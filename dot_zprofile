@@ -16,7 +16,6 @@ export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 
 # Python
 export PATH="$(brew --prefix python)/libexec/bin:$PATH"
-source virtualenvwrapper.sh
 
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zprofile.post.zsh"
