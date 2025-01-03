@@ -176,7 +176,6 @@ casks = [
   "obsidian",
   "podman-desktop",
   "postman",
-  "proxyman",
   "raspberry-pi-imager",
   "raycast",
   "rectangle",
