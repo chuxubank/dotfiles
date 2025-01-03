@@ -26,20 +26,25 @@
     refreshPeriod = "24h"
     clone.args = ["--depth=1"]
 
-["org"]
+["Life/org"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org"
     refreshPeriod = "4h"
 
-["org-roam"]
+["Life/org-roam"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org-roam"
     refreshPeriod = "4h"
 
-["beancount"]
+["Life/beancount"]
     type = "git-repo"
     url = "https://github.com/chuxubank/beancount"
     refreshPeriod = "24h"
+
+["Life/pass"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/pass"
+    refreshPeriod = "4h"
 
 [".plum"]
     type = "git-repo"
@@ -53,11 +58,6 @@
     exact = true
     stripComponents = 1
 {{- end }}
-
-[".password-store"]
-    type = "git-repo"
-    url = "https://github.com/chuxubank/pass"
-    refreshPeriod = "4h"
 
 ["bin/jar/pdf-unstamper.jar"]
     type = "file"
