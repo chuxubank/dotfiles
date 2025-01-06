@@ -3,5 +3,5 @@
 echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.proxy) "rev-parse" "HEAD" }}"
 echo "Xray running: {{ output "brew" "services" "info" "xray" "--json" | fromJson | jq ".[0].running" | first }}"
 
-cd {{ (joinPath .chezmoi.homeDir .path.proxy) }}
+cd {{ (joinPath .chezmoi.homeDir .path.proxy "ansible") }}
 ansible-playbook playbook.yml --limit localhost
