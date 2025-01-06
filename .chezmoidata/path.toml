@@ -6,3 +6,4 @@ pass = "Life/pass"
 
 emacs = ".config/emacs"
 proxy = ".config/proxy"
+plum = ".config/plum"

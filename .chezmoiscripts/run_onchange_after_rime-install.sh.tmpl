@@ -8,7 +8,7 @@ bash rime-install emoji:customize:schema=luna_pinyin
 bash rime-install emoji:customize:schema=double_pinyin_flypy
 {{- end }}
 
-echo "󰯁 Update rime with {{ output "git" "-C" (joinPath .chezmoi.homeDir ".plum") "rev-parse" "HEAD" }}"
+echo "󰯁 Update rime with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.plum) "rev-parse" "HEAD" }}"
 export rime_dir=""
 bash rime-install iDvel/rime-ice:others/recipes/full
 bash rime-install iDvel/rime-ice:others/recipes/config:schema=flypy
