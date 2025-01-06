@@ -52,7 +52,7 @@
     refreshPeriod = "168h"
 
 {{- if eq .chezmoi.os "darwin" }}
-[".rime/dist"]
+["{{ .path.rime }}/dist"]
     type = "archive"
     url = "{{ (gitHubLatestReleaseAssetURL "rime/librime" "rime-*-macOS-universal.tar.bz2") }}"
     exact = true

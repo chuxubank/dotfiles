@@ -8,3 +8,5 @@ emacs = ".config/emacs"
 proxy = ".config/proxy"
 plum = ".config/plum"
 isyncrc = ".config/isyncrc"
+
+rime = ".local/share/rime"
