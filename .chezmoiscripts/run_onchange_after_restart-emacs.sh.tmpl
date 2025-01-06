@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir ".config/emacs") "rev-parse" "HEAD" }}"
+echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.emacs) "rev-parse" "HEAD" }}"
 
 \emacs --eval '(kill-emacs)' || true
 \emacsclient --eval '(kill-emacs)' || true

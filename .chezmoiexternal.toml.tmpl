@@ -1,9 +1,9 @@
-[".config/proxy"]
+["{{ .path.proxy }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/proxy-config"
     refreshPeriod = "4h"
 
-[".config/emacs"]
+["{{ .path.emacs }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/cat-emacs"
     refreshPeriod = "4h"
@@ -26,22 +26,22 @@
     refreshPeriod = "24h"
     clone.args = ["--depth=1"]
 
-["Life/org"]
+["{{ .path.org }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org"
     refreshPeriod = "4h"
 
-["Life/org-roam"]
+["{{ index .path "org-roam" }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org-roam"
     refreshPeriod = "4h"
 
-["Life/beancount"]
+["{{ .path.beancount }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/beancount"
     refreshPeriod = "24h"
 
-["Life/pass"]
+["{{ .path.pass }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/pass"
     refreshPeriod = "4h"

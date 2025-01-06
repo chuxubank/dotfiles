@@ -1,0 +1,8 @@
+[path]
+org = "Life/org"
+org-roam = "Life/org-roam"
+beancount = "Life/beancount"
+pass = "Life/pass"
+
+emacs = ".config/emacs"
+proxy = ".config/proxy"
