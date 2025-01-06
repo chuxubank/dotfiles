@@ -1,7 +1,9 @@
 #!/bin/zsh
 
-echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir ".emacs.d") "rev-parse" "HEAD" }}"
+echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir ".config/emacs") "rev-parse" "HEAD" }}"
 
 \emacs --eval '(kill-emacs)' || true
 \emacsclient --eval '(kill-emacs)' || true
+
+env TERM_PROGRAM= \
 \emacs --daemon
