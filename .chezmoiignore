@@ -2,8 +2,12 @@
 .config/scoop
 AppData
 Documents/WindowsPowerShell
+Documents/PowerShell
 .wslconfig
+{{- else }}
+.config/powershell
 {{- end }}
+
 {{- if ne .chezmoi.os "darwin" }}
 Library
 {{- else if eq .hosttype "work" }}
