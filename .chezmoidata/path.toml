@@ -1,8 +1,8 @@
 [path]
-org = "Life/org"
-org-roam = "Life/org-roam"
-beancount = "Life/beancount"
-pass = "Life/pass"
+org = "Developer/Personal/org"
+org-roam = "Developer/Personal/org-roam"
+beancount = "Developer/Personal/beancount"
+pass = "Developer/Personal/pass"
 
 emacs = ".config/emacs"
 proxy = ".config/proxy"
