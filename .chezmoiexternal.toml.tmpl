@@ -54,7 +54,7 @@
 {{- if eq .chezmoi.os "darwin" }}
 ["{{ .path.rime }}/dist"]
     type = "archive"
-    url = "{{ (gitHubLatestReleaseAssetURL "rime/librime" "rime-*-macOS-universal.tar.bz2") }}"
+    url = "{{ (gitHubLatestReleaseAssetURL "rime/librime" "rime-[^d]*-macOS-universal.tar.bz2") }}"
     exact = true
     stripComponents = 1
 {{- end }}
