@@ -2,6 +2,7 @@
 #!/bin/zsh
 
 echo "󰯁 Setup macOS"
+xcode-select --install
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES
 {{ end -}}
