@@ -93,7 +93,6 @@ brews = [
   "rust",
   "rustup",
   "scrcpy",
-  "sleepwatcher",
   "sshpass",
   "starship",
   "swagger-codegen",
@@ -115,6 +114,7 @@ brews = [
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
   { name = "isync", restart_service = true },
+  { name = "sleepwatcher", restart_service = true },
 ]
 casks = [
   "amazon-q",

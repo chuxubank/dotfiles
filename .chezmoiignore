@@ -10,6 +10,8 @@ Documents/PowerShell
 
 {{- if ne .chezmoi.os "darwin" }}
 Library
+.sleep
+.wakeup
 {{- else if eq .hosttype "work" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
