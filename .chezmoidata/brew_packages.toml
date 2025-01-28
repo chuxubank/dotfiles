@@ -49,6 +49,7 @@ brews = [
   "htop",
   "imagemagick",
   "iperf3",
+  "isync",
   "jdtls",
   "jq",
   "ki",
@@ -113,7 +114,6 @@ brews = [
   "zsh",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
-  { name = "isync", restart_service = true },
   { name = "sleepwatcher", restart_service = true },
 ]
 casks = [
