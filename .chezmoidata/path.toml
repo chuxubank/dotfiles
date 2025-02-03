@@ -8,6 +8,7 @@ emacs = ".config/emacs"
 proxy = ".config/proxy"
 plum = ".config/plum"
 isyncrc = ".config/isyncrc"
+mail = ".maildir"
 
 rime = ".local/share/rime"
 squirrel = "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"

@@ -1,6 +1,10 @@
 #!/bin/zsh
 
 echo "󰯁 Setup isync"
+mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/qq
+mbsync -a
+mu init --maildir={{ joinPath .chezmoi.homeDir .path.mail }}
+mu index
 brew services stop isync
 brew services start isync --file=/dev/stdin <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
