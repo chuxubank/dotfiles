@@ -101,6 +101,7 @@ brews = [
   "telnet",
   "tesseract",
   "tesseract-lang",
+  "testssl",
   "tldr",
   "tmux",
   "tokei",
