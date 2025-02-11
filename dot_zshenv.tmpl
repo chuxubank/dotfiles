@@ -21,12 +21,13 @@ export ANDROID_HOME=$HOME/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
 export PATH="$ANDROID_HOME/build-tools/33.0.0/:$PATH"
 
-# Pass
-export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
-
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount.gpg"
 export FAVA_PORT=8888
+
+# Bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
 # HASS
 export HASS_SERVER=http://homeassistant.local:8123
@@ -34,9 +35,8 @@ export HASS_SERVER=http://homeassistant.local:8123
 # Jira
 export JIRA_URL="https://aaecosystem.atlassian.net"
 
-# Bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+# Pass
+export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
 
 # plum
 export plum_dir="$HOME/{{ .path.plum }}"
