@@ -1,0 +1,14 @@
+Host Misaka
+    HostName chuxubank.duckdns.org
+    User chuxu
+    Port 8822
+
+Host {{ (passFields "Network/Host/BandwagonHost/ssh").alias }}
+    HostName {{ (passFields "Network/Host/BandwagonHost/ssh").ip }}
+    User root
+    Port {{ (passFields "Network/Host/BandwagonHost/ssh").port }}
+
+Host {{ (passFields "Network/Host/Racknerd/ssh").alias }}
+    HostName {{ (passFields "Network/Host/Racknerd/ssh").ip }}
+    User root
+    Port {{ (passFields "Network/Host/Racknerd/ssh").port }}
