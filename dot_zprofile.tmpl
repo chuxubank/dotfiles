@@ -1,14 +1,14 @@
+export LC_ALL=en_US.UTF-8
+
+{{- if eq .chezmoi.os "darwin" }}
 # Amazon Q pre block. Keep at the top of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zprofile.pre.zsh"
-
-export LC_ALL=en_US.UTF-8
 
 # Added by Toolbox App
 export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # Set PATH, MANPATH, etc., for Homebrew.
-[[ -f "/usr/local/bin/brew" ]] && eval "$(/usr/local/bin/brew shellenv)"
-[[ -f "/opt/homebrew/bin/brew" ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$({{ .path.brew }}/bin/brew shellenv)"
 export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
 export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
 export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
@@ -22,3 +22,4 @@ export PATH="$(brew --prefix python)/libexec/bin:$PATH"
 
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zprofile.post.zsh"
+{{- end }}

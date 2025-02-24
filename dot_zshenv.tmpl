@@ -50,4 +50,4 @@ export VCPKG_ROOT="$HOME/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
 
 # Emacs
-[[ -f "/opt/homebrew/bin/brew" ]] && export EMACSLOADPATH="/opt/homebrew/share/emacs/site-lisp/:"
+[[ -f "{{ .path.brew }}/bin/brew" ]] && export EMACSLOADPATH="{{ .path.brew }}/share/emacs/site-lisp/:"
