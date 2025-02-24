@@ -1,0 +1,11 @@
+[packages.termux]
+pkg = [
+  "aspell",
+  "cmake",
+  "chezmoi",
+  "fzf",
+  "gh",
+  "git",
+  "nodejs",
+  "tmux",
+]

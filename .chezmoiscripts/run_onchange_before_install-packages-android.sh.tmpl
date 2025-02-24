@@ -1,0 +1,15 @@
+{{ if eq .chezmoi.os "android" -}}
+#!/bin/zsh
+
+echo "󰯁 Update pkg packages"
+pkg install
+{{ range .packages.termux.pkg -}}
+{{ if eq (printf "%T" .) "map[string]interface {}" -}}
+{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+{{ .name | quote }}
+{{ end -}}
+{{ else -}}
+{{ . | quote }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
