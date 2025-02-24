@@ -34,6 +34,9 @@ encryption = "gpg"
 {{- else if eq .chezmoi.os "windows" }}
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
+{{- else if eq .chezmoi.os "android" }}
+    brew = ""
+    gh = "/usr/bin/gh"
 {{- else }}
 # unknown
 {{- end }}
