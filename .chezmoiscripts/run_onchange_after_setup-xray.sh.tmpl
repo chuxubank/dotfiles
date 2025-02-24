@@ -6,5 +6,7 @@ echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .pat
 echo "Xray running: {{ output "brew" "services" "info" "xray" "--json" | fromJson | jq ".[0].running" | first }}"
 {{- end }}
 
+{{ if lookPath "ansible-playbook" }}
 cd {{ (joinPath .chezmoi.homeDir .path.proxy "ansible") }}
 ansible-playbook playbook.yml --limit localhost
+{{ end }}
