@@ -6,4 +6,9 @@ echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir .p
 \emacsclient --eval '(kill-emacs)' || true
 
 env TERM_PROGRAM= \
+
+{{ if eq .chezmoi.os "android" -}}
+termux-x11 :1 -xstartup "emacs" &
+{{ else }}
 \emacs --daemon
+{{ end -}}
