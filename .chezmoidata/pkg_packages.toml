@@ -1,6 +1,7 @@
 [packages.termux]
 pkg = [
   "aspell",
+  "aspell-en",
   "chezmoi",
   "cmake",
   "emacs-x",
