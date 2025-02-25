@@ -1,4 +1,7 @@
 [packages.termux]
+repo = [
+  "x11-repo",
+]
 pkg = [
   "aspell",
   "aspell-en",
@@ -31,7 +34,6 @@ pkg = [
   "tree-sitter",
   "uv",
   "wget",
-  "x11-repo",
   "zip",
   "zsh",
 ]

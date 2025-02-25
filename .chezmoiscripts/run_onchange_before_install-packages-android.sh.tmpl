@@ -1,16 +1,34 @@
 {{ if eq .chezmoi.os "android" -}}
 #!/bin/sh
 
-echo "󰯁 Update pkg packages"
+echo "󰯁 Update pkg repo"
 pkg install -y \
-{{ range .packages.termux.pkg -}}
-{{ if eq (printf "%T" .) "map[string]interface {}" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
-{{ .name }} \
+{{ $length := len .packages.termux.repo -}}
+{{ range $index, $package := .packages.termux.repo -}}
+{{ if eq (printf "%T" $package) "map[string]interface {}" -}}
+{{ if or (not (index $package "when")) (eq (index $package "when") $.hosttype) -}}
+{{ .name -}}
 {{ end -}}
 {{ else -}}
-{{ . }} \
+{{ . -}}
+{{- end -}}
+{{- if lt (add $index 1) $length }} \
 {{ end -}}
+{{ end }}
+
+echo "󰯁 Update pkg packages"
+pkg install -y \
+{{ $length := len .packages.termux.pkg -}}
+{{ range $index, $package := .packages.termux.pkg -}}
+{{ if eq (printf "%T" $package) "map[string]interface {}" -}}
+{{ if or (not (index $package "when")) (eq (index $package "when") $.hosttype) -}}
+{{ .name -}}
 {{ end -}}
+{{ else -}}
+{{ . -}}
+{{ end -}}
+{{- if lt (add $index 1) $length }} \
+{{ end -}}
+{{ end }}
 
 {{ end -}}
