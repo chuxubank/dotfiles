@@ -8,7 +8,7 @@ source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/she
 export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # Set PATH, MANPATH, etc., for Homebrew.
-eval "$({{ .path.brew }}/bin/brew shellenv)"
+eval "$({{ .path.usr }}/bin/brew shellenv)"
 export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
 export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
 export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"

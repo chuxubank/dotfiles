@@ -20,7 +20,7 @@
 	</array>
 	<key>ProgramArguments</key>
 	<array>
-      <string>{{ .path.brew }}/bin/gitwatch</string>
+      <string>{{ .path.usr }}/bin/gitwatch</string>
       <string>-r</string>
       <string>origin</string>
       <string>-s</string>
@@ -31,7 +31,7 @@
 	<key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>{{ .path.brew }}/bin:/bin:/usr/bin</string>
+        <string>{{ .path.usr }}/bin:/bin:/usr/bin</string>
     </dict>
 	<key>RunAtLoad</key>
 	<true/>

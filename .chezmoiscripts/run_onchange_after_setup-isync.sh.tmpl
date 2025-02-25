@@ -16,7 +16,7 @@ brew services start isync --file=/dev/stdin <<EOF
         <key>EnvironmentVariables</key>
         <dict>
                 <key>PATH</key>
-                <string>{{ .path.brew }}/bin:{{ .path.brew }}/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+                <string>{{ .path.usr }}/bin:{{ .path.usr }}/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
                 <key>PASSWORD_STORE_DIR</key>
                 <string>{{ joinPath .chezmoi.homeDir .path.pass }}</string>
         </dict>
@@ -32,7 +32,7 @@ brew services start isync --file=/dev/stdin <<EOF
         </array>
         <key>ProgramArguments</key>
         <array>
-                <string>{{ .path.brew }}/bin/mbsync</string>
+                <string>{{ .path.usr }}/bin/mbsync</string>
                 <string>-a</string>
         </array>
         <key>RunAtLoad</key>

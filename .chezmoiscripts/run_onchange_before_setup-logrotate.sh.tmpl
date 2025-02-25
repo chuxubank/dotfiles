@@ -22,7 +22,7 @@ brew services start logrotate --file=/dev/stdin <<EOF
     </array>
     <key>ProgramArguments</key>
     <array>
-        <string>{{ .path.brew }}/sbin/logrotate</string>
+        <string>{{ .path.usr }}/sbin/logrotate</string>
         <string>{{ .chezmoi.homeDir }}/.config/logrotate.conf</string>
         <string>-s</string>
         <string>{{ .chezmoi.homeDir }}/.config/logrotate.status</string>

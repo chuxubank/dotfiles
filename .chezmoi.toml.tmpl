@@ -22,10 +22,10 @@ encryption = "gpg"
 {{- if eq .chezmoi.os "darwin" }}
 # darwin
 {{- if eq .chezmoi.arch "arm64" }}
-    brew = "/opt/homebrew"
+    usr = "/opt/homebrew"
     gh = "/opt/homebrew/bin/gh"
 {{- else }}
-    brew = "/usr/local"
+    usr = "/usr/local"
     gh = "/usr/local/bin/gh"
 {{- end }}
 {{- else if eq .chezmoi.os "linux" }}
@@ -35,8 +35,8 @@ encryption = "gpg"
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
 {{- else if eq .chezmoi.os "android" }}
-    brew = ""
-    gh = "/usr/bin/gh"
+    usr = "/data/data/com.termux/files/usr"
+    gh = "/data/data/com.termux/files/usr/bin/gh"
 {{- else }}
 # unknown
 {{- end }}
