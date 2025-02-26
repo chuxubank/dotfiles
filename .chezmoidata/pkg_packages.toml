@@ -25,6 +25,7 @@ pkg = [
   "plantuml",
   "rclone",
   "ripgrep",
+  "rsync",
   "rust",
   "sshpass",
   "starship",
