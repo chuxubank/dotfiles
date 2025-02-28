@@ -17,7 +17,7 @@ if ! type pass >/dev/null 2>&1; then
 fi
 
 # Check if the pass repository is already cloned
-PASS_DIR="$HOME/Developer/Personal/pass"
-if [ ! -d "$PASS_DIR" ]; then
-    gh repo clone pass "$PASS_DIR"
+export PASSWORD_STORE_DIR="$HOME/Developer/Personal/pass"
+if [ ! -d "$PASSWORD_STORE_DIR" ]; then
+    gh repo clone pass "$PASSWORD_STORE_DIR"
 fi
