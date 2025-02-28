@@ -13,7 +13,6 @@ Library
 .sleep
 .wakeup
 Developer/Example/Raycast
-Developer/Example/raycast-g4f
 {{- else if eq .hosttype "work" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
