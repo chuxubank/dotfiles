@@ -46,3 +46,6 @@ encryption = "gpg"
 
 [gitHub]
     refreshPeriod = "24h"
+
+[hooks.read-source-state.pre]
+    command = ".local/share/chezmoi/.install-password-manager.sh"
