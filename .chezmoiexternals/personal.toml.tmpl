@@ -1,0 +1,29 @@
+["{{ .path.pass }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/pass"
+    refreshPeriod = "4h"
+
+["{{ .path.beancount }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/beancount"
+    refreshPeriod = "24h"
+
+["{{ .path.proxy }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/proxy-config"
+    refreshPeriod = "4h"
+
+["{{ .path.emacs }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/cat-emacs"
+    refreshPeriod = "4h"
+
+["{{ .path.org }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/org"
+    refreshPeriod = "4h"
+
+["{{ index .path "org-roam" }}"]
+    type = "git-repo"
+    url = "https://github.com/chuxubank/org-roam"
+    refreshPeriod = "4h"
