@@ -1,15 +1,3 @@
-["Developer/Example/Raycast/script-commands"]
-    type = "git-repo"
-    url = "https://github.com/raycast/script-commands.git"
-    refreshPeriod = "24h"
-    clone.args = ["--depth=1"]
-
-["Developer/Example/Raycast/raycast-g4f"]
-    type = "git-repo"
-    url = "https://github.com/XInTheDark/raycast-g4f.git"
-    refreshPeriod = "24h"
-    clone.args = ["--depth=1"]
-
 ["Developer/Example/Zotero/translators"]
     type = "git-repo"
     url = "https://github.com/zotero/translators.git"
@@ -26,14 +14,6 @@
     type = "git-repo"
     url = "https://github.com/rime/plum"
     refreshPeriod = "168h"
-
-{{- if eq .chezmoi.os "darwin" }}
-["{{ .path.rime }}/dist"]
-    type = "archive"
-    url = "{{ (gitHubLatestReleaseAssetURL "rime/librime" "rime-[^d]*-macOS-universal.tar.bz2") }}"
-    exact = true
-    stripComponents = 1
-{{- end }}
 
 ["bin/jar/pdf-unstamper.jar"]
     type = "file"
