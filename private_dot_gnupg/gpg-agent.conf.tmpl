@@ -1,5 +1,5 @@
 {{- if eq .chezmoi.os "darwin" -}}
 pinentry-program {{ .path.usr }}/bin/pinentry-mac
 {{- else if eq .chezmoi.os "android" -}}
-pinentry-program {{ .path.usr }}/bin/pinentry-tty
+pinentry-mode loopback
 {{- end -}}
