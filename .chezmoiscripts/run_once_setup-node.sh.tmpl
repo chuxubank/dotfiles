@@ -9,3 +9,11 @@ npm install --global corepack@latest
 corepack enable pnpm
 # Verify pnpm version:
 pnpm -v
+
+{{- if eq .chezmoi.os "android" }}
+if [ -d "$HOME/.bun" ]; then
+    echo "✅ Bun installed."
+else
+    curl -fsSL https://bun.sh/install | bash
+fi
+{{- end }}
