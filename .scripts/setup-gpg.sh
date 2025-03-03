@@ -15,7 +15,7 @@ else
         key_file=${key_file/#\~/$HOME}
         if [ -f "$key_file" ]; then
             echo "📥 Importing GPG key from $key_file..."
-            gpg --import --pinentry-mode=loopback "$key_file" && echo "✅ Key imported successfully!" && break
+            gpg --import "$key_file" && echo "✅ Key imported successfully!" && break
         else
             echo "⚠️ File not found. Please enter a valid path."
         fi
