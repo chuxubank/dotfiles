@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 detect_os() {
     OS=$(uname -s)
@@ -25,6 +25,11 @@ detect_os() {
 get_package_name() {
     PACKAGE=$1
     SYSTEM=$(detect_os)
+
+    if ! type declare >/dev/null 2>&1; then
+        echo "$PACKAGE"
+        return
+    fi
 
     declare -A APT_MAP
     declare -A DNF_MAP
