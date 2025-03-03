@@ -3,6 +3,7 @@
 source "$SCRIPT_DIR/common.sh"
 
 install_package "zsh"
+install_package "git"
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "✅ omz is already installed."
