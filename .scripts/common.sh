@@ -45,11 +45,11 @@ get_package_name() {
             echo "$PACKAGE"
             ;;
         linux)
-            if command -v apt >/dev/null 2>&1; then
+            if type apt >/dev/null 2>&1; then
                 echo "${APT_MAP[$PACKAGE]:-$PACKAGE}"
-            elif command -v dnf >/dev/null 2>&1; then
+            elif type dnf >/dev/null 2>&1; then
                 echo "${DNF_MAP[$PACKAGE]:-$PACKAGE}"
-            elif command -v pacman >/dev/null 2>&1; then
+            elif type pacman >/dev/null 2>&1; then
                 echo "${PACMAN_MAP[$PACKAGE]:-$PACKAGE}"
             else
                 echo "$PACKAGE"
@@ -72,7 +72,7 @@ install_package() {
     EXECUTABLE=${2:-$PACKAGE}
     SYSTEM=$(detect_os)
 
-    if command -v "$EXECUTABLE" >/dev/null 2>&1; then
+    if type "$EXECUTABLE" >/dev/null 2>&1; then
         echo "✅ $PACKAGE is already installed."
         return 0
     fi
@@ -90,11 +90,11 @@ install_package() {
             pkg update && pkg install -y "$PACKAGE_NAME"
             ;;
         linux)
-            if command -v apt >/dev/null 2>&1; then
+            if type apt >/dev/null 2>&1; then
                 sudo apt update && sudo apt install -y "$PACKAGE_NAME"
-            elif command -v dnf >/dev/null 2>&1; then
+            elif type dnf >/dev/null 2>&1; then
                 sudo dnf install -y "$PACKAGE_NAME"
-            elif command -v pacman >/dev/null 2>&1; then
+            elif type pacman >/dev/null 2>&1; then
                 sudo pacman -Syu --noconfirm "$PACKAGE_NAME"
             else
                 echo "⚠️ Unsupported Linux distribution. Install $PACKAGE_NAME manually."
