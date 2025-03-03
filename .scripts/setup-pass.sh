@@ -2,7 +2,17 @@
 
 source "$SCRIPT_DIR/common.sh"
 
+SYSTEM=$(detect_os)
+
+if [ "$SYSTEM" = "termux" ]; then
+    if [ ! -d "$HOME/storage" ]; then
+        termux-setup-storage
+    fi
+fi
+
 install_package "pass"
+install_package "gh"
+install_package "gnupg" "gpg"
 
 export PASSWORD_STORE_DIR="$HOME/Developer/Personal/pass"
 if [ -d "$PASSWORD_STORE_DIR" ]; then
@@ -10,8 +20,6 @@ if [ -d "$PASSWORD_STORE_DIR" ]; then
 else
     gh repo clone pass "$PASSWORD_STORE_DIR"
 fi
-
-install_package "gnupg" "gpg"
 
 if gpg --list-secret-keys | grep -q "^sec"; then
     echo "✅ gpg secret key found."

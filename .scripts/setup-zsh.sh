@@ -1,7 +1,5 @@
 #!/bin/sh
 
-source "$SCRIPT_DIR/common.sh"
-
 install_package "zsh"
 install_package "git"
 

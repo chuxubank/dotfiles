@@ -121,3 +121,40 @@ install_package() {
 
     echo "✅ $PACKAGE_NAME installation completed!"
 }
+
+update_all_packages() {
+    SYSTEM=$(detect_os)
+
+    echo "🚀 Updating all packages on $SYSTEM..."
+
+    case "$SYSTEM" in
+        termux)
+            pkg update && pkg upgrade -y
+            ;;
+        linux)
+            if type apt >/dev/null 2>&1; then
+                sudo apt update && sudo apt upgrade -y
+            elif type dnf >/dev/null 2>&1; then
+                sudo dnf update -y
+            elif type pacman >/dev/null 2>&1; then
+                sudo pacman -Syu --noconfirm
+            else
+                echo "⚠️ Unsupported Linux distribution. Please update packages manually."
+                return 1
+            fi
+            ;;
+        macos)
+            brew update && brew upgrade
+            ;;
+        windows)
+            echo "⚠️ Please update packages manually on Windows."
+            return 1
+            ;;
+        *)
+            echo "⚠️ Unknown system. Please update packages manually."
+            return 1
+            ;;
+    esac
+
+    echo "✅ All packages have been updated!"
+}
