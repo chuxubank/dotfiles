@@ -19,7 +19,7 @@ else
     echo "❌ no gpg secret key found."
     while true; do
         echo "🔑 Please enter the path to your GPG private key file: "
-        read -e -p "> " key_file
+        read -e key_file
         if [ -f "$key_file" ]; then
             echo "📥 Importing GPG key from $key_file..."
             gpg --import --pinentry-mode=loopback "$key_file" && echo "✅ Key imported successfully!" && break
