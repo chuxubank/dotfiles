@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+export SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 source "$SCRIPT_DIR/setup-zsh.sh"
 
