@@ -2,13 +2,13 @@
 org = "Developer/Personal/org"
 org-roam = "Developer/Personal/org-roam"
 beancount = "Developer/Personal/beancount"
-pass = "Developer/Personal/pass"
 
 emacs = ".config/emacs"
 proxy = ".config/proxy"
 plum = ".config/plum"
 isyncrc = ".config/isyncrc"
 mail = ".maildir"
+pass = ".password-store"
 
 rime = ".local/share/rime"
 squirrel = "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
