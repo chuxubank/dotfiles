@@ -7,11 +7,16 @@
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
 {{- end }}
 
+{{- $passDir := promptStringOnce . "passDir" "Password store dir for pass cli" ".password-store" }}
+
 encryption = "gpg"
 
 [gpg]
     recipient = "Misaka"
 	args = ["--quiet"]
+
+[scriptEnv]
+    PASSWORD_STORE_DIR = {{- joinPath .chezmoi.homeDir $passDir | quote }}
 
 [data]
     email = {{- $email | quote }}
@@ -19,6 +24,7 @@ encryption = "gpg"
 	isDarkMode = {{- $isDarkMode }}
 
 [data.path]
+    pass = {{- $passDir | quote }}
 {{- if eq .chezmoi.os "darwin" }}
 # darwin
 {{- if eq .chezmoi.arch "arm64" }}

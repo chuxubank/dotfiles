@@ -2,8 +2,8 @@
 
 install_package "pass"
 
-if [ -d "$HOME/.password-store" ]; then
+if [ -d "$PASSWORD_STORE_DIR" ]; then
     echo "✅ password store dir exist."
 else
-    gh repo clone pass "$HOME/.password-store"
+    gh repo clone pass "$PASSWORD_STORE_DIR"
 fi
