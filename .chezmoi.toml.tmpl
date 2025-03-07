@@ -7,7 +7,7 @@
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
 {{- end }}
 
-{{- $passDir := promptStringOnce . "passDir" "Password store dir for pass cli" ".password-store" }}
+{{- $passDir := promptStringOnce .path "pass" "Password store dir for pass cli" ".password-store" }}
 
 encryption = "gpg"
 
