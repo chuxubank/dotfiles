@@ -1,35 +1,8 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
 
-echo "󰯁 Update brew packages"
-brew bundle --file=/dev/stdin <<EOF
-{{ range .packages.darwin.taps -}}
-tap {{ . | quote }}
-{{ end -}}
-{{ range .packages.darwin.brews -}}
-{{ if eq (printf "%T" .) "map[string]interface {}" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
-brew {{ .name | quote }}
-{{- range $key, $value := . -}}
-{{- if eq $key "link" }}, link: {{ $value }}{{ end -}}
-{{- if eq $key "restart_service" }}, restart_service: {{ $value }}{{ end -}}
-{{ end }}
-{{ end }}
-{{ else -}}
-brew {{ . | quote }}
-{{ end -}}
-{{ end -}}
-{{ range .packages.darwin.casks -}}
-{{ if eq (printf "%T" .) "map[string]interface {}" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
-cask {{ .name | quote }}
-{{ end -}}
-{{ else -}}
-cask {{ . | quote }}
-{{ end -}}
-{{ end -}}
-{{ range $appName, $appId := .packages.darwin.mas -}}
-mas {{ $appName | quote }}, id: {{ $appId }}
-{{ end -}}
+echo "󰯁 Update and cleanup brew packages"
+brew bundle --quiet --cleanup --file=- <<EOF
+{{ template "Brewfile" . -}}
 EOF
 {{ end -}}

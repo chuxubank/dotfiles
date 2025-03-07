@@ -28,6 +28,7 @@ brews = [
   "cmake",
   "coreutils",
   "curl",
+  "dasel",
   "deb-sig/tap/double-entry-generator",
   "docx2txt",
   "exiftool",
@@ -35,6 +36,7 @@ brews = [
   "fd",
   "fzf",
   "gcc",
+  "gh",
   "git",
   "git-filter-repo",
   "git-lfs",
@@ -111,6 +113,7 @@ brews = [
   "xray",
   "you-get",
   "yt-dlp",
+  "zbar",
   "zig",
   "zsh",
   "zsh-autosuggestions",
@@ -119,8 +122,9 @@ brews = [
 ]
 casks = [
   "amazon-q",
-  "android-file-transfer",
+  "android-commandlinetools",
   "android-platform-tools",
+  "android-studio",
   "anki",
   "appcleaner",
   "betterdisplay",
@@ -160,7 +164,6 @@ casks = [
   "font-victor-mono",
   "iina",
   "itsycal",
-  "jetbrains-toolbox",
   "jordanbaird-ice",
   "karabiner-elements",
   "libreoffice",
@@ -171,7 +174,6 @@ casks = [
   "mitmproxy",
   "monitorcontrol",
   "motrix",
-  "mpv",
   "neovide",
   "neteasemusic",
   "netnewswire",
@@ -186,6 +188,7 @@ casks = [
   "spotify",
   "squirrel",
   "stats",
+  "stolendata-mpv",
   "visual-studio-code",
   "wezterm",
   "windows-app",
@@ -196,6 +199,7 @@ casks = [
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
   { name = "intune-company-portal", when = "work" },
+  { name = "mos", when = "home" },
 ]
 
 [packages.darwin.mas]
