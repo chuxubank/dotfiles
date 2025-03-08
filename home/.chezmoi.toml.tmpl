@@ -62,4 +62,4 @@ encryption = "gpg"
     refreshPeriod = "24h"
 
 [hooks.read-source-state.pre]
-    command = ".local/share/chezmoi/.scripts/init.sh"
+    command = {{ joinPath .chezmoi.sourceDir ".scripts/init.sh" | quote}}
