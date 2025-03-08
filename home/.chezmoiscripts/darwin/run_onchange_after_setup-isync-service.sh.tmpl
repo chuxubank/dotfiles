@@ -1,11 +1,3 @@
-#!/bin/sh
-
-echo "󰯁 Setup isync and mu with {{ .email }}"
-mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/qq
-mbsync -a
-mu init --maildir={{ joinPath .chezmoi.homeDir .path.mail }} --my-address=$EMAIL
-mu index
-
 {{- if eq .chezmoi.os "darwin" }}
 brew services stop isync
 brew services start isync --file=/dev/stdin <<EOF

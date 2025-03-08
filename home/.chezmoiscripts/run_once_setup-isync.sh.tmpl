@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "󰯁 Setup isync and mu"
+mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/qq
+mbsync -a
+mu init --maildir={{ joinPath .chezmoi.homeDir .path.mail }} --my-address={{ .email }}
+mu index
