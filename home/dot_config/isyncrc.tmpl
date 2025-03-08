@@ -11,8 +11,8 @@ IMAPStore qq-remote
 Account qq
 
 MaildirStore qq-local
-Path ~/.maildir/qq/
-Inbox ~/.maildir/qq/Inbox
+Path {{ joinPath .chezmoi.homeDir .path.mail "qq" }}
+Inbox {{ joinPath .chezmoi.homeDir .path.mail "qq" "Inbox" }}
 SubFolders Verbatim
 
 Channel qq
