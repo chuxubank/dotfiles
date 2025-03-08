@@ -9,6 +9,7 @@
 
 {{- $passDir := promptStringOnce .path "pass" "Password store dir for pass cli" ".password-store" }}
 
+sourceDir = {{ .chezmoi.sourceDir | quote }}
 encryption = "gpg"
 
 [gpg]

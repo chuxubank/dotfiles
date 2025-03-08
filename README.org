@@ -1,0 +1,8 @@
+* Misaks's dotfiles
+
+Managed with [[https://github.com/twpayne/chezmoi][chezmoi]].
+
+Install them with:
+#+begin_src sh
+  chezmoi init chuxubank -a
+#+end_src
