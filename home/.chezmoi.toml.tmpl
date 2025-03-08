@@ -1,10 +1,10 @@
 {{- $interactive := stdinIsATTY }}
-{{- $choices := list "home" "work" "cloud" -}}
+{{- $choices := list "home" "work" "cloud" "ci" -}}
 
-{{- $isDarkMode := false }}
 {{- $email := env "EMAIL" -}}
-{{- $hosttype := "cloud" -}}
+{{- $hosttype := "ci" -}}
 {{- $passDir := ".password-store" }}
+{{- $isDarkMode := false }}
 
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
