@@ -1,6 +1,6 @@
 {{- $email := promptStringOnce . "email" "Email address" -}}
-{{- $choices := list "home" "work" "other" -}}
-{{- $hosttype := promptChoiceOnce . "hosttype" "What type of host are you on" $choices -}}
+{{- $choices := list "home" "work" "cloud" -}}
+{{- $hosttype := promptChoiceOnce . "hosttype" "What type of host are you on" $choices "cloud" -}}
 {{- $isDarkMode := false }}
 
 {{- if eq .chezmoi.os "darwin" }}
