@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "darwin" -}}
-#!/bin/sh
+#!/bin/zsh
 
-echo "󰯁 Setup macOS"
+echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
 xcode-select --install
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES

@@ -1,15 +1,12 @@
 #!/bin/sh
-echo "{{ template "week" . }} Upgrade packages"
+echo "{{ template "week" . }} 󰯁 Upgrade packages"
 {{ if eq .chezmoi.os "android" -}}
-echo "󰯁 Update pkg repo"
 pkg install -y \
 {{ template "package-list" .packages.termux.repo }}
-echo "󰯁 Update pkg packages"
 pkg install -y \
 {{ template "package-list" .packages.termux.pkg }}
 
 {{ else if eq .chezmoi.os "darwin" -}}
-echo "󰯁 Upgrade and cleanup brew packages"
 brew bundle --quiet --cleanup --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
