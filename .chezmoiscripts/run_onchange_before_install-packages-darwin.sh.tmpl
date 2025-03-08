@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
 
-echo "󰯁 Update and cleanup brew packages"
+echo "{{ template "week" . }} 󰯁 Upgrade and cleanup brew packages"
 brew bundle --quiet --cleanup --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF

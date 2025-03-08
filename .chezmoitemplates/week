@@ -1,0 +1,6 @@
+{{- cat "󰨳" " " }}
+{{- if eq .chezmoi.os "windows" }}
+{{- output "Get-Date" "-UFormat" "'%Y W%V'" | trim }}
+{{- else }}
+{{- output "date" "+%Y W%V" | trim }}
+{{- end }}
