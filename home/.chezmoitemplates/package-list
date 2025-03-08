@@ -1,0 +1,12 @@
+{{ $length := len . -}}
+{{ range $index, $package := . -}}
+{{ if eq (printf "%T" $package) "map[string]interface {}" -}}
+{{ if or (not (index $package "when")) (eq (index $package "when") $.hosttype) -}}
+{{ .name -}}
+{{ end -}}
+{{ else -}}
+{{ . -}}
+{{ end -}}
+{{- if lt (add $index 1) $length }} \
+{{ end -}}
+{{ end }}

@@ -3,32 +3,10 @@
 
 echo "󰯁 Update pkg repo"
 pkg install -y \
-{{ $length := len .packages.termux.repo -}}
-{{ range $index, $package := .packages.termux.repo -}}
-{{ if eq (printf "%T" $package) "map[string]interface {}" -}}
-{{ if or (not (index $package "when")) (eq (index $package "when") $.hosttype) -}}
-{{ .name -}}
-{{ end -}}
-{{ else -}}
-{{ . -}}
-{{- end -}}
-{{- if lt (add $index 1) $length }} \
-{{ end -}}
-{{ end }}
+{{ template "package-list" .packages.termux.repo }}
 
 echo "󰯁 Update pkg packages"
 pkg install -y \
-{{ $length := len .packages.termux.pkg -}}
-{{ range $index, $package := .packages.termux.pkg -}}
-{{ if eq (printf "%T" $package) "map[string]interface {}" -}}
-{{ if or (not (index $package "when")) (eq (index $package "when") $.hosttype) -}}
-{{ .name -}}
-{{ end -}}
-{{ else -}}
-{{ . -}}
-{{ end -}}
-{{- if lt (add $index 1) $length }} \
-{{ end -}}
-{{ end }}
+{{ template "package-list" .packages.termux.pkg }}
 
 {{ end -}}
