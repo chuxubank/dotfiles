@@ -189,6 +189,8 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias cz="chezmoi"
+
 {{- if eq .chezmoi.os "darwin" }}
 alias upp="brew update && brew upgrade"
 {{- else if eq .chezmoi.os "android" }}
