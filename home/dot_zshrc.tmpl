@@ -210,8 +210,7 @@ alias zssg='export {http,https}_proxy="http://10.29.248.90:80"'
 {{- end }}
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-source_if_exists "$HOME/.sdkman/bin/sdkman-init.sh"
+source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
