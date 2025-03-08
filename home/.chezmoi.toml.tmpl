@@ -1,13 +1,20 @@
-{{- $email := promptStringOnce . "email" "Email address" -}}
+{{- $interactive := stdinIsATTY }}
 {{- $choices := list "home" "work" "cloud" -}}
-{{- $hosttype := promptChoiceOnce . "hosttype" "What type of host are you on" $choices "cloud" -}}
+
 {{- $isDarkMode := false }}
+{{- $email := env "EMAIL" -}}
+{{- $hosttype := "cloud" -}}
+{{- $passDir := ".password-store" }}
+
+{{- if $interactive }}
+{{- $email = promptStringOnce . "email" "Email address" -}}
+{{- $hosttype = promptChoiceOnce . "hosttype" "What type of host are you on" $choices -}}
+{{- $passDir = promptStringOnce .path "pass" "Password store dir for pass cli" ".password-store" }}
+{{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
 {{- end }}
-
-{{- $passDir := promptStringOnce .path "pass" "Password store dir for pass cli" ".password-store" }}
 
 sourceDir = {{ .chezmoi.sourceDir | quote }}
 encryption = "gpg"
