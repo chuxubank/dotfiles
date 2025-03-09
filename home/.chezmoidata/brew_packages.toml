@@ -34,6 +34,7 @@ brews = [
   "exiftool",
   "fava",
   "fd",
+  "ffmpegthumbnailer",
   "fzf",
   "gcc",
   "gh",
