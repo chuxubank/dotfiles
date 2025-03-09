@@ -1,6 +1,20 @@
+{{ if not (eq .hosttype "ci") -}}
 #!/bin/zsh
+echo "󰯁 Setup packages"
 
-install_package "gnupg" "gpg"
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "✅ omz is already installed."
+else
+    echo "🚀 Installing omz..."
+    RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && echo "✅ omz installed!"
+fi
+
+if ! gh auth status >/dev/null 2>&1; then
+    echo "⚠️ Not logged in. Logging into GitHub..."
+    gh auth login
+else
+    echo "✅ Already logged in to GitHub."
+fi
 
 if gpg --list-secret-keys | grep -q "^sec"; then
     echo "✅ gpg secret key found."
@@ -21,3 +35,10 @@ else
         fi
     done
 fi
+
+if [ -d "$PASSWORD_STORE_DIR" ]; then
+    echo "✅ password store dir exist."
+else
+    gh repo clone pass "$PASSWORD_STORE_DIR"
+fi
+{{ end -}}

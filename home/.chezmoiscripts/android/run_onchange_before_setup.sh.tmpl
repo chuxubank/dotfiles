@@ -1,0 +1,8 @@
+{{ if eq .chezmoi.os "android" -}}
+#!/bin/zsh
+
+{{- if not stat (joinPath .chezmoi.homeDir "storage") }}
+termux-setup-storage
+{{- end }}
+
+{{ end -}}
