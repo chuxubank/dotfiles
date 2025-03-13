@@ -1,5 +1,7 @@
 #!/bin/sh
+
 echo "{{ template "week" . }} 󰯁 Install packages"
+
 {{ if eq .chezmoi.os "android" -}}
 pkg install -y \
 {{ template "package-list" .packages.termux.repo }}
@@ -10,4 +12,12 @@ pkg install -y \
 brew bundle --quiet --cleanup --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
+
+{{ else if eq .chezmoi.os "linux" }}
+{{ if lookPath "apt-get" }}
+apt-get install -y \
+{{ template "package-list" .packages.apt.pkg }}
+{{ end -}}
+
+{{ else if eq .chezmoi.os "windows" }}
 {{ end -}}

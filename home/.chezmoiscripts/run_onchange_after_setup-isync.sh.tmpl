@@ -1,3 +1,4 @@
+{{ if not (eq .hosttype "ci") -}}
 #!/bin/sh
 
 echo "󰯁 Setup isync and mu"
@@ -7,3 +8,5 @@ mbsync -a
 mu init --maildir={{ joinPath .chezmoi.homeDir .path.mail }} --my-address={{ .email }}
 {{- end }}
 mu index
+
+{{ end -}}
