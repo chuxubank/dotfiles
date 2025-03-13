@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "{{ template "week" . }} 󰯁 Upgrade packages"
+echo "{{ template "week" . }} 󰯁 Install packages"
 {{ if eq .chezmoi.os "android" -}}
 pkg install -y \
 {{ template "package-list" .packages.termux.repo }}
