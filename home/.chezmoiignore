@@ -1,18 +1,30 @@
 {{- if ne .chezmoi.os "windows" }}
 .config/scoop
-AppData
-Documents/WindowsPowerShell
-Documents/PowerShell
 .wslconfig
+AppData
+Documents/PowerShell
+Documents/WindowsPowerShell
 {{- else }}
 .config/powershell
 {{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}
-Library
 .sleep
 .wakeup
 Developer/Example/Raycast
+Library
 {{- else if eq .hosttype "work" }}
 Library/LaunchAgents/rclone.rpi.plist
+{{- end }}
+
+{{- if eq .hosttype "ci" }}
+.aider.conf.yml
+.config/rclone
+.ssh
+{{ .path.beancount }}
+{{ .path.isyncrc }}
+{{ .path.org }}
+{{ .path.pass }}
+{{ .path.proxy }}
+{{ index .path "org-roam" }}
 {{- end }}
