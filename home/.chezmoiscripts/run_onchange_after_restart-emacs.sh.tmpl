@@ -1,3 +1,4 @@
+{{ if not (eq .hosttype "ci") -}}
 #!/bin/sh
 
 echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.emacs) "rev-parse" "HEAD" }}"
@@ -11,4 +12,6 @@ env TERM_PROGRAM= \
 termux-x11 :1 -xstartup "\emacs" &
 {{ else }}
 \emacs --daemon
+{{ end -}}
+
 {{ end -}}
