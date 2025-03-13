@@ -44,6 +44,7 @@ encryption = "gpg"
 {{- end }}
 {{- else if eq .chezmoi.os "linux" }}
 # linux
+    usr = "/usr"
     gh = "/usr/bin/gh"
 {{- else if eq .chezmoi.os "windows" }}
 # windows
