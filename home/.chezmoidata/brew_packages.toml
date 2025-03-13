@@ -204,11 +204,12 @@ casks = [
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
   { name = "intune-company-portal", when = "work" },
-  { name = "miro", when = "work" },
-  { name = "slack", when = "work" },
-  { name = "microsoft-teams", when = "work" },
   { name = "microsoft-auto-update", when = "work" },
+  { name = "microsoft-teams", when = "work" },
+  { name = "miro", when = "work" },
   { name = "mos", when = "home" },
+  { name = "proxifier", when = "home" },
+  { name = "slack", when = "work" },
 ]
 
 [packages.darwin.mas]
