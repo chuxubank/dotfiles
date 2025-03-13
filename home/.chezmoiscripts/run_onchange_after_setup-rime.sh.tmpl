@@ -1,0 +1,16 @@
+#!/bin/sh
+
+{{- $plum_dir :=  joinPath .chezmoi.homeDir .path.plum }}
+
+{{- if eq .chezmoi.os "darwin" }}
+echo "󰯁 Update librime for Emacs usage"
+export rime_dir=$HOME/{{ .path.rime }}/data/
+bash {{ joinPath $plum_dir "rime-install" }} double-pinyin
+bash {{ joinPath $plum_dir "rime-install" }} emoji:customize:schema=luna_pinyin
+bash {{ joinPath $plum_dir "rime-install" }} emoji:customize:schema=double_pinyin_flypy
+{{- end }}
+
+echo "󰯁 Update rime with {{ output "git" "-C" $plum_dir "rev-parse" "HEAD" }}"
+export rime_dir=""
+bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/full
+bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/config:schema=flypy
