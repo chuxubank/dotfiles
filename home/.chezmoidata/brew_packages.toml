@@ -54,6 +54,7 @@ brews = [
   "imagemagick",
   "iperf3",
   "isync",
+  "jadx",
   "jdtls",
   "jq",
   "ki",
