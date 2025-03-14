@@ -1,9 +1,12 @@
 #!/bin/sh
 
-echo "󰯁 Setup bun"
+echo "{{ template "week" . }} 󰯁 Setup bun"
 
-{{- if or (lookPath "bun") (eq .chezmoi.os "darwin") }}
-echo "Already have bun"
+BUN_INSTALL="$HOME/{{ .path.bun }}"
+PATH="$BUN_INSTALL/bin:$PATH"
+
+{{- if not (lookPath "bun") }}
+curl -fsSL https://bun.sh/install | bash
 {{- else }}
-BUN_INSTALL={{ joinPath .chezmoi.homeDir .path.bun }} curl -fsSL https://bun.sh/install | bash
+bun upgrade
 {{- end }}
