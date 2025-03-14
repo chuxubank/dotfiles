@@ -2,6 +2,8 @@
 
 echo "{{ template "week" . }} 󰯁 Upgrade packages"
 
+{{ if not (eq .hosttype "ci") -}}
 {{ template "upgrade-emacs-packages.sh" . }}
+{{ end -}}
 
 bun update -g
