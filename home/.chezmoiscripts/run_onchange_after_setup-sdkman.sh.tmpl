@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 {{ $sdkmanDir := joinPath .chezmoi.homeDir .path.sdkman }}
 
 echo "{{ template "week" . }} 󰯁 Setup sdkman"
 
-{{- if stat $sdkmanDir }}
-source {{ joinPath $sdkmanDir "bin" "sdkman-init.sh" }}
-{{- else }}
+{{- if not (stat $sdkmanDir) }}
 curl -s "https://get.sdkman.io" | bash
 {{- end }}
+
+source {{ joinPath $sdkmanDir "bin" "sdkman-init.sh" }}
 
 sdk selfupdate
