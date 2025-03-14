@@ -2,7 +2,6 @@
 #+ATTR_HTML: :title CI
 [[https://github.com/chuxubank/dotfiles/actions/workflows/ci.yaml][https://github.com/chuxubank/dotfiles/actions/workflows/ci.yaml/badge.svg]]
 
-
 Managed with [[https://github.com/twpayne/chezmoi][chezmoi]].
 
 Install them with:
