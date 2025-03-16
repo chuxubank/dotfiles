@@ -20,6 +20,7 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- if eq .hosttype "ci" }}
 .aider.conf.yml
 .config/rclone
+.gradle
 .ssh
 {{ .path.beancount }}
 {{ .path.isyncrc }}
