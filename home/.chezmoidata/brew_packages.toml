@@ -154,6 +154,8 @@ casks = [
   "font-iosevka-etoile",
   "font-jetbrains-mono",
   "font-lxgw-wenkai",
+  "font-maple-mono",
+  "font-maple-mono-cn",
   "font-newsreader",
   "font-noto-sans",
   "font-noto-sans-math",
