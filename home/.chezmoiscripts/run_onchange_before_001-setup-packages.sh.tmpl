@@ -3,7 +3,7 @@
 echo "󰯁 Setup packages"
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
-    echo "✅ omz is already installed."
+    echo "✅ Omz is already installed."
 else
     echo "🚀 Installing omz..."
     RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && echo "✅ omz installed!"
@@ -17,9 +17,9 @@ else
 fi
 
 if gpg --list-secret-keys | grep -q "^sec"; then
-    echo "✅ gpg secret key found."
+    echo "✅ Gpg secret key found."
 else
-    echo "❌ no gpg secret key found."
+    echo "❌ No gpg secret key found."
     autoload -Uz compinit
     compinit
     while true; do
@@ -37,7 +37,7 @@ else
 fi
 
 if [ -d "$PASSWORD_STORE_DIR" ]; then
-    echo "✅ password store dir exist."
+    echo "✅ Password store dir exist."
 else
     gh repo clone pass "$PASSWORD_STORE_DIR"
 fi
