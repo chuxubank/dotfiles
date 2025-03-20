@@ -2,6 +2,7 @@
 org = "Developer/Personal/org"
 org-roam = "Developer/Personal/org-roam"
 beancount = "Developer/Personal/beancount"
+nutstore = "Nutstore"
 
 emacs = ".config/emacs"
 proxy = ".config/proxy"
@@ -12,4 +13,5 @@ sdkman = ".sdkman"
 bun = ".bun"
 
 rime = ".local/share/rime"
+rime-sync = "Nutstore/RimeSync"
 squirrel = "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"

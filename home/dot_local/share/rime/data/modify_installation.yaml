@@ -1,5 +1,5 @@
 {{- /* chezmoi:modify-template */ -}}
 {{ fromYaml .chezmoi.stdin
 		| setValueAtPath "installation_id" (print .chezmoi.hostname "-macOS-Emacs")
-		| setValueAtPath "sync_dir" (joinPath .chezmoi.homeDir "RimeSync")
+		| setValueAtPath "sync_dir" (joinPath .chezmoi.homeDir (index .path "rime-sync"))
 		| toYaml }}

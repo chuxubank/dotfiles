@@ -5,7 +5,7 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Label</key>
-	<string>rclone.rimesync</string>
+	<string>rclone.nutstore</string>
     <key>StandardOutPath</key>
     <string>{{ .chezmoi.homeDir }}/Library/Logs/rclone/rclone-stdout.log</string>
     <key>StandardErrorPath</key>
@@ -22,14 +22,16 @@
 	<array>
       <string>{{ .path.usr }}/bin/rclone</string>
 	  <string>nfsmount</string>
-      <string>nutstore:/RimeSync</string>
-      <string>{{ .chezmoi.homeDir }}/RimeSync</string>
+      <string>nutstore:</string>
+      <string>{{ joinPath .chezmoi.homeDir .path.nutstore }}</string>
       <string>--vfs-cache-mode</string>
       <string>full</string>
       <string>--volname</string>
-      <string>RimeSync</string>
+      <string>{{ .path.nutstore }}</string>
       <string>--dir-cache-time</string>
-      <string>10s</string>
+      <string>3m</string>
+	  <string>--poll-interval</string>
+      <string>1m</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
