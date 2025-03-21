@@ -24,14 +24,15 @@
 	  <string>nfsmount</string>
       <string>nutstore:</string>
       <string>{{ joinPath .chezmoi.homeDir .path.nutstore }}</string>
-      <string>--vfs-cache-mode</string>
-      <string>full</string>
       <string>--volname</string>
       <string>{{ .path.nutstore }}</string>
+	  <string>-vv</string>
       <string>--dir-cache-time</string>
       <string>3m</string>
 	  <string>--poll-interval</string>
       <string>1m</string>
+      <string>--vfs-cache-mode</string>
+      <string>full</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
