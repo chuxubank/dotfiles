@@ -5,9 +5,9 @@
 	<key>Label</key>
 	<string>rclone.rpi</string>
     <key>StandardOutPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/rclone/rclone-stdout.log</string>
+    <string>{{ joinPath .path.log "rclone" "rclone-stdout.log" }}</string>
     <key>StandardErrorPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/rclone/rclone-stderr.log</string>
+    <string>{{ joinPath .path.log "rclone" "rclone-stderr.log" }}</string>
 	<key>LimitLoadToSessionType</key>
 	<array>
 	  <string>Aqua</string>

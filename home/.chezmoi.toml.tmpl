@@ -42,16 +42,19 @@ encryption = "gpg"
     usr = "/usr/local"
     gh = "/usr/local/bin/gh"
 {{- end }}
+    log = {{- joinPath .chezmoi.homeDir "Library" "Logs" | quote }}
 {{- else if eq .chezmoi.os "linux" }}
 # linux
     usr = "/usr"
     gh = "/usr/bin/gh"
+    log = "/var/log"
 {{- else if eq .chezmoi.os "windows" }}
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
 {{- else if eq .chezmoi.os "android" }}
     usr = "/data/data/com.termux/files/usr"
     gh = "/data/data/com.termux/files/usr/bin/gh"
+    log = "/data/data/com.termux/files/var/log"
 {{- else }}
 # unknown
 {{- end }}
