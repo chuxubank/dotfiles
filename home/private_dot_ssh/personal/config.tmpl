@@ -1,7 +1,7 @@
-Host Misaka
-    HostName chuxubank.duckdns.org
-    User chuxu
-    Port 8822
+Host {{ (passFields "Network/Home/RaspberryPi/ssh").alias }}
+    HostName {{ (passFields "Network/Home/RaspberryPi/ssh").ip }}
+    User {{ (passFields "Network/Home/RaspberryPi/ssh").user }}
+    Port {{ (passFields "Network/Home/RaspberryPi/ssh").port }}
 
 Host {{ (passFields "Network/Host/BandwagonHost/ssh").alias }}
     HostName {{ (passFields "Network/Host/BandwagonHost/ssh").ip }}
