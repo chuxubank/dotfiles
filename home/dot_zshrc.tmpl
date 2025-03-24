@@ -106,7 +106,6 @@ plugins=(
     gnu-utils
     gpg-agent
     gradle
-    jira
     man
     mosh
     pass
@@ -137,6 +136,10 @@ fi
 if [[ "$(uname)" = 'Darwin' ]]; then
     plugins+=(macos)
 fi
+
+{{ if eq .hosttype "work" -}}
+plugins+=(jira)
+{{ end -}}
 
 source_if_exists $ZSH/oh-my-zsh.sh
 
