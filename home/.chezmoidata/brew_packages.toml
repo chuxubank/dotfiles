@@ -69,6 +69,7 @@ brews = [
   "mas",
   "media-info",
   "mosh",
+  "mosquitto",
   "mu",
   "mupdf",
   "neovim",
