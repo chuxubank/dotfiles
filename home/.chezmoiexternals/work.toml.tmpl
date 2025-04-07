@@ -1,0 +1,6 @@
+{{- if eq .hosttype "work" }}
+["bin/fly"]
+    type = "file"
+	url = "https://concourse-prod.aaecosystem.com/api/v1/cli?arch=amd64&platform={{ .chezmoi.os }}"
+	executable = true
+{{- end }}
