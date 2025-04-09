@@ -42,6 +42,7 @@ brews = [
   "git",
   "git-filter-repo",
   "git-lfs",
+  "github-mcp-server",
   "gitwatch",
   "gnupg",
   "gradle",
