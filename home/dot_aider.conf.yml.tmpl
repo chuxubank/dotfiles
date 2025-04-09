@@ -110,6 +110,9 @@ api-key:
 ## Only work with models that have meta-data available (default: True)
 #show-model-warnings: true
 
+## Check if model accepts settings like reasoning_effort/thinking_tokens (default: True)
+#check-model-accepts-settings: true
+
 ## Soft limit on tokens for chat history, after which summarization begins. If unspecified, defaults to the model's max_chat_history_tokens.
 #max-chat-history-tokens: xxx
 
@@ -164,19 +167,19 @@ dark-mode: {{ .isDarkMode }}
 #stream: true
 
 ## Set the color for user input (default: #00cc00)
-#user-input-color: #00cc00
+#user-input-color: "#00cc00"
 
 ## Set the color for tool output (default: None)
 #tool-output-color: "xxx"
 
 ## Set the color for tool error messages (default: #FF2222)
-#tool-error-color: #FF2222
+#tool-error-color: "#FF2222"
 
 ## Set the color for tool warning messages (default: #FFA500)
-#tool-warning-color: #FFA500
+#tool-warning-color: "#FFA500"
 
 ## Set the color for assistant output (default: #0088ff)
-#assistant-output-color: #0088ff
+#assistant-output-color: "#0088ff"
 
 ## Set the color for the completion menu (default: terminal's default text color)
 #completion-menu-color: "xxx"
@@ -228,6 +231,9 @@ dark-mode: {{ .isDarkMode }}
 
 ## Prefix all commit messages with 'aider: ' (default: False)
 #attribute-commit-message-committer: false
+
+## Enable/disable git pre-commit hooks with --no-verify (default: False)
+#git-commit-verify: false
 
 ## Commit all pending changes with a suitable commit message, then exit
 #commit: false
