@@ -216,6 +216,7 @@ casks = [
   { name = "mos", when = "home" },
   { name = "proxifier", when = "home" },
   { name = "slack", when = "work" },
+  { name = "steam", when = "home" },
 ]
 
 [packages.darwin.mas]
