@@ -213,6 +213,7 @@ casks = [
   { name = "microsoft-auto-update", when = "work" },
   { name = "microsoft-teams", when = "work" },
   { name = "miro", when = "work" },
+  { name = "mongodb-compass", when = "work" },
   { name = "mos", when = "home" },
   { name = "proxifier", when = "home" },
   { name = "slack", when = "work" },
