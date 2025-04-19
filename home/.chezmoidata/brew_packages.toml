@@ -188,6 +188,7 @@ casks = [
   "neteasemusic",
   "netnewswire",
   "nextcloud",
+  "notion",
   "obsidian",
   "podman-desktop",
   "postman",
