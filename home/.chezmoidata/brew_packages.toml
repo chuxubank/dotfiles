@@ -53,6 +53,7 @@ brews = [
   "hidapi",
   "homeassistant-cli",
   "htop",
+  "hugo",
   "imagemagick",
   "iperf3",
   "isync",
@@ -217,7 +218,6 @@ casks = [
   { name = "miro", when = "work" },
   { name = "mongodb-compass", when = "work" },
   { name = "mos", when = "home" },
-  { name = "proxifier", when = "home" },
   { name = "slack", when = "work" },
   { name = "steam", when = "home" },
 ]
