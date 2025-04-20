@@ -32,6 +32,7 @@ brews = [
   "dasel",
   "deb-sig/tap/double-entry-generator",
   "docx2txt",
+  "dprint",
   "exiftool",
   "fava",
   "fd",
