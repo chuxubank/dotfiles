@@ -46,6 +46,7 @@ brews = [
   "github-mcp-server",
   "gitwatch",
   "gnupg",
+  "go",
   "gradle",
   "gradle-profiler",
   "graphviz",
