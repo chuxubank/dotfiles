@@ -2,6 +2,7 @@
 org = "Developer/Personal/org"
 org-roam = "Developer/Personal/org-roam"
 beancount = "Developer/Personal/beancount"
+blog = "Developer/Personal/blog"
 nutstore = "Nutstore"
 
 emacs = ".config/emacs"
