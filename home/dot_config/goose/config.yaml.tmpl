@@ -86,5 +86,18 @@ extensions:
     name: amap
     timeout: 300
     type: stdio
+  tavily:
+    args:
+      - "-y"
+      - "tavily-mcp"
+    bundled: null
+    cmd: bunx
+    description: Real-time web search and intelligent data extraction capabilities
+    enabled: true
+    envs:
+      { "TAVILY_API_KEY": '{{ pass "Personal/Tech/Tavily" }}' }
+    name: tavily
+    timeout: 300
+    type: stdio
 GOOGLE_API_KEY: {{ index (passFields "Personal/Tech/Google") "goose-gemini-api-key" }}
 GOOSE_PROVIDER: google
