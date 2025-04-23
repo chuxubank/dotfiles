@@ -74,3 +74,16 @@ extensions:
     name: github
     timeout: 300
     type: stdio
+  amap:
+    args:
+      - "-y"
+      - "@amap/amap-maps-mcp-server"
+    bundled: null
+    cmd: bunx
+    description: Amap's official MCP Server
+    enabled: true
+    envs:
+      { "AMAP_MAPS_API_KEY": '{{ (passFields "Personal/Life/Amap").token }}' }
+    name: amap
+    timeout: 300
+    type: stdio
