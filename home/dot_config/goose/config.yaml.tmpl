@@ -112,5 +112,15 @@ extensions:
     name: notion
     timeout: 300
     type: stdio
+  markitdown:
+    args:
+      - markitdown-mcp
+    bundled: null
+    cmd: uvx
+    description: Convert various files to Markdown
+    enabled: true
+    name: markitdown
+    timeout: 300
+    type: stdio
 GOOGLE_API_KEY: {{ index (passFields "Personal/Tech/Google") "goose-gemini-api-key" }}
 GOOSE_PROVIDER: google
