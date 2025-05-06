@@ -28,6 +28,9 @@ export PATH="$ANDROID_HOME/build-tools/33.0.0/:$PATH"
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount.gpg"
 export FAVA_PORT=8888
 
+# Org
+export ORG_DIR="$HOME/{{ .path.org }}" 
+
 # Bun
 export BUN_INSTALL="$HOME/{{ .path.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
