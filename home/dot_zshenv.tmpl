@@ -6,7 +6,6 @@ function source_if_exists_outside_emacs {
     [[ -f $1 ]] && [[ -z "$INSIDE_EMACS" ]] && builtin source $1
 }
 
-export TZ="Asia/Shanghai"
 export EMAIL={{ .email | quote }}
 export HOST_TYPE={{ .hosttype | quote }}
 
