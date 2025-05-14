@@ -21,7 +21,16 @@ export PATH=$HOME/bin:$PATH
 # Android
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
-export PATH="$ANDROID_HOME/build-tools/33.0.0/:$PATH"
+if [ -d "$ANDROID_HOME/build-tools" ]; then
+  export ANDROID_BUILD_TOOLS_VERSION=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+  export PATH="$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$PATH"
+fi
+if [ -d "$ANDROID_HOME/platform-tools" ]; then
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+fi
+if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
+  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+fi
 
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount.gpg"

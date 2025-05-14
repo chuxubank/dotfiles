@@ -133,8 +133,6 @@ brews = [
 ]
 casks = [
   "amazon-q",
-  "android-commandlinetools",
-  "android-platform-tools",
   "android-studio",
   "anki",
   "appcleaner",
