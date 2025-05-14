@@ -17,6 +17,10 @@ Library
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
+{{- if ne .hosttype "work" }}
+ACLI
+{{- end }}
+
 {{- if eq .hosttype "ci" }}
 .aider.conf.yml
 .config/rclone

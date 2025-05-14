@@ -32,6 +32,9 @@ if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
   export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 fi
 
+# ACLI
+export PATH="$HOME/ACLI:$PATH"
+
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount.gpg"
 export FAVA_PORT=8888

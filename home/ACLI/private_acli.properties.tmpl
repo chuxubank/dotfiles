@@ -1,0 +1,3 @@
+aa-jira = jiracloud -s {{ (passFields "Work/AA/Atlassian").site }} -u {{ (passFields "Work/AA/Atlassian").username }} -t {{ index (passFields "Work/AA/Atlassian") "acli-api-token" }}
+aa-confluence = confluencecloud -s {{ (passFields "Work/AA/Atlassian").site }} -u {{ (passFields "Work/AA/Atlassian").username }} -t {{ index (passFields "Work/AA/Atlassian") "acli-api-token" }}
+aa-bitbucket = bitbucketcloud -u {{ index (passFields "Work/AA/Atlassian") "bitbucket-user" }} -p {{ index (passFields "Work/AA/Atlassian") "acli-bitbucket-app-pass" }}
