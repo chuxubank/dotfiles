@@ -13,7 +13,7 @@ Documents/WindowsPowerShell
 .wakeup
 Developer/Example/Raycast
 Library
-{{- else if eq .hosttype "work" }}
+{{- else if ne .hosttype "home" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 

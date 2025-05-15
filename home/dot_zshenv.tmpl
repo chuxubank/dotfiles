@@ -18,6 +18,9 @@ export XDG_STATE_HOME="$HOME/.local/state"
 # Bin
 export PATH=$HOME/bin:$PATH
 
+# ACLI
+export PATH="$HOME/ACLI:$PATH"
+
 # Android
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
@@ -32,19 +35,16 @@ if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
   export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 fi
 
-# ACLI
-export PATH="$HOME/ACLI:$PATH"
-
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount.gpg"
 export FAVA_PORT=8888
 
-# Org
-export ORG_DIR="$HOME/{{ .path.org }}" 
-
 # Bun
 export BUN_INSTALL="$HOME/{{ .path.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Emacs
+export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp/:"
 
 # HASS
 export HASS_SERVER=http://homeassistant.local:8123
@@ -52,8 +52,8 @@ export HASS_SERVER=http://homeassistant.local:8123
 # Jira
 export JIRA_URL="https://aaecosystem.atlassian.net"
 
-# SDKMAN
-export SDKMAN_DIR="$HOME/{{ .path.sdkman }}"
+# Org
+export ORG_DIR="$HOME/{{ .path.org }}"
 
 # Pass
 export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
@@ -62,9 +62,9 @@ export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
 export plum_dir="$HOME/{{ .path.plum }}"
 export PATH=$plum_dir:$PATH
 
+# SDKMAN
+export SDKMAN_DIR="$HOME/{{ .path.sdkman }}"
+
 # VCPKG
 export VCPKG_ROOT="$HOME/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
-
-# Emacs
-export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp/:"
