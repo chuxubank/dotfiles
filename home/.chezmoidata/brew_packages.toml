@@ -219,6 +219,7 @@ casks = [
   { name = "miro", when = "work" },
   { name = "mongodb-compass", when = "work" },
   { name = "mos", when = "home" },
+  { name = "signal", when = "home" },
   { name = "slack", when = "work" },
   { name = "steam", when = "home" },
 ]
