@@ -8,7 +8,7 @@ echo "Xray running: {{ output "brew" "services" "info" "xray" "--json" | fromJso
 {{- end }}
 
 {{ if lookPath "ansible-playbook" }}
-cd {{ (joinPath .chezmoi.homeDir .path.proxy "ansible") }}
+cd {{ joinPath .chezmoi.homeDir .path.proxy }}
 ansible-playbook playbook.yml --limit localhost
 {{ end }}
 
