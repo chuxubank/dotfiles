@@ -106,6 +106,7 @@ brews = [
   "rsync",
   "rust",
   "rustup",
+  "samba",
   "scrcpy",
   "sshpass",
   "starship",
