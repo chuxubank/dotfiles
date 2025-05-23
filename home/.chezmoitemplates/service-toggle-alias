@@ -1,0 +1,2 @@
+alias {{ .tool }}-{{ .target }}-off='launchctl bootout gui/{{ .uid }}/{{ .tool }}.{{ .target }}'
+alias {{ .tool }}-{{ .target }}-on='launchctl bootstrap gui/{{ .uid }} ~/Library/LaunchAgents/{{ .tool }}.{{ .target }}.plist'
