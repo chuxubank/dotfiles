@@ -223,6 +223,8 @@ casks = [
   { name = "signal", when = "home" },
   { name = "slack", when = "work" },
   { name = "steam", when = "home" },
+  { name = "wechat", when = "home" },
+  { name = "wechatwork", when = "work" },
 ]
 
 [packages.darwin.mas]
