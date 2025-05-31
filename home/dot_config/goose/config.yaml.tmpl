@@ -122,5 +122,16 @@ extensions:
     name: markitdown
     timeout: 300
     type: stdio
+  jetbrains:
+    args:
+      - "-y"
+      - "@jetbrains/mcp-proxy"
+    bundled: null
+    cmd: bunx
+    description: The server proxies requests from client to JetBrains IDE
+    enabled: true
+    name: jetbrains
+    timeout: 300
+    type: stdio
 GOOGLE_API_KEY: {{ index (passFields "Personal/Tech/Google") "goose-gemini-api-key" }}
 GOOSE_PROVIDER: google
