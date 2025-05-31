@@ -1,0 +1,4 @@
+Host {{ .alias }}
+    HostName {{ .ip }}
+    User {{ .username }}
+    Port {{ .port }}

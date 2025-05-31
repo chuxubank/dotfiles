@@ -1,14 +1,7 @@
-Host {{ (passFields "Network/Home/RaspberryPi/ssh").alias }}
-    HostName {{ (passFields "Network/Home/RaspberryPi/ssh").ip }}
-    User {{ (passFields "Network/Home/RaspberryPi/ssh").user }}
-    Port {{ (passFields "Network/Home/RaspberryPi/ssh").port }}
+{{ template "ssh" (passFields "Network/Home/RaspberryPi/ssh") }}
 
-Host {{ (passFields "Network/Host/BandwagonHost/ssh").alias }}
-    HostName {{ (passFields "Network/Host/BandwagonHost/ssh").ip }}
-    User root
-    Port {{ (passFields "Network/Host/BandwagonHost/ssh").port }}
+{{ template "ssh" (passFields "Network/Host/BandwagonHost/ssh") }}
 
-Host {{ (passFields "Network/Host/Racknerd/ssh").alias }}
-    HostName {{ (passFields "Network/Host/Racknerd/ssh").ip }}
-    User root
-    Port {{ (passFields "Network/Host/Racknerd/ssh").port }}
+{{ template "ssh" (passFields "Network/Host/BandwagonHost/CN2/ssh") }}
+
+{{ template "ssh" (passFields "Network/Host/Racknerd/ssh") }}
