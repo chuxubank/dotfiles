@@ -4,4 +4,6 @@
 echo "{{ template "week" . }} 󰯁 Upgrade packages"
 
 {{ template "upgrade-emacs-packages.sh" . }}
+
+bun update -g
 {{ end -}}
