@@ -6,6 +6,7 @@ blog = "Developer/Personal/blog"
 nutstore = "Nutstore"
 
 emacs = ".config/emacs"
+emacs-site-lisp = ".local/share/emacs/site-lisp"
 proxy = ".config/proxy"
 plum = ".config/plum"
 isyncrc = ".config/isyncrc"

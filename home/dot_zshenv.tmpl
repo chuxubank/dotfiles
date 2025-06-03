@@ -44,7 +44,7 @@ export BUN_INSTALL="$HOME/{{ .path.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Emacs
-export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp/:"
+export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path "emacs-site-lisp" }}:"
 
 # HASS
 export HASS_SERVER=http://homeassistant.local:8123
