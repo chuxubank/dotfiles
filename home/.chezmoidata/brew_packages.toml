@@ -105,6 +105,7 @@ brews = [
   "rustup",
   "samba",
   "scrcpy",
+  "sdcv",
   "sshpass",
   "starship",
   "swagger-codegen",

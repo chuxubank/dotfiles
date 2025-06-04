@@ -2,5 +2,5 @@
 tools = [
   "markitdown",
   { name = "aider-chat", version = "3.12", with = "pip" },
-  { name = "pyglossary", with = "prompt_toolkit" },
+  { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
 ]
