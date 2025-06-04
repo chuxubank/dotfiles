@@ -1,0 +1,5 @@
+[packages.python]
+tools = [
+  "markitdown",
+  { name = "aider-chat", version = "3.12", pip = true },
+]
