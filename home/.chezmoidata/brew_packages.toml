@@ -129,6 +129,7 @@ brews = [
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
   { name = "sleepwatcher", restart_service = true },
+  { name = "atlassian/homebrew-acli/acli", when = "work" },
 ]
 casks = [
   "amazon-q",
