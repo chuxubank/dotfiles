@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "{{ template "week" . }} 󰯁 Setup uv"
+
+INSTALLER_NO_MODIFY_PATH=1
+
+{{- if not (lookPath "uv") }}
+curl -LsSf https://astral.sh/uv/install.sh | sh
+{{- else }}
+uv self update | true
+{{- end }}
+
+{{ template "uv-tool-install" .packages.python.tools }}
