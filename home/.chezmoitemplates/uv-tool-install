@@ -6,5 +6,5 @@ uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- w
 {{- end }}
 {{- else }}
 uv tool install {{ $tool }}
-{{- end }}
+{{- end }} --upgrade
 {{- end }}
