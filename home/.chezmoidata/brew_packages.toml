@@ -213,6 +213,7 @@ casks = [
   "zotero",
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
+  { name = "cursor", when = "work" },
   { name = "intune-company-portal", when = "work" },
   { name = "microsoft-auto-update", when = "work" },
   { name = "microsoft-teams", when = "work" },
