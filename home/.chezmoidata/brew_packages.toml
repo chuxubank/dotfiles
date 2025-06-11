@@ -28,6 +28,7 @@ brews = [
   "coreutils",
   "curl",
   "dasel",
+  "dbus",
   "deb-sig/tap/double-entry-generator",
   "docx2txt",
   "dprint",

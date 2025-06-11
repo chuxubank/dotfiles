@@ -210,6 +210,7 @@ source <(fly completion --shell zsh)
 
 {{ template "service-toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
+{{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
