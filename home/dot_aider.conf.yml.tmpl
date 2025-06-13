@@ -1,4 +1,37 @@
+#############
+# Main model:
+
+## Specify the model to use for the main chat
 model: gemini-2.5-pro
 
+
+########################
+# API Keys and settings:
+
+## Set an API key for a provider (eg: --api-key provider=<key> sets PROVIDER_API_KEY=<key>)
 api-key:
   - gemini={{ index (passFields "Personal/Tech/Google") "aider-gemini-api-key" }}
+
+
+################
+# History Files:
+
+## Log the conversation with the LLM to this file (for example, .aider.llm.history)
+llm-history-file: .aider.llm.history
+
+
+##################
+# Output settings:
+
+## Set the markdown code theme (default: default, other options include monokai, solarized-dark, solarized-light, or a Pygments builtin style, see https://pygments.org/styles for available themes)
+code-theme: {{ if .isDarkMode -}} gruvbox-dark {{- else -}} gruvbox-light {{- end }}
+
+
+############
+# Upgrading:
+
+## Check for new aider versions on launch
+check-update: false
+
+## Show release notes on first run of new version (default: None, ask user)
+show-release-notes: false
