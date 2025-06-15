@@ -94,6 +94,7 @@ brews = [
   "podman-compose",
   "podman-tui",
   "poppler",
+  "portaudio",
   "pylint",
   "python",
   "python-lsp-server",
