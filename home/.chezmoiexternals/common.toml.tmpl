@@ -23,3 +23,9 @@
 ["bin/jar/pdf-unstamper.jar"]
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
+
+[".local/share/kotlin-lsp"]
+    type = "archive"
+	url = "{{ regexFind `https://[^\s]+\.zip` (gitHubLatestRelease "Kotlin/kotlin-lsp").Body }}"
+	exact = true
+    refreshPeriod = "744h"

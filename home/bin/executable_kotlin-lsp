@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+SCRIPT="$XDG_DATA_HOME/kotlin-lsp/kotlin-lsp.sh"
+
+# Auto-grant executable permission if not already granted
+if [ ! -x "$SCRIPT" ]; then
+    echo "Granting executable permission to $SCRIPT"
+    chmod +x "$SCRIPT"
+fi
+
+# Forward all arguments
+exec "$SCRIPT" "$@"
