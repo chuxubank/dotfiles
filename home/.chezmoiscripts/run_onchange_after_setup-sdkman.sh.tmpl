@@ -2,12 +2,13 @@
 
 echo "{{ template "week" . }} 󰯁 Setup sdkman"
 
-SDKMAN_DIR="$HOME/{{ .path.sdkman }}"
+SDKMAN_INIT="$SDKMAN_DIR/bin/sdkman-init.sh"
 
-if [ -z "$SDKMAN_DIR" ]; then
+if [ ! -s "$SDKMAN_INIT" ]; then
+    rm -rf "$SDKMAN_DIR"
     curl -s "https://get.sdkman.io" | bash
 fi
 
-source "$SDKMAN_DIR/bin/sdkman-init.sh"
+source "$SDKMAN_INIT"
 
 sdk selfupdate
