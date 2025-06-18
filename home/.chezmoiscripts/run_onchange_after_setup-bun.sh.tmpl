@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 echo "{{ template "week" . }} 󰯁 Setup bun"
 
@@ -7,6 +7,6 @@ PATH="$BUN_INSTALL/bin:$PATH"
 
 {{- if not (lookPath "bun") }}
 curl -fsSL https://bun.sh/install | bash
-{{- else }}
-bun upgrade
 {{- end }}
+
+bun upgrade
