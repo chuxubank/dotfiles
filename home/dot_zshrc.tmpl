@@ -149,6 +149,9 @@ source_if_exists $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highl
 source_if_exists /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if_exists /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+# bun completions
+source_if_exists "$BUN_INSTALL/_bun"
+
 # vterm
 if [[ "$INSIDE_EMACS" = 'vterm' ]] \
     && [[ -n ${EMACS_VTERM_PATH} ]] \
@@ -200,6 +203,7 @@ function upe() {
   {{ template "upgrade-emacs-packages.sh" . }}
 }
 alias upn="bun update -g"
+alias gpgk="gpgconf --kill gpg-agent"
 
 {{- if eq .hosttype "work" }}
 alias ci="export CIRCLECI=true && export CI=true && export key_file_path='/' && export key_alias='' && export key_password='' && export key_alias_password=''"
@@ -217,6 +221,3 @@ source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
-
-# bun completions
-source_if_exists "$BUN_INSTALL/_bun"
