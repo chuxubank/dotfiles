@@ -1,4 +1,4 @@
-sdkman_auto_answer=false
+sdkman_auto_answer=true
 sdkman_auto_complete=true
 sdkman_auto_env=true
 sdkman_auto_update=true

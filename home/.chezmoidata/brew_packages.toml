@@ -46,8 +46,6 @@ brews = [
   "gitwatch",
   "gnupg",
   "go",
-  "gradle",
-  "gradle-profiler",
   "graphviz",
   "helix",
   "hidapi",
