@@ -10,7 +10,7 @@ extensions:
     description: Amap's official MCP Server
     enabled: true
     envs:
-      AMAP_MAPS_API_KEY: '{{ (passFields "Personal/Life/Amap").token }}'
+      AMAP_MAPS_API_KEY: {{ (passFields "Personal/Life/Amap").token }}
     name: amap
     timeout: 300
     type: stdio
@@ -34,7 +34,7 @@ extensions:
     bundled: null
     cmd: uvx
     description: Web content fetching and processing capabilities
-    enabled: false
+    enabled: true
     envs: {}
     name: fetch
     timeout: 300
@@ -47,7 +47,7 @@ extensions:
     description: GitHub's official MCP Server
     enabled: true
     envs:
-      GITHUB_PERSONAL_ACCESS_TOKEN: '{{ output "gh" "auth" "token" | trim }}'
+      GITHUB_PERSONAL_ACCESS_TOKEN: {{ output "gh" "auth" "token" | trim }}
     name: github
     timeout: 300
     type: stdio
@@ -60,7 +60,7 @@ extensions:
     description: Location services, directions, and place details
     enabled: true
     envs:
-      GOOGLE_MAPS_API_KEY: '{{ index (passFields "Personal/Tech/Google") "goose-map-api-key" }}'
+      GOOGLE_MAPS_API_KEY: {{ index (passFields "Personal/Tech/Google") "goose-map-api-key" }}
     name: google_map
     timeout: 300
     type: stdio
@@ -121,7 +121,7 @@ extensions:
     description: Real-time web search and intelligent data extraction capabilities
     enabled: true
     envs:
-      TAVILY_API_KEY: '{{ pass "Personal/Tech/Tavily" }}'
+      TAVILY_API_KEY: {{ pass "Personal/Tech/Tavily" }}
     name: tavily
     timeout: 300
     type: stdio
