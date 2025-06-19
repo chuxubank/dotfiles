@@ -1,4 +1,4 @@
-{{- range $tool := . }}
+{{- range $tool := .packages.python.tools }}
 {{- if eq (printf "%T" $tool) "map[string]interface {}" }}
 {{- $when := index $tool "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}

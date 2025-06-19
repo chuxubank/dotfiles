@@ -11,4 +11,4 @@ if ! brew list uv &>/dev/null; then
 fi
 {{- end }}
 
-{{ template "uv-tool-install" .packages.python.tools }}
+{{ template "uv-tool-install" . }}
