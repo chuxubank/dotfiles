@@ -1,5 +1,5 @@
 GOOSE_PROVIDER: google
-GOOSE_MODEL: gemini-2.5-flash-preview-04-17
+GOOSE_MODEL: gemini-2.5-pro
 extensions:
   computercontroller:
     bundled: true
@@ -18,7 +18,7 @@ extensions:
   jetbrains:
     bundled: true
     display_name: JetBrains
-    enabled: true
+    enabled: false
     name: jetbrains
     timeout: 300
     type: builtin
@@ -48,7 +48,7 @@ extensions:
     name: fetch
     timeout: 300
     type: stdio
-  pdfreader:
+  pdf-reader:
     args:
       - mcp-read-pdf
     bundled: null
@@ -57,7 +57,7 @@ extensions:
     enabled: true
     env_keys: []
     envs: {}
-    name: pdfreader
+    name: pdf_reader
     timeout: 300
     type: stdio
   github:
@@ -68,9 +68,7 @@ extensions:
     description: GitHub's official MCP Server
     enabled: true
     envs:
-      {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": '{{ output "gh" "auth" "token" | trim }}',
-      }
+      { "GITHUB_PERSONAL_ACCESS_TOKEN": '{{ output "gh" "auth" "token" | trim }}' }
     name: github
     timeout: 300
     type: stdio
@@ -123,14 +121,16 @@ extensions:
     name: markitdown
     timeout: 300
     type: stdio
-  jetbrains:
+  google-map:
     args:
       - "-y"
-      - "@jetbrains/mcp-proxy"
+      - "@modelcontextprotocol/server-google-maps"
     bundled: null
     cmd: bunx
-    description: The server proxies requests from client to JetBrains IDE
+    description: Location services, directions, and place details
     enabled: true
-    name: jetbrains
+    envs:
+      { "GOOGLE_MAPS_API_KEY": '{{ index (passFields "Personal/Tech/Google") "goose-map-api-key" }}' }
+    name: google_map
     timeout: 300
     type: stdio
