@@ -1,4 +1,5 @@
-GOOSE_MODEL: gemini-2.0-flash
+GOOSE_PROVIDER: google
+GOOSE_MODEL: gemini-2.5-flash-preview-04-17
 extensions:
   computercontroller:
     bundled: true
@@ -133,5 +134,3 @@ extensions:
     name: jetbrains
     timeout: 300
     type: stdio
-GOOGLE_API_KEY: {{ index (passFields "Personal/Tech/Google") "goose-gemini-api-key" }}
-GOOSE_PROVIDER: google
