@@ -12,3 +12,7 @@ fi
 source "$SDKMAN_INIT"
 
 sdk selfupdate
+
+{{ template "sdkman-install" . }}
+
+sdk flush

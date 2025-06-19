@@ -1,0 +1,10 @@
+{{- range $sdk := .packages.sdkman.sdk }}
+{{- if eq (printf "%T" $sdk) "map[string]interface {}" }}
+{{- $when := index $sdk "when" }}
+{{- if or (not $when) (eq $when $.hosttype) }}
+sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
+{{- end }}
+{{- else }}
+sdk install {{ $sdk }}
+{{- end }}
+{{- end }}

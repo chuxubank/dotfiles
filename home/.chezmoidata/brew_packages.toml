@@ -60,8 +60,6 @@ brews = [
   "jadx",
   "jdtls",
   "jq",
-  "ki",
-  "kotlin",
   "kotlin-language-server",
   "ktlint",
   "lefthook",
