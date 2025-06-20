@@ -11,4 +11,13 @@ if ! brew list uv &>/dev/null; then
 fi
 {{- end }}
 
-{{ template "uv-tool-install" . }}
+{{- range $tool := .packages.python.tools }}
+{{- if eq (printf "%T" $tool) "map[string]interface {}" }}
+{{- $when := index $tool "when" }}
+{{- if or (not $when) (eq $when $.hosttype) }}
+uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --python python{{ . }}{{ end }}{{- with index $tool "with" }} --with {{.}}{{ end }} {{ $tool.name }}
+{{- end }}
+{{- else }}
+uv tool install {{ $tool }}
+{{- end }} --upgrade
+{{- end }}
