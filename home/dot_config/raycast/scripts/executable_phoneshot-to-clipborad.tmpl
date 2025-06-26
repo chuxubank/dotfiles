@@ -14,7 +14,7 @@
 # @raycast.authorURL https://github.com/chuxubank
 
 clip-image() {
-    osascript {{ joinPath .chezmoi.homeDir .path.raycast "scripts/clip-image.applescript" | quote }} "$@"
+    osascript {{ joinPath .chezmoi.homeDir .path.raycast "scripts/clip-image" | quote }} "$@"
 }
 
 phoneshot() {
