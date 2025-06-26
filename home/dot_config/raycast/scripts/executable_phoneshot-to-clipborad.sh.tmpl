@@ -13,12 +13,8 @@
 # @raycast.author Misaka
 # @raycast.authorURL https://github.com/chuxubank
 
-file-to-clipboard() {
-    osascript \
-        -e 'on run args' \
-        -e 'set the clipboard to POSIX file (first item of args)' \
-        -e end \
-        "$@"
+clip-image() {
+    osascript {{ joinPath .chezmoi.homeDir .path.raycast "scripts/clip-image.applescript" | quote }} "$@"
 }
 
 phoneshot() {
@@ -45,7 +41,7 @@ phoneshot() {
     echo "save phone screenshot to $out_file"
 
     if [[ $copy_to_clipboard == 1 ]]; then
-        file-to-clipboard $out_file
+        clip-image $out_file
         echo "copy phone screenshot file to clipboard"
     fi
 }
