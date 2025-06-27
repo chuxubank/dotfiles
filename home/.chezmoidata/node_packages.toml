@@ -1,0 +1,10 @@
+[packages.node]
+global = [
+  "@google/gemini-cli",
+  "@mermaid-js/mermaid-cli",
+  "prettier",
+  "puppeteer",
+  "pyright",
+  "typescript-language-server",
+  "vscode-json-languageserver",
+]

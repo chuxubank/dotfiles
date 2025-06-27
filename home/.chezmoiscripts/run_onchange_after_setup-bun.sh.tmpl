@@ -10,3 +10,16 @@ curl -fsSL https://bun.sh/install | bash
 {{- end }}
 
 bun upgrade
+
+{{- range $tool := .packages.node.global }}
+{{- if eq (printf "%T" $tool) "map[string]interface {}" }}
+{{- $when := index $tool "when" }}
+{{- if or (not $when) (eq $when $.hosttype) }}
+bun add -g {{ $tool.name }}
+{{- end }}
+{{- else }}
+bun add -g {{ $tool }}
+{{- end }} --silent
+{{- end }}
+
+bun update -g
