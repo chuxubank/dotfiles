@@ -41,7 +41,11 @@
           },
           "ignore": false,
           "simple_modifications": [
-            {{ template "karabiner/common_simple_modifications.json" }}
+            {{ template "karabiner/common_simple_modifications.json" }},
+            {
+              "from": { "pointing_button": "button3" },
+              "to": [{ "key_code": "vk_none" }]
+            }
           ]
         },
         // ThinkPad TrackPoint Keyboard Ⅱ USB
@@ -56,7 +60,11 @@
           },
           "ignore": false,
           "simple_modifications": [
-            {{ template "karabiner/common_simple_modifications.json" }}
+            {{ template "karabiner/common_simple_modifications.json" }},
+            {
+              "from": { "pointing_button": "button3" },
+              "to": [{ "key_code": "vk_none" }]
+            }
           ]
         },
         {
