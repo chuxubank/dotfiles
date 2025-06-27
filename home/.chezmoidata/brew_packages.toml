@@ -96,6 +96,7 @@ brews = [
   "sdcv",
   "sshpass",
   "starship",
+  "stylua",
   "swagger-codegen",
   "switchaudio-osx",
   "telnet",
