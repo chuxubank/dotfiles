@@ -13,6 +13,16 @@ jobs:
         CODESPACES: true
     steps:
       - uses: actions/checkout@v3
+      - name: Get XDG_CACHE_HOME
+        id: xdg
+        run: echo "path=${XDG_CACHE_HOME:-$HOME/.cache}" >> $GITHUB_OUTPUT
+      - name: Cache chezmoi
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.xdg.outputs.path }}/chezmoi
+          key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoidata/**/*.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-chezmoi-
       - run: ./install.sh
       - name: chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
