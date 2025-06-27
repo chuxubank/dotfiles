@@ -2,7 +2,11 @@
 tools = [
   "beancount",
   "black",
+  "fava",
+  "git-filter-repo",
+  "homeassistant-cli",
   "markitdown",
   { name = "aider-chat[help]", version = "3.12", with = "pip,playwright" },
+  { name = "ansible-core", with = "ansible" },
   { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
 ]
