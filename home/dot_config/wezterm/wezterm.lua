@@ -20,6 +20,7 @@ config.window_decorations = "RESIZE"
 config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
+config.enable_scroll_bar = true
 
 -- Modules
 config.launch_menu = launch.launch_menu
