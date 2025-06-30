@@ -5,7 +5,7 @@ tools = [
   "fava",
   "git-filter-repo",
   "homeassistant-cli",
-  "markitdown",
+  "markitdown[all]",
   "pylint",
   "python-lsp-server",
   "you-get",
