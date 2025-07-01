@@ -17,7 +17,7 @@ jobs:
       - name: Cache chezmoi
         uses: actions/cache@v4
         with:
-          path: ${{ env.HOME }}/.cache/chezmoi
+          path: ~/.cache/chezmoi
           key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoidata/**/*.toml') }}
           restore-keys: |
             ${{ runner.os }}-chezmoi-
@@ -25,7 +25,7 @@ jobs:
       - name: Cache uv
         uses: actions/cache@v4
         with:
-          path: ${{ env.HOME }}/.cache/uv
+          path: ~/.cache/uv
           key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-uv-
@@ -33,7 +33,9 @@ jobs:
       - name: Cache apt
         uses: actions/cache@v4
         with:
-          path: /var/cache/apt/
+          path: |
+            /var/cache/apt/
+            /var/lib/apt
           key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-apt-
@@ -41,7 +43,7 @@ jobs:
       - name: Cache bun
         uses: actions/cache@v4
         with:
-          path: ${{ env.HOME }}/.bun
+          path: ~/.bun
           key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/node_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-bun-
@@ -49,12 +51,12 @@ jobs:
       - name: Cache sdkman
         uses: actions/cache@v4
         with:
-          path: ${{ env.HOME }}/.sdkman
+          path: ~/.sdkman
           key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/sdkman_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-sdkman-
 
       - run: ./install.sh
 
-      - name: chezmoi data
+      - name: Chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
