@@ -13,16 +13,48 @@ jobs:
         CODESPACES: true
     steps:
       - uses: actions/checkout@v3
-      - name: Get XDG_CACHE_HOME
-        id: xdg
-        run: echo "path=${XDG_CACHE_HOME:-$HOME/.cache}" >> $GITHUB_OUTPUT
+
       - name: Cache chezmoi
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ${{ steps.xdg.outputs.path }}/chezmoi
+          path: ${{ env.HOME }}/.cache/chezmoi
           key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoidata/**/*.toml') }}
           restore-keys: |
             ${{ runner.os }}-chezmoi-
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HOME }}/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Cache apt
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/
+          key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Cache bun
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HOME }}/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/node_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Cache sdkman
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HOME }}/.sdkman
+          key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/sdkman_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-sdkman-
+
       - run: ./install.sh
+
       - name: chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
