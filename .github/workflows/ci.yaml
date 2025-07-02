@@ -18,7 +18,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            /var/cache/apt/
+            /var/cache/apt
             /var/lib/apt
           key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
           restore-keys: |
@@ -31,14 +31,6 @@ jobs:
           key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoidata/**/*.toml') }}
           restore-keys: |
             ${{ runner.os }}-chezmoi-
-
-      - name: Cache uv
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-
 
       - name: Cache bun
         uses: actions/cache@v4
