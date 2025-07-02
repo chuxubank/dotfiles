@@ -14,6 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Cache apt
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/
+            /var/lib/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
       - name: Cache chezmoi
         uses: actions/cache@v4
         with:
@@ -29,16 +39,6 @@ jobs:
           key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-uv-
-
-      - name: Cache apt
-        uses: actions/cache@v4
-        with:
-          path: |
-            /var/cache/apt/
-            /var/lib/apt
-          key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
 
       - name: Cache bun
         uses: actions/cache@v4
@@ -56,7 +56,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sdkman-
 
-      - run: ./install.sh
+      - name: Run install
+        run: ./install.sh
 
       - name: Chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
