@@ -1,0 +1,42 @@
+#!/bin/zsh
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Compress PDF
+# @raycast.mode compact
+
+# Optional parameters:
+# @raycast.icon 📄
+# @raycast.argument1 { "type": "text", "placeholder": "Input PDF path" }
+# @raycast.argument2 { "type": "dropdown", "placeholder": "Quality", "data": [ { "title": "Screen (Lowest quality)", "value": "screen" }, { "title": "Ebook (Good for reading)", "value": "ebook" }, { "title": "Printer (High quality)", "value": "printer" }, { "title": "Prepress (Very high quality)", "value": "prepress" }, { "title": "Default (Ghostscript default)", "value": "default" } ], "optional": true }
+# @raycast.argument3 { "type": "text", "placeholder": "Output PDF path", "optional": true }
+
+# Documentation:
+# @raycast.author Misaka
+# @raycast.authorURL https://github.com/chuxubank
+# @raycast.description Compress a PDF using Ghostscript with selectable quality level
+
+input="$1"
+quality="${2:-ebook}"
+output="${3:-${input%.*}-compressed.pdf}"
+
+if [ ! -f "$input" ]; then
+  echo "❌ File not found: $input"
+  exit 1
+fi
+
+case "$quality" in
+  screen|ebook|printer|prepress|default) ;;
+  *) echo "❌ Invalid quality: $quality. Must be one of: screen, ebook, printer, prepress, default."; exit 1 ;;
+esac
+
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 \
+  -dPDFSETTINGS=/$quality \
+  -dNOPAUSE -dQUIET -dBATCH \
+  -sOutputFile="$output" "$input"
+
+if [ $? -eq 0 ]; then
+  echo "✅ Compressed PDF saved to: $output"
+else
+  echo "❌ Compression failed."
+fi
