@@ -15,9 +15,7 @@ EOF
 
 {{ else if eq .chezmoi.os "linux" }}
 {{ if lookPath "apt-get" }}
-{{ if ne .hosttype "ci" -}}
 sudo apt-get update -y
-{{ end -}}
 sudo apt-get install -y \
 {{ template "package-list" .packages.apt.pkg }}
 {{ end -}}
