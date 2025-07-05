@@ -201,6 +201,7 @@ casks = [
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
   { name = "cursor", when = "work" },
+  { name = "insta360-studio", when = "home" },
   { name = "intellij-idea", when = "work" },
   { name = "intune-company-portal", when = "work" },
   { name = "microsoft-auto-update", when = "work" },
