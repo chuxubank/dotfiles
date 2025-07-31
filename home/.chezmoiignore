@@ -23,8 +23,9 @@ ACLI
 
 {{- if eq .hosttype "ci" }}
 .aider.conf.yml
-.config/rclone
 .config/goose
+.config/rclone
+.double-entry-generator.yaml
 .gradle
 .ssh
 {{ .path.beancount }}
