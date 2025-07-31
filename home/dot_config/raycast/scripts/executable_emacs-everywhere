@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title Emacs Everywhere
+# @raycast.mode silent
+
+# Optional parameters:
+# @raycast.icon 🐾
+# @raycast.packageName Editor
+
+# Documentation:
+# @raycast.description Open Emacs Client (Everywhere)
+# @raycast.author Misaka
+# @raycast.authorURL https://github.com/chuxubank
+
+emacsclient --eval "(emacs-everywhere)"
