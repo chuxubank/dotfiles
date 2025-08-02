@@ -1,0 +1,3 @@
+#!/bin/bash
+
+qpdf --password="$2" --decrypt "$1" "${1%.pdf}-unlocked.pdf"
