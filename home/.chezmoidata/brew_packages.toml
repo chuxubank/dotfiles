@@ -133,6 +133,7 @@ casks = [
   "discord",
   "emacs-app",
   "figma",
+  "firefox",
   "folo",
   "font-cascadia-code",
   "font-dejavu",
