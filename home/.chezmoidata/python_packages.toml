@@ -6,6 +6,7 @@ tools = [
   "git-filter-repo",
   "homeassistant-cli",
   "markitdown[all]",
+  "my_cookies",
   "pylint",
   "python-lsp-server",
   "you-get",
