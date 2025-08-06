@@ -3,7 +3,17 @@
 
 echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
 xcode-select --install
+
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
+
 defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES
+
+defaults write com.apple.finder RelativeDates -bool false
+defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "1" "yyyy-MM-dd HH:mm"
+defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "2" "yyyy-MM-dd HH:mm:ss"
+defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "3" "yyyy-MM-dd HH:mm:ss"
+defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "4" "yyyy-MM-dd HH:mm:ss"
+killall Finder
+
 networksetup -setdnsservers Wi-Fi 223.5.5.5 8.8.8.8 1.1.1.1
 {{ end -}}
