@@ -71,6 +71,17 @@ extensions:
     name: jetbrains
     timeout: 300
     type: builtin
+  jetbrains-mcp:
+    args:
+      - "-y"
+      - "@jetbrains/mcp-proxy"
+    bundled: null
+    cmd: bunx
+    description: The server proxies requests from client to JetBrains IDE.
+    enabled: false
+    name: jetbrains_mcp
+    timeout: 300
+    type: stdio
   markitdown:
     args:
       - markitdown-mcp
