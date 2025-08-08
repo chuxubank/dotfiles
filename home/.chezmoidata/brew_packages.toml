@@ -78,9 +78,6 @@ brews = [
   "pgformatter",
   "pinentry-mac",
   "plantuml",
-  "podman",
-  "podman-compose",
-  "podman-tui",
   "poppler",
   "portaudio",
   "python",
@@ -117,6 +114,9 @@ brews = [
   "zsh-syntax-highlighting",
   { name = "sleepwatcher", restart_service = true },
   { name = "atlassian/homebrew-acli/acli", when = "work" },
+  { name = "podman", when = "work" },
+  { name = "podman-compose", when = "work" },
+  { name = "podman-tui", when = "work" },
 ]
 casks = [
   "amazon-q",
@@ -186,7 +186,6 @@ casks = [
   "nextcloud",
   "notion",
   "obsidian",
-  "podman-desktop",
   "postman",
   "raspberry-pi-imager",
   "raycast",
@@ -219,6 +218,7 @@ casks = [
   { name = "steam", when = "home" },
   { name = "wechat", when = "home" },
   { name = "wechatwork", when = "work" },
+  { name = "podman-desktop", when = "work" },
 ]
 
 [packages.darwin.mas]
