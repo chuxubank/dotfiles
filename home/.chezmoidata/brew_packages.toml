@@ -129,6 +129,7 @@ casks = [
   "blender",
   "block-goose",
   "chatgpt",
+  "claude",
   "deepl",
   "discord",
   "emacs-app",
