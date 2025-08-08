@@ -132,7 +132,7 @@ casks = [
   "claude",
   "deepl",
   "discord",
-  "emacs-app",
+  "jimeh/emacs-builds/emacs-app",
   "figma",
   "firefox",
   "folo",
