@@ -2,6 +2,7 @@
 global = [
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
+  "@openai/codex",
   "prettier",
   "puppeteer",
   "pyright",

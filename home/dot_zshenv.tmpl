@@ -52,6 +52,9 @@ export HASS_SERVER=http://homeassistant.local:8123
 # Jira
 export JIRA_URL="https://aaecosystem.atlassian.net"
 
+# OpenAI
+export OPENAI_API_KEY="{{ index (passFields "Personal/Tech/OpenAI") "api-key" }}"
+
 # Org
 export ORG_DIR="$HOME/{{ .path.org }}"
 
