@@ -1,3 +1,7 @@
+{{ if lookPath "orb" -}}
+Include ~/.orbstack/ssh/config
+{{ end -}}
+
 Include ~/.ssh/personal/config
 
 {{ if eq .hosttype "work" -}}

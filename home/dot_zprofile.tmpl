@@ -4,6 +4,11 @@ export LC_ALL=en_US.UTF-8
 # Amazon Q pre block. Keep at the top of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zprofile.pre.zsh"
 
+{{ if lookPath "orb" -}}
+# Added by OrbStack: command-line tools and integration
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+{{- end }}
+
 # Added by Toolbox App
 export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
