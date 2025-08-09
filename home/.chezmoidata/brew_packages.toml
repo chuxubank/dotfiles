@@ -78,6 +78,7 @@ brews = [
   "pgformatter",
   "pinentry-mac",
   "plantuml",
+  "pngpaste",
   "poppler",
   "portaudio",
   "python",
