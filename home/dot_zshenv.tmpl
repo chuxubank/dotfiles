@@ -35,6 +35,12 @@ if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
   export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 fi
 
+{{- if ne .hosttype "ci" }}
+# API-KEY
+export OPENAI_API_KEY="{{ index (passFields "Personal/Tech/OpenAI") "api-key" }}"
+export GEMINI_API_KEY="{{ index (passFields "Personal/Tech/Google") "gemini-api-key" }}"
+{{- end }}
+
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount"
 export FAVA_PORT=8888
@@ -51,11 +57,6 @@ export HASS_SERVER=http://homeassistant.local:8123
 
 # Jira
 export JIRA_URL="https://aaecosystem.atlassian.net"
-
-{{- if ne .hosttype "ci" }}
-# OpenAI
-export OPENAI_API_KEY="{{ index (passFields "Personal/Tech/OpenAI") "api-key" }}"
-{{- end }}
 
 # Org
 export ORG_DIR="$HOME/{{ .path.org }}"
