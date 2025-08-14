@@ -4,6 +4,7 @@ global = [
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
   "@openai/codex",
+  "@prettier/plugin-ruby",
   "prettier",
   "puppeteer",
   "pyright",
