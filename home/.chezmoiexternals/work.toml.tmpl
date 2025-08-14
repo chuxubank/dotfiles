@@ -3,4 +3,14 @@
     type = "file"
 	url = "https://concourse-prod.aaecosystem.com/api/v1/cli?arch=amd64&platform={{ .chezmoi.os }}"
 	executable = true
+
+["Developer/Example/Concourse/ci"]
+    type = "git-repo"
+	url = "https://github.com/concourse/ci"
+	refreshPeriod = "24h"
+
+["Developer/Example/Concourse/examples"]
+    type = "git-repo"
+	url = "https://github.com/concourse/examples"
+	refreshPeriod = "24h"
 {{- end }}
