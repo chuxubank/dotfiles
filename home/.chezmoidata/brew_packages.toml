@@ -108,6 +108,7 @@ brews = [
   "uv",
   "wget",
   "xray",
+  "yq",
   "zbar",
   "zig",
   "zsh",
