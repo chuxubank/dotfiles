@@ -87,6 +87,7 @@ brews = [
   "rclone",
   "ripgrep",
   "rsync",
+  "ruby",
   "rust",
   "rustup",
   "samba",
