@@ -1,16 +1,24 @@
-{{ if not (eq .hosttype "ci") -}}
+{{ if ne .hosttype "ci" -}}
 #!/bin/sh
+set -eu
 
-echo "󰯁 Restart emacs with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.emacs) "rev-parse" "HEAD" }}"
+# Define Emacs base directory
+{{ $emacsDir := joinPath .chezmoi.homeDir .path.emacs }}
 
-\emacsclient --eval '(kill-emacs)' || true
+# Get current Emacs and Org-mode short commit hashes
+EMACS_VER="{{ output "git" "-C" $emacsDir "rev-parse" "--short" "HEAD" }}"
+ORG_VER="{{ output "git" "-C" (joinPath $emacsDir "elpa" "org-mode") "rev-parse" "--short" "HEAD" }}"
 
-env TERM_PROGRAM= \
+echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver $ORG_VER"
 
+# Kill existing Emacs session if running
+\emacsclient --eval '(kill-emacs)' >/dev/null 2>&1 || true
+
+# Start Emacs depending on OS
 {{ if eq .chezmoi.os "android" -}}
 termux-x11 :1 -xstartup "\emacs" &
-{{ else }}
-\emacsclient -cn -a=""
+{{ else -}}
+env TERM_PROGRAM= \emacsclient -cn -a=""
 {{ end -}}
 
 {{ end -}}
