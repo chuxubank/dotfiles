@@ -30,6 +30,7 @@ brews = [
   "docx2txt",
   "dprint",
   "exiftool",
+  "fastlane",
   "fd",
   "ffmpegthumbnailer",
   "fzf",
