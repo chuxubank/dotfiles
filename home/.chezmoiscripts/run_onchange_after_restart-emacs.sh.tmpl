@@ -2,12 +2,31 @@
 #!/bin/sh
 set -eu
 
-# Define Emacs base directory
-{{ $emacsDir := joinPath .chezmoi.homeDir .path.emacs }}
+{{ $emacsDir := joinPath .chezmoi.homeDir .path.emacs -}}
+{{ $orgDir := joinPath $emacsDir "elpa" "org-mode" -}}
 
 # Get current Emacs and Org-mode short commit hashes
-EMACS_VER="{{ output "git" "-C" $emacsDir "rev-parse" "--short" "HEAD" }}"
-ORG_VER="{{ output "git" "-C" (joinPath $emacsDir "elpa" "org-mode") "rev-parse" "--short" "HEAD" }}"
+EMACS_VER="{{ output "git" "-C" $emacsDir "rev-parse" "--short" "HEAD" | trim }}"
+ORG_VER="{{ output "git" "-C" $orgDir "rev-parse" "--short" "HEAD" | trim }}"
+
+# Determine cache directory following XDG spec
+CACHE_HOME="${XDG_CACHE_HOME:-{{ joinPath .chezmoi.homeDir ".cache" }}}"
+CACHE_FILE="$CACHE_HOME/org-mode-last-hash"
+
+mkdir -p "$CACHE_HOME"
+
+# Check Org-mode version change and rebuild autoloads if needed
+if [ -f "$CACHE_FILE" ]; then
+    LAST_ORG_VER="$(cat "$CACHE_FILE")"
+else
+    LAST_ORG_VER=""
+fi
+
+if [ "$ORG_VER" != "$LAST_ORG_VER" ]; then
+    echo "⚡ Org-mode updated ($LAST_ORG_VER → $ORG_VER), rebuilding autoloads..."
+    make -C "{{ $orgDir }}" compile autoloads
+    echo "$ORG_VER" > "$CACHE_FILE"
+fi
 
 echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver $ORG_VER"
 
