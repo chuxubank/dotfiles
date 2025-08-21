@@ -108,6 +108,7 @@ brews = [
   "tokei",
   "tree-sitter",
   "uv",
+  "watch",
   "wget",
   "xray",
   "yq",
