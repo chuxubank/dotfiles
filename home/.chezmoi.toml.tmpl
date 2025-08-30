@@ -9,7 +9,7 @@
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $hosttype = promptChoiceOnce . "hosttype" "What type of host are you on" $choices -}}
-{{- $passDir = promptStringOnce .path "pass" "Password store dir for pass cli" ".password-store" }}
+{{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
 {{- end }}
 
 {{- if eq .chezmoi.os "darwin" }}
