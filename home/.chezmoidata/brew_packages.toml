@@ -93,6 +93,7 @@ brews = [
   "samba",
   "scrcpy",
   "sdcv",
+  "sing-box",
   "sshpass",
   "starship",
   "stylua",
