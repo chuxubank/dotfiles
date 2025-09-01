@@ -1,0 +1,6 @@
+[[mcp]]
+name = "amap"
+cmd = "bunx"
+args = ["-y", "@amap/amap-maps-mcp-server"]
+envs = { AMAP_MAPS_API_KEY = { pass = "Personal/Life/Amap", field = "token" } }
+desc = "Amap's official MCP Server"
