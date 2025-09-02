@@ -12,8 +12,9 @@ from dataclasses import dataclass, field
 # --- Configuration Center ---
 # Centralizes all configurations for clarity.
 class Config:
-    # Base directory for configuration files.
-    CONFIG_DIR = Path.home() / ".config" / "mitmproxy" / "work"
+
+    SCRIPT_DIR = Path(__file__).parent.resolve()
+    CONFIG_DIR = SCRIPT_DIR / "data"
 
     # Response data file paths.
     # Managed by a dictionary for easy access by key.
@@ -42,16 +43,9 @@ class Route:
 
     pattern_str: str
     handler_name: str
-
-    # --- Optional fields to define the response ---
-    # To respond from a file, use its key.
     file_key: Optional[str] = None
-    # To respond with a direct JSON object, use this field.
     response_json: Optional[Dict[str, Any]] = None
-    # To override the HTTP status code (defaults to 200).
     status_code: int = Config.DEFAULT_STATUS
-
-    # --- Internal field for compiled regex ---
     compiled_pattern: re.Pattern = field(init=False)
 
     def __post_init__(self):
@@ -105,15 +99,21 @@ class RequestInterceptor:
     @staticmethod
     @lru_cache(maxsize=16)
     def _get_json_content(file_path: Path) -> str:
-        """Reads and caches JSON content from a file."""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = json.load(f)
                 ctx.log.info(f"✅ Successfully loaded and cached JSON from {file_path}")
                 return json.dumps(content, ensure_ascii=False)
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            ctx.log.error(f"❌ Error reading or parsing {file_path}: {e}")
-            return json.dumps({"error": f"Failed to load data from {file_path.name}"})
+        except FileNotFoundError:
+            ctx.log.error(
+                f"❌ CRITICAL: JSON file not found at {file_path}. Make sure the file exists in the 'mock_data' directory next to the script."
+            )
+            return json.dumps(
+                {"error": "Server configuration error: mock file not found."}
+            )
+        except json.JSONDecodeError as e:
+            ctx.log.error(f"❌ Error parsing JSON from {file_path}: {e}")
+            return json.dumps({"error": f"Failed to parse data from {file_path.name}"})
 
     def _create_response(
         self,

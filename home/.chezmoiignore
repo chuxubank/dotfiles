@@ -20,7 +20,6 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- if ne .hosttype "work" }}
 ACLI
 .ssh/aa
-.config/mitmproxy/work
 {{- end }}
 
 {{- if eq .hosttype "ci" }}
