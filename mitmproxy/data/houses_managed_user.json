@@ -1,0 +1,72 @@
+{
+  "locks": [
+    {
+      "lockID": "E72F461B8D5D994DB8291398085297B2",
+      "lockName": "OH Testing Lock",
+      "rule": { "lockPinCredentialSchedules": [], "otherSchedules": [] },
+      "accessLevel": "owner",
+      "associatedPinToFinger": "none",
+      "entryCode": "none",
+      "contactlessKey": "none",
+      "fingerprintAccess": "none",
+      "fingerprintMasterAccess": "none",
+      "face": "none",
+      "palm": "none",
+      "inside_door_pin": "none"
+    },
+    {
+      "lockID": "9C90150B9E554A839D107BA44BE7B571",
+      "lockName": "Primary Lock",
+      "rule": { "lockPinCredentialSchedules": [], "otherSchedules": [] },
+      "accessLevel": "none",
+      "associatedPinToFinger": "none",
+      "entryCode": "none",
+      "contactlessKey": "none",
+      "fingerprintAccess": "none",
+      "fingerprintMasterAccess": "none",
+      "face": "none",
+      "palm": "none",
+      "inside_door_pin": "none"
+    },
+    {
+      "lockID": "D65201791DBC5C449BCE086E37EAD87E",
+      "lockName": "FRONT DOOR",
+      "rule": { "lockPinCredentialSchedules": [], "otherSchedules": [] },
+      "accessLevel": "owner",
+      "associatedPinToFinger": "none",
+      "entryCode": "none",
+      "contactlessKey": "none",
+      "fingerprintAccess": "none",
+      "fingerprintMasterAccess": "none",
+      "face": "none",
+      "palm": "none",
+      "inside_door_pin": "none"
+    }
+  ],
+  "waSystems": [
+    {
+      "systemID": "68aec3e640cafae1afd0b373",
+      "hubName": "Omni Hub",
+      "accessLevel": "owner",
+      "rule": {
+        "waSystemSchedules": [
+          { "accessType": "always", "id": "68b65493dfe68c2059129743" }
+        ]
+      },
+      "hubCapabilities": {
+        "type": "omni",
+        "supportEdge": false,
+        "capabilities": { "ble": true }
+      }
+    }
+  ],
+  "alarm": {
+    "accessLevel": "superuser",
+    "credentialID": "68b65495dfe68c2059129843",
+    "alarmID": "BD32F56E734045B3B34B69BFB2E5379A",
+    "areaDisarm": [],
+    "areaArm": [],
+    "rules": { "accessType": "always" }
+  },
+  "doorbells": []
+}
