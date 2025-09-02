@@ -38,7 +38,7 @@ class Config:
     # Parameters for specific logic.
     FIRMWARE_DELAY_SECONDS = 1
     FIRMWARE_REQUIRED_CALLS = 2
-    OTA_DELAY_SECONDS = 1
+    DEFAULT_DELAY_SECONDS = 1
 
 
 # --- Route Definition ---
@@ -51,6 +51,7 @@ class Route:
     file_key: Optional[str] = None
     response_json: Optional[Dict[str, Any]] = None
     status_code: int = Config.DEFAULT_STATUS
+    delay_seconds: float = Config.DEFAULT_DELAY_SECONDS
     compiled_pattern: re.Pattern = field(init=False)
 
     def __post_init__(self):
@@ -68,7 +69,7 @@ class RequestInterceptor:
             "_handle_firmware_request",
             file_key="FIRMWARE_UPGRADABLE",
         ),
-        Route(r".*/remoteoperate/.*/ota", "_handle_ota_request"),
+        Route(r".*/remoteoperate/.*/ota", "_handle_standard_response"),
         Route(
             r".*/devices/capabilities\?deviceType=lock.*",
             "_handle_standard_response",
@@ -87,11 +88,7 @@ class RequestInterceptor:
         Route(
             pattern_str=r".*/houses/.*/manageduser/.*",
             handler_name="_handle_standard_response",
-            status_code=429,
-            response_json={
-                "code": "TooManyRequests",
-                "message": "Request limit reached. Count: 66, Limit: 15 per 3600 second",
-            },
+            file_key="HOUSES_MANAGED_USER",
         ),
     ]
 
@@ -138,6 +135,11 @@ class RequestInterceptor:
         It can return from a file or a direct JSON object, with a custom status code.
         """
         ctx.log.info(f"Matched standard rule for: {flow.request.pretty_url}")
+
+        if rule.delay_seconds > 0:
+            ctx.log.info(f"Applying {rule.delay_seconds}s delay...")
+            time.sleep(rule.delay_seconds)
+
         content = ""
         # Priority 1: Use direct JSON response if provided.
         if rule.response_json is not None:
@@ -172,12 +174,6 @@ class RequestInterceptor:
         self._create_response(
             flow, Config.DEFAULT_STATUS, content, Config.DEFAULT_HEADERS
         )
-
-    def _handle_ota_request(self, flow: http.HTTPFlow, file_key: Optional[str] = None):
-        """Handles OTA requests with a delay and an empty response body."""
-        ctx.log.info(f"📡 OTA request from {flow.client_conn.address[0]}")
-        time.sleep(Config.OTA_DELAY_SECONDS)
-        self._create_response(flow, Config.DEFAULT_STATUS, "", Config.DEFAULT_HEADERS)
 
     # --- Main Request Processor ---
     def process_request(self, flow: http.HTTPFlow):
