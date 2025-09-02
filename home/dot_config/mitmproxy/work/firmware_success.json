@@ -1,0 +1,41 @@
+{
+  "updateInfo": [
+    {
+      "supportedMethods": ["wifi", "ble"],
+      "chipName": "LOCK_PRIMARY",
+      "status": "upToDate",
+      "version": "4.2.2"
+    },
+    {
+      "supportedMethods": ["wifi", "ble"],
+      "chipName": "LOCK_SECONDARY",
+      "status": "upToDate",
+      "version": "5.0.0"
+    },
+    {
+      "supportedMethods": ["wifi"],
+      "chipName": "WIFI",
+      "status": "upToDate",
+      "version": "2.4.2"
+    },
+    {
+      "supportedMethods": ["wifi"],
+      "chipName": "MCU",
+      "status": "upToDate",
+      "version": "3.0.0",
+      "nextVersion": ""
+    },
+    {
+      "supportedMethods": ["wifi"],
+      "chipName": "FDSP",
+      "status": "upToDate",
+      "version": "1.5.0"
+    },
+    {
+      "supportedMethods": ["wifi"],
+      "chipName": "DSP",
+      "status": "upToDate",
+      "version": "1.0.0"
+    }
+  ]
+}

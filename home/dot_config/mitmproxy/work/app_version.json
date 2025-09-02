@@ -1,0 +1,6 @@
+{
+  "message": "recommend",
+  "shouldpreselectmarketingoptin": false,
+  "upgradeVersion": "2025.5.0",
+  "description": "Customized description.This is a very long bug fixing or improvement list to show how long a 250-character description looks like, including space. This description need translation from Crowdin, but it will be kept in English if translation is not ready before code frozen” Customized description.This is a very long bug fixing or improvement list to show how long a 250-character description looks like, including space. This description need translation from Crowdin, but it will be kept in English if translation is not ready before code frozen”"
+}
