@@ -38,13 +38,20 @@ class Config:
 # --- Route Definition ---
 @dataclass
 class Route:
-    """A dataclass to represent a URL routing rule."""
+    """A dataclass to represent a URL routing rule with configurable responses."""
 
     pattern_str: str
     handler_name: str
-    file_key: Optional[str] = None
 
-    # This field will be populated after initialization and should not be passed to the constructor.
+    # --- Optional fields to define the response ---
+    # To respond from a file, use its key.
+    file_key: Optional[str] = None
+    # To respond with a direct JSON object, use this field.
+    response_json: Optional[Dict[str, Any]] = None
+    # To override the HTTP status code (defaults to 200).
+    status_code: int = Config.DEFAULT_STATUS
+
+    # --- Internal field for compiled regex ---
     compiled_pattern: re.Pattern = field(init=False)
 
     def __post_init__(self):
@@ -60,20 +67,32 @@ class RequestInterceptor:
         Route(
             r".*/remotedevices/azureDragonModule/locks/.*/firmware",
             "_handle_firmware_request",
-            "FIRMWARE_UPGRADABLE",
+            file_key="FIRMWARE_UPGRADABLE",
         ),
         Route(r".*/remoteoperate/.*/ota", "_handle_ota_request"),
         Route(
             r".*/devices/capabilities\?deviceType=lock.*",
-            "_handle_generic_request",
-            "CAPABILITIES",
+            "_handle_standard_response",
+            file_key="CAPABILITIES",
         ),
-        Route(r".*/appversionok/android/.*", "_handle_generic_request", "APP_VERSION"),
-        Route(r".*/appfeatures/android/.*", "_handle_generic_request", "APP_FEATURE"),
         Route(
-            r".*/houses/.*/manageduser/.*",
-            "_handle_generic_request",
-            "HOUSES_MANAGED_USER",
+            r".*/appversionok/android/.*",
+            "_handle_standard_response",
+            file_key="APP_VERSION",
+        ),
+        Route(
+            r".*/appfeatures/android/.*",
+            "_handle_standard_response",
+            file_key="APP_FEATURE",
+        ),
+        Route(
+            pattern_str=r".*/houses/.*/manageduser/.*",
+            handler_name="_handle_standard_response",
+            status_code=429,
+            response_json={
+                "code": "TooManyRequests",
+                "message": "Request limit reached. Count: 66, Limit: 15 per 3600 second",
+            },
         ),
     ]
 
@@ -106,15 +125,29 @@ class RequestInterceptor:
         """Helper function to create responses uniformly."""
         flow.response = http.Response.make(status_code, content, headers)
 
-    # --- Specific Request Handlers ---
+    # --- Request Handlers ---
 
-    def _handle_generic_request(self, flow: http.HTTPFlow, file_key: str):
-        """Handles generic requests by serving a JSON response from a file."""
-        ctx.log.info(f"Matched generic rule for: {flow.request.pretty_url}")
-        content = self._get_json_content(Config.RESPONSE_FILES[file_key])
-        self._create_response(
-            flow, Config.DEFAULT_STATUS, content, Config.DEFAULT_HEADERS
-        )
+    def _handle_standard_response(self, flow: http.HTTPFlow, rule: Route):
+        """
+        A powerful, generic handler that creates a response based on the Route's configuration.
+        It can return from a file or a direct JSON object, with a custom status code.
+        """
+        ctx.log.info(f"Matched standard rule for: {flow.request.pretty_url}")
+        content = ""
+        # Priority 1: Use direct JSON response if provided.
+        if rule.response_json is not None:
+            content = json.dumps(rule.response_json, ensure_ascii=False)
+            ctx.log.info(
+                f"Responding with direct JSON content, status {rule.status_code}."
+            )
+        # Priority 2: Fallback to file-based response.
+        elif rule.file_key:
+            content = self._get_json_content(Config.RESPONSE_FILES[rule.file_key])
+            ctx.log.info(
+                f"Responding from file '{rule.file_key}', status {rule.status_code}."
+            )
+
+        self._create_response(flow, rule.status_code, content, Config.DEFAULT_HEADERS)
 
     def _handle_firmware_request(self, flow: http.HTTPFlow, file_key: str):
         """Handles firmware update requests with delay and counting logic."""
@@ -143,16 +176,13 @@ class RequestInterceptor:
 
     # --- Main Request Processor ---
     def process_request(self, flow: http.HTTPFlow):
-        """
-        Main processing function. Iterates through the Route objects and dispatches requests.
-        """
+        """Main processing function."""
         for rule in self.url_mapping:
             if rule.compiled_pattern.search(flow.request.pretty_url):
                 try:
-                    # Get the handler method from its name string.
                     handler: Callable = getattr(self, rule.handler_name)
-                    # Call the handler.
-                    handler(flow, rule.file_key)
+                    # Pass the whole rule object to the handler
+                    handler(flow, rule)
                 except Exception as e:
                     ctx.log.error(f"Error in handler for '{rule.pattern_str}': {e}")
                     self._create_response(
@@ -161,9 +191,7 @@ class RequestInterceptor:
                         json.dumps({"error": "Internal server error"}),
                         Config.DEFAULT_HEADERS,
                     )
-                # Break the loop after handling to prevent multiple matches for a single URL.
                 return
-
         ctx.log.warn(f"No handler matched for URL: {flow.request.pretty_url}")
 
 
