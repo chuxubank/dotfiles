@@ -1,9 +1,14 @@
-# English comments provided as requested.
 import re
 import time
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Callable,
+    Any,
+)
 from mitmproxy import ctx, http
 from functools import lru_cache
 from dataclasses import dataclass, field
