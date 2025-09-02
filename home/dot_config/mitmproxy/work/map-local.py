@@ -1,158 +1,181 @@
+# English comments provided as requested.
 import re
 import time
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional, Callable
 from mitmproxy import ctx, http
+from functools import lru_cache
+from dataclasses import dataclass, field
 
 
-# Configuration
+# --- Configuration Center ---
+# Centralizes all configurations for clarity.
 class Config:
-    # URL patterns
-    FIRMWARE_URL_PATTERN = r".*/remotedevices/azureDragonModule/locks/.*/firmware"
-    OTA_URL_PATTERN = r".*/remoteoperate/.*/ota"
-    CAPABILITIES_PATTERN = r".*/devices/capabilities\?deviceType=lock.*"
-    APP_VERSION_PATTERN = r".*/appversionok/android/.*"
-    APP_FEATURE_PATTERN = r".*/appfeatures/android/.*"
-    HOUSES_MANAGED_USER_PATTERN = r".*/houses/.*/manageduser/.*"
-
-    # File paths
+    # Base directory for configuration files.
     CONFIG_DIR = Path.home() / ".config" / "mitmproxy" / "work"
-    FIRMWARE_UPGRADABLE = CONFIG_DIR / "firmware_upgradable.json"
-    FIRMWARE_UPGRADING = CONFIG_DIR / "firmware_upgrading.json"
-    FIRMWARE_SUCCESS = CONFIG_DIR / "firmware_success.json"
-    CAPABILITIES_RESPONSE = CONFIG_DIR / "capabilities.json"
-    APP_VERSION_RESPONSE = CONFIG_DIR / "app_version.json"
-    APP_FEATURE_RESPONSE = CONFIG_DIR / "app_feature.json"
 
-    # Timing and counter settings
-    DELAY_SECONDS = 1
-    REQUIRED_CALLS = 2
+    # Response data file paths.
+    # Managed by a dictionary for easy access by key.
+    RESPONSE_FILES = {
+        "FIRMWARE_UPGRADABLE": CONFIG_DIR / "firmware_upgradable.json",
+        "CAPABILITIES": CONFIG_DIR / "capabilities.json",
+        "APP_VERSION": CONFIG_DIR / "app_version.json",
+        "APP_FEATURE": CONFIG_DIR / "app_feature.json",
+        "HOUSES_MANAGED_USER": CONFIG_DIR / "houses_managed_user.json",
+    }
 
-    # Response settings
-    DEFAULT_HEADERS = {"Content-Type": "application/json"}
+    # Default response settings.
+    DEFAULT_HEADERS = {"Content-Type": "application/json; charset=utf-8"}
     DEFAULT_STATUS = 200
 
+    # Parameters for specific logic.
+    FIRMWARE_DELAY_SECONDS = 1
+    FIRMWARE_REQUIRED_CALLS = 2
+    OTA_DELAY_SECONDS = 1
 
-class ResponseHandler:
+
+# --- Route Definition ---
+@dataclass
+class Route:
+    """A dataclass to represent a URL routing rule."""
+
+    pattern_str: str
+    handler_name: str
+    file_key: Optional[str] = None
+
+    # This field will be populated after initialization and should not be passed to the constructor.
+    compiled_pattern: re.Pattern = field(init=False)
+
+    def __post_init__(self):
+        """Compile the regex pattern after the object is created."""
+        self.compiled_pattern = re.compile(self.pattern_str)
+
+
+# --- Core Handler ---
+class RequestInterceptor:
+    # Define rules using the structured Route dataclass.
+    # This is very clean, self-documenting, and easy to expand.
+    URL_ROUTES: List[Route] = [
+        Route(
+            r".*/remotedevices/azureDragonModule/locks/.*/firmware",
+            "_handle_firmware_request",
+            "FIRMWARE_UPGRADABLE",
+        ),
+        Route(r".*/remoteoperate/.*/ota", "_handle_ota_request"),
+        Route(
+            r".*/devices/capabilities\?deviceType=lock.*",
+            "_handle_generic_request",
+            "CAPABILITIES",
+        ),
+        Route(r".*/appversionok/android/.*", "_handle_generic_request", "APP_VERSION"),
+        Route(r".*/appfeatures/android/.*", "_handle_generic_request", "APP_FEATURE"),
+        Route(
+            r".*/houses/.*/manageduser/.*",
+            "_handle_generic_request",
+            "HOUSES_MANAGED_USER",
+        ),
+    ]
+
     def __init__(self):
-        self.call_count = 0
+        # State counter for specific requests.
+        self.firmware_call_count = 0
+        # The routes are already defined and self-contained with compiled patterns.
+        self.url_mapping = self.URL_ROUTES
 
-    def _read_json_file(self, file_path: Path) -> str:
-        """Read JSON file content without caching."""
-        with open(file_path, "r") as f:
-            content = json.load(f)
-            ctx.log.info(f"Successfully loaded and validated JSON from {file_path}")
-            return json.dumps(content)
+    @staticmethod
+    @lru_cache(maxsize=16)
+    def _get_json_content(file_path: Path) -> str:
+        """Reads and caches JSON content from a file."""
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = json.load(f)
+                ctx.log.info(f"✅ Successfully loaded and cached JSON from {file_path}")
+                return json.dumps(content, ensure_ascii=False)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            ctx.log.error(f"❌ Error reading or parsing {file_path}: {e}")
+            return json.dumps({"error": f"Failed to load data from {file_path.name}"})
 
-    def handle_firmware_request(self, flow: http.HTTPFlow) -> None:
-        """Handle firmware update requests."""
-        self.call_count += 1
+    def _create_response(
+        self,
+        flow: http.HTTPFlow,
+        status_code: int,
+        content: str,
+        headers: Dict[str, str],
+    ):
+        """Helper function to create responses uniformly."""
+        flow.response = http.Response.make(status_code, content, headers)
+
+    # --- Specific Request Handlers ---
+
+    def _handle_generic_request(self, flow: http.HTTPFlow, file_key: str):
+        """Handles generic requests by serving a JSON response from a file."""
+        ctx.log.info(f"Matched generic rule for: {flow.request.pretty_url}")
+        content = self._get_json_content(Config.RESPONSE_FILES[file_key])
+        self._create_response(
+            flow, Config.DEFAULT_STATUS, content, Config.DEFAULT_HEADERS
+        )
+
+    def _handle_firmware_request(self, flow: http.HTTPFlow, file_key: str):
+        """Handles firmware update requests with delay and counting logic."""
+        self.firmware_call_count += 1
         ctx.log.info(
-            f"Firmware request #{self.call_count} from {flow.client_conn.address[0]}"
-        )
-        ctx.log.debug(f"Request headers: {dict(flow.request.headers)}")
-
-        # Apply delay
-        ctx.log.info(f"Applying {Config.DELAY_SECONDS}s delay")
-        time.sleep(Config.DELAY_SECONDS)
-
-        # Set response
-        response_content = self._read_json_file(Config.FIRMWARE_UPGRADABLE)
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, response_content, Config.DEFAULT_HEADERS
+            f"🔥 Firmware request #{self.firmware_call_count} from {flow.client_conn.address[0]}"
         )
 
-        response_type = (
-            "success" if self.call_count >= Config.REQUIRED_CALLS else "regular"
-        )
-        ctx.log.info(
-            f"Responded with {response_type} response to {flow.client_conn.address[0]}"
-        )
+        time.sleep(Config.FIRMWARE_DELAY_SECONDS)
 
-    def handle_ota_request(self, flow: http.HTTPFlow) -> None:
-        """Handle OTA update requests."""
-        ctx.log.info(f"OTA request received from {flow.client_conn.address[0]}")
-        ctx.log.debug(f"Request headers: {dict(flow.request.headers)}")
+        if self.firmware_call_count >= Config.FIRMWARE_REQUIRED_CALLS:
+            ctx.log.info("Responding with 'success' state logic.")
+        else:
+            ctx.log.info("Responding with 'upgradable' state logic.")
 
-        ctx.log.info(f"Applying {Config.DELAY_SECONDS}s delay")
-        time.sleep(Config.DELAY_SECONDS)
-
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, "", Config.DEFAULT_HEADERS
-        )
-        ctx.log.info(f"OTA request handled for {flow.client_conn.address[0]}")
-
-    def handle_capabilities_request(self, flow: http.HTTPFlow) -> None:
-        """Handle device capabilities requests."""
-        ctx.log.info(
-            f"Capabilities request received from {flow.client_conn.address[0]}"
+        content = self._get_json_content(Config.RESPONSE_FILES[file_key])
+        self._create_response(
+            flow, Config.DEFAULT_STATUS, content, Config.DEFAULT_HEADERS
         )
 
-        # Set response
-        response_content = self._read_json_file(Config.CAPABILITIES_RESPONSE)
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, response_content, Config.DEFAULT_HEADERS
-        )
+    def _handle_ota_request(self, flow: http.HTTPFlow, file_key: Optional[str] = None):
+        """Handles OTA requests with a delay and an empty response body."""
+        ctx.log.info(f"📡 OTA request from {flow.client_conn.address[0]}")
+        time.sleep(Config.OTA_DELAY_SECONDS)
+        self._create_response(flow, Config.DEFAULT_STATUS, "", Config.DEFAULT_HEADERS)
 
-    def handle_app_version_request(self, flow: http.HTTPFlow) -> None:
-        """Handle app version requests."""
-        ctx.log.info(f"App version request received from {flow.client_conn.address[0]}")
+    # --- Main Request Processor ---
+    def process_request(self, flow: http.HTTPFlow):
+        """
+        Main processing function. Iterates through the Route objects and dispatches requests.
+        """
+        for rule in self.url_mapping:
+            if rule.compiled_pattern.search(flow.request.pretty_url):
+                try:
+                    # Get the handler method from its name string.
+                    handler: Callable = getattr(self, rule.handler_name)
+                    # Call the handler.
+                    handler(flow, rule.file_key)
+                except Exception as e:
+                    ctx.log.error(f"Error in handler for '{rule.pattern_str}': {e}")
+                    self._create_response(
+                        flow,
+                        500,
+                        json.dumps({"error": "Internal server error"}),
+                        Config.DEFAULT_HEADERS,
+                    )
+                # Break the loop after handling to prevent multiple matches for a single URL.
+                return
 
-        # Set response
-        response_content = self._read_json_file(Config.APP_VERSION_RESPONSE)
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, response_content, Config.DEFAULT_HEADERS
-        )
-
-    def handle_app_feature_request(self, flow: http.HTTPFlow) -> None:
-        """Handle app feature requests."""
-        ctx.log.info(f"App feature request received from {flow.client_conn.address[0]}")
-
-        # Set response
-        response_content = self._read_json_file(Config.APP_FEATURE_RESPONSE)
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, response_content, Config.DEFAULT_HEADERS
-        )
-
-    def handle_houses_managed_user_request(self, flow: http.HTTPFlow) -> None:
-        """Handle houses managed users request."""
-        ctx.log.info(
-            f"Houses managed users received from {flow.client_conn.address[0]}"
-        )
-
-        # Set response
-        response_content = self._read_json_file(Config.APP_FEATURE_RESPONSE)
-        flow.response = http.Response.make(
-            Config.DEFAULT_STATUS, response_content, Config.DEFAULT_HEADERS
-        )
+        ctx.log.warn(f"No handler matched for URL: {flow.request.pretty_url}")
 
 
-# Global handler instance
-handler = ResponseHandler()
+# --- mitmproxy Addon Entrypoints ---
+
+# Create a global instance of the interceptor.
+interceptor = RequestInterceptor()
 
 
 def request(flow: http.HTTPFlow) -> None:
-    """Main request handler."""
-    try:
-        ctx.log.info(f"Received request: {flow.request.pretty_url}")
-
-        if re.search(Config.FIRMWARE_URL_PATTERN, flow.request.pretty_url):
-            handler.handle_firmware_request(flow)
-        elif re.search(Config.OTA_URL_PATTERN, flow.request.pretty_url):
-            handler.handle_ota_request(flow)
-        elif re.search(Config.CAPABILITIES_PATTERN, flow.request.pretty_url):
-            handler.handle_capabilities_request(flow)
-        elif re.search(Config.APP_VERSION_PATTERN, flow.request.pretty_url):
-            handler.handle_app_version_request(flow)
-        elif re.search(Config.APP_FEATURE_PATTERN, flow.request.pretty_url):
-            handler.handle_app_feature_request(flow)
-        elif re.search(Config.HOUSES_MANAGED_USER_PATTERN, flow.request.pretty_url):
-            handler.handle_houses_managed_user_request(flow)
-        else:
-            ctx.log.warn(f"No handler found for URL: {flow.request.pretty_url}")
-    except Exception as e:
-        ctx.log.error(f"Error handling request: {e}")
-        flow.response = http.Response.make(
-            500, json.dumps({"error": "Internal server error"}), Config.DEFAULT_HEADERS
-        )
+    """The 'request' event hook for mitmproxy."""
+    ctx.log.info(
+        f"--> Intercepted request: {flow.request.method} {flow.request.pretty_url}"
+    )
+    interceptor.process_request(flow)
