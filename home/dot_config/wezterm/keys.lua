@@ -1,14 +1,20 @@
 local wezterm = require("wezterm")
+local act = wezterm.action
 
 return {
   {
     key = "l",
     mods = "ALT",
-    action = wezterm.action.ShowLauncher,
+    action = act.ShowLauncher,
   },
   {
     key = "w",
     mods = "CTRL|SHIFT|ALT",
-    action = wezterm.action.CloseCurrentPane { confirm = true },
+    action = act.CloseCurrentPane { confirm = true },
   },
+  {
+    key = "`",
+    mods = "CTRL|SHIFT",
+    action = act.PaneSelect
+  }
 }
