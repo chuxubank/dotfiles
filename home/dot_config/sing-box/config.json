@@ -115,14 +115,15 @@
         "action": "reject"
       },
       {
+        "rule_set": "geosite-geolocation-cn",
+        "outbound": "direct"
+      },
+      {
         "type": "logical",
-        "mode": "or",
+        "mode": "and",
         "rules": [
           {
             "rule_set": "geoip-cn"
-          },
-          {
-            "rule_set": "geosite-geolocation-cn"
           },
           {
             "rule_set": "geosite-geolocation-!cn",
