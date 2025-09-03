@@ -6,4 +6,9 @@ return {
     mods = "ALT",
     action = wezterm.action.ShowLauncher,
   },
+  {
+    key = "w",
+    mods = "CTRL|SHIFT|ALT",
+    action = wezterm.action.CloseCurrentPane { confirm = true },
+  },
 }
