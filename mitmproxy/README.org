@@ -1,0 +1,4 @@
+* mitmproxy
+#+begin_src sh
+  mitmdump --mode wireguard -s ~/.local/share/chezmoi/mitmproxy/map-local.py
+#+end_src
