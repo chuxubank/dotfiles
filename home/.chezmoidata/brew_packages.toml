@@ -114,6 +114,7 @@ brews = [
   "xray",
   "yq",
   "zbar",
+  "zellij",
   "zig",
   "zsh",
   "zsh-autosuggestions",
