@@ -15,6 +15,7 @@ brews = [
   "asciinema",
   "aspell",
   "autorestic",
+  "awk",
   "beancount-language-server",
   "bfg",
   "block-goose-cli",
