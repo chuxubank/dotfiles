@@ -1,0 +1,25 @@
+layout {
+    tab name="System Monitor" {
+        pane command="sshpass" {
+            args "-p" "$(pass otp Work/AA/Server/Jump)" "-P" "'Verification code'" "ssh" "android-01" "btop"
+        }
+        pane command="sshpass" {
+            args "-p" "$(pass otp Work/AA/Server/Jump)" "-P" "'Verification code'" "ssh" "android-02" "btop"
+        }
+    }
+
+    tab name="Concourse Watch" focus=true {
+        pane command="watch" {
+            args "-d" "fly" "-t" "concourse" "workers"
+        }
+        pane command="watch" {
+            args "-c" "show-builds"
+        }
+        pane command="watch" {
+            args "show-containers" "android-01"
+        }
+        pane command="watch" {
+            args "show-containers" "android-02"
+        }
+    }
+}
