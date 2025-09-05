@@ -4,17 +4,17 @@ local act = wezterm.action
 return {
   {
     key = "l",
-    mods = "ALT",
+    mods = "CTRL|SHIFT|ALT",
     action = act.ShowLauncher,
   },
   {
     key = "w",
     mods = "CTRL|SHIFT|ALT",
-    action = act.CloseCurrentPane { confirm = true },
+    action = act.CloseCurrentPane({ confirm = true }),
   },
   {
     key = "`",
     mods = "CTRL|SHIFT",
-    action = act.PaneSelect
-  }
+    action = act.PaneSelect,
+  },
 }
