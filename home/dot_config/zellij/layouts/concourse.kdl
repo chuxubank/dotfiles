@@ -10,16 +10,16 @@ layout {
 
     tab name="Concourse Watch" focus=true {
         pane command="watch" {
-            args "-d" "fly" "-t" "concourse" "workers"
+            args "-n" "5" "-d" "fly" "-t" "concourse" "workers"
         }
         pane command="watch" {
-            args "-c" "show-builds"
+            args "-n" "5" "-c" "show-builds"
         }
         pane command="watch" {
-            args "show-containers" "android-01"
+            args "-n" "5" "show-containers" "android-01"
         }
         pane command="watch" {
-            args "show-containers" "android-02"
+            args "-n" "5" "show-containers" "android-02"
         }
     }
 }
