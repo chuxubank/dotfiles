@@ -10,4 +10,5 @@ global = [
   "pyright",
   "typescript-language-server",
   "vscode-json-languageserver",
+  "yaml-language-server",
 ]
