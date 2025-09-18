@@ -1,0 +1,29 @@
+{{- range .mcp.providers }}
+  {{.name}}:
+    name: {{ .name | quote }}
+    description: {{ .description | quote }}
+    {{- if eq .execution.type "stdio" }}
+    type: stdio
+    cmd: {{ .execution.cmd | quote }}
+    args:
+    {{- range .execution.args }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- if .execution.envs }}
+    envs:
+    {{- range $key, $value := .execution.envs }}
+      {{- if eq (kindOf $value) "map" }}
+      {{- $secretValue := "" }}
+      {{- if $value.field }}
+      {{- $secretValue = (index (passFields $value.path) $value.field) }}
+      {{- else }}
+      {{- $secretValue = (pass $value.path) }}
+      {{- end }}
+      {{ $key }}: {{ $secretValue | quote }}
+      {{- else }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}

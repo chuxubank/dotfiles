@@ -1,6 +1,11 @@
-[[mcp]]
+[[mcp.providers]]
 name = "amap"
+description = "Amap's official MCP Server"
+enabled = true
+
+[mcp.providers.execution]
+type = "stdio"
 cmd = "bunx"
 args = ["-y", "@amap/amap-maps-mcp-server"]
-envs = { AMAP_MAPS_API_KEY = { pass = "Personal/Life/Amap", field = "token" } }
-desc = "Amap's official MCP Server"
+timeout = 300
+envs = { AMAP_MAPS_API_KEY = { path = "Personal/Life/Amap", field = "token" } }
