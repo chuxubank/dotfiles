@@ -121,6 +121,7 @@ brews = [
   "zsh-syntax-highlighting",
   { name = "sleepwatcher", restart_service = true },
   { name = "atlassian/homebrew-acli/acli", when = "work" },
+  { name = "awscli", when = "work" },
   { name = "podman", when = "work" },
   { name = "podman-compose", when = "work" },
   { name = "podman-tui", when = "work" },
