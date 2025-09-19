@@ -2,7 +2,7 @@
 tap {{ . | quote }}
 {{ end -}}
 {{ range .packages.darwin.brews -}}
-{{ if eq (printf "%T" .) "map[string]interface {}" -}}
+{{ if eq (kindOf .) "map" -}}
 {{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
 brew {{ .name | quote }}
 {{- range $key, $value := . -}}
@@ -15,7 +15,7 @@ brew {{ . | quote }}
 {{ end -}}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
-{{ if eq (printf "%T" .) "map[string]interface {}" -}}
+{{ if eq (kindOf .) "map" -}}
 {{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
 cask {{ .name | quote }}
 {{ end -}}

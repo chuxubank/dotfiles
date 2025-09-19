@@ -12,7 +12,7 @@ fi
 {{- end }}
 
 {{- range $tool := .packages.python.tools }}
-{{- if eq (printf "%T" $tool) "map[string]interface {}" }}
+{{- if eq (kindOf $tool) "map" }}
 {{- $when := index $tool "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}
 uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --python python{{ . }}{{ end }}{{- with index $tool "with" }} --with {{.}}{{ end }} {{ $tool.name }}

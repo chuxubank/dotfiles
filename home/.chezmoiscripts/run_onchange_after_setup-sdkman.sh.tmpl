@@ -14,7 +14,7 @@ source "$SDKMAN_INIT"
 sdk selfupdate
 
 {{- range $sdk := .packages.sdkman.sdk }}
-{{- if eq (printf "%T" $sdk) "map[string]interface {}" }}
+{{- if eq (kindOf $sdk) "map" }}
 {{- $when := index $sdk "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}

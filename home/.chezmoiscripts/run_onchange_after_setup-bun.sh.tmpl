@@ -12,7 +12,7 @@ curl -fsSL https://bun.sh/install | bash
 bun upgrade
 
 {{- range $tool := .packages.node.global }}
-{{- if eq (printf "%T" $tool) "map[string]interface {}" }}
+{{- if eq (kindOf $tool) "map" }}
 {{- $when := index $tool "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}
 bun add -g {{ $tool.name }}
