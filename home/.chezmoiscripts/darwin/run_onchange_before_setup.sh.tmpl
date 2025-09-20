@@ -3,6 +3,7 @@
 
 echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
 xcode-select --install
+sudo xcodebuild -license accept
 
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 
