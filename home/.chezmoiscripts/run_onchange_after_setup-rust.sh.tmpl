@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "{{ template "week" . }} 󰯁 Setup rust"
+
+rustup default stable
+
+rustup update stable
+
+rustup component add rust-analyzer
