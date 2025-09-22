@@ -124,10 +124,7 @@ plugins=(
 if [[ "$TERM_PROGRAM" =~ ^(WezTerm|ghostty)$ ]]; then
     plugins+=(starship)
 else
-    plugins+=(
-        timer
-        virtualenv
-    )
+    plugins+=(timer virtualenv)
 fi
 
 if [[ "$(uname)" = 'Darwin' ]]; then
@@ -135,7 +132,7 @@ if [[ "$(uname)" = 'Darwin' ]]; then
 fi
 
 {{ if eq .hosttype "work" -}}
-plugins+=(jira)
+    plugins+=(jira aws)
 {{ end -}}
 
 source_if_exists $ZSH/oh-my-zsh.sh
@@ -210,6 +207,7 @@ alias ci="export CIRCLECI=true && export CI=true && export key_file_path='/' && 
 alias zs='export {http,https}_proxy="http://127.0.0.1:9000"'
 alias zssg='export {http,https}_proxy="http://10.29.248.90:80"'
 source <(fly completion --shell zsh)
+source $HOME/.config/op/plugins.sh
 {{- end }}
 
 {{ template "service-toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
