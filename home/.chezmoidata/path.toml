@@ -5,7 +5,6 @@ beancount = "Developer/Personal/beancount"
 blog = "Developer/Personal/blog"
 nutstore = "Nutstore"
 
-bin = "bin"
 bun = ".bun"
 emacs = ".config/emacs"
 emacs-site-lisp = ".local/share/emacs/site-lisp"
