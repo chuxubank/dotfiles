@@ -4,7 +4,7 @@
 IMAPAccount qq
 Host imap.qq.com
 User chuxubank@qq.com
-PassCmd "pass show Personal/Social/Tencent/QQMail | head -1"
+PassCmd "pass Personal/Social/Tencent/QQMail"
 TLSType IMAPS
 
 IMAPStore qq-remote
@@ -18,6 +18,31 @@ SubFolders Verbatim
 Channel qq
 Far :qq-remote:
 Near :qq-local:
+Patterns *
+Expunge None
+CopyArrivalDate yes
+Sync All
+Create Both
+SyncState *
+
+## GMail
+IMAPAccount gmail
+Host imap.gmail.com
+User chuxubank@gmail.com
+PassCmd "pass Personal/Tech/Google | tail -n +2 | yq '.app-pass-mbsync'"
+TLSType IMAPS
+
+IMAPStore gmail-remote
+Account gmail
+
+MaildirStore gmail-local
+Path {{ joinPath .chezmoi.homeDir .path.mail "gmail" -}} {{- .chezmoi.pathSeparator }}
+Inbox {{ joinPath .chezmoi.homeDir .path.mail "gmail" "Inbox" }}
+SubFolders Verbatim
+
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
 Patterns *
 Expunge None
 CopyArrivalDate yes

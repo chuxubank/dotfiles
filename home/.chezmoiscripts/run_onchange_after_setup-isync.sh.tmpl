@@ -3,6 +3,7 @@
 
 echo "󰯁 Setup isync and mu"
 mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/qq
+mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/gmail
 mbsync -a
 {{- if not (stat (joinPath .chezmoi.homeDir ".cache" "mu")) }}
 mu init --maildir={{ joinPath .chezmoi.homeDir .path.mail }} --my-address={{ .email }}
