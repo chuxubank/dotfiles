@@ -35,6 +35,7 @@ TLSType IMAPS
 
 IMAPStore gmail-remote
 Account gmail
+Path "[Gmail]/"
 
 MaildirStore gmail-local
 Path {{ joinPath .chezmoi.homeDir .path.mail "gmail" -}} {{- .chezmoi.pathSeparator }}
