@@ -20,6 +20,7 @@ pkg = [
   "rclone",
   "ripgrep",
   "rsync",
+  "rustup",
   "sshpass",
   "tmux",
   "wget",
