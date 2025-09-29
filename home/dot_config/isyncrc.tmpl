@@ -25,11 +25,12 @@ Sync All
 Create Both
 SyncState *
 
-## GMail
+## Gmail
 IMAPAccount gmail
 Host imap.gmail.com
 User chuxubank@gmail.com
 PassCmd "pass Personal/Tech/Google | tail -n +2 | yq '.app-pass-mbsync'"
+AuthMechs LOGIN
 TLSType IMAPS
 
 IMAPStore gmail-remote
