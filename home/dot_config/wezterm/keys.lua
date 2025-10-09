@@ -3,6 +3,11 @@ local act = wezterm.action
 
 return {
   {
+    key = "B",
+    mods = "CTRL|SHIFT",
+    action = wezterm.action.EmitEvent("toggle-opacity"),
+  },
+  {
     key = "l",
     mods = "CTRL|SHIFT|ALT",
     action = act.ShowLauncher,

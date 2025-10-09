@@ -24,6 +24,7 @@ function scheme_for_appearance(appearance, index)
 end
 
 wezterm.on("window-config-reloaded", function(window, pane)
+  local overrides = window:get_config_overrides() or {}
   local window_id = tostring(window:window_id())
 
   wezterm.GLOBAL.window_theme_map = wezterm.GLOBAL.window_theme_map or {}
@@ -45,8 +46,16 @@ wezterm.on("window-config-reloaded", function(window, pane)
   local scheme_name = scheme_for_appearance(appearance, theme_index)
 
   wezterm.log_info("Applying theme '" .. scheme_name .. "' to window " .. window_id)
+  overrides.color_scheme = scheme_name
+  window:set_config_overrides(overrides)
+end)
 
-  window:set_config_overrides({
-    color_scheme = scheme_name,
-  })
+wezterm.on("toggle-opacity", function(window, pane)
+  local overrides = window:get_config_overrides() or {}
+  if not overrides.window_background_opacity then
+    overrides.window_background_opacity = 0.5
+  else
+    overrides.window_background_opacity = nil
+  end
+  window:set_config_overrides(overrides)
 end)
