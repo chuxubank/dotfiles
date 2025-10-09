@@ -1,5 +1,7 @@
 local wezterm = require("wezterm")
 
+-- Helper function to get the system's appearance (Dark or Light).
+-- It defaults to "Dark" if the GUI is not available.
 function get_appearance()
   if wezterm.gui then
     return wezterm.gui.get_appearance()
@@ -7,42 +9,44 @@ function get_appearance()
   return "Dark"
 end
 
-local dark = { "Gruvbox Dark (Gogh)", "Everforest Dark (Gogh)" }
+-- Define lists of color schemes for dark and light modes.
+-- Make sure both lists have the same number of schemes.
+local dark_schemes = { "Gruvbox Dark (Gogh)", "Everforest Dark (Gogh)" }
+local light_schemes = { "Gruvbox (Gogh)", "EverforestLight (Gogh)" }
 
-local light = { "Gruvbox (Gogh)", "EverforestLight (Gogh)" }
-
+-- Function to select a scheme from the correct list based on appearance and index.
 function scheme_for_appearance(appearance, index)
   if appearance:find("Dark") then
-    return dark[index]
+    return dark_schemes[index]
   else
-    return light[index]
+    return light_schemes[index]
   end
 end
 
 wezterm.on("window-config-reloaded", function(window, pane)
-  -- approximately identify this gui window, by using the associated mux id
-  local id = tostring(window:window_id())
+  local window_id = tostring(window:window_id())
 
-  -- maintain a mapping of windows that we have previously seen before in this event handler
-  local seen = wezterm.GLOBAL.seen_windows or {}
-  local index = wezterm.GLOBAL.scheme_index or 0
-  -- set a flag if we haven't seen this window before
-  local is_new_window = not seen[id]
-  -- and update the mapping
-  seen[id] = true
-  wezterm.GLOBAL.seen_windows = seen
+  wezterm.GLOBAL.window_theme_map = wezterm.GLOBAL.window_theme_map or {}
+  wezterm.GLOBAL.next_theme_index = wezterm.GLOBAL.next_theme_index or 1
 
-  -- now act upon the flag
-  if is_new_window then
-    index = index + 1
-    if index > #dark then
-      index = 1
-    end
+  local theme_index = wezterm.GLOBAL.window_theme_map[window_id]
+
+  if not theme_index then
+    theme_index = wezterm.GLOBAL.next_theme_index
+    wezterm.GLOBAL.window_theme_map[window_id] = theme_index
+
+    wezterm.log_info("New window (ID: " .. window_id .. "), assigning theme index: " .. theme_index)
+
+    local num_schemes = math.min(#dark_schemes, #light_schemes)
+    wezterm.GLOBAL.next_theme_index = (wezterm.GLOBAL.next_theme_index % num_schemes) + 1
   end
 
-  wezterm.log_info(string.format("Set theme index: %s", index))
+  local appearance = get_appearance()
+  local scheme_name = scheme_for_appearance(appearance, theme_index)
+
+  wezterm.log_info("Applying theme '" .. scheme_name .. "' to window " .. window_id)
+
   window:set_config_overrides({
-    color_scheme = scheme_for_appearance(get_appearance(), index),
+    color_scheme = scheme_name,
   })
-  wezterm.GLOBAL.scheme_index = index
 end)
