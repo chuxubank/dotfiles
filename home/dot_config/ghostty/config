@@ -3,3 +3,5 @@ theme = light:Gruvbox Light,dark:Gruvbox Dark
 mouse-hide-while-typing = true
 
 window-padding-balance = true
+
+macos-option-as-alt = true
