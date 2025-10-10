@@ -201,6 +201,7 @@ alias upp="pkg update && pkg upgrade"
 {{- end }}
 function upe() {
   {{ template "upgrade-emacs-packages.sh" . }}
+  {{ template "restart-emacs.sh" . }}
 }
 alias upn="bun update -g"
 alias gpgk="gpgconf --kill gpg-agent"

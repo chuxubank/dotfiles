@@ -29,15 +29,5 @@ if [ "$ORG_VER" != "$LAST_ORG_VER" ]; then
 fi
 
 echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver $ORG_VER"
-
-# Kill existing Emacs session if running
-\emacsclient --eval '(kill-emacs)' >/dev/null 2>&1 || true
-
-# Start Emacs depending on OS
-{{ if eq .chezmoi.os "android" -}}
-termux-x11 :1 -xstartup "\emacs" &
-{{ else -}}
-env TERM_PROGRAM= \emacsclient -cn -a=""
-{{ end -}}
-
+{{ template "restart-emacs.sh" . }}
 {{ end -}}
