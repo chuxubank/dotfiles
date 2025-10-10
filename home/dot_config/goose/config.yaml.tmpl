@@ -1,39 +1,50 @@
-GOOSE_MODEL: gemini-2.5-pro
-GOOSE_PROVIDER: google
 extensions:
   computercontroller:
-    bundled: true
-    display_name: Computer Controller
     enabled: true
+    type: builtin
     name: computercontroller
+    display_name: Computer Controller
+    description: null
     timeout: 300
-    type: builtin
+    bundled: true
+    available_tools: []
   developer:
-    bundled: true
-    display_name: Developer
     enabled: true
+    type: builtin
     name: developer
+    display_name: Developer
+    description: null
     timeout: 300
-    type: builtin
+    bundled: true
+    available_tools: []
   jetbrains:
-    bundled: true
-    display_name: JetBrains
     enabled: false
+    type: builtin
     name: jetbrains
+    display_name: JetBrains
+    description: null
     timeout: 300
-    type: builtin
+    bundled: true
+    available_tools: []
   memory:
-    bundled: true
-    display_name: Memory
     enabled: true
+    type: builtin
     name: memory
+    display_name: Memory
+    description: null
     timeout: 300
-    type: builtin
-  tutorial:
     bundled: true
-    display_name: Tutorial
+    available_tools: []
+  tutorial:
     enabled: false
-    name: tutorial
-    timeout: 300
     type: builtin
+    name: tutorial
+    display_name: Tutorial
+    description: null
+    timeout: 300
+    bundled: true
+    available_tools: []
   {{ template "mcp/goose-extensions" . }}
+GOOSE_MODEL: google/gemini-2.0-flash-exp:free
+OPENROUTER_HOST: https://openrouter.ai
+GOOSE_PROVIDER: openrouter

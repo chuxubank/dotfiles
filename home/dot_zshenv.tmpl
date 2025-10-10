@@ -39,6 +39,7 @@ fi
 # API-KEY
 export OPENAI_API_KEY="{{ index (passFields "Personal/Tech/AI/OpenAI") "api-key" }}"
 export GEMINI_API_KEY="{{ index (passFields "Personal/Tech/Google") "gemini-api-key" }}"
+export OPENROUTER_API_KEY="{{ index (passFields "Personal/Tech/AI/OpenRouter") "api-key" }}"
 {{- end }}
 
 # Beancount
