@@ -13,7 +13,7 @@
     {{- range .execution.args }}
       - {{ . | quote }}
     {{- end }}
-    {{- if .execution.envs }}
+    {{- if (hasKey .execution "envs") }}
     envs:
     {{- range $key, $value := .execution.envs }}
       {{- if eq (kindOf $value) "map" }}

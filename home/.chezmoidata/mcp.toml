@@ -20,7 +20,9 @@ type = "stdio"
 cmd = "bunx"
 args = ["-y", "@upstash/context7-mcp"]
 timeout = 300
-envs = { CONTEXT7_API_KEY = { path = "Personal/Tech/AI/Context7", field = "api-key" } }
+[mcp.providers.execution.envs.CONTEXT7_API_KEY]
+path = "Personal/Tech/AI/Context7"
+field = "api-key"
 
 [[mcp.providers]]
 name = "Fetch"
@@ -31,7 +33,6 @@ type = "stdio"
 cmd = "uvx"
 args = ["mcp-server-fetch"]
 timeout = 300
-envs = {}
 
 [[mcp.providers]]
 name = "GitHub"
