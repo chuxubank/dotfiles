@@ -1,3 +1,4 @@
+{{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
 {{- range .mcp.providers }}
   {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "-" }}:
     name: {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "_" }}
