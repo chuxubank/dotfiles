@@ -1,6 +1,7 @@
 [packages.node]
 global = [
   "@anthropic-ai/claude-code",
+  "@github/copilot-language-server",
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
   "@openai/codex",
