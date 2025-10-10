@@ -1,9 +1,13 @@
 {{- range .mcp.providers }}
-  {{.name}}:
-    name: {{ .name | quote }}
+  {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "-" }}:
+    name: {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "_" }}
+    display_name: {{ .name | quote }}
     description: {{ .description | quote }}
+    enabled: {{ .enabled }}
+    bundled: null
     {{- if eq .execution.type "stdio" }}
     type: stdio
+    timeout: {{ .execution.timeout }}
     cmd: {{ .execution.cmd | quote }}
     args:
     {{- range .execution.args }}
@@ -14,10 +18,17 @@
     {{- range $key, $value := .execution.envs }}
       {{- if eq (kindOf $value) "map" }}
       {{- $secretValue := "" }}
-      {{- if $value.field }}
-      {{- $secretValue = (index (passFields $value.path) $value.field) }}
-      {{- else }}
-      {{- $secretValue = (pass $value.path) }}
+      {{- if or (not (hasKey $value "type")) (eq $value.type "pass") }}
+        {{- if (hasKey $value "field") }}
+          {{- $secretValue = (index (passFields $value.path) $value.field) }}
+        {{- else }}
+          {{- $secretValue = (pass $value.path) }}
+        {{- end }}
+      {{- else if eq $value.type "output" }}
+        {{- $secretValue = (outputList $value.cmd $value.args) }}
+      {{- end }}
+      {{- if and (hasKey $value "trim") $value.trim }}
+        {{- $secretValue = ($secretValue | trim) }}
       {{- end }}
       {{ $key }}: {{ $secretValue | quote }}
       {{- else }}

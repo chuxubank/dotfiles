@@ -1,11 +1,118 @@
 [[mcp.providers]]
-name = "amap"
+name = "Amap"
 description = "Amap's official MCP Server"
 enabled = true
-
 [mcp.providers.execution]
 type = "stdio"
 cmd = "bunx"
 args = ["-y", "@amap/amap-maps-mcp-server"]
 timeout = 300
-envs = { AMAP_MAPS_API_KEY = { path = "Personal/Life/Amap", field = "token" } }
+[mcp.providers.execution.envs.AMAP_MAPS_API_KEY]
+path = "Personal/Life/Amap"
+field = "token"
+
+[[mcp.providers]]
+name = "Context7"
+description = "Up-to-date Docs for LLMs and AI code editors"
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "@upstash/context7-mcp"]
+timeout = 300
+envs = { CONTEXT7_API_KEY = { path = "Personal/Tech/AI/Context7", field = "api-key" } }
+
+[[mcp.providers]]
+name = "Fetch"
+description = "A Model Context Protocol server that provides web content fetching capabilities. This server enables LLMs to retrieve and process content from web pages, converting HTML to markdown for easier consumption."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "uvx"
+args = ["mcp-server-fetch"]
+timeout = 300
+envs = {}
+
+[[mcp.providers]]
+name = "GitHub"
+description = "The GitHub MCP Server connects AI tools directly to GitHub's platform. This gives AI agents, assistants, and chatbots the ability to read repositories and code files, manage issues and PRs, analyze code, and automate workflows. All through natural language interactions."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "github-mcp-server"
+args = ["stdio"]
+timeout = 300
+[mcp.providers.execution.envs.GITHUB_PERSONAL_ACCESS_TOKEN]
+type = "output"
+cmd = "gh"
+args = ["auth", "token"]
+trim = true
+
+[[mcp.providers]]
+name = "Google Map"
+description = "Location services, directions, and place details"
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "@modelcontextprotocol/server-google-maps"]
+timeout = 300
+[mcp.providers.execution.envs.GOOGLE_MAPS_API_KEY]
+path = "Personal/Tech/Google"
+field = "goose-map-api-key"
+
+[[mcp.providers]]
+name = "JetBrains MCP"
+description = "The server proxies requests from client to JetBrains IDE."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "@jetbrains/mcp-proxy"]
+timeout = 300
+
+[[mcp.providers]]
+name = "MarkItDown"
+description = "Python tool for converting files and office documents to Markdown."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "uvx"
+args = ["markitdown-mcp"]
+timeout = 300
+
+[[mcp.providers]]
+name = "Notion"
+description = "Allows AI apps and agents to interface with the Notion public API."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "@notionhq/notion-mcp-server"]
+timeout = 300
+[mcp.providers.execution.envs.NOTION_TOKEN]
+path = "Personal/Tech/Notion"
+field = "asahi-art-token"
+
+[[mcp.providers]]
+name = "Playwright MCP"
+description = "A MCP server that provides browser automation capabilities using Playwright. This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "@playwright/mcp@latest"]
+timeout = 300
+
+[[mcp.providers]]
+name = "Tavily"
+description = "Real-time web search and intelligent data extraction capabilities."
+enabled = true
+[mcp.providers.execution]
+type = "stdio"
+cmd = "bunx"
+args = ["-y", "tavily-mcp"]
+timeout = 300
+[mcp.providers.execution.envs.TAVILY_API_KEY]
+path = "Personal/Tech/AI/Tavily"
+field = "api-key"
