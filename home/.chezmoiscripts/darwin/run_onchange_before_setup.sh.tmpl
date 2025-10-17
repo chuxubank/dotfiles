@@ -5,6 +5,9 @@ echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }
 xcode-select --install
 sudo xcodebuild -license accept
 
+# Turn off Spotlight Index
+sudo mdutil -Eai off
+
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 
 defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES
