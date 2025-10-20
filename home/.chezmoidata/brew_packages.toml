@@ -62,6 +62,7 @@ brews = [
   "markdown",
   "mas",
   "media-info",
+  "tw93/tap/mole",
   "mosh",
   "mosquitto",
   "mpv",
