@@ -6,8 +6,7 @@ xcode-select --install
 sudo xcodebuild -license accept
 
 # Turn off Spotlight Index
-# Commented out because mas use it to list current installed apps
-# sudo mdutil -Eai off
+sudo mdutil -Eai on
 
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 
