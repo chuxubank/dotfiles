@@ -43,6 +43,7 @@ brews = [
   "gnupg",
   "go",
   "graphviz",
+  "grep",
   "helix",
   "hidapi",
   "htop",
