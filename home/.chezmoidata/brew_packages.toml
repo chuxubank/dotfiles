@@ -231,18 +231,19 @@ casks = [
   { name = "wechatwork", when = "work" },
 ]
 
-[packages.darwin.mas]
-"Amphetamine" = 937984704
-"Developer" = 640199958
-"Final Cut Pro" = 424389933
-"Immersive Translate" = 6447957425
-"Juice" = 1478610778
-"Kindle" = 302584613
-"Logic Pro" = 634148309
-"MainStage" = 634159523
-"MenubarX" = 1575588022
-"Playgrounds" = 1496833156
-"RSSHub Radar" = 1610744717
-"The Unarchiver" = 425424353
-"Unsplash Wallpapers" = 1284863847
-"Xcode" = 497799835
+mas = [
+  { id = 1284863847, name = "Unsplash Wallpapers" },
+  { id = 1478610778, name = "Juice" },
+  { id = 1496833156, name = "Playgrounds", when = "home" },
+  { id = 1575588022, name = "MenubarX" },
+  { id = 1610744717, name = "RSSHub Radar", when = "home" },
+  { id = 6447957425, name = "Immersive Translate" },
+  { id = 302584613, name = "Kindle", when = "home" },
+  { id = 424389933, name = "Final Cut Pro", when = "home" },
+  { id = 425424353, name = "The Unarchiver" },
+  { id = 497799835, name = "Xcode" },
+  { id = 634148309, name = "Logic Pro", when = "home" },
+  { id = 634159523, name = "MainStage", when = "home" },
+  { id = 640199958, name = "Developer" },
+  { id = 937984704, name = "Amphetamine" },
+]

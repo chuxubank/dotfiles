@@ -9,7 +9,7 @@ brew {{ .name | quote }}
 {{- if eq $key "link" }}, link: {{ $value }}{{ end -}}
 {{- if eq $key "restart_service" }}, restart_service: {{ $value }}{{ end -}}
 {{ end }}
-{{ end }}
+{{ end -}}
 {{ else -}}
 brew {{ . | quote }}
 {{ end -}}
@@ -23,6 +23,8 @@ cask {{ .name | quote }}
 cask {{ . | quote }}
 {{ end -}}
 {{ end -}}
-{{ range $appName, $appId := .packages.darwin.mas -}}
-mas {{ $appName | quote }}, id: {{ $appId }}
+{{ range .packages.darwin.mas -}}
+{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+mas {{ .name | quote }}, id: {{ .id }}
+{{ end -}}
 {{ end -}}
