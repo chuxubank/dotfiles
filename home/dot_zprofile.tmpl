@@ -33,15 +33,15 @@ export PATH="$(brew --prefix curl)/bin:$PATH"
 # grep
 export PATH="$(brew --prefix grep)/libexec/gunbin:$PATH"
 
+# python
+export PATH="$(brew --prefix python)/libexec/bin:$PATH"
+
 # ruby
 export PATH="$(brew --prefix ruby)/bin:$PATH"
 export PATH="$(gem env gemdir)/bin:$PATH"
 
 # rust
 export PATH="$(brew --prefix rustup)/bin:$PATH"
-
-# Python
-export PATH="$(brew --prefix python)/libexec/bin:$PATH"
 
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zprofile.post.zsh"
