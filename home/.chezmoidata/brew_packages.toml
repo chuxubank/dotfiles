@@ -231,13 +231,12 @@ casks = [
   { name = "wechat", when = "home" },
   { name = "wechatwork", when = "work" },
 ]
-
 mas = [
   { id = 1284863847, name = "Unsplash Wallpapers" },
   { id = 1478610778, name = "Juice" },
   { id = 1496833156, name = "Playgrounds", when = "home" },
   { id = 1575588022, name = "MenubarX" },
-  { id = 1610744717, name = "RSSHub Radar", when = "home" },
+  { id = 1610744717, name = "RSSHub Radar" },
   { id = 6447957425, name = "Immersive Translate" },
   { id = 302584613, name = "Kindle", when = "home" },
   { id = 424389933, name = "Final Cut Pro", when = "home" },
