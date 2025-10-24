@@ -6,6 +6,7 @@ global = [
   "@mermaid-js/mermaid-cli",
   "@openai/codex",
   "@prettier/plugin-ruby",
+  "emacs-lsp-proxy",
   "opencode-ai",
   "prettier",
   "puppeteer",
