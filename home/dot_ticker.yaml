@@ -1,0 +1,22 @@
+show-summary: true
+show-tags: true
+show-fundamentals: true
+show-separator: true
+show-holdings: true
+interval: 5
+currency: USD
+currency-summary-only: false
+groups:
+  - name: stock
+    watchlist:
+      - NET
+      - AAPL
+      - TSLA
+      - TEAM
+      - ESTC
+  - name: crypto
+    watchlist:
+      - BTC-USD
+      - ETH-USD
+      - SOL-USD
+      - SHIB-USD
