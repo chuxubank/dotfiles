@@ -15,7 +15,7 @@ bun upgrade
 {{- if eq (kindOf $tool) "map" }}
 {{- $when := index $tool "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}
-bun add -g {{ $tool.name }}
+bun add -g {{ if $tool.trust }}--trust {{ end }}{{ $tool.name }}
 {{- end }}
 {{- else }}
 bun add -g {{ $tool }}
