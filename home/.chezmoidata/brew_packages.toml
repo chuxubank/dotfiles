@@ -105,6 +105,7 @@ brews = [
   "tesseract",
   "tesseract-lang",
   "testssl",
+  "achannarasappa/tap/ticker",
   "tlrc",
   "tmux",
   "tokei",
