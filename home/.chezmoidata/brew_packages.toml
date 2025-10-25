@@ -212,6 +212,7 @@ casks = [
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
   { name = "altserver", when = "home" },
+  { name = "battery", when = "home" },
   { name = "cursor", when = "work" },
   { name = "insta360-studio", when = "home" },
   { name = "intellij-idea", when = "work" },
