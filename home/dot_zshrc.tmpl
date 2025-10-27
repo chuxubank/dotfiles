@@ -218,8 +218,5 @@ source $HOME/.config/op/plugins.sh
 {{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
-
 # Amazon Q post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"

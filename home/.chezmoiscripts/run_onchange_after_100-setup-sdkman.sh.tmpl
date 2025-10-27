@@ -6,7 +6,7 @@ SDKMAN_INIT="$SDKMAN_DIR/bin/sdkman-init.sh"
 
 if [ ! -s "$SDKMAN_INIT" ]; then
     rm -rf "$SDKMAN_DIR"
-    curl -s "https://get.sdkman.io" | bash
+    curl -s "https://get.sdkman.io?rcupdate=false" | bash
 fi
 
 source "$SDKMAN_INIT"
