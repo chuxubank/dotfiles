@@ -1,5 +1,7 @@
-[packages.arch.pacman]
+[packages.pacman]
 core = [
+  "rclone",
+  "pass",
 ]
 extra = [
   "starship",
