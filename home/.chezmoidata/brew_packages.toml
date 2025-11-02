@@ -75,6 +75,7 @@ brews = [
   "openapi-generator",
   "p7zip",
   "pandoc",
+  "paperkey",
   "pass",
   "pass-otp",
   "pdfcpu",
