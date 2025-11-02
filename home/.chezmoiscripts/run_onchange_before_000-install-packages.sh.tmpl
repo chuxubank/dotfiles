@@ -19,7 +19,7 @@ sudo apt-get update -y
 sudo apt-get install -y \
 {{ template "package-list" .packages.apt.pkg }}
 
-{{ if lookPath "pacman" }}
+{{ else if lookPath "pacman" }}
 sudo pacman -Syu --noconfirm \
      {{ template "package-list" .packages.pacman.core }} \
      {{ template "package-list" .packages.pacman.extra }}
