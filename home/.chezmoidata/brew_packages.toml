@@ -98,6 +98,7 @@ brews = [
   "sdcv",
   "sing-box",
   "sshpass",
+  "theseal/ssh-askpass/ssh-askpass",
   "starship",
   "stylua",
   "swagger-codegen",
@@ -128,7 +129,6 @@ brews = [
   { name = "podman-compose", when = "work" },
   { name = "podman-tui", when = "work" },
   { name = "sleepwatcher", restart_service = true },
-  { name = "theseal/ssh-askpass/ssh-askpass", restart_service = true },
 ]
 casks = [
   "amazon-q",
