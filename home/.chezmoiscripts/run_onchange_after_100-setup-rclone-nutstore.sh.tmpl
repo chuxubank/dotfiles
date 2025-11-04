@@ -1,0 +1,27 @@
+{{ if not (eq .hosttype "ci") -}}
+#!/bin/zsh
+
+local target={{ joinPath .path.etc "logrotate.d" "rclone-nutstore" }}
+
+mkdir -p "$(dirname "$target")"
+
+tee "$target" > /dev/null <<EOF
+{{ joinPath .path.log "rclone" "nutstore" "stderr.log" }} {
+  rotate 7
+  daily
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+
+{{ joinPath .path.log "rclone" "nutstore" "stdout.log" }} {
+  rotate 3
+  yearly
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+EOF
+{{ end }}

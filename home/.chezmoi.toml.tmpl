@@ -37,15 +37,18 @@ encryption = "gpg"
 # darwin
 {{- if eq .chezmoi.arch "arm64" }}
     usr = "/opt/homebrew"
+	etc = "/opt/homebrew/etc"
     gh = "/opt/homebrew/bin/gh"
 {{- else }}
     usr = "/usr/local"
+	etc = "/usr/local/etc"
     gh = "/usr/local/bin/gh"
 {{- end }}
     log = {{- joinPath .chezmoi.homeDir "Library" "Logs" | quote }}
 {{- else if eq .chezmoi.os "linux" }}
 # linux
     usr = "/usr"
+	etc = "/etc"
     gh = "/usr/bin/gh"
     log = "/var/log"
 {{- else if eq .chezmoi.os "windows" }}

@@ -1,12 +1,17 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
 
-brew services stop isync
-brew services start isync --file=/dev/stdin <<EOF
+brew services restart isync --file=/dev/stdin <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+        <key>Label</key>
+        <string>homebrew.mxcl.isync</string>
+        <key>StandardOutPath</key>
+        <string>{{ joinPath .path.log "isync" "stdout.log" }}</string>
+        <key>StandardErrorPath</key>
+        <string>{{ joinPath .path.log "isync" "stderr.log" }}</string>
         <key>EnvironmentVariables</key>
         <dict>
                 <key>PATH</key>
@@ -14,8 +19,6 @@ brew services start isync --file=/dev/stdin <<EOF
                 <key>PASSWORD_STORE_DIR</key>
                 <string>{{ joinPath .chezmoi.homeDir .path.pass }}</string>
         </dict>
-        <key>Label</key>
-        <string>homebrew.mxcl.isync</string>
         <key>LimitLoadToSessionType</key>
         <array>
                 <string>Aqua</string>
@@ -31,10 +34,6 @@ brew services start isync --file=/dev/stdin <<EOF
         </array>
         <key>RunAtLoad</key>
         <true/>
-        <key>StandardErrorPath</key>
-        <string>{{ .chezmoi.homeDir }}/Library/Logs/isync/isync-stderr.log</string>
-        <key>StandardOutPath</key>
-        <string>{{ .chezmoi.homeDir }}/Library/Logs/isync/isync-stdout.log</string>
         <key>StartInterval</key>
         <integer>300</integer>
 </dict>

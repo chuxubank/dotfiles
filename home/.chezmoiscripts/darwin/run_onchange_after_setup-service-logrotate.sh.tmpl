@@ -4,39 +4,5 @@
 echo "󰯁 Setup logrotate"
 echo "Logrotate running: {{ output "brew" "services" "info" "logrotate" "--json" | fromJson | jq ".[0].running" | first }}"
 
-brew services stop logrotate
-brew services start logrotate --file=/dev/stdin <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>homebrew.mxcl.logrotate</string>
-    <key>LimitLoadToSessionType</key>
-    <array>
-        <string>Aqua</string>
-        <string>Background</string>
-        <string>LoginWindow</string>
-        <string>StandardIO</string>
-        <string>System</string>
-    </array>
-    <key>ProgramArguments</key>
-    <array>
-        <string>{{ .path.usr }}/sbin/logrotate</string>
-        <string>{{ .chezmoi.homeDir }}/.config/logrotate.conf</string>
-        <string>-s</string>
-        <string>{{ .chezmoi.homeDir }}/.config/logrotate.status</string>
-    </array>
-    <key>RunAtLoad</key>
-    <false/>
-    <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>6</integer>
-        <key>Minute</key>
-        <integer>25</integer>
-    </dict>
-</dict>
-</plist>
-EOF
+brew services restart logrotate
 {{ end -}}
