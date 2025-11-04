@@ -122,6 +122,7 @@ brews = [
   "zsh",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
+  { name = "theseal/ssh-askpass/ssh-askpass", restart_service = true },
   { name = "sleepwatcher", restart_service = true },
   { name = "atlassian/homebrew-acli/acli", when = "work" },
   { name = "awscli", when = "work" },
