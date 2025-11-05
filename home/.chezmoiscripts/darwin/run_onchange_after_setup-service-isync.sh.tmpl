@@ -9,9 +9,9 @@ brew services restart isync --file=/dev/stdin <<EOF
         <key>Label</key>
         <string>homebrew.mxcl.isync</string>
         <key>StandardOutPath</key>
-        <string>{{ joinPath .path.log "isync" "stdout.log" }}</string>
+        <string>{{ joinPath .path.log "isync" "isync-stdout.log" }}</string>
         <key>StandardErrorPath</key>
-        <string>{{ joinPath .path.log "isync" "stderr.log" }}</string>
+        <string>{{ joinPath .path.log "isync" "isync-stderr.log" }}</string>
         <key>EnvironmentVariables</key>
         <dict>
                 <key>PATH</key>
