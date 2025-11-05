@@ -140,6 +140,7 @@ casks = [
   "blender",
   "block-goose",
   "chatgpt",
+  "chatgpt-atlas",
   "claude",
   "deepl",
   "discord",
