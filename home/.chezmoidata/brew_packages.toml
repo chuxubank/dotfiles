@@ -20,7 +20,6 @@ brews = [
   "bison",
   "block-goose-cli",
   "btop",
-  "byobu",
   "chezmoi",
   "cmake",
   "coreutils",
