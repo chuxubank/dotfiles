@@ -1,11 +1,9 @@
 {{ if not (eq .hosttype "ci") -}}
 #!/bin/zsh
 
-local target={{ joinPath .path.etc "logrotate.d" "gitwatch-org" }}
+mkdir -p '{{ joinPath .path.log "gitwatch" "org" }}'
 
-mkdir -p "$(dirname "$target")"
-
-cat >"$target" <<EOF
+cat >'{{ joinPath .path.etc "logrotate.d" "gitwatch-org" }}' <<EOF
 {{ joinPath .path.log "gitwatch" "org" "stderr.log" }} {
   rotate 7
   daily

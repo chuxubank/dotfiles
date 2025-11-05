@@ -1,11 +1,9 @@
 {{ if not (eq .hosttype "ci") -}}
 #!/bin/zsh
 
-local target={{ joinPath .path.etc "logrotate.d" "rclone-nutstore" }}
+mkdir -p '{{ joinPath .path.log "rclone" "nutstore" }}'
 
-mkdir -p "$(dirname "$target")"
-
-cat >"$target" <<EOF
+cat >'{{ joinPath .path.etc "logrotate.d" "rclone-nutstore" }}' <<EOF
 {{ joinPath .path.log "rclone" "nutstore" "stderr.log" }} {
   rotate 7
   daily
