@@ -5,7 +5,7 @@ local target={{ joinPath .path.etc "logrotate.d" "rclone-nutstore" }}
 
 mkdir -p "$(dirname "$target")"
 
-tee "$target" > /dev/null <<EOF
+cat >"$target" <<EOF
 {{ joinPath .path.log "rclone" "nutstore" "stderr.log" }} {
   rotate 7
   daily

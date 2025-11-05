@@ -7,9 +7,9 @@
 	<key>Label</key>
 	<string>gitwatch.org</string>
     <key>StandardOutPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/gitwatch/gitwatch-org-stdout.log</string>
+    <string>{{ joinPath .path.log "gitwatch" "org" "stdout.log" }}</string>
     <key>StandardErrorPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/gitwatch/gitwatch-org-stderr.log</string>
+    <string>{{ joinPath .path.log "gitwatch" "org" "stderr.log" }}</string>
 	<key>LimitLoadToSessionType</key>
 	<array>
 	  <string>Aqua</string>
