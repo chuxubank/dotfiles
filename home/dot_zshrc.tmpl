@@ -194,11 +194,15 @@ fi
 alias cz="chezmoi"
 alias up="chezmoi update --init -a"
 
-{{- if eq .chezmoi.os "darwin" }}
-alias upp="brew update && brew upgrade"
-{{- else if eq .chezmoi.os "android" }}
-alias upp="pkg update && pkg upgrade"
-{{- end }}
+function upp() {
+  {{- if eq .chezmoi.os "darwin" }}
+  brew update && brew bundle --quiet --cleanup --file=- <<EOF
+  {{ template "Brewfile" . -}}
+  EOF
+  {{- else if eq .chezmoi.os "android" }}
+  pkg update && pkg upgrade
+  {{- end }}
+}
 function upe() {
   {{ template "upgrade-emacs-packages.sh" . }}
   {{ template "restart-emacs.sh" . }}
