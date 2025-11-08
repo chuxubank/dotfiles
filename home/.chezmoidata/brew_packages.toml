@@ -57,6 +57,7 @@ brews = [
   "ktlint",
   "lefthook",
   "libgccjit",
+  "librime",
   "libvterm",
   "logrotate",
   "markdown",

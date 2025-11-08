@@ -4,6 +4,7 @@ core = [
   "pass",
 ]
 extra = [
+  "librime",
   "starship",
   "wezterm",
   "zsh-autosuggestions",

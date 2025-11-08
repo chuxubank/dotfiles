@@ -11,12 +11,6 @@
     refreshPeriod = "24h"
     clone.args = ["--depth=1"]
 
-["{{ .path.rime }}/dist"]
-    type = "archive"
-    url = "{{ (gitHubLatestReleaseAssetURL "rime/librime" "rime-[^d]*-macOS-universal.tar.bz2") }}"
-    exact = true
-    stripComponents = 1
-
 ["Library/Fonts/Symbola.ttf"]
     type = "archive-file"
 	url = "https://fontlibrary.org/assets/downloads/symbola/cf81aeb303c13ce765877d31571dc5c7/symbola.zip"
