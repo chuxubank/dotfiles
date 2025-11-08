@@ -21,6 +21,13 @@ autoStash = true
 [credential]
     helper = cache
     helper = !type pass-git-helper >/dev/null && pass-git-helper$@
+{{ if eq .chezmoi.os "windows" -}}
+	helper = manager
+{{ else if eq .chezmoi.os "darwin" -}}
+    helper = osxkeychain
+{{ else if eq .chezmoi.os "linux" -}}
+    helper = libsecret
+{{ end -}}
 
 [credential "https://github.com"]
 	helper = 
@@ -29,12 +36,6 @@ autoStash = true
 [credential "https://gist.github.com"]
 	helper = 
 	helper = !{{ .path.gh }} auth git-credential
-
-{{ if eq .chezmoi.os "windows" -}}
-[credential]
-	helper = 
-	helper = manager
-{{ end -}}
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f
