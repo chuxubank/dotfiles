@@ -18,6 +18,10 @@ rebase = true
 [rebase]
 autoStash = true
 
+[credential]
+    helper = cache
+    helper = !type pass-git-helper >/dev/null && pass-git-helper$@
+
 [credential "https://github.com"]
 	helper = 
 	helper = !{{ .path.gh }} auth git-credential

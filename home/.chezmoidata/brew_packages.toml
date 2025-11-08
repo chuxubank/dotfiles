@@ -76,6 +76,7 @@ brews = [
   "pandoc",
   "paperkey",
   "pass",
+  "pass-git-helper",
   "pass-otp",
   "pdfcpu",
   "pgformatter",
