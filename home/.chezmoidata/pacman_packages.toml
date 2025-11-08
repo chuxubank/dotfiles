@@ -5,6 +5,7 @@ core = [
 ]
 extra = [
   "starship",
+  "wezterm",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
 ]
