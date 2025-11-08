@@ -13,6 +13,6 @@ tools = [
   "you-get",
   "yt-dlp[default]",
   { name = "aider-chat[help]", version = "3.12", with = "pip,playwright" },
-  { name = "ansible-core", with = "ansible" },
+  { name = "ansible", with-exec = "ansible-core,ansible-lint" },
   { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
 ]

@@ -15,7 +15,7 @@ fi
 {{- if eq (kindOf $tool) "map" }}
 {{- $when := index $tool "when" }}
 {{- if or (not $when) (eq $when $.hosttype) }}
-uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --python python{{ . }}{{ end }}{{- with index $tool "with" }} --with {{.}}{{ end }} {{ $tool.name }}
+uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --python python{{ . }}{{ end }}{{- with index $tool "with" }} --with {{.}}{{ end }} {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }} {{ $tool.name }}
 {{- end }}
 {{- else }}
 uv tool install {{ $tool }}
