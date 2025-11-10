@@ -4,6 +4,7 @@ org-roam = "Developer/Personal/org-roam"
 beancount = "Developer/Personal/beancount"
 blog = "Developer/Personal/blog"
 proxy = "Developer/Personal/proxy"
+keyboard = "Developer/Personal/keyboard"
 nutstore = "Nutstore"
 
 bun = ".bun"

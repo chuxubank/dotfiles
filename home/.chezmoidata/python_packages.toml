@@ -5,6 +5,7 @@ tools = [
   "fava",
   "git-filter-repo",
   "homeassistant-cli",
+  "keymap-drawer",
   "kimi-cli",
   "markitdown[all]",
   "my_cookies",
