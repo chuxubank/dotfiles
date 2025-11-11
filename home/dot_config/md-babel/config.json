@@ -1,0 +1,31 @@
+{
+  "evaluators": {
+    "codeBlock" : {
+      "sh": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["sh"],
+        "result": "codeBlock"
+      },
+      "shell": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["sh"],
+        "result": "codeBlock"
+      },
+      "bash": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["bash"],
+        "result": "codeBlock"
+      },
+      "python": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["python3"],
+        "result": "codeBlock"
+      },
+      "elisp": {
+        "path": "/usr/bin/env",
+        "defaultArguments": ["emacsclient", "--eval"],
+        "result": "codeBlock"
+      }
+    }
+  }
+}

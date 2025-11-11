@@ -21,4 +21,9 @@
     url = "{{ (gitHubLatestReleaseAssetURL "Gaurav-Gosain/tuios" "tuios_*_Darwin_arm64.tar.gz") }}"
     path = "tuios"
 
+["bin/md-babel"]
+    type = "archive-file"
+    url = "{{ (gitHubLatestReleaseAssetURL "md-babel/swift-markdown-babel" "md-babel_macos-universal-*.tar.bz2") }}"
+    path = "md-babel"
+
 {{- end }}
