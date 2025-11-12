@@ -16,4 +16,5 @@ tools = [
   { name = "aider-chat[help]", version = "3.12", with = "pip,playwright" },
   { name = "ansible", with-exec = "ansible-core,ansible-lint" },
   { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
+  { name = "qmk", with-exec = "argcomplete" },
 ]
