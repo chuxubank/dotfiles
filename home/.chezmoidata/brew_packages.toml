@@ -90,6 +90,7 @@ brews = [
   "qpdf",
   "radare2",
   "rclone",
+  "reddix",
   "ripgrep",
   "rsync",
   "ruby",
