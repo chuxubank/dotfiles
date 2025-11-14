@@ -4,6 +4,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(mouse-wheel-progressive-speed nil)
  '(package-selected-packages
    '(ace-pinyin activities age aider aidermacs anki-vocabulary apheleia
                 applescript-mode auctex avy-embark-collect bbdb beacon
@@ -49,10 +50,10 @@
                 swift-ts-mode system-packages telega templ-ts-mode
                 templatel toc-mode transpose-frame tree-sitter
                 treemacs-magit treemacs-nerd-icons treemacs-tab-bar
-                treesit-auto treesit-fold treesit-langs tributary
-                ultra-scroll undo-fu-session uv-mode valign
-                vbscript-mode vertico-prescient video-trimmer
-                vterm-toggle vundo winum yaml-pro))
+                treesit-fold treesit-langs tributary ultra-scroll
+                undo-fu-session uv-mode valign vbscript-mode
+                vertico-prescient video-trimmer vterm-toggle vundo
+                winum yaml-pro))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces
