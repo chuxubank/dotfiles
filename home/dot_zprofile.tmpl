@@ -43,6 +43,9 @@ export PATH="$(gem env gemdir)/bin:$PATH"
 # rust
 export PATH="$(brew --prefix rustup)/bin:$PATH"
 
+# sqlite
+export PATH="$(brew --prefix sqlite)/bin:$PATH"
+
 # ssh
 export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
 export SUDO_ASKPASS="$SSH_ASKPASS"
