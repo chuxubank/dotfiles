@@ -1,4 +1,4 @@
-* Misaks's dotfiles
+* Misaka's dotfiles
 #+ATTR_HTML: :title CI
 [[https://github.com/chuxubank/dotfiles/actions/workflows/ci.yaml][https://github.com/chuxubank/dotfiles/actions/workflows/ci.yaml/badge.svg]]
 
