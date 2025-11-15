@@ -5,6 +5,7 @@ taps = [
   "homebrew/bundle",
   "homebrew/command-not-found",
   "homebrew/services",
+  "jimeh/emacs-builds",
   "railwaycat/emacsmacport",
 ]
 brews = [
