@@ -221,6 +221,7 @@ casks = [
   { name = "altserver", when = "home" },
   { name = "battery", when = "home" },
   { name = "cursor", when = "work" },
+  { name = "home-assistant", when = "home" },
   { name = "insta360-studio", when = "home" },
   { name = "intellij-idea", when = "work" },
   { name = "intune-company-portal", when = "work" },
