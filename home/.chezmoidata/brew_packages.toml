@@ -242,17 +242,18 @@ casks = [
   { name = "wechatwork", when = "work" },
 ]
 mas = [
+  { id = 1248669703, name = "Aqara Home", when = "home" },
   { id = 1284863847, name = "Unsplash Wallpapers" },
   { id = 1478610778, name = "Juice" },
   { id = 1496833156, name = "Playgrounds", when = "home" },
   { id = 1575588022, name = "MenubarX" },
   { id = 1610744717, name = "RSSHub Radar" },
-  { id = 6447957425, name = "Immersive Translate" },
   { id = 424389933, name = "Final Cut Pro", when = "home" },
   { id = 425424353, name = "The Unarchiver" },
   { id = 497799835, name = "Xcode" },
   { id = 634148309, name = "Logic Pro", when = "home" },
   { id = 634159523, name = "MainStage", when = "home" },
   { id = 640199958, name = "Developer" },
+  { id = 6447957425, name = "Immersive Translate" },
   { id = 937984704, name = "Amphetamine" },
 ]
