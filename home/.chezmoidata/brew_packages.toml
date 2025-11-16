@@ -243,7 +243,6 @@ casks = [
   { name = "wechatwork", when = "work" },
 ]
 mas = [
-  { id = 1248669703, name = "Aqara Home", when = "home" },
   { id = 1284863847, name = "Unsplash Wallpapers" },
   { id = 1478610778, name = "Juice" },
   { id = 1496833156, name = "Playgrounds", when = "home" },
