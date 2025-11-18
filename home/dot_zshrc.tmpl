@@ -198,9 +198,7 @@ alias up="chezmoi update --init -a"
 
 function upp() {
   {{- if eq .chezmoi.os "darwin" }}
-  brew update && brew bundle --quiet --cleanup --file=- <<EOF
-  {{ template "Brewfile" . -}}
-  EOF
+  brew update && brew bundle --quiet --cleanup --global
   {{- else if eq .chezmoi.os "android" }}
   pkg update && pkg upgrade
   {{- end }}
