@@ -1,3 +1,5 @@
+ACLI
+
 {{- if ne .chezmoi.os "windows" }}
 .config/scoop
 .wslconfig
@@ -18,7 +20,6 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
 {{- if ne .hosttype "work" }}
-ACLI
 .ssh/aa
 {{- end }}
 
