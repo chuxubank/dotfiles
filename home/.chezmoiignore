@@ -25,6 +25,7 @@ Library/LaunchAgents/rclone.rpi.plist
 
 {{- if eq .hosttype "ci" }}
 .aider.conf.yml
+.codex/
 .config/goose
 .config/rclone
 .double-entry-generator.yaml
