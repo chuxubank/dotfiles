@@ -79,7 +79,7 @@ enabled = true
 [mcp.providers.execution]
 type = "stdio"
 cmd = "uvx"
-args = ["markitdown-mcp"]
+args = ["--python", "3.12", "markitdown-mcp"]
 timeout = 300
 
 [[mcp.providers]]
