@@ -1,0 +1,63 @@
+{{- /* https://developers.openai.com/codex/mcp/ */ -}}
+{{- range $index, $provider := .mcp.providers -}}
+  {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
+[mcp_servers.{{ $serverName }}]
+  {{- if eq $provider.execution.type "stdio" }}
+command = {{ $provider.execution.cmd | quote }}
+    {{- if hasKey $provider.execution "args" }}
+args = [{{- range $argIndex, $arg := $provider.execution.args }}{{- if gt $argIndex 0 }}, {{ end }}{{ $arg | quote }}{{- end }}]
+    {{- end }}
+    {{- if hasKey $provider.execution "startup_timeout_sec" }}
+startup_timeout_sec = {{ $provider.execution.startup_timeout_sec }}
+    {{- end }}
+    {{- if hasKey $provider.execution "timeout" }}
+tool_timeout_sec = {{ $provider.execution.timeout }}
+    {{- end }}
+enabled = {{ $provider.enabled }}
+  {{- else if eq $provider.execution.type "http" }}
+url = {{ $provider.execution.url | quote }}
+    {{- if hasKey $provider.execution "bearer_token_env_var" }}
+bearer_token_env_var = {{ $provider.execution.bearer_token_env_var | quote }}
+    {{- end }}
+    {{- if hasKey $provider.execution "http_headers" }}
+http_headers = { {{- range $keyIndex, $headerKey := sortAlpha (keys $provider.execution.http_headers) }}{{- if gt $keyIndex 0 }}, {{ end }}"{{ $headerKey }}" = {{ index $provider.execution.http_headers $headerKey | quote }}{{- end }} }
+    {{- end }}
+    {{- if hasKey $provider.execution "env_http_headers" }}
+env_http_headers = { {{- range $keyIndex, $headerKey := sortAlpha (keys $provider.execution.env_http_headers) }}{{- if gt $keyIndex 0 }}, {{ end }}"{{ $headerKey }}" = {{ index $provider.execution.env_http_headers $headerKey | quote }}{{- end }} }
+    {{- end }}
+    {{- if hasKey $provider.execution "startup_timeout_sec" }}
+startup_timeout_sec = {{ $provider.execution.startup_timeout_sec }}
+    {{- end }}
+    {{- if hasKey $provider.execution "timeout" }}
+tool_timeout_sec = {{ $provider.execution.timeout }}
+    {{- end }}
+enabled = {{ $provider.enabled }}
+  {{- else }}
+    {{- /* Unsupported execution type */ -}}
+  {{- end }}
+  {{- if hasKey $provider.execution "envs" }}
+[mcp_servers.{{ $serverName }}.env]
+    {{- range $envIndex, $envKey := sortAlpha (keys $provider.execution.envs) }}
+      {{- $envValue := index $provider.execution.envs $envKey }}
+      {{- if eq (kindOf $envValue) "map" }}
+        {{- $secretValue := "" }}
+        {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
+          {{- if (hasKey $envValue "field") }}
+            {{- $secretValue = (index (passFields $envValue.path) $envValue.field) }}
+          {{- else }}
+            {{- $secretValue = (pass $envValue.path) }}
+          {{- end }}
+        {{- else if eq $envValue.type "output" }}
+          {{- $secretValue = (outputList $envValue.cmd $envValue.args) }}
+        {{- end }}
+        {{- if and (hasKey $envValue "trim") $envValue.trim }}
+          {{- $secretValue = ($secretValue | trim) }}
+        {{- end }}
+{{ $envKey }} = {{ $secretValue | quote }}
+        {{- else }}
+{{ $envKey }} = {{ $envValue | quote }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+{{ end }}
