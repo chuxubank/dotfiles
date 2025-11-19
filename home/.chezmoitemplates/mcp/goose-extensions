@@ -16,26 +16,26 @@
     {{- end }}
     {{- if (hasKey .execution "envs") }}
     envs:
-    {{- range $key, $value := .execution.envs }}
-      {{- if eq (kindOf $value) "map" }}
-      {{- $secretValue := "" }}
-      {{- if or (not (hasKey $value "type")) (eq $value.type "pass") }}
-        {{- if (hasKey $value "field") }}
-          {{- $secretValue = (index (passFields $value.path) $value.field) }}
-        {{- else }}
-          {{- $secretValue = (pass $value.path) }}
-        {{- end }}
-      {{- else if eq $value.type "output" }}
-        {{- $secretValue = (outputList $value.cmd $value.args) }}
-      {{- end }}
-      {{- if and (hasKey $value "trim") $value.trim }}
-        {{- $secretValue = ($secretValue | trim) }}
-      {{- end }}
+      {{- range $key, $value := .execution.envs }}
+        {{- if eq (kindOf $value) "map" }}
+          {{- $secretValue := "" }}
+          {{- if or (not (hasKey $value "type")) (eq $value.type "pass") }}
+            {{- if (hasKey $value "field") }}
+              {{- $secretValue = (index (passFields $value.path) $value.field) }}
+            {{- else }}
+              {{- $secretValue = (pass $value.path) }}
+            {{- end }}
+          {{- else if eq $value.type "output" }}
+            {{- $secretValue = (outputList $value.cmd $value.args) }}
+          {{- end }}
+          {{- if and (hasKey $value "trim") $value.trim }}
+            {{- $secretValue = ($secretValue | trim) }}
+          {{- end }}
       {{ $key }}: {{ $secretValue | quote }}
-      {{- else }}
+          {{- else }}
       {{ $key }}: {{ $value | quote }}
+          {{- end }}
+        {{- end }}
       {{- end }}
-      {{- end }}
-    {{- end }}
     {{- end }}
 {{- end }}
