@@ -194,9 +194,10 @@ fi
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias cz="chezmoi"
-alias up="chezmoi update --init -a"
+alias cza="chezmoi apply"
+alias czu="chezmoi update --init -a"
 
-function upp() {
+function up() {
   {{- if eq .chezmoi.os "darwin" }}
   brew update && brew bundle --quiet --cleanup --global
   {{- else if eq .chezmoi.os "android" }}
@@ -208,6 +209,8 @@ function upe() {
   {{ template "restart-emacs.sh" . }}
 }
 alias upn="bun update -g"
+alias upp="uv tool upgrade --all"
+
 alias gpgk="gpgconf --kill gpg-agent"
 
 {{- if eq .hosttype "work" }}
