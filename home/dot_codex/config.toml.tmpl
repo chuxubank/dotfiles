@@ -62,12 +62,20 @@ enabled = {{ $provider.enabled }}
   {{- end }}
 
 {{ end }}
-
 [projects.'{{ joinPath .chezmoi.homeDir ".local" "share" "chezmoi" }}']
 trust_level = "trusted"
-
-[projects.'{{ joinPath .chezmoi.homeDir "Developer" }}']
+{{ $trustedKeys := list
+    "org"
+    "org-roam"
+    "beancount"
+    "blog"
+    "proxy"
+    "keyboard"
+-}}
+{{- range $k := $trustedKeys }}
+[projects.'{{ joinPath $.chezmoi.homeDir (index $.path $k) }}']
 trust_level = "trusted"
+{{ end }}
 
 [notice]
 hide_gpt5_1_migration_prompt = true
