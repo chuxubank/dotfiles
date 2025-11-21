@@ -1,5 +1,6 @@
 {{- /* https://developers.openai.com/codex/mcp/ */ -}}
-{{- range $index, $provider := .mcp.providers -}}
+model = "gpt-5.1-codex-max"
+{{ range $index, $provider := .mcp.providers -}}
   {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
 [mcp_servers.{{ $serverName }}]
   {{- if eq $provider.execution.type "stdio" }}
@@ -61,3 +62,13 @@ enabled = {{ $provider.enabled }}
   {{- end }}
 
 {{ end }}
+
+[projects.'{{ joinPath .chezmoi.homeDir ".local" "share" "chezmoi" }}']
+trust_level = "trusted"
+
+[projects.'{{ joinPath .chezmoi.homeDir "Developer" }}']
+trust_level = "trusted"
+
+[notice]
+hide_gpt5_1_migration_prompt = true
+"hide_gpt-5.1-codex-max_migration_prompt" = true
