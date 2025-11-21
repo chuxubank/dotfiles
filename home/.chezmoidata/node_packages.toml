@@ -2,11 +2,13 @@
 global = [
   "@ansible/ansible-language-server",
   "@anthropic-ai/claude-code",
+  "@blowmage/cursor-agent-acp",
   "@github/copilot-language-server",
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
   "@openai/codex",
   "@prettier/plugin-ruby",
+  "@zed-industries/codex-acp",
   "bash-language-server",
   "prettier",
   "puppeteer",

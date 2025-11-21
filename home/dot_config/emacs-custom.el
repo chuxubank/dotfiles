@@ -6,9 +6,10 @@
  ;; If there is more than one, they won't work right.
  '(mouse-wheel-progressive-speed nil)
  '(package-selected-packages
-   '(ace-pinyin activities age aider aidermacs anki-vocabulary apheleia
-                applescript-mode auctex avy-embark-collect bbdb beacon
-                beancount benchmark-init bing-dict breadcrumb buck
+   '(ace-pinyin activities age agent-shell aider aidermacs
+                anki-vocabulary apheleia applescript-mode auctex
+                avy-embark-collect bbdb beacon beancount
+                benchmark-init bing-dict breadcrumb buck
                 caddyfile-mode cape cdlatex chatgpt-shell
                 chezmoi-extensions citar-embark citar-org-roam
                 cmake-font-lock code-review codeium consult-gh-embark
