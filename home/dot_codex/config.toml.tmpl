@@ -1,82 +1,86 @@
 {{- /* https://developers.openai.com/codex/mcp/ */ -}}
-model = "gpt-5.1-codex-max"
-{{ range $index, $provider := .mcp.providers -}}
+
+{{- /* Build MCP servers map */ -}}
+{{- $servers := dict -}}
+{{- range $provider := .mcp.providers }}
   {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
-[mcp_servers.{{ $serverName }}]
-  {{- if eq $provider.execution.type "stdio" }}
-command = {{ $provider.execution.cmd | quote }}
-    {{- if hasKey $provider.execution "args" }}
-args = [{{- range $argIndex, $arg := $provider.execution.args }}{{- if gt $argIndex 0 }}, {{ end }}{{ $arg | quote }}{{- end }}]
+  {{- $exec := $provider.execution -}}
+  {{- $server := dict -}}
+  {{- /* Support only stdio and http */ -}}
+  {{- if eq $exec.type "stdio" }}
+    {{- $_ := set $server "command" $exec.cmd -}}
+    {{- if hasKey $exec "args" }}
+      {{- $_ := set $server "args" $exec.args -}}
     {{- end }}
-    {{- if hasKey $provider.execution "startup_timeout_sec" }}
-startup_timeout_sec = {{ $provider.execution.startup_timeout_sec }}
+  {{- else if eq $exec.type "http" }}
+    {{- $_ := set $server "url" $exec.url -}}
+    {{- if hasKey $exec "bearer_token_env_var" }}
+      {{- $_ := set $server "bearer_token_env_var" $exec.bearer_token_env_var -}}
     {{- end }}
-    {{- if hasKey $provider.execution "timeout" }}
-tool_timeout_sec = {{ $provider.execution.timeout }}
+    {{- if hasKey $exec "http_headers" }}
+      {{- $_ := set $server "http_headers" $exec.http_headers -}}
     {{- end }}
-enabled = {{ $provider.enabled }}
-  {{- else if eq $provider.execution.type "http" }}
-url = {{ $provider.execution.url | quote }}
-    {{- if hasKey $provider.execution "bearer_token_env_var" }}
-bearer_token_env_var = {{ $provider.execution.bearer_token_env_var | quote }}
+    {{- if hasKey $exec "env_http_headers" }}
+      {{- $_ := set $server "env_http_headers" $exec.env_http_headers -}}
     {{- end }}
-    {{- if hasKey $provider.execution "http_headers" }}
-http_headers = { {{- range $keyIndex, $headerKey := sortAlpha (keys $provider.execution.http_headers) }}{{- if gt $keyIndex 0 }}, {{ end }}"{{ $headerKey }}" = {{ index $provider.execution.http_headers $headerKey | quote }}{{- end }} }
-    {{- end }}
-    {{- if hasKey $provider.execution "env_http_headers" }}
-env_http_headers = { {{- range $keyIndex, $headerKey := sortAlpha (keys $provider.execution.env_http_headers) }}{{- if gt $keyIndex 0 }}, {{ end }}"{{ $headerKey }}" = {{ index $provider.execution.env_http_headers $headerKey | quote }}{{- end }} }
-    {{- end }}
-    {{- if hasKey $provider.execution "startup_timeout_sec" }}
-startup_timeout_sec = {{ $provider.execution.startup_timeout_sec }}
-    {{- end }}
-    {{- if hasKey $provider.execution "timeout" }}
-tool_timeout_sec = {{ $provider.execution.timeout }}
-    {{- end }}
-enabled = {{ $provider.enabled }}
   {{- else }}
-    {{- /* Unsupported execution type */ -}}
+    {{- /* skip unsupported execution type */ -}}
+    {{- continue -}}
   {{- end }}
-  {{- if hasKey $provider.execution "envs" }}
-[mcp_servers.{{ $serverName }}.env]
-    {{- range $envIndex, $envKey := sortAlpha (keys $provider.execution.envs) }}
-      {{- $envValue := index $provider.execution.envs $envKey }}
+
+  {{- if hasKey $exec "startup_timeout_sec" }}
+    {{- $_ := set $server "startup_timeout_sec" $exec.startup_timeout_sec -}}
+  {{- end }}
+  {{- if hasKey $exec "timeout" }}
+    {{- $_ := set $server "tool_timeout_sec" $exec.timeout -}}
+  {{- end }}
+  {{- $_ := set $server "enabled" $provider.enabled -}}
+
+  {{- if hasKey $exec "envs" }}
+    {{- $envs := dict -}}
+    {{- range $envKey := sortAlpha (keys $exec.envs) }}
+      {{- $envValue := index $exec.envs $envKey -}}
       {{- if eq (kindOf $envValue) "map" }}
-        {{- $secretValue := "" }}
+        {{- $secret := "" -}}
         {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
           {{- if (hasKey $envValue "field") }}
-            {{- $secretValue = (index (passFields $envValue.path) $envValue.field) }}
+            {{- $secret = (index (passFields $envValue.path) $envValue.field) -}}
           {{- else }}
-            {{- $secretValue = (pass $envValue.path) }}
+            {{- $secret = (pass $envValue.path) -}}
           {{- end }}
         {{- else if eq $envValue.type "output" }}
-          {{- $secretValue = (outputList $envValue.cmd $envValue.args) }}
+          {{- $secret = (outputList $envValue.cmd $envValue.args) -}}
         {{- end }}
         {{- if and (hasKey $envValue "trim") $envValue.trim }}
-          {{- $secretValue = ($secretValue | trim) }}
+          {{- $secret = ($secret | trim) -}}
         {{- end }}
-{{ $envKey }} = {{ $secretValue | quote }}
-        {{- else }}
-{{ $envKey }} = {{ $envValue | quote }}
+        {{- $_ := set $envs $envKey $secret -}}
+      {{- else }}
+        {{- $_ := set $envs $envKey $envValue -}}
       {{- end }}
+    {{- end }}
+    {{- if gt (len $envs) 0 }}
+      {{- $_ := set $server "env" $envs -}}
     {{- end }}
   {{- end }}
 
-{{ end }}
-[projects.'{{ joinPath .chezmoi.homeDir ".local" "share" "chezmoi" }}']
-trust_level = "trusted"
-{{ $trustedKeys := list
-    "org"
-    "org-roam"
-    "beancount"
-    "blog"
-    "proxy"
-    "keyboard"
--}}
-{{- range $k := $trustedKeys }}
-[projects.'{{ joinPath $.chezmoi.homeDir (index $.path $k) }}']
-trust_level = "trusted"
-{{ end }}
+  {{- $_ := set $servers $serverName $server -}}
+{{- end }}
 
-[notice]
-hide_gpt5_1_migration_prompt = true
-"hide_gpt-5.1-codex-max_migration_prompt" = true
+{{- /* Projects trust map */ -}}
+{{- $projects := dict -}}
+{{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") (dict "trust_level" "trusted") -}}
+{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" -}}
+{{- range $k := $trustedKeys }}
+  {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) (dict "trust_level" "trusted") -}}
+{{- end }}
+
+{{- $config := dict
+  "model" "gpt-5.1-codex-max"
+  "mcp_servers" $servers
+  "projects" $projects
+  "notice" (dict
+    "hide_gpt5_1_migration_prompt" true
+    "hide_gpt-5.1-codex-max_migration_prompt" true)
+-}}
+{{ $config | toToml }}
