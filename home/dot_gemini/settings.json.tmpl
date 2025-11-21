@@ -1,0 +1,62 @@
+{{- $servers := dict -}}
+{{- range $provider := .mcp.providers }}
+  {{- if $provider.enabled }}
+    {{- $name := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
+    {{- $server := dict -}}
+    {{- $_ := set $server "description" $provider.description -}}
+    {{- if eq $provider.execution.type "stdio" }}
+      {{- $_ := set $server "command" $provider.execution.cmd -}}
+      {{- if hasKey $provider.execution "args" }}
+        {{- $_ := set $server "args" $provider.execution.args -}}
+      {{- end }}
+    {{- else if hasKey $provider.execution "url" }}
+      {{- $_ := set $server "url" $provider.execution.url -}}
+    {{- else if hasKey $provider.execution "httpUrl" }}
+      {{- $_ := set $server "httpUrl" $provider.execution.httpUrl -}}
+    {{- end }}
+    {{- if hasKey $provider.execution "timeout" }}
+      {{- $_ := set $server "timeout" (mul $provider.execution.timeout 1000) -}}
+    {{- end }}
+    {{- if hasKey $provider.execution "envs" }}
+      {{- $envs := dict -}}
+      {{- range $envKey := sortAlpha (keys $provider.execution.envs) }}
+        {{- $envValue := index $provider.execution.envs $envKey -}}
+        {{- if eq (kindOf $envValue) "map" }}
+          {{- $secret := "" -}}
+          {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
+            {{- if (hasKey $envValue "field") }}
+              {{- $secret = (index (passFields $envValue.path) $envValue.field) -}}
+            {{- else }}
+              {{- $secret = (pass $envValue.path) -}}
+            {{- end }}
+          {{- else if eq $envValue.type "output" }}
+            {{- $secret = (outputList $envValue.cmd $envValue.args) -}}
+          {{- end }}
+          {{- if and (hasKey $envValue "trim") $envValue.trim }}
+            {{- $secret = ($secret | trim) -}}
+          {{- end }}
+          {{- $_ := set $envs $envKey $secret -}}
+        {{- else }}
+          {{- $_ := set $envs $envKey $envValue -}}
+        {{- end }}
+      {{- end }}
+      {{- if gt (len $envs) 0 }}
+        {{- $_ := set $server "env" $envs -}}
+      {{- end }}
+    {{- end }}
+    {{- $_ := set $servers $name $server -}}
+  {{- end }}
+{{- end }}
+
+{{- $theme := "ANSI Light" -}}
+{{- if .isDarkMode }}
+  {{- $theme = "ANSI" -}}
+{{- end }}
+
+{{- $config := dict
+  "security" (dict "auth" (dict "selectedType" "oauth-personal"))
+  "ui" (dict "theme" $theme)
+  "general" (dict "vimMode" false)
+  "mcpServers" $servers
+-}}
+{{ $config | toPrettyJson }}
