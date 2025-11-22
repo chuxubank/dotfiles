@@ -136,7 +136,6 @@ brews = [
   { name = "sleepwatcher", restart_service = true },
 ]
 casks = [
-  "amazon-q",
   "android-studio",
   "anki",
   "antigravity",
@@ -190,6 +189,7 @@ casks = [
   "jimeh/emacs-builds/emacs-app",
   "jordanbaird-ice",
   "karabiner-elements",
+  "kiro-cli",
   "libreoffice",
   "logseq",
   "loop",

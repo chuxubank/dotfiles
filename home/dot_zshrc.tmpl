@@ -1,7 +1,7 @@
 # chezmoi:template:line-endings=native
 
-# Amazon Q pre block. Keep at the top of this file.
-source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
+# Kiro CLI pre block. Keep at the top of this file.
+source_if_exists_outside_emacs "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -225,5 +225,5 @@ source $HOME/.config/op/plugins.sh
 {{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
 
-# Amazon Q post block. Keep at the bottom of this file.
-source_if_exists_outside_emacs "${HOME}/Library/Application Support/amazon-q/shell/zshrc.post.zsh"
+# Kiro CLI post block. Keep at the bottom of this file.
+source_if_exists_outside_emacs "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
