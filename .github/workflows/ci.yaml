@@ -12,7 +12,7 @@ jobs:
       env:
         CODESPACES: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Cache apt
         uses: actions/cache@v4
@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/chezmoi
-          key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoidata/**/*.toml') }}
+          key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoiexternals/**/*.toml.tmpl') }}
           restore-keys: |
             ${{ runner.os }}-chezmoi-
 
@@ -47,6 +47,14 @@ jobs:
           key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/sdkman_packages.toml') }}
           restore-keys: |
             ${{ runner.os }}-sdkman-
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
 
       - name: Run install
         run: ./install.sh
