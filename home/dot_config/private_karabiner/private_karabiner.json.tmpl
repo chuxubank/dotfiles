@@ -1,26 +1,19 @@
-{{- $commonFnKeys := list
-  (dict "from" (dict "key_code" "f1") "to" (list (dict "key_code" "f1")))
-  (dict "from" (dict "key_code" "f2") "to" (list (dict "key_code" "f2")))
-  (dict "from" (dict "key_code" "f3") "to" (list (dict "key_code" "f3")))
-  (dict "from" (dict "key_code" "f4") "to" (list (dict "key_code" "f4")))
-  (dict "from" (dict "key_code" "f5") "to" (list (dict "key_code" "f5")))
-  (dict "from" (dict "key_code" "f6") "to" (list (dict "key_code" "f6")))
-  (dict "from" (dict "key_code" "f7") "to" (list (dict "key_code" "f7")))
-  (dict "from" (dict "key_code" "f8") "to" (list (dict "key_code" "f8")))
-  (dict "from" (dict "key_code" "f9") "to" (list (dict "key_code" "f9")))
-  (dict "from" (dict "key_code" "f10") "to" (list (dict "key_code" "f10")))
-  (dict "from" (dict "key_code" "f11") "to" (list (dict "key_code" "f11")))
-  (dict "from" (dict "key_code" "f12") "to" (list (dict "key_code" "f12")))
--}}
+{{- $commonFnKeys := list -}}
+{{- range $code := list "f1" "f2" "f3" "f4" "f5" "f6" "f7" "f8" "f9" "f10" "f11" "f12" -}}
+  {{- $commonFnKeys = append $commonFnKeys (dict "from" (dict "key_code" $code) "to" (list (dict "key_code" $code))) -}}
+{{- end -}}
 
-{{- $commonSimpleMods := list
-  (dict "from" (dict "key_code" "caps_lock") "to" (list (dict "key_code" "left_control")))
-  (dict "from" (dict "key_code" "left_control") "to" (list (dict "key_code" "caps_lock")))
-  (dict "from" (dict "key_code" "left_command") "to" (list (dict "key_code" "left_option")))
-  (dict "from" (dict "key_code" "left_option") "to" (list (dict "key_code" "left_command")))
-  (dict "from" (dict "key_code" "right_command") "to" (list (dict "key_code" "right_option")))
-  (dict "from" (dict "key_code" "right_option") "to" (list (dict "key_code" "right_command")))
--}}
+{{- $commonSimpleMods := list -}}
+{{- range $swap := list
+    (dict "from" "caps_lock" "to" "left_control")
+    (dict "from" "left_control" "to" "caps_lock")
+    (dict "from" "left_command" "to" "left_option")
+    (dict "from" "left_option" "to" "left_command")
+    (dict "from" "right_command" "to" "right_option")
+    (dict "from" "right_option" "to" "right_command")
+  -}}
+  {{- $commonSimpleMods = append $commonSimpleMods (dict "from" (dict "key_code" $swap.from) "to" (list (dict "key_code" $swap.to))) -}}
+{{- end -}}
 
 {{- $capsSwap := list
   (dict "from" (dict "key_code" "caps_lock") "to" (list (dict "key_code" "left_control")))
@@ -31,7 +24,7 @@
 {{- $applicationToFn := dict "from" (dict "key_code" "application") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
 {{- $ejectToFn := dict "from" (dict "consumer_key_code" "eject") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
 
-{{- $devices := list
+{{- $deviceSpecs := list
   (dict
     "identifiers" (dict "is_keyboard" true)
     "simple_modifications" $capsSwap
@@ -45,15 +38,15 @@
     "ignore" true
   )
   (dict
-    "fn_function_keys" $commonFnKeys
     "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 24801 "vendor_id" 6127)
     "ignore" false
+    "fnKeys" true
     "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
   )
   (dict
-    "fn_function_keys" $commonFnKeys
     "identifiers" (dict "is_keyboard" true "product_id" 24814 "vendor_id" 6127)
     "ignore" false
+    "fnKeys" true
     "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
   )
   (dict
@@ -61,8 +54,8 @@
     "simple_modifications" (concat (list $applicationToFn) $commonSimpleMods)
   )
   (dict
-    "fn_function_keys" $commonFnKeys
     "identifiers" (dict "is_keyboard" true "product_id" 33 "vendor_id" 1278)
+    "fnKeys" true
     "simple_modifications" (list $ejectToFn)
   )
   (dict
@@ -70,17 +63,26 @@
     "simple_modifications" $commonSimpleMods
   )
   (dict
-    "fn_function_keys" $commonFnKeys
     "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 33398 "vendor_id" 9306)
-    "simple_modifications" (list $applicationToFn)
     "ignore" false
+    "fnKeys" true
+    "simple_modifications" (list $applicationToFn)
   )
   (dict
-    "fn_function_keys" $commonFnKeys
     "identifiers" (dict "is_keyboard" true "product_id" 20565 "vendor_id" 12815)
+    "fnKeys" true
     "simple_modifications" (list $applicationToFn)
   )
 -}}
+
+{{- $devices := list -}}
+{{- range $spec := $deviceSpecs -}}
+  {{- $device := dict "identifiers" $spec.identifiers -}}
+  {{- if hasKey $spec "fnKeys" }}{{- $_ := set $device "fn_function_keys" $commonFnKeys -}}{{- end -}}
+  {{- if hasKey $spec "ignore" }}{{- $_ := set $device "ignore" $spec.ignore -}}{{- end -}}
+  {{- if hasKey $spec "simple_modifications" }}{{- $_ := set $device "simple_modifications" $spec.simple_modifications -}}{{- end -}}
+  {{- $devices = append $devices $device -}}
+{{- end -}}
 
 {{- $profile := dict
   "devices" $devices
