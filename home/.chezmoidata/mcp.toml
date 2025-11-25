@@ -81,6 +81,7 @@ type = "stdio"
 cmd = "uvx"
 args = ["--python", "3.12", "markitdown-mcp"]
 timeout = 300
+startup_timeout_sec = 30
 
 [[mcp.providers]]
 name = "Notion"
