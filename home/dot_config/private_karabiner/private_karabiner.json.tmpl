@@ -24,63 +24,29 @@
 {{- $applicationToFn := dict "from" (dict "key_code" "application") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
 {{- $ejectToFn := dict "from" (dict "consumer_key_code" "eject") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
 
-{{- $deviceSpecs := list
-  (dict
-    "identifiers" (dict "is_keyboard" true)
-    "simple_modifications" $capsSwap
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 832 "vendor_id" 1452)
-    "simple_modifications" $capsSwap
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 4423 "vendor_id" 10462)
-    "ignore" true
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 24801 "vendor_id" 6127)
-    "ignore" false
-    "fnKeys" true
-    "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 24814 "vendor_id" 6127)
-    "ignore" false
-    "fnKeys" true
-    "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 4878 "vendor_id" 6785)
-    "simple_modifications" (concat (list $applicationToFn) $commonSimpleMods)
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 33 "vendor_id" 1278)
-    "fnKeys" true
-    "simple_modifications" (list $ejectToFn)
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 8265 "vendor_id" 6785)
-    "simple_modifications" $commonSimpleMods
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 33398 "vendor_id" 9306)
-    "ignore" false
-    "fnKeys" true
-    "simple_modifications" (list $applicationToFn)
-  )
-  (dict
-    "identifiers" (dict "is_keyboard" true "product_id" 20565 "vendor_id" 12815)
-    "fnKeys" true
-    "simple_modifications" (list $applicationToFn)
-  )
+{{- $simpleModPresets := dict
+  "applicationToFn" (list $applicationToFn)
+  "button3ToNone" (list $button3ToNone)
+  "capsSwap" $capsSwap
+  "commonSimpleMods" $commonSimpleMods
+  "ejectToFn" (list $ejectToFn)
 -}}
+
+{{- $keyboards := default (dict) .keyboards -}}
+{{- $deviceSpecs := default (list) $keyboards.device_specs -}}
 
 {{- $devices := list -}}
 {{- range $spec := $deviceSpecs -}}
   {{- $device := dict "identifiers" $spec.identifiers -}}
   {{- if hasKey $spec "fnKeys" }}{{- $_ := set $device "fn_function_keys" $commonFnKeys -}}{{- end -}}
   {{- if hasKey $spec "ignore" }}{{- $_ := set $device "ignore" $spec.ignore -}}{{- end -}}
-  {{- if hasKey $spec "simple_modifications" }}{{- $_ := set $device "simple_modifications" $spec.simple_modifications -}}{{- end -}}
+  {{- if hasKey $spec "simple_modifications" }}
+    {{- $mods := list -}}
+    {{- range $preset := $spec.simple_modifications -}}
+      {{- $mods = concat $mods (index $simpleModPresets $preset | default (list)) -}}
+    {{- end -}}
+    {{- $_ := set $device "simple_modifications" $mods -}}
+  {{- end -}}
   {{- $devices = append $devices $device -}}
 {{- end -}}
 
