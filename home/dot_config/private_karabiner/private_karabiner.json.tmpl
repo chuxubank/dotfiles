@@ -1,169 +1,92 @@
-{
-  "profiles": [
-    {
-      "devices": [
-        // Apple Internal Keyboard,
-        {
-          "identifiers": { "is_keyboard": true },
-          "simple_modifications": [
-            {
-              "from": { "key_code": "caps_lock" },
-              "to": [{ "key_code": "left_control" }]
-            },
-            {
-              "from": { "key_code": "left_control" },
-              "to": [{ "key_code": "caps_lock" }]
-            }
-          ]
-        },
-        {
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 832,
-            "vendor_id": 1452
-          },
-          "simple_modifications": [
-            {
-              "from": { "key_code": "caps_lock" },
-              "to": [{ "key_code": "left_control" }]
-            },
-            {
-              "from": { "key_code": "left_control" },
-              "to": [{ "key_code": "caps_lock" }]
-            }
-          ]
-        },
-        {
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 4423,
-            "vendor_id": 10462
-          },
-          "ignore": true
-        },
-        // ThinkPad TrackPoint Keyboard Ⅱ BLE
-        {
-          "fn_function_keys": [
-            {{ template "karabiner/common_fn_function_keys.json" }}
-          ],
-          "identifiers": {
-            "is_keyboard": true,
-            "is_pointing_device": true,
-            "product_id": 24801,
-            "vendor_id": 6127
-          },
-          "ignore": false,
-          "simple_modifications": [
-            {{ template "karabiner/common_simple_modifications.json" }},
-            {
-              "from": { "pointing_button": "button3" },
-              "to": [{ "key_code": "vk_none" }]
-            }
-          ]
-        },
-        // ThinkPad TrackPoint Keyboard Ⅱ USB
-        {
-          "fn_function_keys": [
-            {{ template "karabiner/common_fn_function_keys.json" }}
-          ],
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 24814,
-            "vendor_id": 6127
-          },
-          "ignore": false,
-          "simple_modifications": [
-            {{ template "karabiner/common_simple_modifications.json" }},
-            {
-              "from": { "pointing_button": "button3" },
-              "to": [{ "key_code": "vk_none" }]
-            }
-          ]
-        },
-        {
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 4878,
-            "vendor_id": 6785
-          },
-          "simple_modifications": [
-            {
-              "from": { "key_code": "application" },
-              "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
-            },
-            {{ template "karabiner/common_simple_modifications.json" }}
-          ]
-        },
-        // HHKB Hybird BLE
-        {
-          "fn_function_keys": [
-            {{ template "karabiner/common_fn_function_keys.json" }}
-          ],
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 33,
-            "vendor_id": 1278
-          },
-          "simple_modifications": [
-            {
-              "from": { "consumer_key_code": "eject" },
-              "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
-            }
-          ]
-        },
-        {
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 8265,
-            "vendor_id": 6785
-          },
-          "simple_modifications": [
-            {{ template "karabiner/common_simple_modifications.json" }}
-          ]
-        },
-		// CIDOO ABM066 BLE
-        {
-          "fn_function_keys": [
-            {{ template "karabiner/common_fn_function_keys.json" }}
-          ],
-          "identifiers": {
-            "is_keyboard": true,
-            "is_pointing_device": true,
-            "product_id": 33398,
-            "vendor_id": 9306
-          },
-          "simple_modifications": [
-            {
-              "from": { "key_code": "application" },
-              "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
-            }
-          ],
-          "ignore": false
-        },
-        // CIDOO ABM066 USB
-        {
-          "fn_function_keys": [
-            {{ template "karabiner/common_fn_function_keys.json" }}
-          ],
-          "identifiers": {
-            "is_keyboard": true,
-            "product_id": 20565,
-            "vendor_id": 12815
-          },
-          "simple_modifications": [
-            {
-              "from": { "key_code": "application" },
-              "to": [{ "apple_vendor_top_case_key_code": "keyboard_fn" }]
-            }
-          ]
-        }
-      ],
-      "name": "Misaka",
-      "selected": true,
-      "virtual_hid_keyboard": {
-        "country_code": 0,
-        "keyboard_type_v2": "ansi"
-      }
-    }
-  ]
-}
+{{- $commonFnKeys := list
+  (dict "from" (dict "key_code" "f1") "to" (list (dict "key_code" "f1")))
+  (dict "from" (dict "key_code" "f2") "to" (list (dict "key_code" "f2")))
+  (dict "from" (dict "key_code" "f3") "to" (list (dict "key_code" "f3")))
+  (dict "from" (dict "key_code" "f4") "to" (list (dict "key_code" "f4")))
+  (dict "from" (dict "key_code" "f5") "to" (list (dict "key_code" "f5")))
+  (dict "from" (dict "key_code" "f6") "to" (list (dict "key_code" "f6")))
+  (dict "from" (dict "key_code" "f7") "to" (list (dict "key_code" "f7")))
+  (dict "from" (dict "key_code" "f8") "to" (list (dict "key_code" "f8")))
+  (dict "from" (dict "key_code" "f9") "to" (list (dict "key_code" "f9")))
+  (dict "from" (dict "key_code" "f10") "to" (list (dict "key_code" "f10")))
+  (dict "from" (dict "key_code" "f11") "to" (list (dict "key_code" "f11")))
+  (dict "from" (dict "key_code" "f12") "to" (list (dict "key_code" "f12")))
+-}}
+
+{{- $commonSimpleMods := list
+  (dict "from" (dict "key_code" "caps_lock") "to" (list (dict "key_code" "left_control")))
+  (dict "from" (dict "key_code" "left_control") "to" (list (dict "key_code" "caps_lock")))
+  (dict "from" (dict "key_code" "left_command") "to" (list (dict "key_code" "left_option")))
+  (dict "from" (dict "key_code" "left_option") "to" (list (dict "key_code" "left_command")))
+  (dict "from" (dict "key_code" "right_command") "to" (list (dict "key_code" "right_option")))
+  (dict "from" (dict "key_code" "right_option") "to" (list (dict "key_code" "right_command")))
+-}}
+
+{{- $capsSwap := list
+  (dict "from" (dict "key_code" "caps_lock") "to" (list (dict "key_code" "left_control")))
+  (dict "from" (dict "key_code" "left_control") "to" (list (dict "key_code" "caps_lock")))
+-}}
+
+{{- $button3ToNone := dict "from" (dict "pointing_button" "button3") "to" (list (dict "key_code" "vk_none")) -}}
+{{- $applicationToFn := dict "from" (dict "key_code" "application") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
+{{- $ejectToFn := dict "from" (dict "consumer_key_code" "eject") "to" (list (dict "apple_vendor_top_case_key_code" "keyboard_fn")) -}}
+
+{{- $devices := list
+  (dict
+    "identifiers" (dict "is_keyboard" true)
+    "simple_modifications" $capsSwap
+  )
+  (dict
+    "identifiers" (dict "is_keyboard" true "product_id" 832 "vendor_id" 1452)
+    "simple_modifications" $capsSwap
+  )
+  (dict
+    "identifiers" (dict "is_keyboard" true "product_id" 4423 "vendor_id" 10462)
+    "ignore" true
+  )
+  (dict
+    "fn_function_keys" $commonFnKeys
+    "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 24801 "vendor_id" 6127)
+    "ignore" false
+    "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
+  )
+  (dict
+    "fn_function_keys" $commonFnKeys
+    "identifiers" (dict "is_keyboard" true "product_id" 24814 "vendor_id" 6127)
+    "ignore" false
+    "simple_modifications" (concat $commonSimpleMods (list $button3ToNone))
+  )
+  (dict
+    "identifiers" (dict "is_keyboard" true "product_id" 4878 "vendor_id" 6785)
+    "simple_modifications" (concat (list $applicationToFn) $commonSimpleMods)
+  )
+  (dict
+    "fn_function_keys" $commonFnKeys
+    "identifiers" (dict "is_keyboard" true "product_id" 33 "vendor_id" 1278)
+    "simple_modifications" (list $ejectToFn)
+  )
+  (dict
+    "identifiers" (dict "is_keyboard" true "product_id" 8265 "vendor_id" 6785)
+    "simple_modifications" $commonSimpleMods
+  )
+  (dict
+    "fn_function_keys" $commonFnKeys
+    "identifiers" (dict "is_keyboard" true "is_pointing_device" true "product_id" 33398 "vendor_id" 9306)
+    "simple_modifications" (list $applicationToFn)
+    "ignore" false
+  )
+  (dict
+    "fn_function_keys" $commonFnKeys
+    "identifiers" (dict "is_keyboard" true "product_id" 20565 "vendor_id" 12815)
+    "simple_modifications" (list $applicationToFn)
+  )
+-}}
+
+{{- $profile := dict
+  "devices" $devices
+  "name" "Misaka"
+  "selected" true
+  "virtual_hid_keyboard" (dict "country_code" 0 "keyboard_type_v2" "ansi")
+-}}
+
+{{- dict "profiles" (list $profile) | toPrettyJson -}}
