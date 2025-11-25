@@ -1,45 +1,41 @@
 keyboards:
   device_specs:
+    # Apple Internal Keyboard
     - identifiers:
         is_keyboard: true
       simple_modifications:
         - capsSwap
-
     - identifiers:
         is_keyboard: true
         product_id: 832
         vendor_id: 1452
       simple_modifications:
         - capsSwap
-
     - identifiers:
         is_keyboard: true
         product_id: 4423
         vendor_id: 10462
       ignore: true
-
+    # ThinkPad TrackPoint Keyboard Ⅱ BLE
     - identifiers:
         is_keyboard: true
         is_pointing_device: true
         product_id: 24801
         vendor_id: 6127
-      ignore: false
       fnKeys: true
       simple_modifications:
         - commonSimpleMods
         - button3ToNone
-
+    # ThinkPad TrackPoint Keyboard Ⅱ USB
     - identifiers:
         is_keyboard: true
         is_pointing_device: true
         product_id: 24814
         vendor_id: 6127
-      ignore: false
       fnKeys: true
       simple_modifications:
         - commonSimpleMods
         - button3ToNone
-
     - identifiers:
         is_keyboard: true
         product_id: 4878
@@ -47,7 +43,7 @@ keyboards:
       simple_modifications:
         - applicationToFn
         - commonSimpleMods
-
+    # HHKB Hybird BLE
     - identifiers:
         is_keyboard: true
         product_id: 33
@@ -55,24 +51,22 @@ keyboards:
       fnKeys: true
       simple_modifications:
         - ejectToFn
-
     - identifiers:
         is_keyboard: true
         product_id: 8265
         vendor_id: 6785
       simple_modifications:
         - commonSimpleMods
-
+    # CIDOO ABM066 BLE
     - identifiers:
         is_keyboard: true
         is_pointing_device: true
         product_id: 33398
         vendor_id: 9306
-      ignore: false
       fnKeys: true
       simple_modifications:
         - applicationToFn
-
+    # CIDOO ABM066 USB
     - identifiers:
         is_keyboard: true
         product_id: 20565
