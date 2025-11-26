@@ -74,3 +74,9 @@ keyboards:
       fnKeys: true
       simple_modifications:
         - applicationToFn
+    # Silakka54
+    - identifiers:
+        is_keyboard: true
+        product_id: 24926
+        vendor_id: 7504
+      ignore: true
