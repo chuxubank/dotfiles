@@ -20,7 +20,7 @@ jobs:
           path: |
             /var/cache/apt
             /var/lib/apt
-          key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/apt_packages.toml') }}
+          key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/packages/apt.toml') }}
           restore-keys: |
             ${{ runner.os }}-apt-
 
@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/node_packages.toml') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/packages/node.toml') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.sdkman
-          key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/sdkman_packages.toml') }}
+          key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/packages/sdkman.toml') }}
           restore-keys: |
             ${{ runner.os }}-sdkman-
 
@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/uv
-          key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/python_packages.toml') }}
+          key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/packages/python.toml') }}
           restore-keys: |
             ${{ runner.os }}-uv-
 
