@@ -19,7 +19,10 @@ Library
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
-{{- if ne .hosttype "work" }}
+{{- if eq .hosttype "work" }}
+.ssh/aa/id_rsa
+.ssh/aa/id_ed25519
+{{- else }}
 .ssh/aa
 {{- end }}
 
