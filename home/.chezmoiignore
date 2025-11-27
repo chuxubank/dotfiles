@@ -31,6 +31,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .codex
 .config/goose
 .config/rclone
+.cursor
 .double-entry-generator.yaml
 .gemini
 .gradle
