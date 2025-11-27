@@ -8,6 +8,7 @@ taps = [
   "jimeh/emacs-builds",
   "railwaycat/emacsmacport",
   "sikarugir-app/sikarugir",
+  { name = "atlassian/acli", when = "work" },
 ]
 brews = [
   "agg",

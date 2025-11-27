@@ -1,5 +1,11 @@
 {{ range .packages.darwin.taps -}}
+{{ if eq (kindOf .) "map" -}}
+{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+tap {{ .name | quote }}
+{{ end -}}
+{{ else -}}
 tap {{ . | quote }}
+{{ end -}}
 {{ end -}}
 {{ range .packages.darwin.brews -}}
 {{ if eq (kindOf .) "map" -}}
