@@ -40,6 +40,7 @@ mcp:
         args:
           - mcp-server-fetch
         timeout: 300
+        startup_timeout: 30
     - name: GitHub
       description: The GitHub MCP Server connects AI tools directly to GitHub's
         platform. This gives AI agents, assistants, and chatbots the ability to
@@ -95,7 +96,7 @@ mcp:
           - "3.12"
           - markitdown-mcp
         timeout: 300
-        startup_timeout_sec: 30
+        startup_timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
       enabled: true

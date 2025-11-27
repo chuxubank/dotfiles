@@ -28,8 +28,8 @@
     {{- continue -}}
   {{- end }}
 
-  {{- if hasKey $exec "startup_timeout_sec" }}
-    {{- $_ := set $server "startup_timeout_sec" $exec.startup_timeout_sec -}}
+  {{- if hasKey $exec "startup_timeout" }}
+    {{- $_ := set $server "startup_timeout_sec" $exec.startup_timeout -}}
   {{- end }}
   {{- if hasKey $exec "timeout" }}
     {{- $_ := set $server "tool_timeout_sec" $exec.timeout -}}
