@@ -24,6 +24,9 @@ export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 # awk
 export PATH="$(brew --prefix awk)/bin:$PATH"
 
+# bind
+export PATH="$(brew --prefix bind)/bin:$PATH"
+
 # bison
 export PATH="$(brew --prefix bison)/bin:$PATH"
 
@@ -48,10 +51,10 @@ export PATH="$(brew --prefix sqlite)/bin:$PATH"
 
 # ssh
 export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
-export SUDO_ASKPASS="$SSH_ASKPASS"
-
-source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if_exists_outside_emacs "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}
+
+export SUDO_ASKPASS="$SSH_ASKPASS"
+source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"

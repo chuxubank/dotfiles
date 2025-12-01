@@ -20,6 +20,7 @@ brews = [
   "awk",
   "beancount-language-server",
   "bfg",
+  "bind",
   "bison",
   "block-goose-cli",
   "btop",
