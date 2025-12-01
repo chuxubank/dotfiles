@@ -1,21 +1,21 @@
 {{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
+{{- $providers := dict }}
 {{- range .mcp.providers }}
-  {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "-" }}:
-    name: {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "_" }}
-    display_name: {{ .name | quote }}
-    description: {{ .description | quote }}
-    enabled: {{ .enabled }}
-    bundled: null
-    {{- if eq .execution.type "stdio" }}
-    type: stdio
-    timeout: {{ .execution.timeout }}
-    cmd: {{ .execution.cmd | quote }}
-    args:
-    {{- range .execution.args }}
-      - {{ . | quote }}
-    {{- end }}
+  {{- $providerKey := regexReplaceAll "[^a-z0-9]+" (.name | lower) "-" }}
+  {{- $provider := dict
+        "name" (regexReplaceAll "[^a-z0-9]+" (.name | lower) "_")
+        "display_name" .name
+        "description" .description
+        "enabled" .enabled
+        "bundled" nil
+    -}}
+  {{- if eq .execution.type "stdio" }}
+    {{- $provider = set $provider "type" "stdio" }}
+    {{- $provider = set $provider "timeout" .execution.timeout }}
+    {{- $provider = set $provider "cmd" .execution.cmd }}
+    {{- $provider = set $provider "args" .execution.args }}
     {{- if (hasKey .execution "envs") }}
-    envs:
+      {{- $envs := dict }}
       {{- range $key, $value := .execution.envs }}
         {{- if eq (kindOf $value) "map" }}
           {{- $secretValue := "" }}
@@ -31,11 +31,18 @@
           {{- if and (hasKey $value "trim") $value.trim }}
             {{- $secretValue = ($secretValue | trim) }}
           {{- end }}
-      {{ $key }}: {{ $secretValue | quote }}
-          {{- else }}
-      {{ $key }}: {{ $value | quote }}
-          {{- end }}
+          {{- $envs = set $envs $key $secretValue }}
+        {{- else }}
+          {{- $envs = set $envs $key $value }}
         {{- end }}
       {{- end }}
+      {{- if gt (len $envs) 0 }}
+        {{- $provider = set $provider "envs" $envs }}
+      {{- end }}
     {{- end }}
+  {{- end }}
+  {{- $providers = set $providers $providerKey $provider }}
+{{- end }}
+{{- if gt (len $providers) 0 }}
+{{- toYaml $providers | nindent 2 }}
 {{- end }}
