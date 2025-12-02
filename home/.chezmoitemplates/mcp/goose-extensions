@@ -1,18 +1,16 @@
 {{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
 {{- range .mcp.providers }}
   {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "-" }}:
-    name: {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "_" }}
-    display_name: {{ .name | quote }}
-    description: {{ .description | quote }}
     enabled: {{ .enabled }}
-    bundled: null
+    type: {{ .execution.type }}
+    name: {{ regexReplaceAll "[^a-z0-9]+" (.name | lower) "_" }}
+    description: {{ .description }}
     {{- if eq .execution.type "stdio" }}
-    type: stdio
-    timeout: {{ .execution.timeout }}
-    cmd: {{ .execution.cmd | quote }}
+    cmd: {{ .execution.cmd }}
     args:
-    {{- range .execution.args }}
-      - {{ . | quote }}
+      {{- range .execution.args }}
+    - {{ . | quote }}
+      {{- end }}
     {{- end }}
     {{- if (hasKey .execution "envs") }}
     envs:
@@ -32,10 +30,12 @@
             {{- $secretValue = ($secretValue | trim) }}
           {{- end }}
       {{ $key }}: {{ $secretValue | quote }}
-          {{- else }}
+        {{- else }}
       {{ $key }}: {{ $value | quote }}
-          {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}
+    timeout: {{ .execution.timeout }}
+    bundled: null
+    display_name: {{ .name }}
 {{- end }}
