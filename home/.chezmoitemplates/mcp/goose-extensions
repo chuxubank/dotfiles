@@ -11,6 +11,8 @@
       {{- range .execution.args }}
     - {{ . | quote }}
       {{- end }}
+	{{- else if eq .execution.type "sse" }}
+	uri: {{ .execution.uri }}
     {{- end }}
     {{- if (hasKey .execution "envs") }}
     envs:

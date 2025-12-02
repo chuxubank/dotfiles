@@ -79,11 +79,8 @@ mcp:
       description: The server proxies requests from client to JetBrains IDE.
       enabled: true
       execution:
-        type: stdio
-        cmd: bunx
-        args:
-          - -y
-          - "@jetbrains/mcp-proxy"
+        type: sse
+        uri: http://localhost:64342/sse
         timeout: 300
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
