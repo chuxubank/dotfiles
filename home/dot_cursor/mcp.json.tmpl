@@ -13,7 +13,7 @@
       {{- $_ := set $server "args" $exec.args -}}
     {{- end }}
   {{- else if or (eq $exec.type "http") (eq $exec.type "sse") }}
-    {{- $_ := set $server "url" $exec.url -}}
+    {{- $_ := set $server "url" $exec.uri -}}
     {{- $headers := dict -}}
     {{- if hasKey $exec "http_headers" }}
       {{- range $k, $v := $exec.http_headers }}
