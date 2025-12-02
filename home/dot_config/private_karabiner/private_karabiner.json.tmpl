@@ -39,7 +39,9 @@
 {{- range $spec := $deviceSpecs -}}
   {{- $device := dict "identifiers" $spec.identifiers -}}
   {{- if hasKey $spec "fnKeys" }}{{- $_ := set $device "fn_function_keys" $commonFnKeys -}}{{- end -}}
-  {{- if hasKey $spec "ignore" }}{{- $_ := set $device "ignore" $spec.ignore -}}{{- end -}}
+  {{- if hasKey $spec "ignore" }}{{- $_ := set $device "ignore" $spec.ignore -}}
+  {{- else -}}{{- $_ := set $device "ignore" false -}}
+  {{- end -}}
   {{- if hasKey $spec "simple_modifications" }}
     {{- $mods := list -}}
     {{- range $preset := $spec.simple_modifications -}}
