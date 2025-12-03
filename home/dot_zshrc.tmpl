@@ -196,6 +196,8 @@ fi
 alias cz="chezmoi"
 alias cza="chezmoi apply"
 alias czu="chezmoi update --init -a"
+alias czr="chezmoi re-add"
+alias czd="chezmoi diff"
 
 function up() {
   {{- if eq .chezmoi.os "darwin" }}
