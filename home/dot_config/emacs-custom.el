@@ -17,8 +17,8 @@
                 dashboard deft delight devdocs diagram-preview diff-hl
                 dired-rsync-transient dirvish docker
                 docker-compose-mode dockerfile-mode doom-modeline
-                doom-themes dumb-jump easy-hugo eglot-java ejira
-                ejira3 el-patch eldoc-box eldoc-toml elfeed-org
+                doom-themes dumb-jump easy-hugo edit-indirect
+                eglot-java el-patch eldoc-box eldoc-toml elfeed-org
                 elfeed-protocol elisp-demos elogcat emacs-everywhere
                 ement emms eshell-vterm exec-path-from-shell
                 flycheck-gradle flycheck-kotlin flycheck-plantuml
@@ -52,9 +52,9 @@
                 templatel toc-mode transpose-frame tree-sitter
                 treemacs-magit treemacs-nerd-icons treemacs-tab-bar
                 treesit-fold treesit-langs tributary ultra-scroll
-                undo-fu-session uv-mode valign vbscript-mode
-                vertico-prescient video-trimmer vterm-toggle vundo
-                winum yaml-pro))
+                undo-fu-session uv-mode valign vbs-repl vbscript-mode
+                vertico-prescient video-trimmer visual-basic-mode
+                vterm-toggle vundo winum yaml-pro))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces
