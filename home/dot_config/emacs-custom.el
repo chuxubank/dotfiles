@@ -10,7 +10,7 @@
                 anki-vocabulary apheleia applescript-mode auctex
                 avy-embark-collect bbdb beacon beancount
                 benchmark-init bing-dict breadcrumb buck
-                caddyfile-mode cape cdlatex chatgpt-shell
+                caddyfile-mode cape cdlatex chatgpt-shell chezmoi
                 chezmoi-extensions citar-embark citar-org-roam
                 cmake-font-lock code-review codeium consult-gh-embark
                 consult-gh-forge copilot corfu-prescient dart-mode
