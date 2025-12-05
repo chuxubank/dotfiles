@@ -56,7 +56,7 @@
 {{- $config := dict
   "security" (dict "auth" (dict "selectedType" "oauth-personal"))
   "ui" (dict "theme" $theme)
-  "general" (dict "vimMode" false)
+  "general" (dict "vimMode" false "previewFeatures" true)
   "mcpServers" $servers
 -}}
 {{ $config | toPrettyJson }}
