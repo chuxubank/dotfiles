@@ -119,6 +119,7 @@ brews = [
   "tmux",
   "tokei",
   "tree-sitter",
+  "tuios",
   "uv",
   "watch",
   "wget",
