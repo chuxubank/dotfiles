@@ -14,6 +14,7 @@ brew {{ .name | quote }}
 {{- range $key, $value := . -}}
 {{- if eq $key "link" }}, link: {{ $value }}{{ end -}}
 {{- if eq $key "restart_service" }}, restart_service: {{ $value }}{{ end -}}
+{{- if eq $key "args" }}, args: {{ $value | toJson }}{{ end -}}
 {{ end }}
 {{ end -}}
 {{ else -}}
