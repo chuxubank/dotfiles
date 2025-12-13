@@ -1,19 +1,13 @@
-{{- $os := .chezmoi.os -}}
-{{- $arch := .chezmoi.arch -}}
-
-{{- $kotlinOSMap := dict
+{{- $kotlinOS := get (dict
     "darwin"  "mac"
     "linux"   "linux"
     "windows" "win"
--}}
+) $.chezmoi.os -}}
 
-{{- $kotlinArchMap := dict
+{{- $kotlinArch := get (dict
     "amd64" "x64"
     "arm64" "aarch64"
--}}
-
-{{- $kotlinOS := index $kotlinOSMap $os -}}
-{{- $kotlinArch := index $kotlinArchMap $arch -}}
+) .chezmoi.arch -}}
 
 ["Developer/Example/Zotero/translators"]
     type = "git-repo"
