@@ -57,7 +57,6 @@ brews = [
   "jadx",
   "jdtls",
   "jq",
-  "kotlin-language-server",
   "ktlint",
   "lefthook",
   "libgccjit",
