@@ -1,3 +1,20 @@
+{{- $os := .chezmoi.os -}}
+{{- $arch := .chezmoi.arch -}}
+
+{{- $kotlinOSMap := dict
+    "darwin"  "mac"
+    "linux"   "linux"
+    "windows" "win"
+-}}
+
+{{- $kotlinArchMap := dict
+    "amd64" "x64"
+    "arm64" "aarch64"
+-}}
+
+{{- $kotlinOS := index $kotlinOSMap $os -}}
+{{- $kotlinArch := index $kotlinArchMap $arch -}}
+
 ["Developer/Example/Zotero/translators"]
     type = "git-repo"
     url = "https://github.com/zotero/translators.git"
@@ -26,6 +43,6 @@
 
 [".local/share/kotlin-lsp"]
     type = "archive"
-	url = "{{ regexFind `https://[^\s]+\.zip` (gitHubLatestRelease "Kotlin/kotlin-lsp").Body }}"
+	url = "{{ regexFind (printf `https://[^\s]+-%s-%s\.zip` $kotlinOS $kotlinArch) (gitHubLatestRelease "Kotlin/kotlin-lsp").Body }}"
 	exact = true
     refreshPeriod = "744h"
