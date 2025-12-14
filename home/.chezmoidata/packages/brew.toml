@@ -258,6 +258,6 @@ mas = [
   { id = 634148309, name = "Logic Pro", when = "home" },
   { id = 634159523, name = "MainStage", when = "home" },
   { id = 640199958, name = "Developer" },
-  # { id = 6447957425, name = "Immersive Translate" },
+  { id = 6447957425, name = "Immersive Translate" },
   { id = 937984704, name = "Amphetamine" },
 ]
