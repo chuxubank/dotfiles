@@ -76,11 +76,16 @@
 {{- end }}
 
 {{- $config := dict
-  "model" "gpt-5.1-codex-max"
+  "model" "gpt-5.2-codex"
   "mcp_servers" $servers
   "projects" $projects
   "notice" (dict
     "hide_gpt5_1_migration_prompt" true
-    "hide_gpt-5.1-codex-max_migration_prompt" true)
+    "hide_gpt-5.1-codex-max_migration_prompt" true
+  )
+  "features" (dict
+    "unified_exec" true
+	"shell_snapshot" true
+  )
 -}}
 {{ $config | toToml }}
