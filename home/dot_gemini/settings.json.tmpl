@@ -2,25 +2,26 @@
 {{- range $provider := .mcp.providers }}
   {{- if $provider.enabled }}
     {{- $name := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
+	{{- $exec := $provider.execution -}}
     {{- $server := dict -}}
     {{- $_ := set $server "description" $provider.description -}}
-    {{- if eq $provider.execution.type "stdio" }}
-      {{- $_ := set $server "command" $provider.execution.cmd -}}
-      {{- if hasKey $provider.execution "args" }}
-        {{- $_ := set $server "args" $provider.execution.args -}}
+    {{- if eq $exec.type "stdio" }}
+      {{- $_ := set $server "command" $exec.cmd -}}
+      {{- if hasKey $exec "args" }}
+        {{- $_ := set $server "args" $exec.args -}}
       {{- end }}
-    {{- else if hasKey $provider.execution "url" }}
-      {{- $_ := set $server "url" $provider.execution.url -}}
-    {{- else if hasKey $provider.execution "httpUrl" }}
-      {{- $_ := set $server "httpUrl" $provider.execution.httpUrl -}}
+    {{- else if eq $exec.type "sse" }}
+      {{- $_ := set $server "url" $exec.uri -}}
+    {{- else if eq $exec.type "http" }}
+      {{- $_ := set $server "httpUrl" $exec.uri -}}
     {{- end }}
-    {{- if hasKey $provider.execution "timeout" }}
-      {{- $_ := set $server "timeout" (mul $provider.execution.timeout 1000) -}}
+    {{- if hasKey $exec "timeout" }}
+      {{- $_ := set $server "timeout" (mul $exec.timeout 1000) -}}
     {{- end }}
-    {{- if hasKey $provider.execution "envs" }}
+    {{- if hasKey $exec "envs" }}
       {{- $envs := dict -}}
-      {{- range $envKey := sortAlpha (keys $provider.execution.envs) }}
-        {{- $envValue := index $provider.execution.envs $envKey -}}
+      {{- range $envKey := sortAlpha (keys $exec.envs) }}
+        {{- $envValue := index $exec.envs $envKey -}}
         {{- if eq (kindOf $envValue) "map" }}
           {{- $secret := "" -}}
           {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
