@@ -105,6 +105,7 @@ brews = [
   "sdcv",
   "shfmt",
   "sing-box",
+  "socat",
   "sshpass",
   "starship",
   "stylua",
