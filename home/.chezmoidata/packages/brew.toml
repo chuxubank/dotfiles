@@ -8,6 +8,7 @@ taps = [
   "jimeh/emacs-builds",
   "railwaycat/emacsmacport",
   "sikarugir-app/sikarugir",
+  "steipete/tap",
   { name = "atlassian/acli", when = "work" },
 ]
 brews = [
@@ -216,6 +217,7 @@ casks = [
   "shortcat",
   "squirrel-app",
   "stats",
+  "steipete/tap/codexbar",
   "visual-studio-code",
   "wezterm",
   "windows-app",
