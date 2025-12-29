@@ -191,6 +191,7 @@ casks = [
   "fontgoggles",
   "ghostty",
   "iina",
+  "inkscape",
   "itsycal",
   "jimeh/emacs-builds/emacs-app",
   "jordanbaird-ice",
