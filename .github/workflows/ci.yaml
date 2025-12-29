@@ -32,14 +32,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-chezmoi-
 
-      - name: Cache bun
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun
-          key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/packages/node.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-
       - name: Cache sdkman
         uses: actions/cache@v4
         with:
@@ -48,7 +40,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sdkman-
 
+      - name: Cache bun
+        if: false
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun
+          key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/packages/node.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Cache uv
+        if: false
         uses: actions/cache@v4
         with:
           path: ~/.cache/uv
