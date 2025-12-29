@@ -8,6 +8,7 @@ tools = [
   "keymap-drawer",
   "kimi-cli",
   "my_cookies",
+  "pygments",
   "pylint",
   "python-lsp-server",
   "you-get",
