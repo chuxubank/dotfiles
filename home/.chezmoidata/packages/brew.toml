@@ -228,7 +228,6 @@ casks = [
   { name = "1password", when = "work" },
   { name = "1password-cli", when = "work" },
   { name = "Sikarugir-App/sikarugir/sikarugir", when = "home" },
-  { name = "altserver", when = "home" },
   { name = "battery", when = "home" },
   { name = "cursor", when = "work" },
   { name = "guitar-pro", when = "home" },

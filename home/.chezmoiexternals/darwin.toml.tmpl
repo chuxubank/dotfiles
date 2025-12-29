@@ -21,4 +21,8 @@
     url = "{{ (gitHubLatestReleaseAssetURL "md-babel/swift-markdown-babel" "md-babel_macos-universal-*.tar.bz2") }}"
     path = "md-babel"
 
+["Applications/iloader.app"]
+    type = "archive"
+    url = "{{ (gitHubLatestReleaseAssetURL "nab138/iloader" "iloader-darwin-universal.app.tar.gz") }}"
+	stripComponents = 1
 {{- end }}
