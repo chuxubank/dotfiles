@@ -40,6 +40,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sdkman-
 
+      - name: Cache rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/cargo/bin/
+            ~/.local/share/cargo/registry/index/
+            ~/.local/share/cargo/registry/cache/
+            ~/.local/share/cargo/git/db/
+          key: ${{ runner.os }}-rust-${{ hashFiles('home/.chezmoidata/packages/rust.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
       - name: Cache bun
         if: false
         uses: actions/cache@v4
