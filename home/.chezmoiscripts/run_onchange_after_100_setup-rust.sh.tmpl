@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 echo "{{ template "week" . }} 󰯁 Setup rust"
 
@@ -7,3 +7,16 @@ rustup default stable
 rustup update stable
 
 rustup component add rust-analyzer
+
+{{- range $tool := .packages.rust.cargo }}
+{{- if eq (kindOf $tool) "map" }}
+{{- $when := index $tool "when" }}
+{{- if or (not $when) (eq $when $.hosttype) }}
+cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }} {{ $tool.name }}
+{{- end }}
+{{- else }}
+cargo install {{ $tool }}
+{{- end }}
+{{- end }}
+
+cargo install-update -a -g

@@ -1,0 +1,5 @@
+[packages.rust]
+cargo = [
+  "cargo-update",
+  "rust-script",
+]
