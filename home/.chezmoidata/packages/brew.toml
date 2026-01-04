@@ -142,6 +142,7 @@ brews = [
   { name = "sleepwatcher", restart_service = true },
 ]
 casks = [
+  "alma",
   "android-studio",
   "anki",
   "antigravity",
