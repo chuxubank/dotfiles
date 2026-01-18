@@ -9,6 +9,7 @@ global = [
   "@openai/codex",
   "@prettier/plugin-ruby",
   "@zed-industries/codex-acp",
+  "add-skill",
   "bash-language-server",
   "prettier",
   "puppeteer",
