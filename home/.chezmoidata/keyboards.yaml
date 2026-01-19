@@ -29,7 +29,6 @@ keyboards:
     # ThinkPad TrackPoint Keyboard Ⅱ USB
     - identifiers:
         is_keyboard: true
-        is_pointing_device: true
         product_id: 24814
         vendor_id: 6127
       fnKeys: true
