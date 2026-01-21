@@ -60,6 +60,7 @@ brews = [
   "jdtls",
   "jq",
   "ktlint",
+  "leetcode-cli",
   "lefthook",
   "libgccjit",
   "librime",
