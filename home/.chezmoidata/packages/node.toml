@@ -11,6 +11,7 @@ global = [
   "@zed-industries/codex-acp",
   "add-skill",
   "bash-language-server",
+  "graphql-language-service-cli",
   "prettier",
   "puppeteer",
   "pyright",
