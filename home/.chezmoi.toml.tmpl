@@ -5,6 +5,7 @@
 {{- $hosttype := "ci" -}}
 {{- $passDir := ".password-store" }}
 {{- $isDarkMode := false }}
+{{- $os := .chezmoi.os -}}
 
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
@@ -12,7 +13,7 @@
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
 {{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
+{{- if eq $os "darwin" }}
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
 {{- end }}
 
@@ -33,7 +34,7 @@ encryption = "gpg"
 
 [data.path]
     pass = {{- $passDir | quote }}
-{{- if eq .chezmoi.os "darwin" }}
+{{- if eq $os "darwin" }}
 # darwin
 {{- if eq .chezmoi.arch "arm64" }}
     usr = "/opt/homebrew"
@@ -45,16 +46,20 @@ encryption = "gpg"
     gh = "/usr/local/bin/gh"
 {{- end }}
     log = {{- joinPath .chezmoi.homeDir "Library" "Logs" | quote }}
-{{- else if eq .chezmoi.os "linux" }}
+	zotero = {{- joinPath .chezmoi.homeDir "Library/Application Support/Zotero"}}
+{{- else if eq $os "linux" }}
 # linux
     usr = "/usr"
 	etc = "/etc"
     gh = "/usr/bin/gh"
     log = "/var/log"
-{{- else if eq .chezmoi.os "windows" }}
+	zotero = {{- joinPath .chezmoi.homeDir ".zotero" "zotero"}}
+{{- else if eq $os "windows" }}
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
-{{- else if eq .chezmoi.os "android" }}
+	zotero = {{- joinPath (env "APPDATA") "Zotero" "Zotero"}}
+{{- else if eq $os "android" }}
+# android
     usr = "/data/data/com.termux/files/usr"
     gh = "/data/data/com.termux/files/usr/bin/gh"
     log = "/data/data/com.termux/files/var/log"
