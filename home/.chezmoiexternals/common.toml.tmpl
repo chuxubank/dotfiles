@@ -40,3 +40,7 @@
 	url = "{{ regexFind (printf `https://[^\s]+-%s-%s\.zip` $kotlinOS $kotlinArch) (gitHubLatestRelease "Kotlin/kotlin-lsp").Body }}"
 	exact = true
     refreshPeriod = "744h"
+
+[{{ joinPath .path.zotero (index .path "zotero-ext") "better-bibtex@iris-advies.com.xpi" | quote }}]
+    type = "file"
+	url = "{{ (gitHubLatestReleaseAssetURL "retorquere/zotero-better-bibtex" "zotero-better-bibtex-*.xpi") }}"

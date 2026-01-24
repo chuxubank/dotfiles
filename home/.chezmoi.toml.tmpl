@@ -46,18 +46,18 @@ encryption = "gpg"
     gh = "/usr/local/bin/gh"
 {{- end }}
     log = {{- joinPath .chezmoi.homeDir "Library" "Logs" | quote }}
-	zotero = {{- joinPath .chezmoi.homeDir "Library/Application Support/Zotero"}}
+	zotero = {{- joinPath "Library" "Application Support" "Zotero" | quote}}
 {{- else if eq $os "linux" }}
 # linux
     usr = "/usr"
 	etc = "/etc"
     gh = "/usr/bin/gh"
     log = "/var/log"
-	zotero = {{- joinPath .chezmoi.homeDir ".zotero" "zotero"}}
+	zotero = {{- joinPath ".zotero" "zotero" | quote }}
 {{- else if eq $os "windows" }}
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
-	zotero = {{- joinPath (env "APPDATA") "Zotero" "Zotero"}}
+	zotero = {{- joinPath (env "APPDATA") "Zotero" "Zotero" | quote }}
 {{- else if eq $os "android" }}
 # android
     usr = "/data/data/com.termux/files/usr"

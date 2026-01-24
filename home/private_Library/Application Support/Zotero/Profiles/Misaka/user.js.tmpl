@@ -1,0 +1,24 @@
+{{- $bibFile := joinPath .chezmoi.homeDir (index .path "org-roam") "bibliography" "zotero.bib" -}}
+
+user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $bibFile | replace "." "%2e"}}", {{- dict
+  "created" (stat $bibFile).modTime | mul 1000
+  "path" $bibFile
+  "translatorID" "f895aa0d-f28e-47fe-b247-2ea77c6ed583"
+  "type" "library"
+  "id" 1
+  "status" "done"
+  "error" ""
+  "recursive" false
+  "updated" now.UnixMilli
+  "enabled" true
+  "asciiBibLaTeX" false
+  "biblatexExtendedNameFormat" true
+  "DOIandURL" "both"
+  "exportNotes" false
+  "useJournalAbbreviation" false
+  "biblatexAPA" false
+  "biblatexChicago" false
+| toJson | quote -}});
+
+user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.fold.lower + shorttitle(3, 3) + year");
+user_pref("extensions.zotero.translators.better-bibtex.postscript", {{- includeTemplate "zotero/postscript.js" | quote -}});
