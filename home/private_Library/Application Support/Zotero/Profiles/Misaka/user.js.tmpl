@@ -25,3 +25,10 @@ user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $b
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.fold.lower + shorttitle(3, 3) + year");
 
 user_pref("extensions.zotero.translators.better-bibtex.postscript", {{- includeTemplate "zotero/postscript.js" | quote -}});
+
+user_pref("extensions.zotero.sync.server.username", {{ (passFields "Personal/Tech/Zotero").username | quote }});
+user_pref("extensions.zotero.sync.storage.downloadMode.groups", "on-demand");
+user_pref("extensions.zotero.sync.storage.downloadMode.personal", "on-demand");
+user_pref("extensions.zotero.sync.storage.protocol", "webdav");
+user_pref("extensions.zotero.sync.storage.url", {{ (passFields "Personal/Nutstore/Zotero").url | quote }});
+user_pref("extensions.zotero.sync.storage.username", {{ (passFields "Personal/Nutstore/Zotero").username | quote }});
