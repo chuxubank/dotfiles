@@ -1,0 +1,20 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $in := trim .chezmoi.stdin -}}
+{{- if gt (len $in) 0 -}}
+  {{- $obj := fromJson $in -}}
+
+  {{- if and (hasKey $obj "addons") (kindIs "slice" (index $obj "addons")) -}}
+    {{- $newAddons := list -}}
+    {{- range (index $obj "addons") -}}
+      {{- $addon := .
+          | setValueAtPath "userDisabled" false
+          | setValueAtPath "active" true -}}
+      {{- $newAddons = append $newAddons $addon -}}
+    {{- end -}}
+    {{- $obj = $obj | setValueAtPath "addons" $newAddons -}}
+  {{- end -}}
+
+  {{- toJson $obj -}}
+{{- else -}}
+
+{{- end -}}

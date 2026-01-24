@@ -1,7 +1,9 @@
-{{- $bibFile := joinPath .chezmoi.homeDir (index .path "org-roam") "bibliography" "zotero.bib" -}}
+{{- $repo := joinPath .chezmoi.homeDir (index .path "org-roam") -}}
+{{- $file := joinPath "bibliography" "zotero.bib" -}}
+{{- $bibFile := joinPath $repo $file -}}
 
 user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $bibFile | replace "." "%2e"}}", {{- dict
-  "created" (stat $bibFile).modTime | mul 1000
+  "created" (output "git" "-C" $repo "log" "--diff-filter=A" "--follow" "--format=%ct" "-1" "--" $file | trim | mul 1000)
   "path" $bibFile
   "translatorID" "f895aa0d-f28e-47fe-b247-2ea77c6ed583"
   "type" "library"
@@ -9,7 +11,7 @@ user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $b
   "status" "done"
   "error" ""
   "recursive" false
-  "updated" now.UnixMilli
+  "updated" (mul (stat $bibFile).modTime 1000)
   "enabled" true
   "asciiBibLaTeX" false
   "biblatexExtendedNameFormat" true
@@ -21,4 +23,5 @@ user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $b
 | toJson | quote -}});
 
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.fold.lower + shorttitle(3, 3) + year");
+
 user_pref("extensions.zotero.translators.better-bibtex.postscript", {{- includeTemplate "zotero/postscript.js" | quote -}});
