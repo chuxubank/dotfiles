@@ -11,10 +11,10 @@
                 avy-embark-collect bbdb beacon beancount
                 benchmark-init bing-dict breadcrumb buck
                 caddyfile-mode cape cdlatex chatgpt-shell chezmoi
-                chezmoi-extensions citar-embark citar-org-roam
-                cmake-font-lock code-review codeium consult-gh-embark
-                consult-gh-forge copilot corfu-prescient dart-mode
-                dashboard deft delight devdocs diagram-preview diff-hl
+                citar-embark citar-org-roam cmake-font-lock
+                code-review codeium consult-gh-embark consult-gh-forge
+                copilot corfu-prescient dart-mode dashboard deft
+                delight devdocs diagram-preview diff-hl
                 dired-rsync-transient dirvish docker
                 docker-compose-mode dockerfile-mode doom-modeline
                 doom-themes dumb-jump easy-hugo edit-indirect
