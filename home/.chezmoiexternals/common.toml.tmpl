@@ -9,18 +9,6 @@
     "arm64" "aarch64"
 ) .chezmoi.arch -}}
 
-["Developer/Example/Zotero/translators"]
-    type = "git-repo"
-    url = "https://github.com/zotero/translators.git"
-    refreshPeriod = "24h"
-    clone.args = ["--depth=1"]
-
-["Developer/Example/Zotero/translators_cn"]
-    type = "git-repo"
-    url = "https://github.com/l0o0/translators_CN.git"
-    refreshPeriod = "24h"
-    clone.args = ["--depth=1"]
-
 ["Developer/Example/Android/nowinandroid"]
     type = "git-repo"
     url = "https://github.com/android/nowinandroid.git"
@@ -45,15 +33,3 @@
 	url = "{{ regexFind (printf `https://[^\s]+-%s-%s\.zip` $kotlinOS $kotlinArch) (gitHubLatestRelease "Kotlin/kotlin-lsp").Body }}"
 	exact = true
     refreshPeriod = "744h"
-
-[{{ joinPath .path.zotero (index .path "zotero-ext") "better-bibtex@iris-advies.com.xpi" | quote }}]
-    type = "file"
-	url = "{{ (gitHubLatestReleaseAssetURL "retorquere/zotero-better-bibtex" "zotero-better-bibtex-*.xpi") }}"
-
-[{{ joinPath .path.zotero (index .path "zotero-ext") "zoteropdftranslate@euclpts.com.xpi" | quote }}]
-    type = "file"
-	url = "{{ (gitHubLatestReleaseAssetURL "windingwind/zotero-pdf-translate" "translate-for-zotero.xpi") }}"
-
-[{{ joinPath .path.zotero (index .path "zotero-ext") "jasminum@linxzh.com.xpi" | quote }}]
-    type = "file"
-	url = "{{ (gitHubLatestReleaseAssetURL "l0o0/jasminum" "jasminum_*.xpi") }}"
