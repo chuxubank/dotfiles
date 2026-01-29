@@ -8,6 +8,7 @@ global = [
   "@mermaid-js/mermaid-cli",
   "@openai/codex",
   "@prettier/plugin-ruby",
+  "@sourcegraph/amp",
   "@zed-industries/codex-acp",
   "add-skill",
   "bash-language-server",
