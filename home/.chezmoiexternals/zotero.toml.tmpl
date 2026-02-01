@@ -14,9 +14,9 @@
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "retorquere/zotero-better-bibtex" "zotero-better-bibtex-*.xpi") }}"
 
-# [{{ joinPath .path.zotero (index .path "zotero-ext") "zoteropdftranslate@euclpts.com.xpi" | quote }}]
-#     type = "file"
-#     url = "{{ (gitHubLatestReleaseAssetURL "windingwind/zotero-pdf-translate" "translate-for-zotero.xpi") }}"
+[{{ joinPath .path.zotero (index .path "zotero-ext") "zoteropdftranslate@euclpts.com.xpi" | quote }}]
+    type = "file"
+    url = "{{ (gitHubLatestReleaseAssetURL "windingwind/zotero-pdf-translate" "translate-for-zotero.xpi") }}"
 
 [{{ joinPath .path.zotero (index .path "zotero-ext") "jasminum@linxzh.com.xpi" | quote }}]
     type = "file"

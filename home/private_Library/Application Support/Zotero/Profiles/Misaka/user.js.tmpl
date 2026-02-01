@@ -34,3 +34,7 @@ user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $b
 | toJson | quote -}});
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.fold.lower + shorttitle(3, 3) + year");
 user_pref("extensions.zotero.translators.better-bibtex.postscript", {{- includeTemplate "zotero/postscript.js" | quote -}});
+
+user_pref("extensions.zotero.ZoteroPDFTranslate.dictSource", "bingdict");
+user_pref("extensions.zotero.ZoteroPDFTranslate.targetLanguage", "zh");
+user_pref("extensions.zotero.ZoteroPDFTranslate.translateSource", "googleapi");
