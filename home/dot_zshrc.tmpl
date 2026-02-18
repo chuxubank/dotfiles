@@ -154,6 +154,9 @@ source_if_exists $QMK_HOME/util/qmk_tab_complete.sh
 # bun completions
 source_if_exists "$BUN_INSTALL/_bun"
 
+# OpenClaw Completion
+source_if_exists "$HOME/.openclaw/completions/openclaw.zsh"
+
 # vterm
 if [[ "$INSIDE_EMACS" = 'vterm' ]] \
     && [[ -n ${EMACS_VTERM_PATH} ]] \
