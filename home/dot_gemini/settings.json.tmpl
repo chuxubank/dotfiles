@@ -49,10 +49,7 @@
   {{- end }}
 {{- end }}
 
-{{- $theme := "ANSI Light" -}}
-{{- if .isDarkMode }}
-  {{- $theme = "ANSI" -}}
-{{- end }}
+{{- $theme := ternary "ANSI" "ANSI Light" .isDarkMode -}}
 
 {{- $config := dict
   "security" (dict "auth" (dict "selectedType" "oauth-personal"))
