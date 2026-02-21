@@ -197,10 +197,10 @@ fi
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias cz="chezmoi"
-alias cza="chezmoi apply"
-alias czu="chezmoi update --init -a"
-alias czr="chezmoi re-add"
-alias czd="chezmoi diff"
+alias cza="cz apply --init"
+alias czu="cz update --init -a"
+alias czr="cz re-add"
+alias czd="cz diff"
 
 function up() {
   {{- if eq .chezmoi.os "darwin" }}
