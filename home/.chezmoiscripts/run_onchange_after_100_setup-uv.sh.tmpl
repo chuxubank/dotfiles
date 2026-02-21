@@ -21,3 +21,5 @@ uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- w
 uv tool install {{ $tool }}
 {{- end }} --upgrade
 {{- end }}
+
+uv tool upgrade --all
