@@ -36,8 +36,8 @@
                 mu4e-column-faces mu4e-overview nerd-icons-corfu
                 nerd-icons-dired netease-cloud-music no-littering nov
                 ns-auto-titlebar ob-aider ob-applescript ob-async
-                ob-go ob-kotlin ob-powershell ob-swiftui oj
-                org-agenda-count org-anki org-appear org-cliplink
+                ob-go ob-kotlin ob-powershell ob-swiftui ob-typescript
+                oj org-agenda-count org-anki org-appear org-cliplink
                 org-cv org-dial org-drill org-edna org-imgtog org-jira
                 org-link-beautify org-media-note org-mode org-modern
                 org-modern-indent org-pdftools org-ref org-remoteimg
