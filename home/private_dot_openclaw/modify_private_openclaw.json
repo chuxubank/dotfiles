@@ -18,17 +18,21 @@
   "defaults" (dict
 	"model" (dict
 	  "primary" "openrouter/free"
-	  "fallbacks" "openrouter/auto"
 	)
 	"models" (dict
 	  "openrouter/auto" (dict
 	    "alias" "OpenRouter"
 	  )
+	  "openrouter/free" (dict)
 	)
 	"workspace" (joinPath .chezmoi.homeDir ".openclaw" "workspace")
 	"compaction" (dict
 	  "mode" "safeguard"
 	)
+    "maxConcurrent" 4
+    "subagents" (dict
+      "maxConcurrent" 8
+    )
   )
   "list" (list
     (dict
@@ -53,6 +57,10 @@
   )
 -}}
 
+{{- $tools := dict
+  "profile" "messaging"
+-}}
+
 {{- $bindings := list
   (dict
     "agentId" "public"
@@ -67,12 +75,20 @@
   "native" "auto"
   "nativeSkills" "auto"
   "restart" true
+  "ownerDisplay" "raw"
 -}}
 
 {{- $channels := dict
   "imessage" (dict
 	"cliPath" (joinPath .chezmoi.homeDir ".openclaw" "scripts" "imsg-ssh")
+    "groupPolicy" "open"
 	"accounts" (dict
+	  "default" (dict
+	    "enabled" true
+		"configWrites" false
+		"dmPolicy" "pairing"
+        "groupPolicy" "open"
+	  )
 	  "pub" (dict
 	    "enabled" true
 		"configWrites" false
@@ -94,7 +110,7 @@
   "bind" "loopback"
   "auth" (dict
     "mode" "token"
-	"token" (index (passFields "Personal/Tech/AI/OpenRouter") "token-openclaw")
+	"token" (index (passFields "Personal/Tech/AI/OpenRouter") "api-key-openclaw")
   )
   "tailscale" (dict
     "mode" "off"
@@ -105,9 +121,10 @@
 	  "camera.snap"
 	  "camera.clip"
 	  "screen.record"
-	  "clendar.add"
 	  "contacts.add"
+	  "clendar.add"
 	  "reminders.add"
+      "sms.send"
 	)
   )
 -}}
@@ -133,6 +150,7 @@
 	| setValueAtPath "browser" $browser
 	| setValueAtPath "auth" $auth
 	| setValueAtPath "agents" $agents
+	| setValueAtPath "tools" $tools
 	| setValueAtPath "bindings" $bindings
 	| setValueAtPath "commands" $commands
 	| setValueAtPath "channels" $channels

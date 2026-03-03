@@ -1,2 +1,2 @@
 #!/usr/bin/env zsh
-exec sshpass -p {{ pass "Network/Home/OpenClaw" }} ssh -T openclaw@localhost imsg "$@"
+exec sshpass -p {{ pass "Network/Home/OpenClaw" }} ssh -T openclaw@localhost {{ joinPath .path.usr "bin" "imsg" }} "$@"
