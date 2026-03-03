@@ -213,7 +213,6 @@ casks = [
   "nextcloud",
   "notion",
   "obsidian",
-  "openclaw",
   "postman",
   "raspberry-pi-imager",
   "raycast",
