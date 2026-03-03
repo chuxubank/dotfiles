@@ -76,12 +76,14 @@
 {{- end }}
 
 {{- $config := dict
-  "model" "gpt-5.2-codex"
+  "model" "gpt-5.3-codex"
+  "model_reasoning_effort" "medium"
   "mcp_servers" $servers
   "projects" $projects
   "notice" (dict
     "hide_gpt5_1_migration_prompt" true
     "hide_gpt-5.1-codex-max_migration_prompt" true
+	"model_migrations" (dict "gpt-5.2-codex" "gpt-5.3-codex")
   )
   "features" (dict
     "unified_exec" true
