@@ -71,11 +71,7 @@
 
 {{- $channels := dict
   "imessage" (dict
-    "enabled" true
-	"configWrites" true
 	"cliPath" (joinPath .chezmoi.homeDir ".openclaw" "scripts" "imsg-ssh")
-	"dmPolicy" "pairing"
-	"groupPolicy" "allowlist"
 	"accounts" (dict
 	  "pub" (dict
 	    "enabled" true
