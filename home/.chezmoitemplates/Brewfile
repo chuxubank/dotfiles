@@ -1,6 +1,6 @@
 {{ range .packages.darwin.taps -}}
 {{ if eq (kindOf .) "map" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+{{ if or (not (index . "when")) (has $.hosttype (index . "when")) -}}
 tap {{ .name | quote }}
 {{ end -}}
 {{ else -}}
@@ -9,7 +9,7 @@ tap {{ . | quote }}
 {{ end -}}
 {{ range .packages.darwin.brews -}}
 {{ if eq (kindOf .) "map" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+{{ if or (not (index . "when")) (has $.hosttype (index . "when")) -}}
 brew {{ .name | quote }}
 {{- range $key, $value := . -}}
 {{- if eq $key "link" }}, link: {{ $value }}{{ end -}}
@@ -23,7 +23,7 @@ brew {{ . | quote }}
 {{ end -}}
 {{ range .packages.darwin.casks -}}
 {{ if eq (kindOf .) "map" -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+{{ if or (not (index . "when")) (has $.hosttype (index . "when")) -}}
 cask {{ .name | quote }}
 {{ end -}}
 {{ else -}}
@@ -31,7 +31,7 @@ cask {{ . | quote }}
 {{ end -}}
 {{ end -}}
 {{ range .packages.darwin.mas -}}
-{{ if or (not (index . "when")) (eq (index . "when") $.hosttype) -}}
+{{ if or (not (index . "when")) (has $.hosttype (index . "when")) -}}
 mas {{ .name | quote }}, id: {{ .id }}
 {{ end -}}
 {{ end -}}

@@ -19,12 +19,12 @@ Library
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
-{{- if eq .hosttype "work" }}
-.ssh/aa/id_rsa
-.ssh/aa/id_ed25519
-.ssh/personal/id_ed25519
-{{- else }}
+{{- if ne .hosttype "aa" }}
 .ssh/aa
+{{- else if ne .hosttype "iv" }}
+.ssh/iv
+{{- else }}
+.ssh/personal/id_ed25519
 {{- end }}
 
 {{- if eq .hosttype "ci" }}

@@ -134,7 +134,7 @@ if [[ "$(uname)" = 'Darwin' ]]; then
     plugins+=(macos)
 fi
 
-{{ if eq .hosttype "work" -}}
+{{ if eq .hosttype "aa" -}}
 plugins+=(jira aws)
 {{ end -}}
 
@@ -218,7 +218,7 @@ alias upp="uv tool upgrade --all"
 
 alias gpgk="gpgconf --kill gpg-agent"
 
-{{- if eq .hosttype "work" }}
+{{- if eq .hosttype "aa" }}
 alias ci="export CIRCLECI=true && export CI=true && export key_file_path='/' && export key_alias='' && export key_password='' && export key_alias_password=''"
 alias zs='export {http,https}_proxy="http://127.0.0.1:9000"'
 alias zssg='export {http,https}_proxy="http://10.29.248.90:80"'

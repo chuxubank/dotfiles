@@ -1,4 +1,4 @@
-{{- if eq .hosttype "work" }}
+{{- if eq .hosttype "aa" }}
 ["bin/fly"]
     type = "file"
 	url = "https://concourse-prod.aaecosystem.com/api/v1/cli?arch=amd64&platform={{ .chezmoi.os }}"

@@ -16,7 +16,7 @@ sdk selfupdate
 {{- range $sdk := .packages.sdkman.sdk }}
 {{- if eq (kindOf $sdk) "map" }}
 {{- $when := index $sdk "when" }}
-{{- if or (not $when) (eq $when $.hosttype) }}
+{{- if or (not $when) (has $.hosttype $when) }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
 {{- end }}
 {{- else }}
