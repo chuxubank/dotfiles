@@ -1,0 +1,146 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- $browser := dict
+  "enabled" true
+  "defaultProfile" "openclaw"
+-}}
+
+{{- $auth := dict
+  "profiles" (dict
+	"openrouter:default" (dict
+	  "provider" "openrouter"
+	  "mode" "api_key"
+	)
+  )
+-}}
+
+{{- $agents := dict
+  "defaults" (dict
+	"model" (dict
+	  "primary" "openrouter/free"
+	  "fallbacks" "openrouter/auto"
+	)
+	"models" (dict
+	  "openrouter/auto" (dict
+	    "alias" "OpenRouter"
+	  )
+	)
+	"workspace" (joinPath .chezmoi.homeDir ".openclaw" "workspace")
+	"compaction" (dict
+	  "mode" "safeguard"
+	)
+  )
+  "list" (list
+    (dict
+	  "id" "main"
+	  "tools" (dict
+	    "allow" (list
+		  "llm-task"
+		)
+	  )
+	)
+	(dict
+	  "id" "public"
+	  "name" "public"
+	  "workspace" (joinPath .chezmoi.homeDir ".openclaw" "workspace-public")
+	  "agentDir" (joinPath .chezmoi.homeDir ".openclaw" "agents" "public" "agent")
+	  "groupChat" (dict
+	    "mentionPatterns" (list
+		  "@?nyx"
+		)
+	  )
+	)
+  )
+-}}
+
+{{- $bindings := list
+  (dict
+    "agentId" "public"
+	"match" (dict
+	  "channel" "imessage"
+	  "accountId" "pub"
+	)
+  )
+-}}
+
+{{- $commands := dict
+  "native" "auto"
+  "nativeSkills" "auto"
+  "restart" true
+-}}
+
+{{- $channels := dict
+  "imessage" (dict
+    "enabled" true
+	"configWrites" true
+	"cliPath" (joinPath .chezmoi.homeDir ".openclaw" "scripts" "imsg-ssh")
+	"dmPolicy" "pairing"
+	"groupPolicy" "allowlist"
+	"accounts" (dict
+	  "pub" (dict
+	    "enabled" true
+		"configWrites" false
+		"dmPolicy" "pairing"
+		"groupPolicy" "open"
+		"groups" (dict
+		  "*" (dict
+		    "requireMention" true
+		  )
+		)
+	  )
+	)
+  )
+-}}
+
+{{- $gateway := dict
+  "port" 18789
+  "mode" "local"
+  "bind" "loopback"
+  "auth" (dict
+    "mode" "token"
+	"token" (index (passFields "Personal/Tech/AI/OpenRouter") "token-openclaw")
+  )
+  "tailscale" (dict
+    "mode" "off"
+	"resetOnExit" false
+  )
+  "nodes" (dict
+    "denyCommands" (list
+	  "camera.snap"
+	  "camera.clip"
+	  "screen.record"
+	  "clendar.add"
+	  "contacts.add"
+	  "reminders.add"
+	)
+  )
+-}}
+
+{{- $skills := dict
+  "install" (dict
+    "nodeManager" "bun"
+  )
+-}}
+
+{{- $plugins := dict
+  "entries" (dict
+    "llm-task" (dict
+	  "enabled" true
+	)
+	"imessage" (dict
+	  "enabled" true
+	)
+  )
+-}}
+
+{{- fromJson .chezmoi.stdin
+	| setValueAtPath "browser" $browser
+	| setValueAtPath "auth" $auth
+	| setValueAtPath "agents" $agents
+	| setValueAtPath "bindings" $bindings
+	| setValueAtPath "commands" $commands
+	| setValueAtPath "channels" $channels
+	| setValueAtPath "gateway" $gateway
+	| setValueAtPath "skills" $skills
+	| setValueAtPath "plugins" $plugins
+	| toPrettyJson -}}

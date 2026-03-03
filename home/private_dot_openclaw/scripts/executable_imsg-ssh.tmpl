@@ -1,0 +1,2 @@
+#!/usr/bin/env zsh
+exec sshpass -p {{ pass "Network/Home/OpenClaw" }} ssh -T openclaw@localhost imsg "$@"
