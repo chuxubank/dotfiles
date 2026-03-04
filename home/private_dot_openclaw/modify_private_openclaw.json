@@ -146,7 +146,9 @@
   )
 -}}
 
-{{- fromJson .chezmoi.stdin
+{{- $in := trim .chezmoi.stdin -}}
+{{- if gt (len $in) 0 -}}
+{{- fromJson $in
 	| setValueAtPath "browser" $browser
 	| setValueAtPath "auth" $auth
 	| setValueAtPath "agents" $agents
@@ -158,3 +160,6 @@
 	| setValueAtPath "skills" $skills
 	| setValueAtPath "plugins" $plugins
 	| toPrettyJson -}}
+{{- else -}}
+
+{{- end -}}

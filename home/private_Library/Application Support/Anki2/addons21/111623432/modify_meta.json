@@ -51,7 +51,12 @@
   }
 }` | fromJson -}}
 
-{{ fromJson .chezmoi.stdin |
+{{- $in := trim .chezmoi.stdin -}}
+{{- if gt (len $in) 0 -}}
+{{ fromJson $in |
    setValueAtPath "config.realtime_config" $realtimeConfig |
    setValueAtPath "config.configuration" $configuration |
    toJson }}
+{{- else -}}
+
+{{- end -}}
