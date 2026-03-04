@@ -1,13 +1,14 @@
 [packages.darwin]
 taps = [
+  "achannarasappa/tap",
   "beeftornado/rmtree",
   "d12frosted/emacs-plus",
-  "homebrew/bundle",
-  "homebrew/command-not-found",
-  "homebrew/services",
+  "deb-sig/tap",
   "railwaycat/emacsmacport",
   "sikarugir-app/sikarugir",
   "steipete/tap",
+  "theseal/ssh-askpass",
+  "tw93/tap",
   { name = "atlassian/acli", when = ["aa"] },
 ]
 brews = [
