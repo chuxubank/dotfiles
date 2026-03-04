@@ -234,6 +234,7 @@ casks = [
   { name = "Sikarugir-App/sikarugir/sikarugir", when = ["home"] },
   { name = "battery", when = ["home"] },
   { name = "cursor", when = ["aa"] },
+  { name = "feishu", when = ["iv"] },
   { name = "guitar-pro", when = ["home"] },
   { name = "home-assistant", when = ["home"] },
   { name = "insta360-studio", when = ["home"] },
