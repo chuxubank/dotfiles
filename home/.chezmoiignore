@@ -36,6 +36,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .double-entry-generator.yaml
 .gemini
 .gradle
+.openclaw
 .ssh
 {{ .path.beancount }}
 {{ .path.isyncrc }}
