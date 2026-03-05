@@ -244,7 +244,7 @@ casks = [
   { name = "microsoft-teams", when = ["aa"] },
   { name = "miro", when = ["aa"] },
   { name = "mongodb-compass", when = ["aa"] },
-  { name = "mos", when = ["home"] },
+  { name = "mos", when = ["home", "iv"] },
   { name = "neteasemusic", when = ["home"] },
   { name = "orbstack", when = ["home"] },
   { name = "podman-desktop", when = ["aa"] },
