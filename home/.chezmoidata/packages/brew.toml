@@ -159,6 +159,7 @@ casks = [
   "chatgpt",
   "chatgpt-atlas",
   "claude",
+  "claude-code",
   "d12frosted/emacs-plus/emacs-plus-app",
   "deepl",
   "discord",
