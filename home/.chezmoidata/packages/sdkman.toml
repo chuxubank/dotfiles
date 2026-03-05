@@ -4,7 +4,7 @@ sdk = [
   "ki",
   { name = "gradle", version = "8.9", when = ["aa"] },
   { name = "gradle", when = ["home"] },
-  { name = "java", version = "17-open", when = ["aa"] },
+  { name = "java", version = "17-open", when = ["aa", "iv"] },
   { name = "java", when = ["home"] },
   { name = "kotlin", version = "2.1.10", when = ["aa"] },
   { name = "kotlin", version = "2.2.21", when = ["home"] },
