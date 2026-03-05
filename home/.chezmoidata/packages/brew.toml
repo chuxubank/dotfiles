@@ -138,6 +138,7 @@ brews = [
   "zsh-syntax-highlighting",
   { name = "atlassian/homebrew-acli/acli", when = ["aa"] },
   { name = "awscli", when = ["aa"] },
+  { name = "cocoapods", when = ["home", "iv"] },
   { name = "podman", when = ["aa"] },
   { name = "podman-compose", when = ["aa"] },
   { name = "podman-tui", when = ["aa"] },
