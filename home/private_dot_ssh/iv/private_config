@@ -1,0 +1,4 @@
+Host git.infinityparadise.com
+  AddKeysToAgent yes
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/iv/id_ed25519

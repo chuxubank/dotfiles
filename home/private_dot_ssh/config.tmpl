@@ -7,3 +7,7 @@ Include ~/.ssh/personal/config
 {{ if eq .hosttype "aa" -}}
 Include ~/.ssh/aa/config
 {{ end -}}
+
+{{ if eq .hosttype "iv" -}}
+Include ~/.ssh/iv/config
+{{ end -}}
