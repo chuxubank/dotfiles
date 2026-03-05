@@ -25,7 +25,7 @@
                 flymake-ansible-lint flymake-bridge flymake-gradle
                 git-link git-timemachine glab gntp go-mode
                 go-translate goggles gogs gptel-magit gptel-prompts
-                gradle gradle-el groovy-mode gtea helpful hugoista
+                gradle gradle-el groovy-mode gt gtea helpful hugoista
                 hydra-posframe igist immersive-translate indent-bars
                 jabber jira kaolin-themes kdl-mode kotlin-mode
                 kotlin-ts-mode kv leetcode ligature logview lsp-proxy
