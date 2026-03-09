@@ -234,6 +234,8 @@ source <(fly completion --shell zsh)
 source $HOME/.config/op/plugins.sh
 {{- end }}
 
+eval "$(codex completion zsh)"
+
 {{ template "service-toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
