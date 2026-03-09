@@ -54,7 +54,15 @@
 {{- $config := dict
   "security" (dict "auth" (dict "selectedType" "oauth-personal"))
   "ui" (dict "theme" $theme)
-  "general" (dict "vimMode" false "previewFeatures" true)
+  "general" (dict
+    "vimMode" false
+	"previewFeatures" true
+	"sessionRetention" (dict
+	  "enabled" true
+	  "maxAge" "30d"
+	  "warningAcknowledged" true
+	)
+  )
   "mcpServers" $servers
 -}}
 {{ $config | toPrettyJson }}
