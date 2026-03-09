@@ -70,7 +70,7 @@
 {{- /* Projects trust map */ -}}
 {{- $projects := dict -}}
 {{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") (dict "trust_level" "trusted") -}}
-{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" -}}
+{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" "iv" "aa" "asahiart" -}}
 {{- range $k := $trustedKeys }}
   {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) (dict "trust_level" "trusted") -}}
 {{- end }}

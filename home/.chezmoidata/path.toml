@@ -7,6 +7,10 @@ proxy = "Developer/Personal/proxy"
 keyboard = "Developer/Personal/keyboard"
 nutstore = "Nutstore"
 
+iv = "Developer/IV"
+aa = "Developer/AA"
+asahiart = "Developer/AsahiArt"
+
 bun = ".bun"
 emacs = ".config/emacs"
 emacs-site-lisp = ".local/share/emacs/site-lisp"
