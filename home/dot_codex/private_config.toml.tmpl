@@ -12,8 +12,8 @@
     {{- if hasKey $exec "args" }}
       {{- $_ := set $server "args" $exec.args -}}
     {{- end }}
-  {{- else if eq $exec.type "http" }}
-    {{- $_ := set $server "url" $exec.url -}}
+  {{- else if or (eq $exec.type "http") (eq $exec.type "sse") }}
+    {{- $_ := set $server "url" $exec.uri -}}
     {{- if hasKey $exec "bearer_token_env_var" }}
       {{- $_ := set $server "bearer_token_env_var" $exec.bearer_token_env_var -}}
     {{- end }}

@@ -11,7 +11,7 @@
       {{- range .execution.args }}
     - {{ . | quote }}
       {{- end }}
-	{{- else if eq .execution.type "sse" }}
+	{{- else if or (eq .execution.type "http") (eq .execution.type "sse") }}
 	uri: {{ .execution.uri }}
     {{- end }}
     {{- if (hasKey .execution "envs") }}
