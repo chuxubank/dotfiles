@@ -70,9 +70,19 @@
 {{- /* Projects trust map */ -}}
 {{- $projects := dict -}}
 {{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") (dict "trust_level" "trusted") -}}
-{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" "iv" "aa" "asahiart" -}}
+{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" "emacs" -}}
 {{- range $k := $trustedKeys }}
   {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) (dict "trust_level" "trusted") -}}
+{{- end }}
+{{- $trustedTreeKeys := list "iv" "aa" "asahiart" -}}
+{{- range $k := $trustedTreeKeys }}
+  {{- $root := joinPath $.chezmoi.homeDir (index $.path $k) -}}
+  {{- $dirs := output "sh" "-c" "if [ -d \"$1\" ]; then find \"$1\" -mindepth 1 -maxdepth 1 -type d -print; fi" "sh" $root -}}
+  {{- range $dir := splitList "\n" ($dirs | trim) }}
+    {{- if $dir }}
+      {{- $_ := set $projects $dir (dict "trust_level" "trusted") -}}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{- $config := dict
