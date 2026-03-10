@@ -50,7 +50,7 @@
     {{- end }}
   {{- end }}
 
-  {{- $serverName := regexReplaceAll "[^A-Za-z0-9_-]+" ($provider.name | lower) "_" -}}
+  {{- $serverName := regexReplaceAll "[^A-Za-z0-9_-]+" ($provider.name | lower) "-" -}}
   {{- $_ := set $servers $serverName $server -}}
 {{- end -}}
 {{- toJson $servers -}}
