@@ -20,32 +20,6 @@
         {{- $_ := set $headers $k $v -}}
       {{- end }}
     {{- end }}
-    {{- if hasKey $exec "env_http_headers" }}
-      {{- range $k := sortAlpha (keys $exec.env_http_headers) }}
-        {{- $v := index $exec.env_http_headers $k -}}
-        {{- if eq (kindOf $v) "map" }}
-          {{- $secret := "" -}}
-          {{- if or (not (hasKey $v "type")) (eq $v.type "pass") }}
-            {{- if (hasKey $v "field") }}
-              {{- $secret = (index (passFields $v.path) $v.field) -}}
-            {{- else }}
-              {{- $secret = (pass $v.path) -}}
-            {{- end }}
-          {{- else if eq $v.type "output" }}
-            {{- $secret = (outputList $v.cmd $v.args) -}}
-          {{- end }}
-          {{- if and (hasKey $v "trim") $v.trim }}
-            {{- $secret = ($secret | trim) -}}
-          {{- end }}
-          {{- $_ := set $headers $k $secret -}}
-        {{- else }}
-          {{- $_ := set $headers $k $v -}}
-        {{- end }}
-      {{- end }}
-    {{- end }}
-    {{- if hasKey $exec "bearer_token_env_var" }}
-      {{- $_ := set $headers "Authorization" (printf "Bearer ${env:%s}" $exec.bearer_token_env_var) -}}
-    {{- end }}
     {{- if gt (len $headers) 0 }}
       {{- $_ := set $server "headers" $headers -}}
     {{- end }}
