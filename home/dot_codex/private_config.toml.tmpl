@@ -17,11 +17,11 @@
     {{- if hasKey $exec "bearer_token_env_var" }}
       {{- $_ := set $server "bearer_token_env_var" $exec.bearer_token_env_var -}}
     {{- end }}
-    {{- if hasKey $exec "http_headers" }}
-      {{- $_ := set $server "http_headers" $exec.http_headers -}}
+    {{- if hasKey $exec "headers" }}
+      {{- $_ := set $server "http_headers" $exec.headers -}}
     {{- end }}
-    {{- if hasKey $exec "env_http_headers" }}
-      {{- $_ := set $server "env_http_headers" $exec.env_http_headers -}}
+    {{- if hasKey $exec "env_headers" }}
+      {{- $_ := set $server "env_http_headers" $exec.env_headers -}}
     {{- end }}
   {{- else }}
     {{- /* skip unsupported execution type */ -}}
