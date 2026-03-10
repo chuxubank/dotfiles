@@ -1,7 +1,7 @@
 {{ if not (eq .hosttype "ci") -}}
 #!/bin/sh
 
-echo "{{ template "week" . }} 󰯁 Upgrade packages"
+echo "{{ template "week" . }} 󰯁 Setup emacs"
 
 {{ template "upgrade-emacs-packages.sh" . }}
 
