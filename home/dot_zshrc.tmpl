@@ -219,10 +219,21 @@ alias upp="uv tool upgrade --all"
 alias gpgk="gpgconf --kill gpg-agent"
 
 function iploc() {
-  dig +short "$1" A | while read ip; do
-    echo "=== $ip ==="
-    curl -s ipinfo.io/$ip
-	echo "\n"
+  local prev=""
+  dig +short "$1" | while read -r line; do
+    line=${line%.}
+
+    if [[ $line =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+      echo "=== $line ==="
+      curl -s "ipinfo.io/$line"
+      echo
+      echo
+    else
+      if [[ -n "$prev" ]]; then
+        echo "$prev -> $line"
+      fi
+      prev="$line"
+    fi
   done
 }
 
