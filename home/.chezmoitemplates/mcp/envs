@@ -1,0 +1,24 @@
+{{- $envs := dict -}}
+{{- $data := . -}}
+{{- range $envKey := sortAlpha (keys $data) }}
+  {{- $envValue := index $data $envKey -}}
+  {{- if eq (kindOf $envValue) "map" }}
+    {{- $secret := "" -}}
+    {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
+      {{- if (hasKey $envValue "field") }}
+        {{- $secret = (index (passFields $envValue.path) $envValue.field) -}}
+      {{- else }}
+        {{- $secret = (pass $envValue.path) -}}
+      {{- end }}
+    {{- else if eq $envValue.type "output" }}
+      {{- $secret = (outputList $envValue.cmd $envValue.args) -}}
+    {{- end }}
+    {{- if and (hasKey $envValue "trim") $envValue.trim }}
+      {{- $secret = ($secret | trim) -}}
+    {{- end }}
+    {{- $_ := set $envs $envKey $secret -}}
+  {{- else }}
+    {{- $_ := set $envs $envKey $envValue -}}
+  {{- end }}
+{{- end }}
+{{- toJson $envs -}}

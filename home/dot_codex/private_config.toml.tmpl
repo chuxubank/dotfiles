@@ -37,28 +37,7 @@
   {{- $_ := set $server "enabled" $provider.enabled -}}
 
   {{- if hasKey $exec "envs" }}
-    {{- $envs := dict -}}
-    {{- range $envKey := sortAlpha (keys $exec.envs) }}
-      {{- $envValue := index $exec.envs $envKey -}}
-      {{- if eq (kindOf $envValue) "map" }}
-        {{- $secret := "" -}}
-        {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
-          {{- if (hasKey $envValue "field") }}
-            {{- $secret = (index (passFields $envValue.path) $envValue.field) -}}
-          {{- else }}
-            {{- $secret = (pass $envValue.path) -}}
-          {{- end }}
-        {{- else if eq $envValue.type "output" }}
-          {{- $secret = (outputList $envValue.cmd $envValue.args) -}}
-        {{- end }}
-        {{- if and (hasKey $envValue "trim") $envValue.trim }}
-          {{- $secret = ($secret | trim) -}}
-        {{- end }}
-        {{- $_ := set $envs $envKey $secret -}}
-      {{- else }}
-        {{- $_ := set $envs $envKey $envValue -}}
-      {{- end }}
-    {{- end }}
+    {{- $envs := includeTemplate "mcp/envs" $exec.envs | fromJson -}}
     {{- if gt (len $envs) 0 }}
       {{- $_ := set $server "env" $envs -}}
     {{- end }}
