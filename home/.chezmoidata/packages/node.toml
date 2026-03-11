@@ -2,6 +2,7 @@
 global = [
   "@ansible/ansible-language-server",
   "@blowmage/cursor-agent-acp",
+  "@github/copilot",
   "@github/copilot-language-server",
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
