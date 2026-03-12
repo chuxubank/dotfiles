@@ -218,6 +218,13 @@ alias upp="uv tool upgrade --all"
 
 alias gpgk="gpgconf --kill gpg-agent"
 
+function webp-duration () {
+  webpmux -info "$1" | awk '
+    /^[[:space:]]*[0-9]+:/ {sum += $7; frames++}
+    END {printf "%d frames, %d ms (%.3f s)\n", frames, sum, sum/1000}
+  '
+}
+
 function iploc() {
   local prev=""
   dig +short "$1" | while read -r line; do
