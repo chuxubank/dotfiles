@@ -1,7 +1,7 @@
 {{- $pass := ternary "Work/IV/LLM" "" (eq .hosttype "iv") -}}
 {{- $fields := passFields $pass -}}
 
-{{- $model := ternary "global.anthropic.claude-sonnet-4-6" "" (eq .hosttype "iv") -}}
+{{- $model := ternary "global.anthropic.claude-opus-4-6-v1" "" (eq .hosttype "iv") -}}
 
 {{- $env := dict
   "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
@@ -9,10 +9,15 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
+{{- if eq .hosttype "iv" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "global.anthropic.claude-opus-4-6-v1" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "global.anthropic.claude-sonnet-4-6" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}
+{{- end -}}
+
 {{- range $k, $v := dict
   "ANTHROPIC_AUTH_TOKEN" (index $fields "anthropic-auth-token")
   "ANTHROPIC_BASE_URL" (index $fields "url")
-  "ANTHROPIC_MODEL" $model
 -}}
   {{- if $v }}
     {{- $_ := set $env $k $v -}}
@@ -24,7 +29,8 @@
 -}}
 
 {{- dict
-  "env" $env
   "enabledPlugins" $enabledPlugins
+  "env" $env
+  "model" $model
   | toPrettyJson
 -}}
