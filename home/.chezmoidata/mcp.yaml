@@ -41,6 +41,15 @@ mcp:
           - mcp-server-fetch
         timeout: 300
         startup_timeout: 30
+    - name: Feishu
+      description:
+        The Feishu Project MCP Server connects AI tools to Feishu's Project.
+        Make project management more convenient.
+      enabled: true
+      execution:
+        type: http
+        uri: "https://project.feishu.cn/mcp_server/v1"
+        timeout: 300
     - name: Figma Desktop
       description: The MCP Server brings Figma directly into your workflow by providing important design information and context to AI agents generating code from Figma design files.
       enabled: true
