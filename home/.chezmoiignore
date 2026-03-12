@@ -29,7 +29,7 @@ Library/LaunchAgents/rclone.rpi.plist
 
 {{- if eq .hosttype "ci" }}
 .aider.conf.yml
-.claude.json
+.claude*
 .codex
 .config/goose
 .config/rclone

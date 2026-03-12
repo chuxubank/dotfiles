@@ -1,0 +1,30 @@
+{{- $pass := ternary "Work/IV/LLM" "" (eq .hosttype "iv") -}}
+{{- $fields := passFields $pass -}}
+
+{{- $model := ternary "global.anthropic.claude-sonnet-4-6" "" (eq .hosttype "iv") -}}
+
+{{- $env := dict
+  "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
+  "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS" "1"
+  "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
+-}}
+
+{{- range $k, $v := dict
+  "ANTHROPIC_AUTH_TOKEN" (index $fields "anthropic-auth-token")
+  "ANTHROPIC_BASE_URL" (index $fields "url")
+  "ANTHROPIC_MODEL" $model
+-}}
+  {{- if $v }}
+    {{- $_ := set $env $k $v -}}
+  {{ end -}}
+{{- end -}}
+
+{{- $enabledPlugins := dict
+  "kotlin-lsp@claude-plugins-official" true
+-}}
+
+{{- dict
+  "env" $env
+  "enabledPlugins" $enabledPlugins
+  | toPrettyJson
+-}}

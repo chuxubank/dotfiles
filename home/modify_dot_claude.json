@@ -1,11 +1,13 @@
 {{- /* chezmoi:modify-template */ -}}
 
 {{- $servers := includeTemplate "mcp/anthropic" . | fromJson -}}
+{{- $theme := ternary "dark" "light" .isDarkMode -}}
 
 {{- $in := trim .chezmoi.stdin -}}
 {{- if gt (len $in) 0 -}}
 {{- fromJson $in
 	| setValueAtPath "mcpServers" $servers
+	| setValueAtPath "theme" $theme
 	| toPrettyJson -}}
 {{- else -}}
 
