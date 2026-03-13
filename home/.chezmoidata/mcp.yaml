@@ -47,8 +47,8 @@ mcp:
         The Feishu Project MCP Server connects AI tools to Feishu's Project.
         Make project management more convenient.
       when:
-        disabled:
-          hosttype: ["home"]
+        enabled:
+          hosttype: ["iv"]
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
@@ -84,8 +84,8 @@ mcp:
     - name: Google Map
       description: Location services, directions, and place details
       when:
-        disabled:
-          hosttype: ["iv"]
+        enabled:
+          hosttype: ["home"]
       execution:
         type: stdio
         cmd: bunx
@@ -117,9 +117,8 @@ mcp:
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
       when:
-        disabled:
-          hosttype: []
-          tool: []
+        enabled:
+          hosttype: ["home"]
       execution:
         type: stdio
         cmd: bunx
