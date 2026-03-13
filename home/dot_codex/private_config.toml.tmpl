@@ -3,6 +3,7 @@
 {{- /* Build MCP servers map */ -}}
 {{- $servers := dict -}}
 {{- range $provider := .mcp.providers }}
+  {{- $enabled := includeTemplate "mcp/when" (dict "provider" $provider "hosttype" $.hosttype "tool" "codex") | fromJson -}}
   {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
   {{- $exec := $provider.execution -}}
   {{- $server := dict -}}
@@ -34,7 +35,7 @@
   {{- if hasKey $exec "timeout" }}
     {{- $_ := set $server "tool_timeout_sec" $exec.timeout -}}
   {{- end }}
-  {{- $_ := set $server "enabled" $provider.enabled -}}
+  {{- $_ := set $server "enabled" $enabled -}}
 
   {{- if hasKey $exec "envs" }}
     {{- $envs := includeTemplate "mcp/envs" $exec.envs | fromJson -}}

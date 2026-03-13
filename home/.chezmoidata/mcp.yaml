@@ -2,7 +2,9 @@ mcp:
   providers:
     - name: Amap
       description: Amap's official MCP Server
-      enabled: true
+      disabled:
+        hosttype: ["iv"]
+        tool: ["cc", "codex", "copilot", "gemini"]
       execution:
         type: stdio
         cmd: bunx
@@ -16,7 +18,6 @@ mcp:
             field: token
     - name: Context7
       description: Up-to-date Docs for LLMs and AI code editors
-      enabled: true
       execution:
         type: stdio
         cmd: bunx
@@ -33,7 +34,6 @@ mcp:
         A Model Context Protocol server that provides web content fetching
         capabilities. This server enables LLMs to retrieve and process content
         from web pages, converting HTML to markdown for easier consumption.
-      enabled: true
       execution:
         type: stdio
         cmd: uvx
@@ -45,14 +45,14 @@ mcp:
       description:
         The Feishu Project MCP Server connects AI tools to Feishu's Project.
         Make project management more convenient.
-      enabled: true
+      disabled:
+        hosttype: ["home"]
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
         timeout: 300
     - name: Figma Desktop
       description: The MCP Server brings Figma directly into your workflow by providing important design information and context to AI agents generating code from Figma design files.
-      enabled: true
       execution:
         type: http
         uri: http://localhost:3845/mcp
@@ -62,7 +62,8 @@ mcp:
         platform. This gives AI agents, assistants, and chatbots the ability to
         read repositories and code files, manage issues and PRs, analyze code,
         and automate workflows. All through natural language interactions.
-      enabled: true
+      disabled:
+        tool: ["copilot"]
       execution:
         type: stdio
         cmd: github-mcp-server
@@ -79,7 +80,8 @@ mcp:
             trim: true
     - name: Google Map
       description: Location services, directions, and place details
-      enabled: true
+      disabled:
+        hosttype: ["iv"]
       execution:
         type: stdio
         cmd: bunx
@@ -93,14 +95,12 @@ mcp:
             field: goose-map-api-key
     - name: JetBrains
       description: The server proxies requests from client to JetBrains IDE.
-      enabled: true
       execution:
         type: sse
         uri: http://localhost:64342/sse
         timeout: 300
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
-      enabled: true
       execution:
         type: stdio
         cmd: uvx
@@ -112,7 +112,9 @@ mcp:
         startup_timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
-      enabled: true
+      disabled:
+        hosttype: []
+        tool: []
       execution:
         type: stdio
         cmd: bunx
@@ -130,7 +132,6 @@ mcp:
         Playwright. This server enables LLMs to interact with web pages through
         structured accessibility snapshots, bypassing the need for screenshots
         or visually-tuned models.
-      enabled: true
       execution:
         type: stdio
         cmd: bunx
@@ -140,7 +141,6 @@ mcp:
         timeout: 300
     - name: Tavily
       description: Real-time web search and intelligent data extraction capabilities.
-      enabled: true
       execution:
         type: stdio
         cmd: bunx

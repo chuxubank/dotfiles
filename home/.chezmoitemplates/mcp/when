@@ -1,0 +1,29 @@
+{{- /* Determine whether a provider is enabled based on `disabled`. */ -}}
+{{- $provider := .provider -}}
+{{- $hosttype := .hosttype -}}
+{{- $tool := .tool -}}
+{{- $enabled := true -}}
+
+{{- if hasKey $provider "disabled" -}}
+  {{- $disabled := $provider.disabled -}}
+  {{- if kindIs "map" $disabled -}}
+    {{- if hasKey $disabled "hosttype" -}}
+      {{- $ht := index $disabled "hosttype" -}}
+      {{- if kindIs "string" $ht -}}
+        {{- if eq $ht $hosttype }}{{- $enabled = false -}}{{- end -}}
+      {{- else if kindIs "slice" $ht -}}
+        {{- if has $hosttype $ht }}{{- $enabled = false -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if and $enabled (hasKey $disabled "tool") -}}
+      {{- $t := index $disabled "tool" -}}
+      {{- if kindIs "string" $t -}}
+        {{- if eq $t $tool }}{{- $enabled = false -}}{{- end -}}
+      {{- else if kindIs "slice" $t -}}
+        {{- if has $tool $t }}{{- $enabled = false -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- toJson $enabled -}}

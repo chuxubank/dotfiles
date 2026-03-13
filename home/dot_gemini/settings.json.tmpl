@@ -1,6 +1,7 @@
 {{- $servers := dict -}}
 {{- range $provider := .mcp.providers }}
-  {{- if $provider.enabled }}
+  {{- $enabled := includeTemplate "mcp/when" (dict "provider" $provider "hosttype" $.hosttype "tool" "gemini") | fromJson -}}
+  {{- if $enabled }}
     {{- $name := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
 	{{- $exec := $provider.execution -}}
     {{- $server := dict -}}

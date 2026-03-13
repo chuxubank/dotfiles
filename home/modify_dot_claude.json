@@ -1,6 +1,6 @@
 {{- /* chezmoi:modify-template */ -}}
 
-{{- $servers := includeTemplate "mcp/anthropic" . | fromJson -}}
+{{- $servers := includeTemplate "mcp/anthropic" (dict "mcp" .mcp "hosttype" .hosttype "tool" "cc") | fromJson -}}
 {{- $theme := ternary "dark" "light" .isDarkMode -}}
 
 {{- $in := trim .chezmoi.stdin -}}
