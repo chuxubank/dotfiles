@@ -2,9 +2,10 @@ mcp:
   providers:
     - name: Amap
       description: Amap's official MCP Server
-      disabled:
-        hosttype: ["iv"]
-        tool: ["cc", "codex", "copilot", "gemini"]
+      when:
+        enabled:
+          hosttype: ["home"]
+          tool: ["goose"]
       execution:
         type: stdio
         cmd: bunx
@@ -45,8 +46,9 @@ mcp:
       description:
         The Feishu Project MCP Server connects AI tools to Feishu's Project.
         Make project management more convenient.
-      disabled:
-        hosttype: ["home"]
+      when:
+        disabled:
+          hosttype: ["home"]
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
@@ -62,8 +64,9 @@ mcp:
         platform. This gives AI agents, assistants, and chatbots the ability to
         read repositories and code files, manage issues and PRs, analyze code,
         and automate workflows. All through natural language interactions.
-      disabled:
-        tool: ["copilot"]
+      when:
+        disabled:
+          tool: ["copilot"]
       execution:
         type: stdio
         cmd: github-mcp-server
@@ -80,8 +83,9 @@ mcp:
             trim: true
     - name: Google Map
       description: Location services, directions, and place details
-      disabled:
-        hosttype: ["iv"]
+      when:
+        disabled:
+          hosttype: ["iv"]
       execution:
         type: stdio
         cmd: bunx
@@ -112,9 +116,10 @@ mcp:
         startup_timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
-      disabled:
-        hosttype: []
-        tool: []
+      when:
+        disabled:
+          hosttype: []
+          tool: []
       execution:
         type: stdio
         cmd: bunx

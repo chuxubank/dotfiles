@@ -1,26 +1,52 @@
-{{- /* Determine whether a provider is enabled based on `disabled`. */ -}}
+{{- /* Determine whether a provider is enabled based on `when.enabled` or `when.disabled`. */ -}}
 {{- $provider := .provider -}}
 {{- $hosttype := .hosttype -}}
 {{- $tool := .tool -}}
 {{- $enabled := true -}}
 
-{{- if hasKey $provider "disabled" -}}
-  {{- $disabled := $provider.disabled -}}
-  {{- if kindIs "map" $disabled -}}
-    {{- if hasKey $disabled "hosttype" -}}
-      {{- $ht := index $disabled "hosttype" -}}
-      {{- if kindIs "string" $ht -}}
-        {{- if eq $ht $hosttype }}{{- $enabled = false -}}{{- end -}}
-      {{- else if kindIs "slice" $ht -}}
-        {{- if has $hosttype $ht }}{{- $enabled = false -}}{{- end -}}
+{{- if hasKey $provider "when" -}}
+  {{- $when := $provider.when -}}
+  {{- if kindIs "map" $when -}}
+    {{- if hasKey $when "enabled" -}}
+      {{- $enabled = true -}}
+      {{- $en := index $when "enabled" -}}
+      {{- if kindIs "map" $en -}}
+        {{- if hasKey $en "hosttype" -}}
+          {{- $ht := index $en "hosttype" -}}
+          {{- if kindIs "string" $ht -}}
+            {{- if ne $ht $hosttype }}{{- $enabled = false -}}{{- end -}}
+          {{- else if and (kindIs "slice" $ht) (not (kindIs "string" $ht)) -}}
+            {{- if or (eq (len $ht) 0) (not (has $hosttype $ht)) }}{{- $enabled = false -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if and $enabled (hasKey $en "tool") -}}
+          {{- $t := index $en "tool" -}}
+          {{- if kindIs "string" $t -}}
+            {{- if ne $t $tool }}{{- $enabled = false -}}{{- end -}}
+          {{- else if and (kindIs "slice" $t) (not (kindIs "string" $t)) -}}
+            {{- if or (eq (len $t) 0) (not (has $tool $t)) }}{{- $enabled = false -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
-    {{- end -}}
-    {{- if and $enabled (hasKey $disabled "tool") -}}
-      {{- $t := index $disabled "tool" -}}
-      {{- if kindIs "string" $t -}}
-        {{- if eq $t $tool }}{{- $enabled = false -}}{{- end -}}
-      {{- else if kindIs "slice" $t -}}
-        {{- if has $tool $t }}{{- $enabled = false -}}{{- end -}}
+    {{- else if hasKey $when "disabled" -}}
+      {{- $disabled := index $when "disabled" -}}
+      {{- if kindIs "map" $disabled -}}
+        {{- if hasKey $disabled "hosttype" -}}
+          {{- $ht := index $disabled "hosttype" -}}
+          {{- if kindIs "string" $ht -}}
+            {{- if eq $ht $hosttype }}{{- $enabled = false -}}{{- end -}}
+          {{- else if and (kindIs "slice" $ht) (not (kindIs "string" $ht)) -}}
+            {{- if and (gt (len $ht) 0) (has $hosttype $ht) }}{{- $enabled = false -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if and $enabled (hasKey $disabled "tool") -}}
+          {{- $t := index $disabled "tool" -}}
+          {{- if kindIs "string" $t -}}
+            {{- if eq $t $tool }}{{- $enabled = false -}}{{- end -}}
+          {{- else if and (kindIs "slice" $t) (not (kindIs "string" $t)) -}}
+            {{- if and (gt (len $t) 0) (has $tool $t) }}{{- $enabled = false -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
