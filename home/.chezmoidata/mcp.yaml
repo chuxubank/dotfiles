@@ -12,7 +12,7 @@ mcp:
         args:
           - -y
           - "@amap/amap-maps-mcp-server"
-        timeout: 300
+        timeout: 20
         envs:
           AMAP_MAPS_API_KEY:
             path: Personal/Life/Amap
@@ -25,7 +25,7 @@ mcp:
         args:
           - -y
           - "@upstash/context7-mcp"
-        timeout: 300
+        timeout: 20
         envs:
           CONTEXT7_API_KEY:
             path: Personal/Tech/AI/Context7
@@ -40,8 +40,8 @@ mcp:
         cmd: uvx
         args:
           - mcp-server-fetch
-        timeout: 300
-        startup_timeout: 30
+        timeout: 20
+        tool_timeout: 30
     - name: Feishu
       description:
         The Feishu Project MCP Server connects AI tools to Feishu's Project.
@@ -52,13 +52,13 @@ mcp:
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
-        timeout: 300
+        timeout: 20
     - name: Figma Desktop
       description: The MCP Server brings Figma directly into your workflow by providing important design information and context to AI agents generating code from Figma design files.
       execution:
         type: http
         uri: http://localhost:3845/mcp
-        timeout: 300
+        timeout: 20
     - name: GitHub
       description: The GitHub MCP Server connects AI tools directly to GitHub's
         platform. This gives AI agents, assistants, and chatbots the ability to
@@ -72,7 +72,7 @@ mcp:
         cmd: github-mcp-server
         args:
           - stdio
-        timeout: 300
+        timeout: 20
         envs:
           GITHUB_PERSONAL_ACCESS_TOKEN:
             type: output
@@ -92,7 +92,7 @@ mcp:
         args:
           - -y
           - "@modelcontextprotocol/server-google-maps"
-        timeout: 300
+        timeout: 20
         envs:
           GOOGLE_MAPS_API_KEY:
             path: Personal/Tech/Google
@@ -102,7 +102,7 @@ mcp:
       execution:
         type: sse
         uri: http://localhost:64342/sse
-        timeout: 300
+        timeout: 20
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
       execution:
@@ -112,8 +112,8 @@ mcp:
           - --python
           - "3.12"
           - markitdown-mcp
-        timeout: 300
-        startup_timeout: 30
+        timeout: 20
+        tool_timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
       when:
@@ -125,7 +125,7 @@ mcp:
         args:
           - -y
           - "@notionhq/notion-mcp-server"
-        timeout: 300
+        timeout: 20
         envs:
           NOTION_TOKEN:
             path: Personal/Tech/Notion
@@ -142,7 +142,7 @@ mcp:
         args:
           - -y
           - "@playwright/mcp@latest"
-        timeout: 300
+        timeout: 20
     - name: Tavily
       description: Real-time web search and intelligent data extraction capabilities.
       execution:
@@ -151,7 +151,7 @@ mcp:
         args:
           - -y
           - tavily-mcp
-        timeout: 300
+        timeout: 20
         envs:
           TAVILY_API_KEY:
             path: Personal/Tech/AI/Tavily

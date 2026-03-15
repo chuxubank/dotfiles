@@ -29,11 +29,11 @@
     {{- continue -}}
   {{- end }}
 
-  {{- if hasKey $exec "startup_timeout" }}
-    {{- $_ := set $server "startup_timeout_sec" $exec.startup_timeout -}}
+  {{- if hasKey $exec "tool_timeout" }}
+    {{- $_ := set $server "tool_timeout_sec" $exec.tool_timeout -}}
   {{- end }}
   {{- if hasKey $exec "timeout" }}
-    {{- $_ := set $server "tool_timeout_sec" $exec.timeout -}}
+    {{- $_ := set $server "startup_timeout_sec" $exec.timeout -}}
   {{- end }}
   {{- $_ := set $server "enabled" $enabled -}}
 
