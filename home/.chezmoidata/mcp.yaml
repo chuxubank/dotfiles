@@ -59,6 +59,9 @@ mcp:
         type: http
         uri: http://localhost:3845/mcp
         timeout: 20
+      when:
+        enabled:
+          hosttype: ["iv"]
     - name: GitHub
       description: The GitHub MCP Server connects AI tools directly to GitHub's
         platform. This gives AI agents, assistants, and chatbots the ability to
@@ -103,6 +106,9 @@ mcp:
         type: sse
         uri: http://localhost:64342/sse
         timeout: 20
+      when:
+        enabled:
+          hosttype: ["iv"]
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
       execution:
