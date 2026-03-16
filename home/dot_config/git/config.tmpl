@@ -5,6 +5,9 @@ email = chuxubank@qq.com
 [includeIf "gitdir:~/Developer/AA/"]
 path = config_aa
 
+[includeIf "gitdir:~/Developer/IV/"]
+path = config_iv
+
 [core]
 excludesfile = ~/.config/git/ignore
 autocrlf = input
@@ -20,7 +23,7 @@ autoStash = true
 
 [credential]
     helper = cache
-    helper = !type pass-git-helper >/dev/null && pass-git-helper$@
+    helper = !type pass-git-helper >/dev/null && pass-git-helper $@
 {{ if eq .chezmoi.os "windows" -}}
 	helper = manager
 {{ else if eq .chezmoi.os "darwin" -}}
