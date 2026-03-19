@@ -26,6 +26,16 @@
 
 {{- $enabledPlugins := dict
   "kotlin-lsp@claude-plugins-official" true
+  "skill-creator@claude-plugins-official" true
+-}}
+
+{{- $extraKnownMarketplaces := dict
+  "anthropic-agent-skills" (dict
+    "source" (dict
+	  (dict "source" "github")
+	  (dict "repo" "anthropics/skills")
+	)
+  )
 -}}
 
 {{- dict
