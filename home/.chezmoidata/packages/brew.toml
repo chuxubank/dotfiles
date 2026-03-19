@@ -204,6 +204,7 @@ casks = [
   "jordanbaird-ice",
   "karabiner-elements",
   "kiro-cli",
+  "kotlin-lsp",
   "libreoffice",
   "linear-linear",
   "logseq",
