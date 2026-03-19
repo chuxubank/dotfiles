@@ -6,6 +6,7 @@ global = [
   "@github/copilot-language-server",
   "@google/gemini-cli",
   "@mermaid-js/mermaid-cli",
+  "@modelcontextprotocol/inspector",
   "@openai/codex",
   "@prettier/plugin-ruby",
   "@sourcegraph/amp",
