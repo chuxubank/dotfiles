@@ -38,9 +38,15 @@
   )
 -}}
 
+{{- $statusLine := dict
+    "type" "command"
+	"command" (joinPath .chezmoi.homeDir ".claude" "statusline.sh")
+-}}
+
 {{- dict
   "enabledPlugins" $enabledPlugins
   "env" $env
   "model" $model
+  "statusLine" $statusLine
   | toPrettyJson
 -}}
