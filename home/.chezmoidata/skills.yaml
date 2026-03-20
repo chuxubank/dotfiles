@@ -19,3 +19,10 @@ skills:
       when:
         disabled:
           tool: ["goose"]
+    - name: find-skills
+      source: vercel-labs/skills
+    - name: gstack
+      source: garrytan/gstack
+      when:
+        enabled:
+          tool: ["claude-code"]
