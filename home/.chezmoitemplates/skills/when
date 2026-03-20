@@ -1,0 +1,25 @@
+{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions.
+       Input:  dict "skill" $skill "hosttype" $hosttype
+       Output: JSON array of agent names (empty array = skip this skill) */ -}}
+{{- $skill := .skill -}}
+{{- $allAgents := .agents -}}
+
+{{- if not (includeTemplate "when/check" (dict "item" $skill "key" "hosttype" "value" .hosttype) | fromJson) -}}
+  {{- toJson list -}}
+{{- else -}}
+  {{- $agents := $allAgents -}}
+  {{- if hasKey $skill "when" -}}
+    {{- $when := $skill.when -}}
+    {{- if and (hasKey $when "enabled") (hasKey $when.enabled "tool") -}}
+      {{- $agents = $when.enabled.tool -}}
+    {{- else if and (hasKey $when "disabled") (hasKey $when.disabled "tool") -}}
+      {{- $agents = list -}}
+      {{- range $a := $allAgents -}}
+        {{- if not (has $a $when.disabled.tool) -}}
+          {{- $agents = append $agents $a -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- toJson $agents -}}
+{{- end -}}

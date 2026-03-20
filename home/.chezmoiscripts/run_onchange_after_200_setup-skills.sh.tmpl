@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Setup skills"
+
+{{- range $skill := .skills.providers }}
+  {{- $agents := includeTemplate "skills/when" (dict
+    "skill" $skill
+    "hosttype" $.hosttype
+    "agents" $.skills.agents
+  ) | fromJson }}
+  {{- if gt (len $agents) 0 }}
+skills add {{ $skill.source }} \
+  --global --yes \
+  --skill {{ $skill.name }} \
+  --agent {{ join " " $agents }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,21 @@
+skills:
+  agents:
+    - amp
+    - claude-code
+    - openclaw
+    - codex
+    - droid
+    - gemini-cli
+    - goose
+    - github-copilot
+    - kimi-cli
+    - kiro-cli
+    - opencode
+    - pi
+    - warp
+  providers:
+    - name: figma-implement-design
+      source: openai/skills
+      when:
+        disabled:
+          tool: ["goose"]

@@ -1,0 +1,25 @@
+{{- /* Check if an item passes a when condition for a given key.
+       Input:  dict "item" $item "key" "hosttype"|"tool" "value" $value
+       Output: JSON boolean
+       - when.enabled.<key>:  true if value is in the list
+       - when.disabled.<key>: true if value is NOT in the list
+       - no condition:        true (no restriction) */ -}}
+{{- $item := .item -}}
+{{- $key := .key -}}
+{{- $value := .value -}}
+{{- $result := true -}}
+
+{{- if hasKey $item "when" -}}
+  {{- $when := $item.when -}}
+  {{- if hasKey $when "enabled" -}}
+    {{- if hasKey $when.enabled $key -}}
+      {{- if not (has $value (index $when.enabled $key)) }}{{- $result = false -}}{{- end -}}
+    {{- end -}}
+  {{- else if hasKey $when "disabled" -}}
+    {{- if hasKey $when.disabled $key -}}
+      {{- if has $value (index $when.disabled $key) }}{{- $result = false -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- toJson $result -}}
