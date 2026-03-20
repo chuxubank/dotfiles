@@ -5,6 +5,7 @@ beancount = "Developer/Personal/beancount"
 blog = "Developer/Personal/blog"
 proxy = "Developer/Personal/proxy"
 keyboard = "Developer/Personal/keyboard"
+skills = "Developer/Personal/skills"
 nutstore = "Nutstore"
 
 iv = "Developer/IV"

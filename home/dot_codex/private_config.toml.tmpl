@@ -52,7 +52,16 @@
 {{- $trustedLevel := dict "trust_level" "trusted" -}}
 {{- $_ := set $projects "/" $trustedLevel -}}
 {{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") $trustedLevel -}}
-{{- $trustedKeys := list "org" "org-roam" "beancount" "blog" "proxy" "keyboard" "emacs" -}}
+{{- $trustedKeys := list
+  "beancount"
+  "blog"
+  "emacs"
+  "keyboard"
+  "org"
+  "org-roam"
+  "proxy"
+  "skills"
+-}}
 {{- range $k := $trustedKeys }}
   {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) $trustedLevel -}}
 {{- end }}
