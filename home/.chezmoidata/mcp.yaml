@@ -96,6 +96,7 @@ mcp:
       when:
         enabled:
           hosttype: ["iv"]
+          tool: [""]
     - name: Google Map
       description: Location services, directions, and place details
       when:
