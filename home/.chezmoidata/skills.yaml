@@ -19,10 +19,30 @@ skills:
       when:
         disabled:
           tool: ["goose"]
+
     - name: find-skills
       source: vercel-labs/skills
+
     - name: gstack
       source: garrytan/gstack
       when:
         enabled:
           tool: ["claude-code"]
+
+    - name: skill-creator
+      source: openai/skills
+      when:
+        enabled:
+          tool: ["codex"]
+
+    - name: "Skill Development"
+      source: anthropics/claude-code
+      when:
+        enabled:
+          tool: ["claude-code"]
+
+    - name: skill-creator
+      source: anthropics/skills
+      when:
+        disabled:
+          tool: ["codex", "claude-code"]
