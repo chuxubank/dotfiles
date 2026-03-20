@@ -11,7 +11,7 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
   {{- if gt (len $agents) 0 }}
 skills add {{ $skill.source }} \
   --global --yes \
-  --skill {{ $skill.name }} \
+  --skill {{ $skill.name | quote }} \
   --agent {{ join " " $agents }}
   {{- end }}
 {{- end }}
