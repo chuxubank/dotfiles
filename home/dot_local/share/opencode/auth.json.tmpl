@@ -1,0 +1,10 @@
+{{- $pass := ternary "Work/IV/LLM" "" (eq .hosttype "iv") -}}
+{{- $fields := passFields $pass -}}
+
+{{- dict
+  "iv" (dict
+    "type" "api"
+	"key" (index $fields "anthropic-auth-token")
+  )
+  | toPrettyJson
+-}}
