@@ -1,14 +1,12 @@
-{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions.
-       Legacy `hosttype` remains supported for compatibility. */ -}}
+{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions. */ -}}
 {{- $skill := .skill -}}
 {{- $allAgents := .agents -}}
 
-{{- $hosttypeOk := includeTemplate "when/check" (dict "item" $skill "key" "hosttype" "value" .hosttype) | fromJson -}}
-{{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $skill "key" "device_type" "value" .device_type) | fromJson -}}
 {{- $hostEnvOk := includeTemplate "when/check" (dict "item" $skill "key" "host_env" "value" .host_env) | fromJson -}}
+{{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $skill "key" "device_type" "value" .device_type) | fromJson -}}
 {{- $rolesOk := includeTemplate "when/check" (dict "item" $skill "key" "roles" "value" .roles) | fromJson -}}
 
-{{- if not (and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk) -}}
+{{- if not (and $hostEnvOk $deviceTypeOk $rolesOk) -}}
   {{- toJson list -}}
 {{- else -}}
   {{- $agents := $allAgents -}}

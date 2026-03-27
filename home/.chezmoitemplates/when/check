@@ -1,7 +1,7 @@
 {{- /* Check if an item passes a when condition for a given key.
        Input:  dict "item" $item "key" <field> "value" $value
        Output: JSON boolean
-       - scalar values (hosttype/device_type/host_env/tool): exact match against the rule list
+       - scalar values (device_type/host_env/tool): exact match against the rule list
        - slice values (roles): pass when there is any overlap with the rule list
        - no condition: true */ -}}
 {{- $item := .item -}}

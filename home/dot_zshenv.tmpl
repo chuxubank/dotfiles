@@ -10,7 +10,6 @@ export EMAIL={{ .email | quote }}
 export DEVICE_TYPE={{ .device_type | quote }}
 export HOST_ENV={{ .host_env | quote }}
 export HOST_ROLES={{ join "," .roles | quote }}
-export HOST_TYPE={{ .hosttype | quote }}
 
 # XDG
 export XDG_CONFIG_HOME="$HOME/.config"

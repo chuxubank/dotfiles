@@ -5,7 +5,9 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
 {{- range $skill := .skills.providers }}
   {{- $agents := includeTemplate "skills/when" (dict
     "skill" $skill
-    "hosttype" $.hosttype
+    "host_env" $.host_env
+    "device_type" $.device_type
+    "roles" $.roles
     "agents" $.skills.agents
   ) | fromJson }}
   {{- if gt (len $agents) 0 }}

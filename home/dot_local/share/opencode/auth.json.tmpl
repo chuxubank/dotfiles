@@ -1,4 +1,4 @@
-{{- $pass := ternary "Work/IV/LLM" "" (eq .hosttype "iv") -}}
+{{- $pass := ternary "Work/IV/LLM" "" (eq .host_env "iv") -}}
 {{- $fields := passFields $pass -}}
 
 {{- dict

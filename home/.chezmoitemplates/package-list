@@ -3,18 +3,10 @@
 {{ if eq (kindOf $package) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey $package "when" -}}
-  {{- $when := index $package "when" -}}
-  {{- if eq (kindOf $when) "string" -}}
-    {{- $enabled = eq $when $.hosttype -}}
-  {{- else if eq (kindOf $when) "slice" -}}
-    {{- $enabled = has $.hosttype $when -}}
-  {{- else -}}
-    {{- $hosttypeOk := includeTemplate "when/check" (dict "item" $package "key" "hosttype" "value" $.hosttype) | fromJson -}}
-    {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $package "key" "device_type" "value" $.device_type) | fromJson -}}
-    {{- $hostEnvOk := includeTemplate "when/check" (dict "item" $package "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- $rolesOk := includeTemplate "when/check" (dict "item" $package "key" "roles" "value" $.roles) | fromJson -}}
-    {{- $enabled = and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk -}}
-  {{- end -}}
+  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" $package "key" "host_env" "value" $.host_env) | fromJson -}}
+  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $package "key" "device_type" "value" $.device_type) | fromJson -}}
+  {{- $rolesOk := includeTemplate "when/check" (dict "item" $package "key" "roles" "value" $.roles) | fromJson -}}
+  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
 {{- end -}}
 {{ if $enabled -}}
 {{- $selected = append $selected .name -}}

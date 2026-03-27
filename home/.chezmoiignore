@@ -15,19 +15,19 @@ Documents/WindowsPowerShell
 .wakeup
 Developer/Example/Raycast
 Library
-{{- else if ne .hosttype "home" }}
+{{- else if ne .host_env "personal" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
-{{- if ne .hosttype "aa" }}
+{{- if ne .host_env "aa" }}
 .ssh/aa
-{{- else if ne .hosttype "iv" }}
+{{- else if ne .host_env "iv" }}
 .ssh/iv
 {{- else }}
 .ssh/personal/id_ed25519
 {{- end }}
 
-{{- if eq .hosttype "ci" }}
+{{- if eq .host_env "ci" }}
 .aider.conf.yml
 .claude*
 .codex

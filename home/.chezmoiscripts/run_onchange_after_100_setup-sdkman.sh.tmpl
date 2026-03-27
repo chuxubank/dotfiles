@@ -15,8 +15,11 @@ sdk selfupdate
 
 {{- range $sdk := .packages.sdkman.sdk }}
 {{- if eq (kindOf $sdk) "map" }}
-{{- $when := index $sdk "when" }}
-{{- if or (not $when) (has $.hosttype $when) }}
+{{- $enabled := true -}}
+{{- if hasKey $sdk "when" -}}
+  {{- $enabled = includeTemplate "when/check" (dict "item" $sdk "key" "host_env" "value" $.host_env) | fromJson -}}
+{{- end -}}
+{{- if $enabled }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
 {{- end }}
 {{- else }}

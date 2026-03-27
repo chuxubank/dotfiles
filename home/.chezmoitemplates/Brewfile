@@ -2,16 +2,10 @@
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $when := index . "when" -}}
-  {{- if eq (kindOf $when) "slice" -}}
-    {{- $enabled = has $.hosttype $when -}}
-  {{- else -}}
-    {{- $hosttypeOk := includeTemplate "when/check" (dict "item" . "key" "hosttype" "value" $.hosttype) | fromJson -}}
-    {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-    {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-    {{- $enabled = and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk -}}
-  {{- end -}}
+  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
+  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
+  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
+  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
 {{- end -}}
 {{ if $enabled -}}
 tap {{ .name | quote }}
@@ -24,16 +18,10 @@ tap {{ . | quote }}
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $when := index . "when" -}}
-  {{- if eq (kindOf $when) "slice" -}}
-    {{- $enabled = has $.hosttype $when -}}
-  {{- else -}}
-    {{- $hosttypeOk := includeTemplate "when/check" (dict "item" . "key" "hosttype" "value" $.hosttype) | fromJson -}}
-    {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-    {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-    {{- $enabled = and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk -}}
-  {{- end -}}
+  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
+  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
+  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
+  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
 {{- end -}}
 {{ if $enabled -}}
 brew {{ .name | quote }}
@@ -51,16 +39,10 @@ brew {{ . | quote }}
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $when := index . "when" -}}
-  {{- if eq (kindOf $when) "slice" -}}
-    {{- $enabled = has $.hosttype $when -}}
-  {{- else -}}
-    {{- $hosttypeOk := includeTemplate "when/check" (dict "item" . "key" "hosttype" "value" $.hosttype) | fromJson -}}
-    {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-    {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-    {{- $enabled = and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk -}}
-  {{- end -}}
+  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
+  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
+  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
+  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
 {{- end -}}
 {{ if $enabled -}}
 cask {{ .name | quote }}
@@ -72,16 +54,10 @@ cask {{ . | quote }}
 {{ range .packages.darwin.mas -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $when := index . "when" -}}
-  {{- if eq (kindOf $when) "slice" -}}
-    {{- $enabled = has $.hosttype $when -}}
-  {{- else -}}
-    {{- $hosttypeOk := includeTemplate "when/check" (dict "item" . "key" "hosttype" "value" $.hosttype) | fromJson -}}
-    {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-    {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-    {{- $enabled = and $hosttypeOk $deviceTypeOk $hostEnvOk $rolesOk -}}
-  {{- end -}}
+  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
+  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
+  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
+  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
 {{- end -}}
 {{ if $enabled -}}
 mas {{ .name | quote }}, id: {{ .id }}

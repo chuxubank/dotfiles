@@ -1,4 +1,4 @@
-{{ if not (eq .hosttype "ci") -}}
+{{ if not (eq .host_env "ci") -}}
 #!/bin/zsh
 
 mkdir -p '{{ joinPath .path.log "rclone" "nutstore" }}'

@@ -3,28 +3,26 @@
 {{- $hostEnvChoices := list "personal" "aa" "iv" "cloud" "ci" -}}
 
 {{- $email := env "EMAIL" -}}
+
 {{- $deviceType := "server" -}}
 {{- $hostEnv := "ci" -}}
 {{- $rolesInput := "automation" -}}
-{{- $hosttype := "ci" -}}
+
 {{- $passDir := ".password-store" }}
 {{- $isDarkMode := false }}
 {{- $os := .chezmoi.os -}}
-
-{{- if or (eq $os "darwin") (eq $os "windows") (eq $os "android") }}
-{{- $deviceType = "laptop" -}}
-{{- $hostEnv = "personal" -}}
-{{- $rolesInput = "daily" -}}
-{{- end }}
 
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
 {{- $hostEnv = promptChoiceOnce . "host_env" "What environment does this host belong to" $hostEnvChoices -}}
+
 {{- if eq $hostEnv "personal" -}}
   {{- if eq $deviceType "server" -}}
-    {{- $rolesInput = "lab" -}}
-  {{- else -}}
+    {{- $rolesInput = "llm, router" -}}
+  {{- else if eq $deviceType "desktop" -}}
+    {{- $rolesInput = "game" -}}
+  {{- else }}
     {{- $rolesInput = "daily" -}}
   {{- end -}}
 {{- else if or (eq $hostEnv "aa") (eq $hostEnv "iv") -}}
@@ -35,6 +33,7 @@
   {{- $rolesInput = "automation" -}}
 {{- end -}}
 {{- $rolesInput = promptStringOnce . "roles" "Roles (comma separated)" $rolesInput -}}
+
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
 {{- end }}
 
@@ -45,20 +44,6 @@
     {{- $roles = append $roles $trimmed -}}
   {{- end -}}
 {{- end -}}
-
-{{- if eq $hostEnv "aa" -}}
-{{- $hosttype = "aa" -}}
-{{- else if eq $hostEnv "iv" -}}
-{{- $hosttype = "iv" -}}
-{{- else if eq $hostEnv "cloud" -}}
-{{- $hosttype = "cloud" -}}
-{{- else if eq $hostEnv "ci" -}}
-{{- $hosttype = "ci" -}}
-{{- else if and (eq $hostEnv "personal") (has "lab" $roles) -}}
-{{- $hosttype = "lab" -}}
-{{- else if eq $hostEnv "personal" -}}
-{{- $hosttype = "home" -}}
-{{- end }}
 
 {{- if eq $os "darwin" }}
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
@@ -79,7 +64,6 @@ encryption = "gpg"
     device_type = {{- $deviceType | quote }}
     host_env = {{- $hostEnv | quote }}
     roles = {{- $roles | toToml }}
-    hosttype = {{- $hosttype | quote }}
 	isDarkMode = {{- $isDarkMode }}
 
 [data.path]

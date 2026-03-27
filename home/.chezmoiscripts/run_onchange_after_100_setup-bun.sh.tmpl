@@ -13,8 +13,11 @@ bun upgrade
 
 {{- range $tool := .packages.node.global }}
 {{- if eq (kindOf $tool) "map" }}
-{{- $when := index $tool "when" }}
-{{- if or (not $when) (eq $when $.hosttype) }}
+{{- $enabled := true -}}
+{{- if hasKey $tool "when" -}}
+  {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
+{{- end -}}
+{{- if $enabled }}
 bun add -g {{ if $tool.trust }}--trust {{ end }}{{ $tool.name }}
 {{- end }}
 {{- else }}

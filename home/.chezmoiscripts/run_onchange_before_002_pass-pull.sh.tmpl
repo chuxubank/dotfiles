@@ -1,4 +1,4 @@
-{{ if not (eq .hosttype "ci") -}}
+{{ if not (eq .host_env "ci") -}}
 #!/bin/zsh
 echo "{{ template "floor-time" 14400 }} 󰯁 Pull password"
 pass git pull
