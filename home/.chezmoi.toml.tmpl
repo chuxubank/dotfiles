@@ -63,7 +63,7 @@ encryption = "gpg"
     email = {{- $email | quote }}
     device_type = {{- $deviceType | quote }}
     host_env = {{- $hostEnv | quote }}
-    roles = {{- $roles | toToml }}
+    roles = {{- $roles | toToml | quote }}
 	isDarkMode = {{- $isDarkMode }}
 
 [data.path]
