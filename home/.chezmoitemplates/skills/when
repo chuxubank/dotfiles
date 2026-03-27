@@ -1,6 +1,6 @@
 {{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions. */ -}}
 {{- $skill := .skill -}}
-{{- $allAgents := .agents -}}
+{{- $allAgents := .skills.agents -}}
 
 {{- $hostEnvOk := includeTemplate "when/check" (dict "item" $skill "key" "host_env" "value" .host_env) | fromJson -}}
 {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $skill "key" "device_type" "value" .device_type) | fromJson -}}

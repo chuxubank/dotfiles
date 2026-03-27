@@ -3,7 +3,7 @@
 {{- /* Build MCP servers map */ -}}
 {{- $servers := dict -}}
 {{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (dict "provider" $provider "device_type" $.device_type "host_env" $.host_env "roles" $.roles "tool" "codex") | fromJson -}}
+  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" "codex") $) | fromJson -}}
   {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
   {{- $exec := $provider.execution -}}
   {{- $server := dict -}}

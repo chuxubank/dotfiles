@@ -1,3 +1,3 @@
 {{- /* https://cursor.com/docs/mcp#using-mcpjson */ -}}
 
-{{ includeTemplate "mcp/anthropic" (dict "mcp" .mcp "device_type" .device_type "host_env" .host_env "roles" .roles "tool" "cursor") | fromJson | dict "mcpServers" | toPrettyJson }}
+{{ includeTemplate "mcp/anthropic" (merge (dict "tool" "cursor") .) | fromJson | dict "mcpServers" | toPrettyJson }}

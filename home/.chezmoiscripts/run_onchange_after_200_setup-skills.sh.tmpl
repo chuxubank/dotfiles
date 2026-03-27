@@ -3,13 +3,7 @@
 echo "{{ template "week" . }} 󰯁 Setup skills"
 
 {{- range $skill := .skills.providers }}
-  {{- $agents := includeTemplate "skills/when" (dict
-    "skill" $skill
-    "host_env" $.host_env
-    "device_type" $.device_type
-    "roles" $.roles
-    "agents" $.skills.agents
-  ) | fromJson }}
+  {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
 skills add {{ $skill.source }} \
   --global --yes \
