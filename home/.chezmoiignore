@@ -28,6 +28,7 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
 {{- if eq .host_env "ci" }}
+./**/opencode
 .aider.conf.yml
 .claude*
 .codex
