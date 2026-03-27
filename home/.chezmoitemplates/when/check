@@ -1,23 +1,39 @@
 {{- /* Check if an item passes a when condition for a given key.
-       Input:  dict "item" $item "key" "hosttype"|"tool" "value" $value
+       Input:  dict "item" $item "key" <field> "value" $value
        Output: JSON boolean
-       - when.enabled.<key>:  true if value is in the list
-       - when.disabled.<key>: true if value is NOT in the list
-       - no condition:        true (no restriction) */ -}}
+       - scalar values (hosttype/device_type/host_env/tool): exact match against the rule list
+       - slice values (roles): pass when there is any overlap with the rule list
+       - no condition: true */ -}}
 {{- $item := .item -}}
 {{- $key := .key -}}
 {{- $value := .value -}}
 {{- $result := true -}}
+{{- $valueIsSlice := eq (kindOf $value) "slice" -}}
 
 {{- if hasKey $item "when" -}}
   {{- $when := $item.when -}}
-  {{- if hasKey $when "enabled" -}}
-    {{- if hasKey $when.enabled $key -}}
-      {{- if not (has $value (index $when.enabled $key)) }}{{- $result = false -}}{{- end -}}
+  {{- if and (hasKey $when "enabled") (hasKey $when.enabled $key) -}}
+    {{- $expected := index $when.enabled $key -}}
+    {{- if $valueIsSlice -}}
+      {{- $matched := false -}}
+      {{- range $actual := $value -}}
+        {{- if has $actual $expected -}}
+          {{- $matched = true -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if not $matched }}{{- $result = false -}}{{- end -}}
+    {{- else -}}
+      {{- if not (has $value $expected) }}{{- $result = false -}}{{- end -}}
     {{- end -}}
-  {{- else if hasKey $when "disabled" -}}
-    {{- if hasKey $when.disabled $key -}}
-      {{- if has $value (index $when.disabled $key) }}{{- $result = false -}}{{- end -}}
+  {{- end -}}
+  {{- if and $result (hasKey $when "disabled") (hasKey $when.disabled $key) -}}
+    {{- $blocked := index $when.disabled $key -}}
+    {{- if $valueIsSlice -}}
+      {{- range $actual := $value -}}
+        {{- if has $actual $blocked }}{{- $result = false -}}{{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- if has $value $blocked }}{{- $result = false -}}{{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

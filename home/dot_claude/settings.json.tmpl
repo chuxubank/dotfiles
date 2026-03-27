@@ -1,7 +1,7 @@
-{{- $pass := ternary "Work/IV/LLM" "" (eq .hosttype "iv") -}}
+{{- $pass := ternary "Work/IV/LLM" "" (eq .host_env "iv") -}}
 {{- $fields := passFields $pass -}}
 
-{{- $model := ternary "global.anthropic.claude-opus-4-6-v1" "" (eq .hosttype "iv") -}}
+{{- $model := ternary "global.anthropic.claude-opus-4-6-v1" "" (eq .host_env "iv") -}}
 
 {{- $env := dict
   "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
@@ -9,7 +9,7 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
-{{- if eq .hosttype "iv" -}}
+{{- if eq .host_env "iv" -}}
   {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "global.anthropic.claude-opus-4-6-v1" -}}
   {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "global.anthropic.claude-sonnet-4-6" -}}
   {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}

@@ -1,6 +1,8 @@
-{{- /* Determine whether a provider is enabled based on `when.enabled` or `when.disabled`.
-       Input:  dict "provider" $provider "hosttype" $hosttype "tool" $tool
-       Output: JSON boolean */ -}}
+{{- /* Determine whether a provider is enabled based on `when.enabled` / `when.disabled`.
+       Legacy `hosttype` remains supported for compatibility. */ -}}
 {{- $ht := includeTemplate "when/check" (dict "item" .provider "key" "hosttype" "value" .hosttype) | fromJson -}}
-{{- $t := includeTemplate "when/check" (dict "item" .provider "key" "tool" "value" .tool) | fromJson -}}
-{{- toJson (and $ht $t) -}}
+{{- $deviceType := includeTemplate "when/check" (dict "item" .provider "key" "device_type" "value" .device_type) | fromJson -}}
+{{- $hostEnv := includeTemplate "when/check" (dict "item" .provider "key" "host_env" "value" .host_env) | fromJson -}}
+{{- $roles := includeTemplate "when/check" (dict "item" .provider "key" "roles" "value" .roles) | fromJson -}}
+{{- $tool := includeTemplate "when/check" (dict "item" .provider "key" "tool" "value" .tool) | fromJson -}}
+{{- toJson (and $ht $deviceType $hostEnv $roles $tool) -}}

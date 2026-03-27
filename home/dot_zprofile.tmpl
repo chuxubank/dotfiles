@@ -14,7 +14,7 @@ export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # Set PATH, MANPATH, etc., for Homebrew.
 eval "$({{ .path.usr }}/bin/brew shellenv)"
-{{- if eq .hosttype "home" }}
+{{- if eq .host_env "personal" }}
 export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
 export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
 export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"

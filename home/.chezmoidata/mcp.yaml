@@ -4,7 +4,8 @@ mcp:
       description: Amap's official MCP Server
       when:
         enabled:
-          hosttype: ["home"]
+          host_env: ["personal"]
+          roles: ["daily"]
           tool: ["goose"]
       execution:
         type: stdio
@@ -48,7 +49,7 @@ mcp:
         Make project management more convenient.
       when:
         enabled:
-          hosttype: ["iv"]
+          host_env: ["iv"]
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
@@ -61,7 +62,7 @@ mcp:
         timeout: 20
       when:
         enabled:
-          hosttype: ["iv"]
+          host_env: ["iv"]
     - name: GitHub
       description: >
         The GitHub MCP Server connects AI tools directly to GitHub's
@@ -95,13 +96,14 @@ mcp:
         timeout: 20
       when:
         enabled:
-          hosttype: ["iv"]
+          host_env: ["iv"]
           tool: [""]
     - name: Google Map
       description: Location services, directions, and place details
       when:
         enabled:
-          hosttype: ["home"]
+          host_env: ["personal"]
+          roles: ["daily"]
       execution:
         type: stdio
         cmd: bunx
@@ -121,7 +123,7 @@ mcp:
         timeout: 20
       when:
         enabled:
-          hosttype: ["iv"]
+          host_env: ["iv"]
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
       execution:
@@ -137,7 +139,8 @@ mcp:
       description: Allows AI apps and agents to interface with the Notion public API.
       when:
         enabled:
-          hosttype: ["home"]
+          host_env: ["personal"]
+          roles: ["daily"]
       execution:
         type: stdio
         cmd: bunx

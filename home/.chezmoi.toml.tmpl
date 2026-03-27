@@ -1,16 +1,63 @@
 {{- $interactive := stdinIsATTY }}
-{{- $choices := list "home" "aa" "iv" "cloud" "ci" -}}
+{{- $deviceTypeChoices := list "laptop" "desktop" "server" -}}
+{{- $hostEnvChoices := list "personal" "aa" "iv" "cloud" "ci" -}}
 
 {{- $email := env "EMAIL" -}}
+{{- $deviceType := "server" -}}
+{{- $hostEnv := "ci" -}}
+{{- $rolesInput := "automation" -}}
 {{- $hosttype := "ci" -}}
 {{- $passDir := ".password-store" }}
 {{- $isDarkMode := false }}
 {{- $os := .chezmoi.os -}}
 
+{{- if or (eq $os "darwin") (eq $os "windows") (eq $os "android") }}
+{{- $deviceType = "laptop" -}}
+{{- $hostEnv = "personal" -}}
+{{- $rolesInput = "daily" -}}
+{{- end }}
+
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
-{{- $hosttype = promptChoiceOnce . "hosttype" "What type of host are you on" $choices -}}
+{{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
+{{- $hostEnv = promptChoiceOnce . "host_env" "What environment does this host belong to" $hostEnvChoices -}}
+{{- if eq $hostEnv "personal" -}}
+  {{- if eq $deviceType "server" -}}
+    {{- $rolesInput = "lab" -}}
+  {{- else -}}
+    {{- $rolesInput = "daily" -}}
+  {{- end -}}
+{{- else if or (eq $hostEnv "aa") (eq $hostEnv "iv") -}}
+  {{- $rolesInput = "work" -}}
+{{- else if eq $hostEnv "cloud" -}}
+  {{- $rolesInput = "service" -}}
+{{- else if eq $hostEnv "ci" -}}
+  {{- $rolesInput = "automation" -}}
+{{- end -}}
+{{- $rolesInput = promptStringOnce . "roles" "Roles (comma separated)" $rolesInput -}}
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
+{{- end }}
+
+{{- $roles := list -}}
+{{- range $role := splitList "," $rolesInput -}}
+  {{- $trimmed := trim $role -}}
+  {{- if $trimmed -}}
+    {{- $roles = append $roles $trimmed -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if eq $hostEnv "aa" -}}
+{{- $hosttype = "aa" -}}
+{{- else if eq $hostEnv "iv" -}}
+{{- $hosttype = "iv" -}}
+{{- else if eq $hostEnv "cloud" -}}
+{{- $hosttype = "cloud" -}}
+{{- else if eq $hostEnv "ci" -}}
+{{- $hosttype = "ci" -}}
+{{- else if and (eq $hostEnv "personal") (has "lab" $roles) -}}
+{{- $hosttype = "lab" -}}
+{{- else if eq $hostEnv "personal" -}}
+{{- $hosttype = "home" -}}
 {{- end }}
 
 {{- if eq $os "darwin" }}
@@ -29,6 +76,9 @@ encryption = "gpg"
 
 [data]
     email = {{- $email | quote }}
+    device_type = {{- $deviceType | quote }}
+    host_env = {{- $hostEnv | quote }}
+    roles = {{- $roles | toToml }}
     hosttype = {{- $hosttype | quote }}
 	isDarkMode = {{- $isDarkMode }}
 

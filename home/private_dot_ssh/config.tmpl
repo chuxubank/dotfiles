@@ -4,10 +4,10 @@ Include ~/.orbstack/ssh/config
 
 Include ~/.ssh/personal/config
 
-{{ if eq .hosttype "aa" -}}
+{{ if eq .host_env "aa" -}}
 Include ~/.ssh/aa/config
 {{ end -}}
 
-{{ if eq .hosttype "iv" -}}
+{{ if eq .host_env "iv" -}}
 Include ~/.ssh/iv/config
 {{ end -}}

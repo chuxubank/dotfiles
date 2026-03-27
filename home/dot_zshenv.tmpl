@@ -7,6 +7,9 @@ function source_if_exists_outside_emacs {
 }
 
 export EMAIL={{ .email | quote }}
+export DEVICE_TYPE={{ .device_type | quote }}
+export HOST_ENV={{ .host_env | quote }}
+export HOST_ROLES={{ join "," .roles | quote }}
 export HOST_TYPE={{ .hosttype | quote }}
 
 # XDG
@@ -33,7 +36,7 @@ if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
   export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 fi
 
-{{- if ne .hosttype "ci" }}
+{{- if ne .host_env "ci" }}
 # API-KEY
 export OPENAI_API_KEY="{{ index (passFields "Personal/Tech/AI/OpenAI") "api-key" }}"
 export GEMINI_API_KEY="{{ index (passFields "Personal/Tech/Google") "gemini-api-key" }}"
