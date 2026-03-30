@@ -35,6 +35,7 @@ brews = [
   "deb-sig/tap/double-entry-generator",
   "docx2txt",
   "dprint",
+  "dua-cli",
   "exiftool",
   "fd",
   "ffmpegthumbnailer",
