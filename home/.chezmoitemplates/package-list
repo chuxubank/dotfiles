@@ -3,10 +3,7 @@
 {{ if eq (kindOf $package) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey $package "when" -}}
-  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" $package "key" "host_env" "value" $.host_env) | fromJson -}}
-  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" $package "key" "device_type" "value" $.device_type) | fromJson -}}
-  {{- $rolesOk := includeTemplate "when/check" (dict "item" $package "key" "roles" "value" $.roles) | fromJson -}}
-  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" $package) $) | fromJson -}}
 {{- end -}}
 {{ if $enabled -}}
 {{- $selected = append $selected .name -}}

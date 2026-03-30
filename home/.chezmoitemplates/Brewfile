@@ -2,10 +2,7 @@
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
 {{- end -}}
 {{ if $enabled -}}
 tap {{ .name | quote }}
@@ -18,10 +15,7 @@ tap {{ . | quote }}
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
 {{- end -}}
 {{ if $enabled -}}
 brew {{ .name | quote }}
@@ -39,10 +33,7 @@ brew {{ . | quote }}
 {{ if eq (kindOf .) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
 {{- end -}}
 {{ if $enabled -}}
 cask {{ .name | quote }}
@@ -54,10 +45,7 @@ cask {{ . | quote }}
 {{ range .packages.darwin.mas -}}
 {{- $enabled := true -}}
 {{- if hasKey . "when" -}}
-  {{- $hostEnvOk := includeTemplate "when/check" (dict "item" . "key" "host_env" "value" $.host_env) | fromJson -}}
-  {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" . "key" "device_type" "value" $.device_type) | fromJson -}}
-  {{- $rolesOk := includeTemplate "when/check" (dict "item" . "key" "roles" "value" $.roles) | fromJson -}}
-  {{- $enabled = and $hostEnvOk $deviceTypeOk $rolesOk -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
 {{- end -}}
 {{ if $enabled -}}
 mas {{ .name | quote }}, id: {{ .id }}
