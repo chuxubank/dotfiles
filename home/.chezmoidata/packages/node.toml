@@ -12,6 +12,7 @@ global = [
   "@prettier/plugin-ruby",
   "@sourcegraph/amp",
   "@zed-industries/codex-acp",
+  "@zed-industries/claude-agent-acp",
   "bash-language-server",
   "clawhub",
   "graphql-language-service-cli",
