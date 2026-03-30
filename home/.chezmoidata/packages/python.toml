@@ -7,7 +7,7 @@ tools = [
   "homeassistant-cli",
   "keymap-drawer",
   "kimi-cli",
-  "my_cookies",
+  "my-cookies",
   "pygments",
   "pylint",
   "python-lsp-server",

@@ -11,6 +11,13 @@ if ! brew list uv &>/dev/null; then
 fi
 {{- end }}
 
+UV_TOOL_LIST="$(uv tool list 2>/dev/null || true)"
+
+uv_tool_installed() {
+    local tool_name="$1"
+    awk -v name="$tool_name" '$1 == name { found=1 } END { exit !found }' <<<"$UV_TOOL_LIST"
+}
+
 {{ range $tool := .packages.python.tools -}}
   {{- if eq (kindOf $tool) "map" -}}
     {{- $enabled := true -}}
@@ -18,6 +25,7 @@ fi
       {{- $enabled = includeTemplate "when/context" (merge (dict "item" $tool) $) | fromJson -}}
     {{- end -}}
     {{- if $enabled }}
+if ! uv_tool_installed {{ $tool.name | quote }}; then
 uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
 	  {{- with index $tool "with" }} --with {{.}}{{ end }}
@@ -27,11 +35,16 @@ uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
 	  {{- else }}
 	    {{- printf " %s" $tool.name }}
 	  {{- end }} --upgrade
+fi
     {{- else }}
+if uv_tool_installed {{ $tool.name | quote }}; then
 uv tool uninstall {{ $tool.name }}
+fi
     {{- end }}
   {{- else }}
+if ! uv_tool_installed {{ $tool | quote }}; then
 uv tool install {{ $tool }} --upgrade
+fi
   {{- end }}
 {{- end }}
 
