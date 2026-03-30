@@ -11,3 +11,4 @@ sdkman_debug_mode=false
 sdkman_insecure_ssl=false
 sdkman_native_enable=true
 sdkman_selfupdate_feature=true
+sdkman_healthcheck_enable=true
