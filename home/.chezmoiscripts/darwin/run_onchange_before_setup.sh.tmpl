@@ -21,4 +21,10 @@ defaults write com.apple.finder RelativeDates -bool false
 killall Finder
 
 networksetup -setdnsservers Wi-Fi 119.29.29.29 8.8.8.8 1.1.1.1
+
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add $(which mosh-server)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp $(which mosh-server)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+
 {{ end -}}
