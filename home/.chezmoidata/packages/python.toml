@@ -12,10 +12,10 @@ tools = [
   "pylint",
   "python-lsp-server",
   "you-get",
-  "yt-dlp[default]",
-  { name = "markitdown[all]", version = "3.12" },
-  { name = "aider-chat[help]", version = "3.12", with = "pip,playwright", when.enabled = false },
+  { name = "aider-chat", extra = "help", version = "3.12", with = "pip,playwright", when.enabled = false },
   { name = "ansible", with-exec = "ansible-core,ansible-lint", with = "requests" },
+  { name = "markitdown", extra = "all", version = "3.12" },
   { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
   { name = "qmk", with-exec = "argcomplete" },
+  { name = "yt-dlp", extra = "default" },
 ]
