@@ -1,12 +1,13 @@
 {{- $interactive := stdinIsATTY }}
 {{- $deviceTypeChoices := list "laptop" "desktop" "server" -}}
 {{- $hostEnvChoices := list "personal" "aa" "iv" "cloud" "ci" -}}
+{{- $roleChoices := list "game" "daily" "work" "llm" "router" "automation" -}}
 
 {{- $email := env "EMAIL" -}}
 
 {{- $deviceType := "server" -}}
 {{- $hostEnv := "ci" -}}
-{{- $rolesInput := "automation" -}}
+{{- $roles := list "automation" -}}
 
 {{- $passDir := ".password-store" }}
 {{- $isDarkMode := false }}
@@ -17,33 +18,22 @@
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
 {{- $hostEnv = promptChoiceOnce . "host_env" "What environment does this host belong to" $hostEnvChoices -}}
 
+{{- $defaultRoles := list -}}
 {{- if eq $hostEnv "personal" -}}
   {{- if eq $deviceType "server" -}}
-    {{- $rolesInput = "llm, router" -}}
-  {{- else if eq $deviceType "desktop" -}}
-    {{- $rolesInput = "game" -}}
+    {{- $defaultRoles = list "llm" "router" -}}
+  {{- else if and (eq $deviceType "desktop") (eq $os "windows") -}}
+    {{- $defaultRoles = "game" -}}
   {{- else }}
-    {{- $rolesInput = "daily" -}}
+    {{- $defaultRoles = "daily" -}}
   {{- end -}}
 {{- else if or (eq $hostEnv "aa") (eq $hostEnv "iv") -}}
-  {{- $rolesInput = "work" -}}
-{{- else if eq $hostEnv "cloud" -}}
-  {{- $rolesInput = "service" -}}
-{{- else if eq $hostEnv "ci" -}}
-  {{- $rolesInput = "automation" -}}
+  {{- $defaultRoles = "work" -}}
 {{- end -}}
-{{- $rolesInput = promptStringOnce . "roles" "Roles (comma separated)" $rolesInput -}}
 
+{{- $roles = promptMultichoiceOnce . "roles" "Roles" $roleChoices $defaultRoles }}
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
 {{- end }}
-
-{{- $roles := list -}}
-{{- range $role := splitList "," $rolesInput -}}
-  {{- $trimmed := trim $role -}}
-  {{- if $trimmed -}}
-    {{- $roles = append $roles $trimmed -}}
-  {{- end -}}
-{{- end -}}
 
 {{- if eq $os "darwin" }}
 {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
