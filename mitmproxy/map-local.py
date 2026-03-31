@@ -15,8 +15,8 @@ from dataclasses import dataclass, field
 class Config:
     SCRIPT_DIR = Path(__file__).parent.resolve()
     HOST_ENV = os.environ.get("HOST_ENV", "aa")
-    CONFIG_DIR = SCRIPT_DIR / "config" / HOST_ENV
-    DATA_DIR = SCRIPT_DIR / "data" / HOST_ENV
+    ENV_DIR = SCRIPT_DIR / HOST_ENV
+    DATA_DIR = ENV_DIR / "data"
 
     DEFAULT_HEADERS = {"Content-Type": "application/json; charset=utf-8"}
     DEFAULT_STATUS = 200
@@ -41,14 +41,14 @@ class Route:
 
 
 # --- Handler Loading ---
-def _load_env_handlers(config_dir: Path) -> Dict[str, Callable]:
-    """Import handlers.py from the environment config directory if it exists."""
-    handlers_file = config_dir / "handlers.py"
+def _load_env_handlers(env_dir: Path) -> Dict[str, Callable]:
+    """Import handlers.py from the environment directory if it exists."""
+    handlers_file = env_dir / "handlers.py"
     if not handlers_file.exists():
         return {}
 
     # Add env dir to sys.path so the module can be imported
-    env_dir_str = str(config_dir)
+    env_dir_str = str(env_dir)
     if env_dir_str not in sys.path:
         sys.path.insert(0, env_dir_str)
 
@@ -69,7 +69,7 @@ def _load_env_handlers(config_dir: Path) -> Dict[str, Callable]:
 
 def _load_routes(env_handlers: Dict[str, Callable]) -> List[Route]:
     """Load routes from the environment-specific routes.json."""
-    routes_file = Config.CONFIG_DIR / "routes.json"
+    routes_file = Config.ENV_DIR / "routes.json"
     try:
         with open(routes_file, "r", encoding="utf-8") as f:
             entries = json.load(f)
@@ -103,7 +103,7 @@ class RequestInterceptor:
         self.firmware_call_count = 0
 
         # Load env-specific handlers, then routes
-        self._env_handlers = _load_env_handlers(Config.CONFIG_DIR)
+        self._env_handlers = _load_env_handlers(Config.ENV_DIR)
         self.routes = _load_routes(self._env_handlers)
 
         env_handler_names = list(self._env_handlers.keys()) or "(none)"
