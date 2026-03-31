@@ -1,6 +1,7 @@
 [packages.node]
 global = [
   "@ansible/ansible-language-server",
+  "@anthropic-ai/claude-code",
   "@blowmage/cursor-agent-acp",
   "@github/copilot",
   "@github/copilot-language-server",
