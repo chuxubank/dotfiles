@@ -9,6 +9,50 @@ PATH="$BUN_INSTALL/bin:$PATH"
 curl -fsSL https://bun.sh/install | bash
 {{- end }}
 
+BUN_GLOBAL_LIST="$(bun pm ls -g 2>/dev/null || true)"
+DESIRED_BUN_TOOLS=(
+{{- range $tool := .packages.node.global }}
+  {{- if eq (kindOf $tool) "map" }}
+    {{- $enabled := true -}}
+    {{- if hasKey $tool "when" -}}
+      {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
+    {{- end -}}
+    {{- if $enabled }}
+{{ printf "  %q" $tool.name }}
+    {{- end }}
+  {{- else }}
+{{ printf "  %q" $tool }}
+  {{- end }}
+{{- end }}
+)
+
+installed_bun_tools() {
+    awk '
+        /^[[:space:]]*[├└]── / {
+            line = $0
+            sub(/^[[:space:]]*[├└]── /, "", line)
+            sub(/@[0-9].*$/, "", line)
+            print line
+        }
+    ' <<<"$BUN_GLOBAL_LIST"
+}
+
+bun_tool_installed() {
+    local tool_name="$1"
+    installed_bun_tools | grep -Fqx "$tool_name"
+}
+
+bun_tool_desired() {
+    local tool_name="$1"
+    local desired_tool
+    for desired_tool in "${DESIRED_BUN_TOOLS[@]}"; do
+        if [[ "$desired_tool" == "$tool_name" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 bun upgrade
 
 {{- range $tool := .packages.node.global }}
@@ -18,12 +62,25 @@ bun upgrade
   {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
 {{- end -}}
 {{- if $enabled }}
+if ! bun_tool_installed {{ $tool.name | quote }}; then
+echo "Install bun tool: {{ $tool.name }}"
 bun add -g {{ if $tool.trust }}--trust {{ end }}{{ $tool.name }}
+fi
 {{- end }}
 {{- else }}
+if ! bun_tool_installed {{ $tool | quote }}; then
+echo "Install bun tool: {{ $tool }}"
 bun add -g {{ $tool }}
+fi
 {{- end }}
 {{- end }}
+
+while IFS= read -r installed_tool; do
+    if [[ -n "$installed_tool" ]] && ! bun_tool_desired "$installed_tool"; then
+        echo "Uninstall bun tool: $installed_tool"
+        bun remove -g "$installed_tool"
+    fi
+done < <(installed_bun_tools)
 
 bun update -g --latest
 
