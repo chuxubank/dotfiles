@@ -5,27 +5,22 @@
     "file": "firmware_upgradable.json"
   },
   {
-    "pattern": ".*/remoteoperate/.*/ota",
-    "handler": "standard"
+    "pattern": ".*/remoteoperate/.*/ota"
   },
   {
     "pattern": ".*/devices/capabilities\\?deviceType=lock.*",
-    "handler": "standard",
     "file": "capabilities.json"
   },
   {
     "pattern": ".*/appversionok/android/.*",
-    "handler": "standard",
     "file": "app_version.json"
   },
   {
     "pattern": ".*/appfeatures/android/.*",
-    "handler": "standard",
     "file": "app_feature.json"
   },
   {
     "pattern": ".*/houses/.*/manageduser/.*",
-    "handler": "standard",
     "file": "houses_managed_user.json"
   }
 ]
