@@ -1,3 +1,4 @@
+import os
 import re
 import time
 import json
@@ -19,7 +20,8 @@ from dataclasses import dataclass, field
 class Config:
 
     SCRIPT_DIR = Path(__file__).parent.resolve()
-    CONFIG_DIR = SCRIPT_DIR / "data"
+    HOST_ENV = os.environ.get("HOST_ENV", "aa")
+    CONFIG_DIR = SCRIPT_DIR / "data" / HOST_ENV
 
     # Response data file paths.
     # Managed by a dictionary for easy access by key.
