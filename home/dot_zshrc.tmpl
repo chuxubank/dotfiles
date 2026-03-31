@@ -1,7 +1,7 @@
 # chezmoi:template:line-endings=native
 
 # Kiro CLI pre block. Keep at the top of this file.
-source_if_exists_outside_emacs "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
+source_if_necessary "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -261,4 +261,4 @@ eval "$(codex completion zsh)"
 {{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
 
 # Kiro CLI post block. Keep at the bottom of this file.
-source_if_exists_outside_emacs "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
+source_if_necessary "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
