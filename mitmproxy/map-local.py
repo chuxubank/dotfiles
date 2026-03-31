@@ -21,8 +21,6 @@ class Config:
     DEFAULT_HEADERS = {"Content-Type": "application/json; charset=utf-8"}
     DEFAULT_STATUS = 200
     DEFAULT_DELAY_SECONDS = 1
-    FIRMWARE_DELAY_SECONDS = 1
-    FIRMWARE_REQUIRED_CALLS = 2
 
 
 # --- Route Definition ---

@@ -1,8 +1,10 @@
 """AA environment handlers."""
 
 import time
-import json
 from mitmproxy import ctx, http
+
+FIRMWARE_DELAY_SECONDS = 1
+FIRMWARE_REQUIRED_CALLS = 2
 
 
 def handle_firmware(interceptor, flow: http.HTTPFlow, rule):
@@ -13,12 +15,12 @@ def handle_firmware(interceptor, flow: http.HTTPFlow, rule):
         f"from {flow.client_conn.address[0]}"
     )
 
-    time.sleep(interceptor.config.FIRMWARE_DELAY_SECONDS)
+    time.sleep(FIRMWARE_DELAY_SECONDS)
 
-    if interceptor.firmware_call_count >= interceptor.config.FIRMWARE_REQUIRED_CALLS:
+    if interceptor.firmware_call_count >= FIRMWARE_REQUIRED_CALLS:
         ctx.log.info("Responding with 'success' state.")
     else:
         ctx.log.info("Responding with 'upgradable' state.")
 
     content = interceptor.get_json_content(rule.file_path) if rule.file_path else ""
-    interceptor.respond(flow, interceptor.config.DEFAULT_STATUS, content)
+    interceptor.respond(flow, 200, content)
