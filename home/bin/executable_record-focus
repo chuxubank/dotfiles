@@ -4,7 +4,7 @@ try:
     from AppKit import NSWorkspace
 except ImportError:
     print("Can't import AppKit -- maybe you're running python from brew?")
-    print("Try running with Apple's /usr/bin/python instead.")
+    print("Try running with Apple's /usr/bin/python3 instead.")
     exit(1)
 
 from datetime import datetime
@@ -13,14 +13,26 @@ from time import sleep
 last_active_name = None
 while True:
     active_app = NSWorkspace.sharedWorkspace().activeApplication()
-    if active_app["NSApplicationName"] != last_active_name:
-        last_active_name = active_app["NSApplicationName"]
-        print(
-            "%s: %s [%s]"
-            % (
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                active_app["NSApplicationName"],
-                active_app["NSApplicationPath"],
+    if active_app:
+        if active_app["NSApplicationName"] != last_active_name:
+            last_active_name = active_app["NSApplicationName"]
+            print(
+                "%s: [%s] %s (%s)"
+                % (
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    active_app["NSApplicationProcessIdentifier"],
+                    active_app["NSApplicationPath"],
+                    active_app["NSApplicationName"],
+                )
             )
-        )
-    sleep(1)
+    else:
+        if last_active_name:
+            print(
+                "%s: %s"
+                % (
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "*** no active app ***",
+                )
+            )
+            last_active_name = None
+    sleep(0.05)
