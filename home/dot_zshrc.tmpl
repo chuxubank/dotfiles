@@ -246,8 +246,6 @@ function iploc() {
 
 {{- if eq .host_env "aa" }}
 alias ci="export CIRCLECI=true && export CI=true && export key_file_path='/' && export key_alias='' && export key_password='' && export key_alias_password=''"
-alias zs='export {http,https}_proxy="http://127.0.0.1:9000"'
-alias zssg='export {http,https}_proxy="http://10.29.248.90:80"'
 source <(fly completion --shell zsh)
 source $HOME/.config/op/plugins.sh
 {{- else if eq .host_env "iv" }}
