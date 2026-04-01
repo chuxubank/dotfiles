@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+
+{{ $file := joinPath "dot_config" "infat" "config.toml" -}}
+
+echo "󰯁 Setup infat with {{ include $file | sha256sum }}"
+
+infat --config {{ joinPath .chezmoi.sourceDir $file | quote }}
+{{ end -}}

@@ -1,3 +1,4 @@
+.config/infat
 ACLI
 
 {{- if ne .chezmoi.os "windows" }}

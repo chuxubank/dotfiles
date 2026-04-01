@@ -36,6 +36,7 @@ brews = [
   "docx2txt",
   "dprint",
   "dua-cli",
+  "infat",
   "exiftool",
   "fd",
   "ffmpegthumbnailer",

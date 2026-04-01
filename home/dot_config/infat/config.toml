@@ -1,0 +1,8 @@
+[extensions]
+# html = "Safari"
+# kt = "Android Studio"
+# md = "Emacs Client"
+# pdf = "Preview"
+
+[types]
+plain-text = "Emacs Client"
