@@ -1,8 +1,6 @@
 {{- $pass := ternary "Work/IV/LLM" "" (eq .host_env "iv") -}}
 {{- $fields := passFields $pass -}}
 
-{{- $model := ternary "global.anthropic.claude-opus-4-6-v1" "" (eq .host_env "iv") -}}
-
 {{- $env := dict
   "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
   "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS" "1"
@@ -46,7 +44,6 @@
 {{- dict
   "enabledPlugins" $enabledPlugins
   "env" $env
-  "model" $model
   "statusLine" $statusLine
   | toPrettyJson
 -}}
