@@ -1,7 +1,7 @@
 {{- /* https://code.claude.com/docs/en/mcp#user-scope */ -}}
 {{- $servers := dict -}}
 {{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" (default "cc" $.tool)) $) | fromJson -}}
+  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" (default "claude-code" $.tool)) $) | fromJson -}}
   {{- if not $enabled }}{{ continue }}{{ end -}}
   {{- $exec := $provider.execution -}}
   {{- $server := dict -}}

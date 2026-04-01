@@ -1,4 +1,4 @@
 {{- /* Determine whether a provider is enabled based on `when.enabled` / `when.disabled`. */ -}}
-{{- $context := includeTemplate "when/context" (merge (dict "item" .provider) .) | fromJson -}}
-{{- $tool := includeTemplate "when/check" (dict "item" .provider "key" "tool" "value" .tool) | fromJson -}}
-{{- toJson (and $context $tool) -}}
+{{- $contextOk := includeTemplate "when/context" (merge (dict "item" .provider) .) | fromJson -}}
+{{- $toolOk := includeTemplate "when/check" (dict "item" .provider "key" "tool" "value" .tool) | fromJson -}}
+{{- toJson (and $contextOk $toolOk) -}}
