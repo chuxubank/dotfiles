@@ -15,6 +15,7 @@ tools = [
   { name = "aider-chat", extra = "help", version = "3.12", with = "pip,playwright", when.enabled = false },
   { name = "ansible", with-exec = "ansible-core,ansible-lint", with = "requests" },
   { name = "markitdown", extra = "all", version = "3.12" },
+  { name = "mlx-lm", when.os = "darwin" },
   { name = "pyglossary", with = "prompt_toolkit,python-idzip,lxml" },
   { name = "qmk", with-exec = "argcomplete" },
   { name = "yt-dlp", extra = "default" },

@@ -1,5 +1,6 @@
 {{- /* Check whether an item passes host_env/device_type/roles conditions. */ -}}
-{{- $hostEnvOk := includeTemplate "when/check" (dict "item" .item "key" "host_env" "value" .host_env) | fromJson -}}
 {{- $deviceTypeOk := includeTemplate "when/check" (dict "item" .item "key" "device_type" "value" .device_type) | fromJson -}}
+{{- $hostEnvOk := includeTemplate "when/check" (dict "item" .item "key" "host_env" "value" .host_env) | fromJson -}}
+{{- $osOk := includeTemplate "when/check" (dict "item" .item "key" "os" "value" .chezmoi.os) | fromJson -}}
 {{- $rolesOk := includeTemplate "when/check" (dict "item" .item "key" "roles" "value" .roles) | fromJson -}}
-{{- toJson (and $hostEnvOk $deviceTypeOk $rolesOk) -}}
+{{- toJson (and $hostEnvOk $deviceTypeOk $osOk $rolesOk) -}}
