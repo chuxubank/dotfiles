@@ -5,8 +5,6 @@ echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }
 xcode-select --install
 sudo xcodebuild -license accept
 
-/Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
-
 # Turn off Spotlight Index
 sudo mdutil -Eai on
 
@@ -28,8 +26,5 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add $(which mosh-server)
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp $(which mosh-server)
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-
-/usr/bin/pip3 install pyobjc
-
 
 {{ end -}}
