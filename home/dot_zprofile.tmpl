@@ -2,7 +2,7 @@ export LC_ALL=en_US.UTF-8
 
 {{- if eq .chezmoi.os "darwin" }}
 # Kiro CLI pre block. Keep at the top of this file.
-source_if -n -t 3 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
+source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
 
 {{ if lookPath "orb" -}}
 # Added by OrbStack: command-line tools and integration
@@ -53,7 +53,7 @@ export PATH="$(brew --prefix sqlite)/bin:$PATH"
 export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
 
 # Kiro CLI post block. Keep at the bottom of this file.
-source_if -n -t 3 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
+source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}
 
 export SUDO_ASKPASS="$SSH_ASKPASS"
