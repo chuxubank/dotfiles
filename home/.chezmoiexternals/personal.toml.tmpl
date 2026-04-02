@@ -12,6 +12,8 @@
     type = "git-repo"
     url = "https://github.com/chuxubank/proxy-config"
     refreshPeriod = "4h"
+	clone.args = ["-b", "stable"]
+	pull.args = ["--ff-only", "origin", "stable"]
 
 ["{{ .path.keyboard }}"]
     type = "git-repo"
