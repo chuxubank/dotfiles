@@ -3,7 +3,7 @@ if [[ "$(uname)" = 'Darwin' ]]; then
     NET_LOCAL=$(networksetup -getcurrentlocation)
 fi
 
-if [[ "$NET_LOCAL" = 'Work' ]]; then
+if [[ "$NET_LOCAL" = 'Automatic' ]]; then
     if [[ "$HOST_ENV" = 'aa' ]]; then
         echo "http://10.29.248.90:80"
     elif [[ "$HOST_ENV" = 'iv' ]]; then
