@@ -1,0 +1,12 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+
+echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
+xcode-select --install
+sudo xcodebuild -license accept
+
+# make sure spotlight index on to let mas work
+sudo mdutil -Eai on
+
+networksetup -setdnsservers Wi-Fi 119.29.29.29 8.8.8.8 1.1.1.1
+{{ end -}}

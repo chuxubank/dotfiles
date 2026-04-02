@@ -1,0 +1,7 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add $(which mosh-server)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp $(which mosh-server)
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+{{ end -}}

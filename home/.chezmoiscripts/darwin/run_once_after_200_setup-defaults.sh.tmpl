@@ -1,13 +1,5 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
-
-echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
-xcode-select --install
-sudo xcodebuild -license accept
-
-# Turn off Spotlight Index
-sudo mdutil -Eai on
-
 defaults write com.apple.Maps AppleLanguages '("zh_CN")'
 
 defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES
@@ -18,13 +10,5 @@ defaults write com.apple.finder RelativeDates -bool false
 # defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "3" "yyyy-MM-dd HH:mm:ss"
 # defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "4" "yyyy-MM-dd HH:mm:ss"
 # defaults delete NSGlobalDomain AppleICUDateFormatStrings
-killall Finder
-
-networksetup -setdnsservers Wi-Fi 119.29.29.29 8.8.8.8 1.1.1.1
-
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add $(which mosh-server)
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp $(which mosh-server)
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
-
+# killall Finder
 {{ end -}}
