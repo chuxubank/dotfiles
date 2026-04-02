@@ -246,7 +246,7 @@ casks = [
   { name = "intellij-idea", when.enabled.host_env = ["aa"] },
   { name = "intune-company-portal", when.enabled.host_env = ["aa"] },
   { name = "microsoft-auto-update", when.enabled.host_env = ["aa"] },
-  { name = "microsoft-edge", when.enabled.host_env = ["aa"] },
+  { name = "microsoft-edge", when.enabled.host_env = ["aa", "iv"] },
   { name = "microsoft-teams", when.enabled.host_env = ["aa"] },
   { name = "miro", when.enabled.host_env = ["aa"] },
   { name = "mongodb-compass", when.enabled.host_env = ["aa"] },
