@@ -1,0 +1,7 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+
+/Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
+
+/usr/bin/pip3 install pyobjc
+{{ end -}}

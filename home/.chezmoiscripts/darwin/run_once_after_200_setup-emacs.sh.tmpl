@@ -4,6 +4,6 @@
 brew reinstall --cask emacs-plus-app
 
 ln -s /Applications/Emacs.app/Contents/Resources/site-lisp/subdirs.el ~/.local/share/emacs/site-lisp/subdirs.el || true
-ln -s /Applications/Emacs.app/Contents/Resources/site-lisp/subdirs.el {{ joinPath .path.usr "share" "emacs" "site-lisp" }}
+ln -s /Applications/Emacs.app/Contents/Resources/site-lisp/subdirs.el {{ joinPath .path.usr "share" "emacs" "site-lisp" }} || true
 ln -s /Applications/Emacs.app/Contents/Resources/include/emacs-module.h {{ joinPath .path.usr "include" "emacs-module.h" }} || true
 {{ end -}}

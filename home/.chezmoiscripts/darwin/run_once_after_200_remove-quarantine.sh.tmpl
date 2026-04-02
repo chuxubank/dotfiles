@@ -1,0 +1,5 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+
+xattr -cr /Applications/MotrixNext.app
+{{ end -}}

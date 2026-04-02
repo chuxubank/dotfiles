@@ -1,11 +1,11 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
 
-# Symlink stdc++.h from Homebrew GCC into Clang include paths
+# Symlink stdc++.h from Homebrew GCC into Clang include paths.
 STDCXX_SRC=$(find "$(brew --prefix gcc)/include" -name "stdc++.h" 2>/dev/null | head -1)
 if [[ -z "$STDCXX_SRC" ]]; then
   echo "stdc++.h not found in Homebrew GCC, skipping"
-  return 0
+  exit 0
 fi
 
 for dir in \
@@ -13,14 +13,4 @@ for dir in \
   "{{ .path.usr }}/opt/llvm/include/c++/v1/bits"; do
   [[ -d "$dir" ]] && sudo ln -sf "$STDCXX_SRC" "$dir/stdc++.h"
 done
-
-echo "Upgrade Xcode's pip:"
-/Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
-
-echo "Install pyobjc to system:"
-/usr/bin/pip3 install pyobjc
-
-echo "Remove quarantine:"
-xattr -cr /Applications/MotrixNext.app
-
 {{ end -}}
