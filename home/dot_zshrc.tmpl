@@ -1,7 +1,7 @@
 # chezmoi:template:line-endings=native
 
 # Kiro CLI pre block. Keep at the top of this file.
-source_if_necessary "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
+source_if -n -t 3 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -138,24 +138,24 @@ fi
 plugins+=(jira aws)
 {{ end -}}
 
-source_if_exists $ZSH/oh-my-zsh.sh
+source_if $ZSH/oh-my-zsh.sh
 
 # plugin
 zstyle ':omz:plugins:alias-finder' autoload yes
 
-source_if_exists $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source_if_exists $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source_if $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source_if $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-source_if_exists /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source_if_exists /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source_if /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source_if /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-source_if_exists $QMK_HOME/util/qmk_tab_complete.sh
+source_if $QMK_HOME/util/qmk_tab_complete.sh
 
 # bun completions
-source_if_exists "$BUN_INSTALL/_bun"
+source_if "$BUN_INSTALL/_bun"
 
 # OpenClaw Completion
-source_if_exists "$HOME/.openclaw/completions/openclaw.zsh"
+source_if "$HOME/.openclaw/completions/openclaw.zsh"
 
 # vterm
 if [[ "$INSIDE_EMACS" = 'vterm' ]] \
@@ -259,4 +259,4 @@ eval "$(codex completion zsh)"
 {{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
 
 # Kiro CLI post block. Keep at the bottom of this file.
-source_if_necessary "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
+source_if -n -t 3 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"

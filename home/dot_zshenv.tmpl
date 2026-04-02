@@ -1,9 +1,31 @@
-function source_if_exists {
-    [[ -f $1 ]] && builtin source $1
-}
+# Unified source helper. Composes existence check, session guard, and timeout.
+# Usage: source_if [-n] [-t seconds] <file>
+#   -n          skip in Emacs / SSH sessions
+#   -t seconds  hard timeout: interrupt and print if sourcing takes too long
+function source_if {
+    local _n_flag=() _t_opt=()
+    zparseopts -D -E n=_n_flag t:=_t_opt
 
-function source_if_necessary {
-    [[ -f $1 ]] && [[ -z "$INSIDE_EMACS" ]] && [[ -z "$SSH_CONNECTION" ]] && builtin source $1
+    local _file="$1"
+    [[ -f "$_file" ]] || return 0
+    (( ${#_n_flag} )) && { [[ -z "$INSIDE_EMACS" ]] && [[ -z "$SSH_CONNECTION" ]] || return 0 }
+
+    if (( ${#_t_opt} )); then
+        local _threshold=${_t_opt[-1]}
+        local _timed_out=0 _ppid=$$
+        local _orig_trap
+        _orig_trap=$(trap -p INT 2>/dev/null)
+        trap '(( _timed_out = 1 ))' INT
+        ( sleep "$_threshold" && kill -INT "$_ppid" ) &
+        local _timer_pid=$!
+        builtin source "$_file"
+        kill "$_timer_pid" 2>/dev/null
+        wait "$_timer_pid" 2>/dev/null
+        if [[ -n "$_orig_trap" ]]; then eval "$_orig_trap"; else trap - INT; fi
+        (( _timed_out )) && print -P "%F{yellow}[zsh] source timed out: $_file (>${_threshold}s), skipped%f" >&2
+    else
+        builtin source "$_file"
+    fi
 }
 
 export EMAIL={{ .email | quote }}
