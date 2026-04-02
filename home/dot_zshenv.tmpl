@@ -1,7 +1,7 @@
 # Unified source helper. Composes existence check, session guard, and timeout.
 # Usage: source_if [-n] [-t seconds] <file>
 #   -n          skip in Emacs / SSH sessions
-#   -t seconds  hard timeout: interrupt and print if sourcing takes too long
+#   -t seconds  warn if sourcing exceeds threshold in seconds
 function source_if {
     local _n_flag=() _t_opt=()
     zparseopts -D -E n=_n_flag t:=_t_opt
@@ -12,17 +12,11 @@ function source_if {
 
     if (( ${#_t_opt} )); then
         local _threshold=${_t_opt[-1]}
-        local _timed_out=0 _ppid=$$
-        local _orig_trap
-        _orig_trap=$(trap -p INT 2>/dev/null)
-        trap '(( _timed_out = 1 ))' INT
-        ( sleep "$_threshold" && kill -INT "$_ppid" ) &
-        local _timer_pid=$!
+        local _t0=$EPOCHREALTIME
         builtin source "$_file"
-        kill "$_timer_pid" 2>/dev/null
-        wait "$_timer_pid" 2>/dev/null
-        if [[ -n "$_orig_trap" ]]; then eval "$_orig_trap"; else trap - INT; fi
-        (( _timed_out )) && print -P "%F{yellow}[zsh] source timed out: $_file (>${_threshold}s), skipped%f" >&2
+        local _elapsed=$(( EPOCHREALTIME - _t0 ))
+        (( _elapsed > _threshold )) && \
+            printf '\033[33m[source_if] slow: %s (%.2fs > %ss)\033[0m\n' "$_file" "$_elapsed" "$_threshold" >&2
     else
         builtin source "$_file"
     fi
