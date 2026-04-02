@@ -37,6 +37,9 @@ brew {{ . | quote }}
 {{- end -}}
 {{ if $enabled -}}
 cask {{ .name | quote }}
+{{- range $key, $value := . -}}
+{{- if eq $key "args" }}, args: {{ $value | toJson }}{{ end -}}
+{{ end }}
 {{ end -}}
 {{ else -}}
 cask {{ . | quote }}
