@@ -20,4 +20,7 @@ echo "Upgrade Xcode's pip:"
 echo "Install pyobjc to system:"
 /usr/bin/pip3 install pyobjc
 
+echo "Remove quarantine:"
+xattr -cr /Applications/MotrixNext.app
+
 {{ end -}}
