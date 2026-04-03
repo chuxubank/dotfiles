@@ -46,6 +46,7 @@ brews = [
   "gh",
   "git",
   "git-lfs",
+  "git-secrets",
   "github-mcp-server",
   "gitwatch",
   "gnupg",
