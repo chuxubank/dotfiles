@@ -8,8 +8,8 @@
 -}}
 
 {{- if eq .host_env "iv" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "global.anthropic.claude-opus-4-6-v1" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "global.anthropic.claude-sonnet-4-6" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "claude-opus-4-6" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "claude-sonnet-4-6" -}}
   {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}
 {{- end -}}
 
