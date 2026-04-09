@@ -265,7 +265,7 @@ casks = [
 mas = [
   { id = 1284863847, name = "Unsplash Wallpapers", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
   { id = 1478610778, name = "Juice" },
-  { id = 1496833156, name = "Playgrounds", when.enabled.host_env = ["personal"] },
+  { id = 1496833156, name = "Playgrounds", when.enabled = false },
   { id = 1575588022, name = "MenubarX" },
   { id = 1610744717, name = "RSSHub Radar" },
   { id = 424389933, name = "Final Cut Pro", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
