@@ -139,7 +139,7 @@ mcp:
           - --python
           - "3.12"
           - markitdown-mcp
-        timeout: 20
+        timeout: 30
         tool_timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
