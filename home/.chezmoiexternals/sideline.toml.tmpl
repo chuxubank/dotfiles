@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "ci" }}
 ["Developer/XingZhi/RobotDroid"]
     type = "git-repo"
     url = "https://github.com/OpenXingZhi/RobotDroid"
@@ -7,3 +8,4 @@
     type = "git-repo"
     url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
     refreshPeriod = "48h"
+{{- end }}

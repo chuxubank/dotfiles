@@ -14,7 +14,6 @@ Documents/WindowsPowerShell
 {{- if ne .chezmoi.os "darwin" }}
 .sleep
 .wakeup
-Developer/Example/Raycast
 Library
 {{- else if ne .host_env "personal" }}
 Library/LaunchAgents/rclone.rpi.plist
