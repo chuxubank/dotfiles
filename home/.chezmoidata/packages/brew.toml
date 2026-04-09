@@ -242,7 +242,7 @@ casks = [
   { name = "figma", when.enabled.host_env = ["aa", "iv"] },
   { name = "handy", when.enabled = { host_env = ["personal"], roles = ["llm"] } },
   { name = "home-assistant", when.enabled.host_env = ["personal"] },
-  { name = "insta360-studio", when.enabled.host_env = ["personal"] },
+  { name = "insta360-studio", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
   { name = "intellij-idea", when.enabled.host_env = ["aa"] },
   { name = "intune-company-portal", when.enabled.host_env = ["aa"] },
   { name = "microsoft-auto-update", when.enabled.host_env = ["aa"] },
