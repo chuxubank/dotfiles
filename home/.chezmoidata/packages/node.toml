@@ -16,6 +16,7 @@ global = [
   "@zed-industries/claude-agent-acp",
   "bash-language-server",
   "clawhub",
+  "ctx7",
   "graphql-language-service-cli",
   "openclaw",
   "prettier",
