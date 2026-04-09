@@ -96,3 +96,8 @@ encryption = "gpg"
 
 [gitHub]
     refreshPeriod = "24h"
+
+[[textconv]]
+    pattern = "**/*.plist"
+    command = "plutil"
+    args = ["-convert", "xml1", "-o", "-", "-"]
