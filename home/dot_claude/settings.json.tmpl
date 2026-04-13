@@ -14,7 +14,7 @@
 {{- end -}}
 
 {{- range $k, $v := dict
-  "ANTHROPIC_AUTH_TOKEN" (index $fields "anthropic-auth-token")
+  "ANTHROPIC_AUTH_TOKEN" (index $fields "cc-auth-token")
   "ANTHROPIC_BASE_URL" (index $fields "url")
 -}}
   {{- if $v }}
