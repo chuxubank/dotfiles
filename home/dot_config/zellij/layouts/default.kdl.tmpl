@@ -17,7 +17,7 @@ layout {
 
     ai name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.proxy -}}" {
         pane command="tail" {
-		    args "-f" "~/Library/Logs/sing-box/sing-box.log"
+		    args "-f" {{ joinPath .chezmoi.homeDir .path.logs "sing-box" "sing-box.log" | quote }}
 		}
 		pane
     }

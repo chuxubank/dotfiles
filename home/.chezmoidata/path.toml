@@ -23,6 +23,7 @@ sdkman = ".sdkman"
 
 rime = ".local/share/rime"
 rime-sync = "Nutstore/RimeSync"
-squirrel = "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
+squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
+logs = "Library/Logs"
 
 zotero-ext = "Profiles/Misaka/extensions"
