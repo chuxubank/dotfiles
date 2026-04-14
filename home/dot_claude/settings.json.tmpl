@@ -30,9 +30,9 @@
 {{- $extraKnownMarketplaces := dict
   "anthropic-agent-skills" (dict
     "source" (dict
-	  (dict "source" "github")
-	  (dict "repo" "anthropics/skills")
-	)
+      "source" "github"
+      "repo" "anthropics/skills"
+    )
   )
 -}}
 
@@ -44,6 +44,7 @@
 {{- dict
   "enabledPlugins" $enabledPlugins
   "env" $env
+  "extraKnownMarketplaces" $extraKnownMarketplaces
   "model" "opusplan"
   "statusLine" $statusLine
   | toPrettyJson
