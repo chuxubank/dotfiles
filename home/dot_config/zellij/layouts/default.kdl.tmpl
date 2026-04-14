@@ -1,0 +1,21 @@
+layout {
+    tab_template name="ai" {
+        pane size=1 borderless=true {
+            plugin location="zellij:compact-bar"
+        }
+        pane split_direction="vertical" {
+            pane command="claude" size="30%"
+            children
+        }
+    }
+
+    {{- if eq .host_env "iv" }}
+    ai name="ivc" cwd="~/Developer/IV/ivc" {
+        pane
+    }
+    {{- end }}
+
+    ai name="proxy" cwd="~/Developer/Personal/proxy" {
+        pane
+    }
+}
