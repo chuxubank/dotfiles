@@ -14,12 +14,6 @@ skills:
     - pi
     - warp
   providers:
-    - name: figma-implement-design
-      source: openai/skills
-      when:
-        disabled:
-          tool: ["goose"]
-
     - name: find-skills
       source: vercel-labs/skills
 
@@ -28,7 +22,7 @@ skills:
       when:
         enabled: false
 
-    - name: skill-creator
+    - name: ["cli-creator", "figma-implement-design"]
       source: openai/skills
       when:
         enabled:
