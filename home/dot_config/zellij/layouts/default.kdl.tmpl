@@ -4,7 +4,7 @@ layout {
             plugin location="zellij:compact-bar"
         }
         pane split_direction="vertical" {
-            pane command="claude" size="30%"
+            pane command="claude" size="40%"
             children
         }
     }
@@ -15,7 +15,7 @@ layout {
     }
     {{- end }}
 
-    ai name="proxy" cwd="~/Developer/Personal/proxy" {
+    ai name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.proxy -}}" {
         pane
     }
 }
