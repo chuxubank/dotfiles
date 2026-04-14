@@ -225,7 +225,6 @@ casks = [
   "stats",
   "steipete/tap/codexbar",
   "wezterm",
-  "windows-app",
   "wireshark-app",
   "xquartz",
   "zed",
@@ -262,6 +261,7 @@ casks = [
   { name = "steam", when.enabled = { host_env = ["personal"], roles = ["game"] } },
   { name = "wechat", when.enabled.host_env = ["personal"] },
   { name = "wechatwork", when.enabled.host_env = ["aa"] },
+  { name = "windows-app", when.enabled.host_env = ["personal"] },
 ]
 mas = [
   { id = 1284863847, name = "Unsplash Wallpapers", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
