@@ -31,6 +31,13 @@ mcp:
           CONTEXT7_API_KEY:
             path: Personal/Tech/AI/Context7
             field: api-key
+    - name: Emacs MCP Server
+      description: Connect Large Language Models directly to your Emacs environment! This MCP (Model Context Protocol) server exposes Emacs functionality through standardized tools, allowing LLMs like Claude to read and modify your buffers, execute elisp code, navigate files, and much more.
+      execution:
+        type: stdio
+        cmd: emacs-mcp-server
+        args: [""]
+        timeout: 20
     - name: Fetch
       description:
         A Model Context Protocol server that provides web content fetching
