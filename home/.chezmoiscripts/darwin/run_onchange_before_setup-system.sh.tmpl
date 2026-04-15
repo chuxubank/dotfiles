@@ -9,4 +9,6 @@ sudo xcodebuild -license accept
 sudo mdutil -Eai on
 
 networksetup -setdnsservers Wi-Fi 119.29.29.29 8.8.8.8 1.1.1.1
+
+launchctl setenv OLLAMA_HOST "0.0.0.0:11434"
 {{ end -}}
