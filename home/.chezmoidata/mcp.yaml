@@ -147,6 +147,20 @@ mcp:
           - markitdown-mcp
         timeout: 30
         tool_timeout: 30
+    - name: Mobile Device MCP
+      description:
+        An MCP server that lets AI agents control iOS and Android devices (tap, scroll, type, take screenshots, read UI trees, and run code).
+        Works with multiple devices at the same time.
+      when:
+        enabled:
+          host_env: ["iv"]
+      execution:
+        type: stdio
+        cmd: bunx
+        args:
+          - -y
+          - "@srmorete/mobile-device-mcp"
+        timeout: 30
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
       when:
