@@ -251,7 +251,7 @@ casks = [
   { name = "mongodb-compass", when.enabled.host_env = ["aa"] },
   { name = "mos", when.enabled.host_env = ["personal", "iv"] },
   { name = "neteasemusic", when.enabled.host_env = ["personal"] },
-  { name = "orbstack", when.enabled.host_env = ["personal"] },
+  { name = "orbstack", when.enabled.host_env = ["personal", "iv"] },
   { name = "podman-desktop", when.enabled.host_env = ["aa"] },
   { name = "pycharm", when.enabled.host_env = ["aa"] },
   { name = "raspberry-pi-imager", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
