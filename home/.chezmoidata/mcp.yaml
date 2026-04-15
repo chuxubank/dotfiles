@@ -31,6 +31,18 @@ mcp:
           CONTEXT7_API_KEY:
             path: Personal/Tech/AI/Context7
             field: api-key
+    - name: Chrome DevTools MCP
+      description:
+        chrome-devtools-mcp lets your coding agent (such as Gemini, Claude, Cursor or Copilot) control and inspect a live Chrome browser.
+        It acts as a Model-Context-Protocol (MCP) server, giving your AI coding assistant access to the full power of Chrome DevTools for reliable automation, in-depth debugging, and performance analysis.
+      execution:
+        type: stdio
+        cmd: bunx
+        args:
+          - -y
+          - "chrome-devtools-mcp@latest"
+          - "--no-usage-statistics"
+        timeout: 20
     - name: Emacs MCP Server
       description: Connect Large Language Models directly to your Emacs environment! This MCP (Model Context Protocol) server exposes Emacs functionality through standardized tools, allowing LLMs like Claude to read and modify your buffers, execute elisp code, navigate files, and much more.
       execution:
