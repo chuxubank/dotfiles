@@ -67,6 +67,9 @@ export FAVA_PORT=8888
 export BUN_INSTALL="$HOME/{{ .path.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# Claude
+export CLAUDE_CODE_NO_FLICKER=1
+
 # Emacs
 export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path "emacs-site-lisp" }}:"
 
