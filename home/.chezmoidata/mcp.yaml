@@ -78,12 +78,18 @@ mcp:
         timeout: 20
     - name: Figma Desktop
       description: The MCP Server brings Figma directly into your workflow by providing important design information and context to AI agents generating code from Figma design files.
+      execution:
+        type: http
+        uri: http://localhost:3845/mcp
+        timeout: 20
+    - name: Figma Remote
+      description: Remote Figma MCP
       when:
         enabled:
           host_env: ["iv"]
       execution:
         type: http
-        uri: http://localhost:3845/mcp
+        uri: https://mcp.figma.com/mcp
         timeout: 20
     - name: GitHub
       description: >
