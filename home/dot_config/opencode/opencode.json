@@ -5,12 +5,23 @@
     "port": 4096
   },
   "provider": {
-    "anthropic": {
+    "iv": {
       "options": {
         "baseURL": "http://llm.invalley.co/v1"
+      },
+      "models": {
+        "global.anthropic.claude-opus-4-6-v1": {
+          "name": "Claude Opus 4.6 V1"
+        },
+        "global.anthropic.claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6"
+        },
+        "claude-haiku-4-5-20251001": {
+          "name": "Claude Haiku 4.5"
+        }
       }
     }
   },
-  "model": "claude-sonnet-4-6",
-  "small_model": "claude-haiku-4-5-20251001"
+  "model": "global.anthropic.claude-opus-4-6-v1",
+  "small_model": "global.anthropic.claude-sonnet-4-6"
 }

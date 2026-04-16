@@ -2,7 +2,7 @@
 {{- $fields := passFields $pass -}}
 
 {{- dict
-  "anthropic" (dict
+  "iv" (dict
     "type" "api"
 	"key" (index $fields "anthropic-auth-token")
   )
