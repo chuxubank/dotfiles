@@ -17,12 +17,12 @@ EOF
 {{ if lookPath "apt-get" }}
 sudo apt-get update -y
 sudo apt-get install -y \
-    {{ template "package-list" .packages.apt.pkg }}
+    {{ template "package-list" (dict "ctx" . "path" (list "apt" "pkg")) }}
 
 {{ else if lookPath "pacman" }}
 sudo pacman -Syu --noconfirm \
-    {{ template "package-list" .packages.pacman.core }} \
-    {{ template "package-list" .packages.pacman.extra }}
+    {{ template "package-list" (dict "ctx" . "path" (list "pacman" "core")) }} \
+    {{ template "package-list" (dict "ctx" . "path" (list "pacman" "extra")) }}
 {{ end -}}
 
 {{ else if eq .chezmoi.os "windows" }}

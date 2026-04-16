@@ -1,11 +1,13 @@
 {{- $selected := list -}}
-{{ range $package := . -}}
-{{ if eq (kindOf $package) "map" -}}
+{{- $list := .ctx -}}
+{{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}
+{{- range $package := $list -}}
+{{- if eq (kindOf $package) "map" -}}
 {{- $enabled := true -}}
 {{- if hasKey $package "when" -}}
-  {{- $enabled = includeTemplate "when/context" (merge (dict "item" $package) $) | fromJson -}}
+  {{- $enabled = includeTemplate "when/context" (merge (dict "item" $package) $.ctx) | fromJson -}}
 {{- end -}}
-{{ if $enabled -}}
+{{- if $enabled -}}
 {{- $selected = append $selected .name -}}
 {{ end -}}
 {{ else -}}
