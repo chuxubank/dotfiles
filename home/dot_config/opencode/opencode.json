@@ -10,18 +10,30 @@
         "baseURL": "http://llm.invalley.co/v1"
       },
       "models": {
-        "global.anthropic.claude-opus-4-6-v1": {
-          "name": "Claude Opus 4.6 V1"
+        "claude-opus-4-6": {
+          "name": "Claude Opus 4.6"
         },
-        "global.anthropic.claude-sonnet-4-6": {
+        "claude-sonnet-4-6": {
           "name": "Claude Sonnet 4.6"
         },
         "claude-haiku-4-5-20251001": {
           "name": "Claude Haiku 4.5"
+        },
+        "gpt-5.4": {
+          "name": "GPT 5.4"
+        },
+        "qwen3.6-plus": {
+          "name": "Qwen3.6 Plus"
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview"
+        },
+        "MiniMax-M2.7": {
+          "name": "MiniMax M2.7"
         }
       }
     }
   },
-  "model": "global.anthropic.claude-opus-4-6-v1",
-  "small_model": "global.anthropic.claude-sonnet-4-6"
+  "model": "claude-sonnet-4-6",
+  "small_model": "claude-haiku-4-5-20251001"
 }
