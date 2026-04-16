@@ -8,7 +8,7 @@ jobs:
   clone-and-install:
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+      image: mcr.microsoft.com/devcontainers/universal:linux
       env:
         CODESPACES: true
     steps:
