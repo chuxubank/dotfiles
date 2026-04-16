@@ -39,9 +39,9 @@ mcp:
         type: stdio
         cmd: bunx
         args:
-          - -y
-          - "chrome-devtools-mcp@latest"
-          - "--no-usage-statistics"
+          - chrome-devtools-mcp@latest
+          - --no-usage-statistics
+          - --autoConnect
         timeout: 20
     - name: Emacs MCP Server
       description: Connect Large Language Models directly to your Emacs environment! This MCP (Model Context Protocol) server exposes Emacs functionality through standardized tools, allowing LLMs like Claude to read and modify your buffers, execute elisp code, navigate files, and much more.
