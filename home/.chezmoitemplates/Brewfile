@@ -1,56 +1,36 @@
-{{ range .packages.darwin.taps -}}
-{{ if eq (kindOf .) "map" -}}
-{{- $enabled := true -}}
-{{- if hasKey . "when" -}}
-  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
-{{- end -}}
-{{ if $enabled -}}
-tap {{ .name | quote }}
-{{ end -}}
+{{- $taps := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "taps")) | fromJson -}}
+{{ range $tap := $taps -}}
+{{ if eq (kindOf $tap) "map" -}}
+tap {{ $tap.name | quote }}
 {{ else -}}
-tap {{ . | quote }}
+tap {{ $tap | quote }}
 {{ end -}}
 {{ end -}}
-{{ range .packages.darwin.brews -}}
-{{ if eq (kindOf .) "map" -}}
-{{- $enabled := true -}}
-{{- if hasKey . "when" -}}
-  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
-{{- end -}}
-{{ if $enabled -}}
-brew {{ .name | quote }}
-{{- range $key, $value := . -}}
+{{- $brews := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "brews")) | fromJson -}}
+{{ range $brew := $brews -}}
+{{ if eq (kindOf $brew) "map" -}}
+brew {{ $brew.name | quote }}
+{{- range $key, $value := $brew -}}
 {{- if eq $key "link" }}, link: {{ $value }}{{ end -}}
 {{- if eq $key "restart_service" }}, restart_service: {{ $value }}{{ end -}}
 {{- if eq $key "args" }}, args: {{ $value | toJson }}{{ end -}}
-{{ end }}
-{{ end -}}
+{{- end }}
 {{ else -}}
-brew {{ . | quote }}
+brew {{ $brew | quote }}
 {{ end -}}
 {{ end -}}
-{{ range .packages.darwin.casks -}}
-{{ if eq (kindOf .) "map" -}}
-{{- $enabled := true -}}
-{{- if hasKey . "when" -}}
-  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
-{{- end -}}
-{{ if $enabled -}}
-cask {{ .name | quote }}
-{{- range $key, $value := . -}}
+{{- $casks := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "casks")) | fromJson -}}
+{{ range $cask := $casks -}}
+{{ if eq (kindOf $cask) "map" -}}
+cask {{ $cask.name | quote }}
+{{- range $key, $value := $cask -}}
 {{- if eq $key "args" }}, args: {{ $value | toJson }}{{ end -}}
-{{ end }}
-{{ end -}}
+{{- end }}
 {{ else -}}
-cask {{ . | quote }}
+cask {{ $cask | quote }}
 {{ end -}}
 {{ end -}}
-{{ range .packages.darwin.mas -}}
-{{- $enabled := true -}}
-{{- if hasKey . "when" -}}
-  {{- $enabled = includeTemplate "when/context" (merge (dict "item" .) $) | fromJson -}}
-{{- end -}}
-{{ if $enabled -}}
-mas {{ .name | quote }}, id: {{ .id }}
-{{ end -}}
+{{- $masApps := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "mas")) | fromJson -}}
+{{ range $app := $masApps -}}
+mas {{ $app.name | quote }}, id: {{ $app.id }}
 {{ end -}}

@@ -10,16 +10,11 @@ curl -fsSL https://bun.sh/install | bash
 {{- end }}
 
 BUN_GLOBAL_LIST="$(bun pm ls -g 2>/dev/null || true)"
+{{- $tools := includeTemplate "package-items" (dict "ctx" . "path" (list "node" "global")) | fromJson }}
 DESIRED_BUN_TOOLS=(
-{{- range $tool := .packages.node.global }}
+{{- range $tool := $tools }}
   {{- if eq (kindOf $tool) "map" }}
-    {{- $enabled := true -}}
-    {{- if hasKey $tool "when" -}}
-      {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
-    {{- end -}}
-    {{- if $enabled }}
 {{ printf "  %q" $tool.name }}
-    {{- end }}
   {{- else }}
 {{ printf "  %q" $tool }}
   {{- end }}
@@ -55,18 +50,12 @@ bun_tool_desired() {
 
 bun upgrade
 
-{{- range $tool := .packages.node.global }}
+{{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
-{{- $enabled := true -}}
-{{- if hasKey $tool "when" -}}
-  {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
-{{- end -}}
-{{- if $enabled }}
 if ! bun_tool_installed {{ $tool.name | quote }}; then
 echo "Install bun tool: {{ $tool.name }}"
 bun add -g {{ if $tool.trust }}--trust {{ end }}{{ $tool.name }}
 fi
-{{- end }}
 {{- else }}
 if ! bun_tool_installed {{ $tool | quote }}; then
 echo "Install bun tool: {{ $tool }}"

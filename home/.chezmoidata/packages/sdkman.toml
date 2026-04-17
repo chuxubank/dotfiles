@@ -1,5 +1,5 @@
-[packages.sdkman]
-sdk = [
+[packages]
+sdkman = [
   "gradleprofiler",
   "ki",
   { name = "gradle", version = "8.9", when.enabled.host_env = ["aa"] },

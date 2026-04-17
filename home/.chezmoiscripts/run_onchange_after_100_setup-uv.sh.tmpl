@@ -12,20 +12,9 @@ fi
 {{- end }}
 
 UV_TOOL_LIST="$(uv tool list 2>/dev/null || true)"
+{{- $tools := includeTemplate "package-items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
 DESIRED_UV_TOOLS=(
-{{- range $tool := .packages.python.tools }}
-  {{- if eq (kindOf $tool) "map" -}}
-    {{- $enabled := true -}}
-    {{- if hasKey $tool "when" -}}
-      {{- $enabled = includeTemplate "when/context" (merge (dict "item" $tool) $) | fromJson -}}
-    {{- end -}}
-    {{- if $enabled }}
-{{ printf "  %q" $tool.name }}
-    {{- end -}}
-  {{- else }}
-{{ printf "  %q" $tool }}
-  {{- end -}}
-{{- end }}
+{{- template "package-list" (dict "ctx" . "path" (list "python" "tools")) }}
 )
 
 installed_uv_tools() {
@@ -48,13 +37,8 @@ uv_tool_desired() {
     return 1
 }
 
-{{ range $tool := .packages.python.tools -}}
-  {{- if eq (kindOf $tool) "map" -}}
-    {{- $enabled := true -}}
-    {{- if hasKey $tool "when" -}}
-      {{- $enabled = includeTemplate "when/context" (merge (dict "item" $tool) $) | fromJson -}}
-    {{- end -}}
-    {{- if $enabled }}
+{{ range $tool := $tools }}
+  {{ if eq (kindOf $tool) "map" -}}
 if ! uv_tool_installed {{ $tool.name | quote }}; then
 echo "Install uv tool: {{ $tool.name }}"
 uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
@@ -67,13 +51,12 @@ uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
 	    {{- printf " %s" $tool.name }}
 	  {{- end }} --upgrade
 fi
-    {{- end }}
-  {{- else }}
+  {{ else }}
 if ! uv_tool_installed {{ $tool | quote }}; then
 echo "Install uv tool: {{ $tool }}"
 uv tool install {{ $tool }} --upgrade
 fi
-  {{- end }}
+  {{ end }}
 {{- end }}
 
 while IFS= read -r installed_tool; do

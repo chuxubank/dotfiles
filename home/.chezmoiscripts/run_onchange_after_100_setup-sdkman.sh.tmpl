@@ -13,15 +13,10 @@ source "$SDKMAN_INIT"
 
 sdk selfupdate
 
-{{- range $sdk := .packages.sdkman.sdk }}
+{{- $items := includeTemplate "package-items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
+{{- range $sdk := $items }}
 {{- if eq (kindOf $sdk) "map" }}
-{{- $enabled := true -}}
-{{- if hasKey $sdk "when" -}}
-  {{- $enabled = includeTemplate "when/check" (dict "item" $sdk "key" "host_env" "value" $.host_env) | fromJson -}}
-{{- end -}}
-{{- if $enabled }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
-{{- end }}
 {{- else }}
 sdk install {{ $sdk }}
 {{- end }}
