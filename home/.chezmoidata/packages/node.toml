@@ -1,5 +1,6 @@
 [packages.node]
 global = [
+  "@agentclientprotocol/claude-agent-acp",
   "@ansible/ansible-language-server",
   "@anthropic-ai/claude-code",
   "@blowmage/cursor-agent-acp",
@@ -13,7 +14,6 @@ global = [
   "@prettier/plugin-ruby",
   "@sourcegraph/amp",
   "@zed-industries/codex-acp",
-  "@zed-industries/claude-agent-acp",
   "bash-language-server",
   "clawhub",
   "ctx7",
