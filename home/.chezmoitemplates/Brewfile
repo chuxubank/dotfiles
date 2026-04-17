@@ -1,4 +1,4 @@
-{{- $taps := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "taps")) | fromJson -}}
+{{- $taps := includeTemplate "package/items" (dict "ctx" . "path" (list "darwin" "taps")) | fromJson -}}
 {{ range $tap := $taps -}}
 {{ if eq (kindOf $tap) "map" -}}
 tap {{ $tap.name | quote }}
@@ -6,7 +6,7 @@ tap {{ $tap.name | quote }}
 tap {{ $tap | quote }}
 {{ end -}}
 {{ end -}}
-{{- $brews := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "brews")) | fromJson -}}
+{{- $brews := includeTemplate "package/items" (dict "ctx" . "path" (list "darwin" "brews")) | fromJson -}}
 {{ range $brew := $brews -}}
 {{ if eq (kindOf $brew) "map" -}}
 brew {{ $brew.name | quote }}
@@ -19,7 +19,7 @@ brew {{ $brew.name | quote }}
 brew {{ $brew | quote }}
 {{ end -}}
 {{ end -}}
-{{- $casks := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "casks")) | fromJson -}}
+{{- $casks := includeTemplate "package/items" (dict "ctx" . "path" (list "darwin" "casks")) | fromJson -}}
 {{ range $cask := $casks -}}
 {{ if eq (kindOf $cask) "map" -}}
 cask {{ $cask.name | quote }}
@@ -30,7 +30,7 @@ cask {{ $cask.name | quote }}
 cask {{ $cask | quote }}
 {{ end -}}
 {{ end -}}
-{{- $masApps := includeTemplate "package-items" (dict "ctx" . "path" (list "darwin" "mas")) | fromJson -}}
+{{- $masApps := includeTemplate "package/items" (dict "ctx" . "path" (list "darwin" "mas")) | fromJson -}}
 {{ range $app := $masApps -}}
 mas {{ $app.name | quote }}, id: {{ $app.id }}
 {{ end -}}

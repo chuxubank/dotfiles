@@ -12,9 +12,9 @@ fi
 {{- end }}
 
 UV_TOOL_LIST="$(uv tool list 2>/dev/null || true)"
-{{- $tools := includeTemplate "package-items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
+{{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
 DESIRED_UV_TOOLS=(
-{{- template "package-list" (dict "ctx" . "path" (list "python" "tools")) }}
+{{- template "package/list" (dict "ctx" . "path" (list "python" "tools")) }}
 )
 
 installed_uv_tools() {

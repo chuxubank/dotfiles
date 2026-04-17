@@ -1,4 +1,4 @@
-{{- $selected := includeTemplate "package-select" . | fromJson -}}
+{{- $selected := includeTemplate "package/select" . | fromJson -}}
 {{- $length := len $selected -}}
 {{- range $index, $name := $selected -}}
 {{- $name -}}

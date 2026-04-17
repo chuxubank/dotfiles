@@ -13,7 +13,7 @@ source "$SDKMAN_INIT"
 
 sdk selfupdate
 
-{{- $items := includeTemplate "package-items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
+{{- $items := includeTemplate "package/items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
 {{- range $sdk := $items }}
 {{- if eq (kindOf $sdk) "map" }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}

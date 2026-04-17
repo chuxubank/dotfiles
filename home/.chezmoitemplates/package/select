@@ -1,5 +1,5 @@
 {{- $selected := list -}}
-{{- $items := includeTemplate "package-items" . | fromJson -}}
+{{- $items := includeTemplate "package/items" . | fromJson -}}
 {{- range $package := $items -}}
 {{- if eq (kindOf $package) "map" -}}
 {{- $selected = append $selected $package.name -}}

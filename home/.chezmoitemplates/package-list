@@ -1,4 +1,0 @@
-{{- $selected := includeTemplate "package-select" . | fromJson -}}
-{{- range $selected }}
-{{ printf "%q" . }}
-{{- end -}}

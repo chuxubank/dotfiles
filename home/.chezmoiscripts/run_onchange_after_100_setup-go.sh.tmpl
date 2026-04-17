@@ -5,7 +5,7 @@ echo "{{ template "week" . }} 󰯁 Setup go"
 source $HOME/.zshenv
 
 GO_PACKAGES=(
-{{- template "package-list" (dict "ctx" . "path" (list "go")) }}
+{{- template "package/list" (dict "ctx" . "path" (list "go")) }}
 )
 
 for pkg in "${GO_PACKAGES[@]}"; do
