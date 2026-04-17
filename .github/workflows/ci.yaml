@@ -16,7 +16,7 @@ jobs:
 
       - name: Cache apt
         id: cache-apt
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             /var/cache/apt/archives
@@ -30,7 +30,7 @@ jobs:
         run: sudo apt-get update -y
 
       - name: Cache chezmoi
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/chezmoi
           key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoiexternals/**/*.toml.tmpl') }}
@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-chezmoi-
 
       - name: Cache sdkman
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.sdkman
           key: ${{ runner.os }}-sdkman-${{ hashFiles('home/.chezmoidata/packages/sdkman.toml') }}
@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-sdkman-
 
       - name: Cache rust
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.local/share/cargo/bin/
@@ -59,7 +59,7 @@ jobs:
 
       - name: Cache bun
         if: false
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.bun
           key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/packages/node.toml') }}
@@ -68,7 +68,7 @@ jobs:
 
       - name: Cache uv
         if: false
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/uv
           key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/packages/python.toml') }}
