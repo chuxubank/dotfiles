@@ -3,6 +3,7 @@ pkg = [
   "aspell",
   "aspell-en",
   "cmake",
+  "emacs",
   "fzf",
   "gh",
   "git",
@@ -27,5 +28,4 @@ pkg = [
   "wget",
   "zip",
   "zsh",
-  { name = "emacs", when.disabled.host_env = ["ci"] },
 ]
