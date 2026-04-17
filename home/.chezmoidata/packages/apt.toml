@@ -9,6 +9,7 @@ pkg = [
   "git",
   "git-lfs",
   "gnupg",
+  "golang-go",
   "imagemagick",
   "isync",
   "jq",
