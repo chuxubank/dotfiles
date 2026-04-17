@@ -70,7 +70,6 @@ brews = [
   "librime",
   "libvterm",
   "logrotate",
-  "markdown",
   "mas",
   "media-info",
   "mosh",
