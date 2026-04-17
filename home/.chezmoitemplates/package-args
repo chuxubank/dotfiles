@@ -1,0 +1,7 @@
+{{- $selected := includeTemplate "package-select" . | fromJson -}}
+{{- $length := len $selected -}}
+{{- range $index, $name := $selected -}}
+{{- $name -}}
+{{- if lt (add $index 1) $length }} \
+    {{ end -}}
+{{- end }}

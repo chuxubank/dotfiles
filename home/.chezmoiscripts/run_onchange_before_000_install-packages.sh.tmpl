@@ -4,9 +4,9 @@ echo "{{ template "week" . }} 󰯁 Install packages"
 
 {{ if eq .chezmoi.os "android" -}}
 pkg install -y \
-    {{ template "package-list" .packages.termux.repo }}
+    {{ template "package-args" (dict "ctx" . "path" (list "termux" "repo")) }}
 pkg install -y \
-    {{ template "package-list" .packages.termux.pkg }}
+    {{ template "package-args" (dict "ctx" . "path" (list "termux" "pkg")) }}
 
 {{ else if eq .chezmoi.os "darwin" -}}
 brew bundle --quiet --cleanup --file=- <<EOF
@@ -19,12 +19,12 @@ EOF
 sudo apt-get update -y
 {{- end }}
 sudo apt-get install -y \
-    {{ template "package-list" (dict "ctx" . "path" (list "apt" "pkg")) }}
+    {{ template "package-args" (dict "ctx" . "path" (list "apt" "pkg")) }}
 
 {{ else if lookPath "pacman" }}
 sudo pacman -Syu --noconfirm \
-    {{ template "package-list" (dict "ctx" . "path" (list "pacman" "core")) }} \
-    {{ template "package-list" (dict "ctx" . "path" (list "pacman" "extra")) }}
+    {{ template "package-args" (dict "ctx" . "path" (list "pacman" "core")) }} \
+    {{ template "package-args" (dict "ctx" . "path" (list "pacman" "extra")) }}
 {{ end -}}
 
 {{ else if eq .chezmoi.os "windows" }}

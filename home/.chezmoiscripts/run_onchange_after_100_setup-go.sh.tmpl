@@ -2,18 +2,14 @@
 
 echo "{{ template "week" . }} 󰯁 Setup go"
 
-{{- range $tool := .packages.go }}
-{{- if eq (kindOf $tool) "map" }}
-{{- $enabled := true -}}
-{{- if hasKey $tool "when" -}}
-  {{- $enabled = includeTemplate "when/check" (dict "item" $tool "key" "host_env" "value" $.host_env) | fromJson -}}
-{{- end -}}
-{{- if $enabled }}
-go install {{ $tool.name }}
-{{- end }}
-{{- else }}
-go install {{ $tool }}
-{{- end }}
-{{- end }}
+source $HOME/.zshenv
+
+GO_PACKAGES=(
+{{- template "package-list" (dict "ctx" . "path" (list "go")) }}
+)
+
+for pkg in "${GO_PACKAGES[@]}"; do
+  go install "$pkg"
+done
 
 gup update
