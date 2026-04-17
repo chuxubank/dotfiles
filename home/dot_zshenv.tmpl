@@ -76,7 +76,8 @@ export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path
 
 # Go
 export GOPATH="$XDG_DATA_HOME/go"
-export GOBIN="$XDG_BIN_HOME"
+export GOBIN="$XDG_BIN_HOME/go"
+export PATH=$GOBIN:$PATH
 
 # HASS
 export HASS_SERVER=http://homeassistant.local:8123
