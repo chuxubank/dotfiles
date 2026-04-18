@@ -21,10 +21,14 @@
 {{- $defaultRoles := list -}}
 {{- if eq $hostEnv "personal" -}}
   {{- if eq $deviceType "server" -}}
-    {{- $defaultRoles = list "llm" "router" -}}
-  {{- else if and (eq $deviceType "desktop") (eq $os "windows") -}}
-    {{- $defaultRoles = "game" -}}
-  {{- else }}
+    {{- $defaultRoles = list "router" -}}
+  {{- else if eq $deviceType "desktop" -}}
+    {{- if eq $os "windows" -}}
+      {{- $defaultRoles = "game" -}}
+	{{- else if eq $os "darwin" -}}
+      {{- $defaultRoles = "llm" "router" -}}
+    {{- end -}}
+  {{- else -}}
     {{- $defaultRoles = "daily" -}}
   {{- end -}}
 {{- else if or (eq $hostEnv "aa") (eq $hostEnv "iv") -}}
