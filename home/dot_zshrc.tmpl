@@ -149,7 +149,9 @@ source_if $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting
 source_if /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+{{- if has "qmk" .roles -}}
 source_if $QMK_HOME/util/qmk_tab_complete.sh
+{{- end -}}
 
 # bun completions
 source_if "$BUN_INSTALL/_bun"

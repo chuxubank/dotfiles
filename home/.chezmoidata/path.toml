@@ -27,3 +27,4 @@ squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
 logs = "Library/Logs"
 
 zotero-ext = "Profiles/Misaka/extensions"
+qmk = "Developer/Example/QMK"

@@ -95,8 +95,10 @@ export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
 export plum_dir="$HOME/{{ .path.plum }}"
 export PATH=$plum_dir:$PATH
 
+{{- if has "qmk" .roles -}}
 # QMK
-export QMK_HOME="$HOME/Developer/Example/QMK"
+export QMK_HOME=$HOME/{{ .path.qmk }}
+{{- end -}}
 
 # Raycast
 export PATH=$HOME/{{ .path.raycast }}/scripts:$PATH

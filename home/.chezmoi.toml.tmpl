@@ -1,7 +1,16 @@
 {{- $interactive := stdinIsATTY }}
 {{- $deviceTypeChoices := list "laptop" "desktop" "server" -}}
 {{- $hostEnvChoices := list "personal" "aa" "iv" "cloud" "ci" -}}
-{{- $roleChoices := list "game" "studio" "daily" "work" "llm" "router" "automation" -}}
+{{- $roleChoices := list
+  "automation"
+  "daily"
+  "game"
+  "llm"
+  "qmk"
+  "router"
+  "studio"
+  "work"
+-}}
 
 {{- $email := env "EMAIL" -}}
 

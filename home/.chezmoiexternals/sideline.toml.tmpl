@@ -1,4 +1,4 @@
-{{- if ne .host_env "ci" }}
+{{- if ne .host_env "ci" -}}
 ["Developer/XingZhi/RobotDroid"]
     type = "git-repo"
     url = "https://github.com/OpenXingZhi/RobotDroid"
@@ -8,4 +8,11 @@
     type = "git-repo"
     url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
     refreshPeriod = "48h"
-{{- end }}
+
+{{- if has "qmk" .roles -}}
+["{{ .path.qmk }}"]
+    type = "git-repo"
+    url = "https://github.com/qmk/qmk_firmware"
+    refreshPeriod = "48h"
+{{- end -}}
+{{- end -}}
