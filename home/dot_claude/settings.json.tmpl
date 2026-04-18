@@ -1,5 +1,4 @@
-{{- $pass := ternary "Work/IV/LLM" "" (eq .host_env "iv") -}}
-{{- $fields := passFields $pass -}}
+{{- $fields := passFields "Work/IV/LLM" -}}
 
 {{- $env := dict
   "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
