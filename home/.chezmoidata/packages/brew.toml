@@ -9,7 +9,6 @@ taps = [
   "sikarugir-app/sikarugir",
   "steipete/tap",
   "theseal/ssh-askpass",
-  "tw93/tap",
   { name = "atlassian/acli", when.enabled.host_env = ["aa"] },
 ]
 brews = [
@@ -37,7 +36,6 @@ brews = [
   "docx2txt",
   "dprint",
   "dua-cli",
-  "infat",
   "exiftool",
   "fd",
   "ffmpegthumbnailer",
@@ -58,6 +56,7 @@ brews = [
   "htop",
   "hugo",
   "imagemagick",
+  "infat",
   "iperf3",
   "isync",
   "jadx",
@@ -72,6 +71,7 @@ brews = [
   "logrotate",
   "mas",
   "media-info",
+  "mole",
   "mosh",
   "mosquitto",
   "mpv",
@@ -128,7 +128,6 @@ brews = [
   "tokei",
   "tree-sitter",
   "tuios",
-  "tw93/tap/mole",
   "uv",
   "watch",
   "wget",
@@ -151,6 +150,7 @@ brews = [
   { name = "sleepwatcher", restart_service = true },
 ]
 casks = [
+  "AnInsomniacy/motrix-next/motrix-next",
   "android-studio",
   "anki",
   "appcleaner",
@@ -210,7 +210,6 @@ casks = [
   "lyricsx",
   "mitmproxy",
   "monitorcontrol",
-  "motrix-next",
   "neovide-app",
   "netnewswire",
   "nextcloud",
