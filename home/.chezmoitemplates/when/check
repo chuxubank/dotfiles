@@ -8,26 +8,15 @@
 {{- $key := .key -}}
 {{- $value := .value -}}
 {{- $result := true -}}
-{{- $valueIsSlice := eq (kindOf $value) "slice" -}}
 
 {{- if hasKey $item "when" -}}
   {{- $when := $item.when -}}
   {{- if hasKey $when "enabled" -}}
     {{- if eq (kindOf $when.enabled) "bool" -}}
       {{- if not $when.enabled }}{{- $result = false -}}{{- end -}}
-    {{- else if hasKey $when.enabled $key -}}
+    {{- else if and (eq (kindOf $when.enabled) "map") (hasKey $when.enabled $key) -}}
       {{- $expected := index $when.enabled $key -}}
-      {{- if $valueIsSlice -}}
-        {{- $matched := false -}}
-        {{- range $actual := $value -}}
-          {{- if has $actual $expected -}}
-            {{- $matched = true -}}
-          {{- end -}}
-        {{- end -}}
-        {{- if not $matched }}{{- $result = false -}}{{- end -}}
-      {{- else -}}
-        {{- if not (has $value $expected) }}{{- $result = false -}}{{- end -}}
-      {{- end -}}
+      {{- if not (includeTemplate "when/match" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
     {{- end -}}
   {{- end -}}
 
@@ -35,15 +24,9 @@
     {{- $disabledValue := $when.disabled -}}
     {{- if eq (kindOf $disabledValue) "bool" -}}
       {{- if $disabledValue }}{{- $result = false -}}{{- end -}}
-    {{- else if hasKey $disabledValue $key -}}
+    {{- else if and (eq (kindOf $disabledValue) "map") (hasKey $disabledValue $key) -}}
       {{- $blocked := index $disabledValue $key -}}
-      {{- if $valueIsSlice -}}
-        {{- range $actual := $value -}}
-          {{- if has $actual $blocked }}{{- $result = false -}}{{- end -}}
-        {{- end -}}
-      {{- else -}}
-        {{- if has $value $blocked }}{{- $result = false -}}{{- end -}}
-      {{- end -}}
+      {{- if includeTemplate "when/match" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

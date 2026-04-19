@@ -1,0 +1,28 @@
+{{- /* Check whether a context value matches a rule value.
+       Input:  dict "value" $value "rule" $rule
+       Output: JSON boolean
+       - scalar vs scalar: exact match
+       - scalar vs slice: scalar is contained in slice
+       - slice vs scalar: slice contains scalar
+       - slice vs slice: any overlap */ -}}
+{{- $value := .value -}}
+{{- $rule := .rule -}}
+{{- $valueIsSlice := eq (kindOf $value) "slice" -}}
+{{- $ruleIsSlice := eq (kindOf $rule) "slice" -}}
+{{- $matched := false -}}
+
+{{- if $valueIsSlice -}}
+  {{- range $actual := $value -}}
+    {{- if and $ruleIsSlice (has $actual $rule) -}}
+      {{- $matched = true -}}
+    {{- else if and (not $ruleIsSlice) (eq $actual $rule) -}}
+      {{- $matched = true -}}
+    {{- end -}}
+  {{- end -}}
+{{- else if $ruleIsSlice -}}
+  {{- $matched = has $value $rule -}}
+{{- else -}}
+  {{- $matched = eq $value $rule -}}
+{{- end -}}
+
+{{- toJson $matched -}}
