@@ -30,12 +30,12 @@
 {{- $defaultRoles := list -}}
 {{- if eq $hostEnv "personal" -}}
   {{- if eq $deviceType "server" -}}
-    {{- $defaultRoles = list "router" -}}
+    {{- $defaultRoles = "llm" -}}
   {{- else if eq $deviceType "desktop" -}}
     {{- if eq $os "windows" -}}
       {{- $defaultRoles = "game" -}}
 	{{- else if eq $os "darwin" -}}
-      {{- $defaultRoles = "llm" "router" -}}
+      {{- $defaultRoles = list "llm" "router" -}}
     {{- end -}}
   {{- else -}}
     {{- $defaultRoles = "daily" -}}
