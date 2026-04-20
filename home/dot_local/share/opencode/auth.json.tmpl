@@ -5,5 +5,9 @@
     "type" "api"
 	"key" (index $fields "anthropic-auth-token")
   )
+  "anthropic" (dict
+    "type" "api"
+	"key" (index $fields "cc-auth-token")
+  )
   | toPrettyJson
 -}}

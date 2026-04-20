@@ -5,6 +5,11 @@
     "port": 4096
   },
   "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "http://llm.invalley.co/v1"
+      }
+    },
     "iv": {
       "options": {
         "baseURL": "http://llm.invalley.co/v1"
