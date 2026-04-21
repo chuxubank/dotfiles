@@ -7,7 +7,6 @@ taps = [
   "deb-sig/tap",
   "railwaycat/emacsmacport",
   "sikarugir-app/sikarugir",
-  "steipete/tap",
   "theseal/ssh-askpass",
   { name = "atlassian/acli", when.enabled.host_env = ["aa"] },
 ]
@@ -113,7 +112,6 @@ brews = [
   "socat",
   "sshpass",
   "starship",
-  "steipete/tap/imsg",
   "stylua",
   "swagger-codegen",
   "switchaudio-osx",
@@ -221,7 +219,6 @@ casks = [
   "shortcat",
   "squirrel-app",
   "stats",
-  "steipete/tap/codexbar",
   "wezterm",
   "wireshark-app",
   "xquartz",

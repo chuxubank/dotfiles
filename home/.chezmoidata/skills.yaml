@@ -2,7 +2,6 @@ skills:
   agents:
     - amp
     - claude-code
-    - openclaw
     - codex
     - droid
     - gemini-cli
