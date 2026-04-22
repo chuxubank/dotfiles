@@ -73,6 +73,7 @@
 
   {{- $resolved := dict
     "name"     $provName
+    "type"     (default "openai" (index $prov "type"))
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
   -}}

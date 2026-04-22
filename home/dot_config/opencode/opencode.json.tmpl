@@ -9,13 +9,22 @@
   {{- if $ep.base_url }}
     {{- $_ := set $provDict "options" (dict "baseURL" (printf "%s/v1" $ep.base_url)) -}}
   {{- end }}
+
+  {{- /* Fetch models, then merge static overrides for display names */ -}}
+  {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
+  {{- $models := dict -}}
+  {{- range $id, $name := $fetched }}
+    {{- $_ := set $models $id (dict "name" $name) -}}
+  {{- end }}
   {{- if hasKey $ep "models" }}
-    {{- $models := dict -}}
     {{- range $id, $name := $ep.models }}
       {{- $_ := set $models $id (dict "name" $name) -}}
     {{- end }}
+  {{- end }}
+  {{- if gt (len $models) 0 }}
     {{- $_ := set $provDict "models" $models -}}
   {{- end }}
+
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 

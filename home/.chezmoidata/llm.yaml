@@ -3,6 +3,9 @@ llm:
   # Each provider = one API endpoint (base_url + default auth).
   # Tools can override auth.field to use a different API key from the
   # same pass path.
+  #
+  # type: openai (default) | ollama | gemini
+  #   Controls model list endpoint path and response parsing.
   providers:
     iv:
       base_url: "http://llm.invalley.co"
@@ -19,6 +22,7 @@ llm:
         field: api-key
 
     google:
+      type: gemini
       auth:
         path: Personal/Tech/Google
         field: gemini-api-key
@@ -30,6 +34,7 @@ llm:
         field: api-key
 
     ollama:
+      type: ollama
       base_url: "http://localhost:11434"
       when:
         enabled:
@@ -55,15 +60,6 @@ llm:
         iv:
           provider: iv
           auth_field: anthropic-auth-token
-          models:
-            claude-opus-4-7: Claude Opus 4.7
-            claude-opus-4-6: Claude Opus 4.6
-            claude-sonnet-4-6: Claude Sonnet 4.6
-            claude-haiku-4-5-20251001: Claude Haiku 4.5
-            gpt-5.4: GPT 5.4
-            qwen3.6-plus: Qwen3.6 Plus
-            gemini-3.1-pro-preview: Gemini 3.1 Pro Preview
-            MiniMax-M2.7: MiniMax M2.7
 
     claude-code:
       model: opusplan

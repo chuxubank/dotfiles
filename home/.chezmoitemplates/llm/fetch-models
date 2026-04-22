@@ -1,0 +1,51 @@
+{{- /* llm/fetch-models — Fetch model list from a provider endpoint.
+       Input: dict with "type", "base_url", "auth_key"
+       Output: JSON map of { model_id: model_id, ... }
+       Returns empty map on failure or missing base_url.
+
+       Provider types:
+         openai (default):  GET /v1/models           → .data[].id
+         ollama:            GET /api/tags             → .models[].name
+         gemini:            GET /v1beta/models?key=   → .models[].name (strip "models/" prefix)
+*/ -}}
+{{- $models := dict -}}
+{{- if .base_url }}
+  {{- $fetchURL := "" -}}
+  {{- $authArg := "" -}}
+  {{- if eq .type "ollama" }}
+    {{- $fetchURL = printf "%s/api/tags" .base_url -}}
+  {{- else if eq .type "gemini" }}
+    {{- $fetchURL = printf "%s/v1beta/models?key=%s&pageSize=1000" .base_url .auth_key -}}
+  {{- else }}
+    {{- $fetchURL = printf "%s/v1/models" .base_url -}}
+    {{- if .auth_key }}
+      {{- $authArg = printf "-H 'Authorization: Bearer %s'" .auth_key -}}
+    {{- end }}
+  {{- end }}
+  {{- $raw := output "sh" "-c" (printf "curl -sfL --connect-timeout 2 %s '%s' 2>/dev/null || echo '{}'" $authArg $fetchURL) | trim -}}
+  {{- $resp := $raw | fromJson -}}
+  {{- if eq .type "ollama" }}
+    {{- if hasKey $resp "models" }}
+      {{- range $m := $resp.models }}
+        {{- $_ := set $models $m.name $m.name -}}
+      {{- end }}
+    {{- end }}
+  {{- else if eq .type "gemini" }}
+    {{- if hasKey $resp "models" }}
+      {{- range $m := $resp.models }}
+        {{- $id := $m.name -}}
+        {{- if hasPrefix "models/" $id }}
+          {{- $id = trimPrefix "models/" $id -}}
+        {{- end }}
+        {{- $_ := set $models $id $id -}}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- if hasKey $resp "data" }}
+      {{- range $m := $resp.data }}
+        {{- $_ := set $models $m.id $m.id -}}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- toJson $models -}}
