@@ -6,8 +6,7 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
-{{- if hasKey $cfg.providers "anthropic" }}
-  {{- $ep := index $cfg.providers "anthropic" -}}
+{{- range $_, $ep := $cfg.providers }}
   {{- if $ep.base_url }}
     {{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}
   {{- end }}

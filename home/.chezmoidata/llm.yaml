@@ -29,6 +29,12 @@ llm:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
 
+    ollama:
+      base_url: "http://localhost:11434/v1"
+      when:
+        enabled:
+          roles: ["llm"]
+
   # ── Tool defaults ──────────────────────────────────────────────────
   # Per-tool model selection.  `providers` overrides only the auth
   # field used for a given provider (the base_url stays the same).
