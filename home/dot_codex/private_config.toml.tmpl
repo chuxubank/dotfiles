@@ -70,9 +70,11 @@
   {{- end }}
 {{- end }}
 
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+
 {{- $config := dict
-  "model" "gpt-5.4"
-  "model_reasoning_effort" "medium"
+  "model" $cfg.model
+  "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
   "projects" $projects
   "notice" (dict

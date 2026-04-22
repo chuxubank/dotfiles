@@ -1,13 +1,10 @@
-{{- $fields := passFields "Work/IV/LLM" -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "opencode") .) | fromJson -}}
 
-{{- dict
-  "iv" (dict
-    "type" "api"
-	"key" (index $fields "anthropic-auth-token")
-  )
-  "anthropic" (dict
-    "type" "api"
-	"key" (index $fields "cc-auth-token")
-  )
-  | toPrettyJson
--}}
+{{- $auth := dict -}}
+{{- range $alias, $ep := $cfg.providers }}
+  {{- if $ep.auth_key }}
+    {{- $_ := set $auth $alias (dict "type" "api" "key" $ep.auth_key) -}}
+  {{- end }}
+{{- end }}
+
+{{- $auth | toPrettyJson -}}

@@ -1,4 +1,4 @@
-{{- $fields := passFields "Work/IV/LLM" -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "claude-code") .) | fromJson -}}
 
 {{- $env := dict
   "CLAUDE_CODE_ATTRIBUTION_HEADER" "0"
@@ -6,19 +6,14 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
-{{- if eq .host_env "iv" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "claude-opus-4-6" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "claude-sonnet-4-6" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}
-{{- end -}}
-
-{{- range $k, $v := dict
-  "ANTHROPIC_AUTH_TOKEN" (index $fields "cc-auth-token")
-  "ANTHROPIC_BASE_URL" (index $fields "url")
--}}
-  {{- if $v }}
-    {{- $_ := set $env $k $v -}}
-  {{ end -}}
+{{- if hasKey $cfg.providers "anthropic" }}
+  {{- $ep := index $cfg.providers "anthropic" -}}
+  {{- if $ep.base_url }}
+    {{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}
+  {{- end }}
+  {{- if $ep.auth_key }}
+    {{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}
+  {{- end }}
 {{- end -}}
 
 {{- $enabledPlugins := dict
@@ -51,7 +46,7 @@
   "enabledPlugins" $enabledPlugins
   "env" $env
   "extraKnownMarketplaces" $extraKnownMarketplaces
-  "model" "opusplan"
+  "model" $cfg.model
   "permissions" $permissions
   "skipAutoPermissionPrompt" true
   "statusLine" $statusLine

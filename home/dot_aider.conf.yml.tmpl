@@ -1,8 +1,9 @@
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "aider") .) | fromJson -}}
 #############
 # Main model:
 
 ## Specify the model to use for the main chat
-model: gemini-2.5-pro
+model: {{ $cfg.model }}
 
 
 ########################
@@ -10,7 +11,11 @@ model: gemini-2.5-pro
 
 ## Set an API key for a provider (eg: --api-key provider=<key> sets PROVIDER_API_KEY=<key>)
 api-key:
-  - gemini={{ index (passFields "Personal/Tech/Google") "aider-gemini-api-key" }}
+{{- range $provName, $ep := $cfg.providers }}
+  {{- if $ep.auth_key }}
+  - {{ $provName }}={{ $ep.auth_key }}
+  {{- end }}
+{{- end }}
 
 
 ################

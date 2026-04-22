@@ -1,0 +1,60 @@
+{{- /* llm/tool-config — Resolve tool-level config from llm.tools.
+       Input: dict "tool" <tool-name> (merged with root context $)
+       Output JSON:
+         model       — default model id
+         small_model — small model id (if set)
+         reasoning_effort — string (if set)
+         providers   — map of alias -> resolved provider:
+           name      — provider key in llm.providers
+           base_url  — string
+           auth_key  — resolved API key (with optional field override)
+*/ -}}
+{{- $tool := .tool -}}
+{{- $toolCfg := index .llm.tools $tool -}}
+{{- $llmProviders := .llm.providers -}}
+{{- $result := dict -}}
+
+{{- if hasKey $toolCfg "model" }}
+  {{- $_ := set $result "model" $toolCfg.model -}}
+{{- end }}
+{{- if hasKey $toolCfg "small_model" }}
+  {{- $_ := set $result "small_model" $toolCfg.small_model -}}
+{{- end }}
+{{- if hasKey $toolCfg "reasoning_effort" }}
+  {{- $_ := set $result "reasoning_effort" $toolCfg.reasoning_effort -}}
+{{- end }}
+
+{{- /* Resolve provider mappings */ -}}
+{{- $providers := dict -}}
+{{- if hasKey $toolCfg "providers" }}
+  {{- range $alias, $ref := $toolCfg.providers }}
+    {{- $provName := $ref.provider -}}
+    {{- $prov := index $llmProviders $provName -}}
+
+    {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
+    {{- $authKey := "" -}}
+    {{- if hasKey $prov "auth" }}
+      {{- $auth := $prov.auth -}}
+      {{- $field := "" -}}
+      {{- if hasKey $ref "auth_field" }}
+        {{- $field = $ref.auth_field -}}
+      {{- else if hasKey $auth "field" }}
+        {{- $field = $auth.field -}}
+      {{- end }}
+      {{- if $field }}
+        {{- $authKey = index (passFields $auth.path) $field -}}
+      {{- else }}
+        {{- $authKey = pass $auth.path -}}
+      {{- end }}
+    {{- end }}
+
+    {{- $_ := set $providers $alias (dict
+      "name"     $provName
+      "base_url" (default "" (index $prov "base_url"))
+      "auth_key" $authKey
+    ) -}}
+  {{- end }}
+{{- end }}
+{{- $_ := set $result "providers" $providers -}}
+
+{{- toJson $result -}}

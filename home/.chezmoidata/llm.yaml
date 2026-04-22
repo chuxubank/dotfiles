@@ -1,0 +1,67 @@
+llm:
+  # ── Providers ───────────────────────────────────────────────────────
+  # Each provider = one API endpoint (base_url + default auth).
+  # Tools can override auth.field to use a different API key from the
+  # same pass path.
+  providers:
+    iv:
+      base_url: "http://llm.invalley.co/v1"
+      auth:
+        path: Work/IV/LLM
+        field: cc-auth-token
+      when:
+        enabled:
+          host_env: ["iv"]
+
+    openai:
+      auth:
+        path: Personal/Tech/AI/OpenAI
+        field: api-key
+
+    google:
+      auth:
+        path: Personal/Tech/Google
+        field: gemini-api-key
+
+    openrouter:
+      base_url: "https://openrouter.ai/api/v1"
+      auth:
+        path: Personal/Tech/AI/OpenRouter
+        field: api-key
+
+  # ── Tool defaults ──────────────────────────────────────────────────
+  # Per-tool model selection.  `providers` overrides only the auth
+  # field used for a given provider (the base_url stays the same).
+  tools:
+    opencode:
+      model: anthropic/claude-opus-4-7
+      small_model: iv/qwen3.6-plus
+      providers:
+        anthropic:
+          provider: iv
+        iv:
+          provider: iv
+          auth_field: anthropic-auth-token
+
+    claude-code:
+      model: opusplan
+      providers:
+        anthropic:
+          provider: iv
+
+    codex:
+      model: gpt-5.4
+      reasoning_effort: medium
+
+    aider:
+      model: gemini-2.5-pro
+      providers:
+        gemini:
+          provider: google
+          auth_field: aider-gemini-api-key
+
+    goose:
+      model: z-ai/glm-4.5-air:free
+      providers:
+        openrouter:
+          provider: openrouter

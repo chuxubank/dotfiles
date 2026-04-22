@@ -1,31 +1,24 @@
 {{- /* https://opencode.ai/docs/config/ */ -}}
 
 {{- $mcpServers := includeTemplate "mcp/opencode" (merge (dict "tool" "opencode") .) | fromJson -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "opencode") .) | fromJson -}}
+
+{{- $provider := dict -}}
+{{- range $alias, $ep := $cfg.providers }}
+  {{- $provDict := dict -}}
+  {{- if $ep.base_url }}
+    {{- $_ := set $provDict "options" (dict "baseURL" $ep.base_url) -}}
+  {{- end }}
+  {{- $_ := set $provider $alias $provDict -}}
+{{- end }}
 
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
   "server" (dict "port" 4096)
-  "provider" (dict
-    "anthropic" (dict
-      "options" (dict "baseURL" "http://llm.invalley.co/v1")
-    )
-    "iv" (dict
-      "options" (dict "baseURL" "http://llm.invalley.co/v1")
-      "models" (dict
-        "claude-opus-4-7" (dict "name" "Claude Opus 4.7")
-        "claude-opus-4-6" (dict "name" "Claude Opus 4.6")
-        "claude-sonnet-4-6" (dict "name" "Claude Sonnet 4.6")
-        "claude-haiku-4-5-20251001" (dict "name" "Claude Haiku 4.5")
-        "gpt-5.4" (dict "name" "GPT 5.4")
-        "qwen3.6-plus" (dict "name" "Qwen3.6 Plus")
-        "gemini-3.1-pro-preview" (dict "name" "Gemini 3.1 Pro Preview")
-        "MiniMax-M2.7" (dict "name" "MiniMax M2.7")
-      )
-    )
-  )
-  "model" "anthropic/claude-opus-4-7"
-  "small_model" "iv/qwen3.6-plus"
+  "provider" $provider
+  "model" $cfg.model
+  "small_model" $cfg.small_model
   "mcp" $mcpServers
 -}}
 {{ $config | toPrettyJson }}

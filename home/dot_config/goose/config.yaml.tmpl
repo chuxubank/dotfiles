@@ -75,6 +75,11 @@ extensions:
     bundled: true
     available_tools: []
 {{ includeTemplate "mcp/goose-extensions" . | indent 2}}
-GOOSE_MODEL: z-ai/glm-4.5-air:free
-OPENROUTER_HOST: https://openrouter.ai
-GOOSE_PROVIDER: openrouter
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "goose") .) | fromJson }}
+GOOSE_MODEL: {{ $cfg.model }}
+{{- range $provName, $ep := $cfg.providers }}
+{{- if $ep.base_url }}
+{{ $provName | upper }}_HOST: {{ regexReplaceAll "/api/v1$" $ep.base_url "" }}
+{{- end }}
+GOOSE_PROVIDER: {{ $provName }}
+{{- end }}
