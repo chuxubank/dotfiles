@@ -26,3 +26,32 @@ skills:
       when:
         enabled:
           tool: ["codex"]
+
+    - name:
+        - lark-approval
+        - lark-attendance
+        - lark-base
+        - lark-calendar
+        - lark-contact
+        - lark-doc
+        - lark-drive
+        - lark-event
+        - lark-im
+        - lark-mail
+        - lark-minutes
+        - lark-okr
+        - lark-openapi-explorer
+        - lark-shared
+        - lark-sheets
+        - lark-skill-maker
+        - lark-slides
+        - lark-task
+        - lark-vc
+        - lark-whiteboard
+        - lark-wiki
+        - lark-workflow-meeting-summary
+        - lark-workflow-standup-report
+      source: larksuite/cli
+      when:
+        enabled:
+          host_env: "iv"
