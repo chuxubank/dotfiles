@@ -9,6 +9,13 @@
   {{- if $ep.base_url }}
     {{- $_ := set $provDict "options" (dict "baseURL" (printf "%s/v1" $ep.base_url)) -}}
   {{- end }}
+  {{- if hasKey $ep "models" }}
+    {{- $models := dict -}}
+    {{- range $id, $name := $ep.models }}
+      {{- $_ := set $models $id (dict "name" $name) -}}
+    {{- end }}
+    {{- $_ := set $provDict "models" $models -}}
+  {{- end }}
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 

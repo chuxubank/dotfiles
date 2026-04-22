@@ -55,6 +55,15 @@ llm:
         iv:
           provider: iv
           auth_field: anthropic-auth-token
+          models:
+            claude-opus-4-7: Claude Opus 4.7
+            claude-opus-4-6: Claude Opus 4.6
+            claude-sonnet-4-6: Claude Sonnet 4.6
+            claude-haiku-4-5-20251001: Claude Haiku 4.5
+            gpt-5.4: GPT 5.4
+            qwen3.6-plus: Qwen3.6 Plus
+            gemini-3.1-pro-preview: Gemini 3.1 Pro Preview
+            MiniMax-M2.7: MiniMax M2.7
 
     claude-code:
       model: opusplan

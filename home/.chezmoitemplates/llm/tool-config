@@ -71,11 +71,16 @@
     {{- end }}
   {{- end }}
 
-  {{- $_ := set $providers $alias (dict
+  {{- $resolved := dict
     "name"     $provName
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
-  ) -}}
+  -}}
+  {{- if hasKey $ref "models" }}
+    {{- $_ := set $resolved "models" $ref.models -}}
+  {{- end }}
+
+  {{- $_ := set $providers $alias $resolved -}}
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
 
