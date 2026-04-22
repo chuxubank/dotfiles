@@ -14,6 +14,9 @@
     {{- if hasKey $s "headers" }}
       {{- $_ := set $server "headers" $s.headers -}}
     {{- end }}
+    {{- if or (hasPrefix "http://localhost" $s.uri) (hasPrefix "http://127.0.0.1" $s.uri) }}
+      {{- $_ := set $server "oauth" false -}}
+    {{- end }}
   {{- else }}
     {{- continue -}}
   {{- end }}
