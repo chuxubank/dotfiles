@@ -250,6 +250,7 @@ source $HOME/.config/op/plugins.sh
 {{- else if eq .host_env "iv" }}
 source <(glab completion -s zsh)
 {{- end }}
+source <(opencode completion)
 
 eval "$(codex completion zsh)"
 
