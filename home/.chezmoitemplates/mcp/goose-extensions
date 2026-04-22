@@ -1,25 +1,25 @@
 {{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
+{{- $extensions := dict -}}
 {{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "goose") $) | fromJson -}}
 {{- range $s := $all }}
-  {{ $s.name }}:
-    enabled: {{ $s.enabled }}
-    type: {{ $s.type }}
-    name: {{ $s.name_snake }}
-    description: {{ $s.description }}
-    {{- if eq $s.type "stdio" }}
-    cmd: {{ $s.cmd }}
-    args:
-      {{- range $s.args }}
-    - {{ . | quote }}
-      {{- end }}
-	{{- else if or (eq $s.type "http") (eq $s.type "sse") }}
-	uri: {{ $s.uri }}
-    {{- end }}
-    {{- if gt (len $s.envs) 0 }}
-    envs:
-      {{- $s.envs | toYaml | nindent 6 -}}
-    {{- end }}
-    timeout: {{ $s.timeout }}
-    bundled: null
-    display_name: {{ $s.display }}
-{{- end }}
+  {{- $ext := dict
+    "enabled" $s.enabled
+    "type" $s.type
+    "name" $s.name_snake
+    "description" $s.description
+  -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $ext "cmd" $s.cmd -}}
+    {{- $_ := set $ext "args" $s.args -}}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $ext "uri" $s.uri -}}
+  {{- end }}
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $ext "envs" $s.envs -}}
+  {{- end }}
+  {{- $_ := set $ext "timeout" $s.timeout -}}
+  {{- $_ := set $ext "bundled" nil -}}
+  {{- $_ := set $ext "display_name" $s.display -}}
+  {{- $_ := set $extensions $s.name $ext -}}
+{{- end -}}
+{{- toYaml $extensions -}}

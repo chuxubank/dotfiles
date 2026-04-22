@@ -1,0 +1,26 @@
+{{- /* https://gemini.google/advanced/aistudio/mcp */ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "gemini") $) | fromJson -}}
+{{- range $s := $all }}
+  {{- if not $s.enabled }}{{ continue }}{{ end -}}
+  {{- $server := dict -}}
+  {{- $_ := set $server "description" $s.description -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if $s.args }}
+      {{- $_ := set $server "args" $s.args -}}
+    {{- end }}
+  {{- else if eq $s.type "sse" }}
+    {{- $_ := set $server "url" $s.uri -}}
+  {{- else if eq $s.type "http" }}
+    {{- $_ := set $server "httpUrl" $s.uri -}}
+  {{- end }}
+  {{- if gt $s.timeout 0 }}
+    {{- $_ := set $server "timeout" (mul $s.timeout 1000) -}}
+  {{- end }}
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "env" $s.envs -}}
+  {{- end }}
+  {{- $_ := set $servers $s.name_snake $server -}}
+{{- end -}}
+{{- toJson $servers -}}
