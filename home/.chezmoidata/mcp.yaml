@@ -20,6 +20,9 @@ mcp:
             field: token
     - name: Context7
       description: Up-to-date Docs for LLMs and AI code editors
+      when:
+        disabled:
+          tool: ["claude-code", "cursor", "opencode", "codex", "gemini"]
       execution:
         type: stdio
         cmd: bunx
