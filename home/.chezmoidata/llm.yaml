@@ -5,7 +5,7 @@ llm:
   # same pass path.
   providers:
     iv:
-      base_url: "http://llm.invalley.co/v1"
+      base_url: "http://llm.invalley.co"
       auth:
         path: Work/IV/LLM
         field: cc-auth-token
@@ -24,13 +24,13 @@ llm:
         field: gemini-api-key
 
     openrouter:
-      base_url: "https://openrouter.ai/api/v1"
+      base_url: "https://openrouter.ai"
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
 
     ollama:
-      base_url: "http://localhost:11434/v1"
+      base_url: "http://localhost:11434"
       when:
         enabled:
           roles: ["llm"]
@@ -38,6 +38,13 @@ llm:
   # ── Tool defaults ──────────────────────────────────────────────────
   # Per-tool model selection.  `providers` overrides only the auth
   # field used for a given provider (the base_url stays the same).
+  #
+  # Provider reference formats:
+  #   Short:  providers: [iv, ollama]
+  #   Map:    providers:
+  #             anthropic:
+  #               provider: iv
+  #               auth_field: cc-auth-token
   tools:
     opencode:
       model: anthropic/claude-opus-4-7
@@ -68,6 +75,4 @@ llm:
 
     goose:
       model: z-ai/glm-4.5-air:free
-      providers:
-        openrouter:
-          provider: openrouter
+      providers: [openrouter]

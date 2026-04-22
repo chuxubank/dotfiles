@@ -8,6 +8,13 @@
            name      — provider key in llm.providers
            base_url  — string
            auth_key  — resolved API key (with optional field override)
+
+       Provider reference formats:
+         Short:  providers: [iv, ollama]        — alias = provider name, default auth
+         Map:    providers:
+                   anthropic:                    — alias differs from provider name
+                     provider: iv
+                     auth_field: cc-auth-token   — optional auth override
 */ -}}
 {{- $tool := .tool -}}
 {{- $toolCfg := index .llm.tools $tool -}}
@@ -24,36 +31,51 @@
   {{- $_ := set $result "reasoning_effort" $toolCfg.reasoning_effort -}}
 {{- end }}
 
-{{- /* Resolve provider mappings */ -}}
-{{- $providers := dict -}}
+{{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}
+{{- $refs := dict -}}
 {{- if hasKey $toolCfg "providers" }}
-  {{- range $alias, $ref := $toolCfg.providers }}
-    {{- $provName := $ref.provider -}}
-    {{- $prov := index $llmProviders $provName -}}
-
-    {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
-    {{- $authKey := "" -}}
-    {{- if hasKey $prov "auth" }}
-      {{- $auth := $prov.auth -}}
-      {{- $field := "" -}}
-      {{- if hasKey $ref "auth_field" }}
-        {{- $field = $ref.auth_field -}}
-      {{- else if hasKey $auth "field" }}
-        {{- $field = $auth.field -}}
-      {{- end }}
-      {{- if $field }}
-        {{- $authKey = index (passFields $auth.path) $field -}}
-      {{- else }}
-        {{- $authKey = pass $auth.path -}}
-      {{- end }}
+  {{- $raw := $toolCfg.providers -}}
+  {{- if eq (kindOf $raw) "slice" }}
+    {{- /* Short form: ["iv", "ollama"] → alias = provider name */ -}}
+    {{- range $name := $raw }}
+      {{- $_ := set $refs $name (dict "provider" $name) -}}
     {{- end }}
-
-    {{- $_ := set $providers $alias (dict
-      "name"     $provName
-      "base_url" (default "" (index $prov "base_url"))
-      "auth_key" $authKey
-    ) -}}
+  {{- else }}
+    {{- /* Map form: { alias: { provider: ..., auth_field: ... } } */ -}}
+    {{- range $alias, $ref := $raw }}
+      {{- $_ := set $refs $alias $ref -}}
+    {{- end }}
   {{- end }}
+{{- end }}
+
+{{- /* Resolve each provider reference */ -}}
+{{- $providers := dict -}}
+{{- range $alias, $ref := $refs }}
+  {{- $provName := $ref.provider -}}
+  {{- $prov := index $llmProviders $provName -}}
+
+  {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
+  {{- $authKey := "" -}}
+  {{- if hasKey $prov "auth" }}
+    {{- $auth := $prov.auth -}}
+    {{- $field := "" -}}
+    {{- if hasKey $ref "auth_field" }}
+      {{- $field = $ref.auth_field -}}
+    {{- else if hasKey $auth "field" }}
+      {{- $field = $auth.field -}}
+    {{- end }}
+    {{- if $field }}
+      {{- $authKey = index (passFields $auth.path) $field -}}
+    {{- else }}
+      {{- $authKey = pass $auth.path -}}
+    {{- end }}
+  {{- end }}
+
+  {{- $_ := set $providers $alias (dict
+    "name"     $provName
+    "base_url" (default "" (index $prov "base_url"))
+    "auth_key" $authKey
+  ) -}}
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
 

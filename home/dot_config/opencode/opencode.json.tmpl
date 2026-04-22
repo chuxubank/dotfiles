@@ -7,7 +7,7 @@
 {{- range $alias, $ep := $cfg.providers }}
   {{- $provDict := dict -}}
   {{- if $ep.base_url }}
-    {{- $_ := set $provDict "options" (dict "baseURL" $ep.base_url) -}}
+    {{- $_ := set $provDict "options" (dict "baseURL" (printf "%s/v1" $ep.base_url)) -}}
   {{- end }}
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}

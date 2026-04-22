@@ -8,7 +8,7 @@
 
 {{- range $_, $ep := $cfg.providers }}
   {{- if $ep.base_url }}
-    {{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}
+    {{- $_ := set $env "ANTHROPIC_BASE_URL" (printf "%s/v1" $ep.base_url) -}}
   {{- end }}
   {{- if $ep.auth_key }}
     {{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}
