@@ -1,36 +1,30 @@
 {{- /* https://code.claude.com/docs/en/mcp#user-scope */ -}}
 {{- $servers := dict -}}
-{{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" (default "claude-code" $.tool)) $) | fromJson -}}
-  {{- if not $enabled }}{{ continue }}{{ end -}}
-  {{- $exec := $provider.execution -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" (default "claude-code" $.tool)) $) | fromJson -}}
+{{- range $s := $all }}
+  {{- if not $s.enabled }}{{ continue }}{{ end -}}
   {{- $server := dict -}}
 
-  {{- if eq $exec.type "stdio" }}
+  {{- if eq $s.type "stdio" }}
     {{- $_ := set $server "type" "stdio" -}}
-    {{- $_ := set $server "command" $exec.cmd -}}
-    {{- if hasKey $exec "args" }}
-      {{- $_ := set $server "args" $exec.args -}}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if $s.args }}
+      {{- $_ := set $server "args" $s.args -}}
     {{- end }}
-  {{- else if or (eq $exec.type "http") (eq $exec.type "sse") }}
-    {{- $_ := set $server "url" $exec.uri -}}
-	{{- $_ := set $server "type" $exec.type -}}
-    {{- if hasKey $exec "headers" }}
-      {{- $_ := set $server "headers" $exec.headers -}}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- $_ := set $server "type" $s.type -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
     {{- end }}
   {{- else }}
-    {{- /* Skip unsupported execution type */ -}}
     {{- continue -}}
   {{- end }}
 
-  {{- if hasKey $exec "envs" }}
-    {{- $envs := includeTemplate "mcp/envs" $exec.envs | fromJson -}}
-    {{- if gt (len $envs) 0 }}
-      {{- $_ := set $server "env" $envs -}}
-    {{- end }}
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "env" $s.envs -}}
   {{- end }}
 
-  {{- $serverName := regexReplaceAll "[^A-Za-z0-9_-]+" ($provider.name | lower) "-" -}}
-  {{- $_ := set $servers $serverName $server -}}
+  {{- $_ := set $servers $s.name $server -}}
 {{- end -}}
 {{- toJson $servers -}}

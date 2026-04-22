@@ -1,32 +1,26 @@
 {{- $servers := dict -}}
-{{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" "gemini") $) | fromJson -}}
-  {{- if $enabled }}
-    {{- $name := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
-	{{- $exec := $provider.execution -}}
-    {{- $server := dict -}}
-    {{- $_ := set $server "description" $provider.description -}}
-    {{- if eq $exec.type "stdio" }}
-      {{- $_ := set $server "command" $exec.cmd -}}
-      {{- if hasKey $exec "args" }}
-        {{- $_ := set $server "args" $exec.args -}}
-      {{- end }}
-    {{- else if eq $exec.type "sse" }}
-      {{- $_ := set $server "url" $exec.uri -}}
-    {{- else if eq $exec.type "http" }}
-      {{- $_ := set $server "httpUrl" $exec.uri -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "gemini") .) | fromJson -}}
+{{- range $s := $all }}
+  {{- if not $s.enabled }}{{ continue }}{{ end -}}
+  {{- $server := dict -}}
+  {{- $_ := set $server "description" $s.description -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if $s.args }}
+      {{- $_ := set $server "args" $s.args -}}
     {{- end }}
-    {{- if hasKey $exec "timeout" }}
-      {{- $_ := set $server "timeout" (mul $exec.timeout 1000) -}}
-    {{- end }}
-    {{- if hasKey $exec "envs" }}
-      {{- $envs := includeTemplate "mcp/envs" $exec.envs | fromJson -}}
-      {{- if gt (len $envs) 0 }}
-        {{- $_ := set $server "env" $envs -}}
-      {{- end }}
-    {{- end }}
-    {{- $_ := set $servers $name $server -}}
+  {{- else if eq $s.type "sse" }}
+    {{- $_ := set $server "url" $s.uri -}}
+  {{- else if eq $s.type "http" }}
+    {{- $_ := set $server "httpUrl" $s.uri -}}
   {{- end }}
+  {{- if gt $s.timeout 0 }}
+    {{- $_ := set $server "timeout" (mul $s.timeout 1000) -}}
+  {{- end }}
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "env" $s.envs -}}
+  {{- end }}
+  {{- $_ := set $servers $s.name_snake $server -}}
 {{- end }}
 
 {{- $theme := ternary "ANSI" "ANSI Light" .isDarkMode -}}

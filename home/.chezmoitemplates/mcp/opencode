@@ -1,0 +1,33 @@
+{{- /* https://opencode.ai/docs/mcp-servers/ */ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "opencode") $) | fromJson -}}
+{{- range $s := $all }}
+  {{- $server := dict -}}
+
+  {{- if eq $s.type "stdio" }}
+    {{- $cmd := prepend $s.args $s.cmd -}}
+    {{- $_ := set $server "type" "local" -}}
+    {{- $_ := set $server "command" $cmd -}}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "type" "remote" -}}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
+  {{- else }}
+    {{- continue -}}
+  {{- end }}
+
+  {{- $_ := set $server "enabled" $s.enabled -}}
+
+  {{- if gt $s.timeout 0 }}
+    {{- $_ := set $server "timeout" (mul $s.timeout 1000) -}}
+  {{- end }}
+
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "environment" $s.envs -}}
+  {{- end }}
+
+  {{- $_ := set $servers $s.name_snake $server -}}
+{{- end -}}
+{{- toJson $servers -}}

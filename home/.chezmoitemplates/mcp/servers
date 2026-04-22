@@ -1,0 +1,62 @@
+{{- /* mcp/servers — Normalize mcp.providers into a JSON array of server objects.
+       Input: dict "tool" <tool-name> (merged with root context $)
+       Each element carries:
+         name        — kebab-case identifier  (e.g. "chrome-devtools-mcp")
+         name_snake  — snake_case identifier  (e.g. "chrome_devtools_mcp")
+         display     — original provider.name
+         description — provider.description
+         enabled     — bool (resolved via mcp/when)
+         type        — "stdio" | "http" | "sse"
+         cmd         — string (stdio only)
+         args        — list   (stdio only, may be empty)
+         uri         — string (http/sse only)
+         headers     — map    (http/sse only, may be absent)
+         timeout     — int seconds (from execution.timeout, 0 if absent)
+         tool_timeout— int seconds (from execution.tool_timeout, 0 if absent)
+         envs        — map    (resolved secrets, empty dict if none)
+*/ -}}
+{{- $out := list -}}
+{{- range $provider := .mcp.providers }}
+  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" $.tool) $) | fromJson -}}
+  {{- $exec := $provider.execution -}}
+  {{- $s := dict
+    "name"         (regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "-")
+    "name_snake"   (regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_")
+    "display"      $provider.name
+    "description"  $provider.description
+    "enabled"      $enabled
+    "type"         $exec.type
+    "timeout"      (default 0 (index $exec "timeout"))
+    "tool_timeout" (default 0 (index $exec "tool_timeout"))
+  -}}
+
+  {{- /* stdio fields */ -}}
+  {{- if eq $exec.type "stdio" }}
+    {{- $_ := set $s "cmd" $exec.cmd -}}
+    {{- $_ := set $s "args" (default list (index $exec "args")) -}}
+  {{- end }}
+
+  {{- /* http / sse fields */ -}}
+  {{- if or (eq $exec.type "http") (eq $exec.type "sse") }}
+    {{- $_ := set $s "uri" $exec.uri -}}
+    {{- if hasKey $exec "headers" }}
+      {{- $_ := set $s "headers" $exec.headers -}}
+    {{- end }}
+    {{- if hasKey $exec "bearer_token_env_var" }}
+      {{- $_ := set $s "bearer_token_env_var" $exec.bearer_token_env_var -}}
+    {{- end }}
+    {{- if hasKey $exec "env_headers" }}
+      {{- $_ := set $s "env_headers" $exec.env_headers -}}
+    {{- end }}
+  {{- end }}
+
+  {{- /* resolved envs */ -}}
+  {{- if hasKey $exec "envs" }}
+    {{- $_ := set $s "envs" (includeTemplate "mcp/envs" $exec.envs | fromJson) -}}
+  {{- else }}
+    {{- $_ := set $s "envs" dict -}}
+  {{- end }}
+
+  {{- $out = append $out $s -}}
+{{- end -}}
+{{- toJson $out -}}

@@ -1,25 +1,25 @@
 {{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
-{{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" "goose") $) | fromJson -}}
-  {{ regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "-" }}:
-    enabled: {{ $enabled }}
-    type: {{ $provider.execution.type }}
-    name: {{ regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" }}
-    description: {{ $provider.description }}
-    {{- if eq $provider.execution.type "stdio" }}
-    cmd: {{ $provider.execution.cmd }}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "goose") $) | fromJson -}}
+{{- range $s := $all }}
+  {{ $s.name }}:
+    enabled: {{ $s.enabled }}
+    type: {{ $s.type }}
+    name: {{ $s.name_snake }}
+    description: {{ $s.description }}
+    {{- if eq $s.type "stdio" }}
+    cmd: {{ $s.cmd }}
     args:
-      {{- range $provider.execution.args }}
+      {{- range $s.args }}
     - {{ . | quote }}
       {{- end }}
-	{{- else if or (eq $provider.execution.type "http") (eq $provider.execution.type "sse") }}
-	uri: {{ $provider.execution.uri }}
+	{{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+	uri: {{ $s.uri }}
     {{- end }}
-    {{- if (hasKey $provider.execution "envs") }}
+    {{- if gt (len $s.envs) 0 }}
     envs:
-      {{- $envs := includeTemplate "mcp/envs" $provider.execution.envs | fromJson | toYaml -}}
+      {{- $s.envs | toYaml | nindent 6 -}}
     {{- end }}
-    timeout: {{ $provider.execution.timeout }}
+    timeout: {{ $s.timeout }}
     bundled: null
-    display_name: {{ $provider.name }}
+    display_name: {{ $s.display }}
 {{- end }}

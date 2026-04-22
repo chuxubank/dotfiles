@@ -2,49 +2,43 @@
 
 {{- /* Build MCP servers map */ -}}
 {{- $servers := dict -}}
-{{- range $provider := .mcp.providers }}
-  {{- $enabled := includeTemplate "mcp/when" (merge (dict "provider" $provider "tool" "codex") $) | fromJson -}}
-  {{- $serverName := regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_" -}}
-  {{- $exec := $provider.execution -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- range $s := $all }}
   {{- $server := dict -}}
   {{- /* Support only stdio and http */ -}}
-  {{- if eq $exec.type "stdio" }}
-    {{- $_ := set $server "command" $exec.cmd -}}
-    {{- if hasKey $exec "args" }}
-      {{- $_ := set $server "args" $exec.args -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if $s.args }}
+      {{- $_ := set $server "args" $s.args -}}
     {{- end }}
-  {{- else if or (eq $exec.type "http") (eq $exec.type "sse") }}
-    {{- $_ := set $server "url" $exec.uri -}}
-    {{- if hasKey $exec "bearer_token_env_var" }}
-      {{- $_ := set $server "bearer_token_env_var" $exec.bearer_token_env_var -}}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "bearer_token_env_var" }}
+      {{- $_ := set $server "bearer_token_env_var" $s.bearer_token_env_var -}}
     {{- end }}
-    {{- if hasKey $exec "headers" }}
-      {{- $_ := set $server "http_headers" $exec.headers -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "http_headers" $s.headers -}}
     {{- end }}
-    {{- if hasKey $exec "env_headers" }}
-      {{- $_ := set $server "env_http_headers" $exec.env_headers -}}
+    {{- if hasKey $s "env_headers" }}
+      {{- $_ := set $server "env_http_headers" $s.env_headers -}}
     {{- end }}
   {{- else }}
-    {{- /* skip unsupported execution type */ -}}
     {{- continue -}}
   {{- end }}
 
-  {{- if hasKey $exec "tool_timeout" }}
-    {{- $_ := set $server "tool_timeout_sec" $exec.tool_timeout -}}
+  {{- if gt $s.tool_timeout 0 }}
+    {{- $_ := set $server "tool_timeout_sec" $s.tool_timeout -}}
   {{- end }}
-  {{- if hasKey $exec "timeout" }}
-    {{- $_ := set $server "startup_timeout_sec" $exec.timeout -}}
+  {{- if gt $s.timeout 0 }}
+    {{- $_ := set $server "startup_timeout_sec" $s.timeout -}}
   {{- end }}
-  {{- $_ := set $server "enabled" $enabled -}}
+  {{- $_ := set $server "enabled" $s.enabled -}}
 
-  {{- if hasKey $exec "envs" }}
-    {{- $envs := includeTemplate "mcp/envs" $exec.envs | fromJson -}}
-    {{- if gt (len $envs) 0 }}
-      {{- $_ := set $server "env" $envs -}}
-    {{- end }}
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "env" $s.envs -}}
   {{- end }}
 
-  {{- $_ := set $servers $serverName $server -}}
+  {{- $_ := set $servers $s.name_snake $server -}}
 {{- end }}
 
 {{- /* Projects trust map */ -}}
