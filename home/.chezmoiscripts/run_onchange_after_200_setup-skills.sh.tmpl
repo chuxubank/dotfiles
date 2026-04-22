@@ -2,9 +2,18 @@
 
 echo "{{ template "week" . }} 󰯁 Setup skills"
 
+{{- /* Collect all declared skill names */ -}}
+{{- $declared := list -}}
 {{- range $skill := .skills.providers }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
+    {{- if kindIs "slice" $skill.name }}
+      {{- range $name := $skill.name }}
+        {{- $declared = append $declared $name -}}
+      {{- end }}
+    {{- else }}
+      {{- $declared = append $declared $skill.name -}}
+    {{- end }}
 skills add {{ $skill.source }} \
   --global --yes \
   {{- if kindIs "slice" $skill.name }}
@@ -17,5 +26,16 @@ skills add {{ $skill.source }} \
   --agent {{ join " " $agents }}
   {{ end }}
 {{- end }}
+
+# Uninstall skills not declared in config
+declared=({{ range $i, $name := $declared }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }})
+installed=($(skills list -g --json | jq -r '.[].name'))
+
+for name in "${installed[@]}"; do
+  if (( ! ${declared[(Ie)$name]} )); then
+    echo "Removing undeclared skill: $name"
+    skills remove "$name" -g --yes
+  fi
+done
 
 skills update -g
