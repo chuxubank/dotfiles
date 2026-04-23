@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -euo pipefail
+
+devices=$(adb devices -l 2>/dev/null | tail -n +2 | grep -v '^$')
+
+if [[ -z "$devices" ]]; then
+    echo "No adb devices found."
+    exit 1
+fi
+
+# If only one device, use it directly; otherwise let user pick
+count=$(echo "$devices" | wc -l | tr -d ' ')
+if [[ "$count" -eq 1 ]]; then
+    selected="$devices"
+else
+    echo "Available devices:"
+    echo "$devices" | nl -ba
+    echo
+    printf "Select device [1-%d]: " "$count"
+    read -r choice
+    selected=$(echo "$devices" | sed -n "${choice}p")
+    if [[ -z "$selected" ]]; then
+        echo "Invalid selection."
+        exit 1
+    fi
+fi
+
+serial=$(echo "$selected" | awk '{print $1}')
+
+# Already a wireless connection
+if [[ "$serial" == *:* ]]; then
+    echo "Device $serial is already connected wirelessly."
+    exit 0
+fi
+
+# Get wlan0 IP from the device
+ip=$(adb -s "$serial" shell ip -4 addr show dev wlan0 2>/dev/null \
+    | grep -oE 'inet [0-9.]+' | awk '{print $2}')
+
+if [[ -z "$ip" ]]; then
+    echo "Could not determine device IP. Is Wi-Fi enabled?"
+    exit 1
+fi
+
+echo "Switching $serial to TCP/IP mode on port 5555..."
+adb -s "$serial" tcpip 5555
+sleep 2
+
+echo "Connecting to ${ip}:5555..."
+adb connect "${ip}:5555"
