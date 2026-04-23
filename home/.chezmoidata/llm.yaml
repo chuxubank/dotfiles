@@ -17,12 +17,14 @@ llm:
           host_env: ["iv"]
 
     openai:
+      base_url: "https://api.openai.com"
       auth:
         path: Personal/Tech/AI/OpenAI
         field: api-key
 
     google:
       type: gemini
+      base_url: "https://generativelanguage.googleapis.com"
       auth:
         path: Personal/Tech/Google
         field: gemini-api-key

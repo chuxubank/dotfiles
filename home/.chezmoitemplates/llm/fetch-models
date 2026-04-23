@@ -1,12 +1,12 @@
 {{- /* llm/fetch-models — Fetch model list from a provider endpoint.
        Input: dict with "type", "base_url", "auth_key"
-       Output: JSON map of { model_id: model_id, ... }
+       Output: JSON map of { model_id: display_name, ... }
        Returns empty map on failure or missing base_url.
 
        Provider types:
-         openai (default):  GET /v1/models           → .data[].id
-         ollama:            GET /api/tags             → .models[].name
-         gemini:            GET /v1beta/models?key=   → .models[].name (strip "models/" prefix)
+         openai (default):  GET /v1/models           → .data[]  (.id, .name)
+         ollama:            GET /api/tags             → .models[] (.name)
+         gemini:            GET /v1beta/models?key=   → .models[] (.name, .displayName)
 */ -}}
 {{- $models := dict -}}
 {{- if .base_url }}
@@ -37,13 +37,23 @@
         {{- if hasPrefix "models/" $id }}
           {{- $id = trimPrefix "models/" $id -}}
         {{- end }}
-        {{- $_ := set $models $id $id -}}
+        {{- $display := $id -}}
+        {{- if hasKey $m "displayName" }}
+          {{- $display = $m.displayName -}}
+        {{- end }}
+        {{- $_ := set $models $id $display -}}
       {{- end }}
     {{- end }}
   {{- else }}
     {{- if hasKey $resp "data" }}
       {{- range $m := $resp.data }}
-        {{- $_ := set $models $m.id $m.id -}}
+        {{- $display := $m.id -}}
+        {{- if hasKey $m "name" }}
+          {{- $display = $m.name -}}
+        {{- else if hasKey $m "display_name" }}
+          {{- $display = $m.display_name -}}
+        {{- end }}
+        {{- $_ := set $models $m.id $display -}}
       {{- end }}
     {{- end }}
   {{- end }}
