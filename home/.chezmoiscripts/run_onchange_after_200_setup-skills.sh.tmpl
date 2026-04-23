@@ -18,20 +18,30 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
 {{- end }}
 
 declared=({{ range $i, $name := $declared }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }})
+installed=($(skills list -g --json | jq -r '.[].name'))
 
 {{- range $skill := .skills.providers }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
-skills add {{ $skill.source }} \
-  --global --yes \
+
+# {{ $skill.source }}
+  {{- if kindIs "slice" $skill.name }}
+if [[ {{- range $i, $name := $skill.name }}{{ if $i }} ||{{ end }} ! ${installed[(Ie){{ $name | quote }}]}
+  {{- end }} ]]; then
+  {{- else }}
+if [[ ! ${installed[(Ie){{ $skill.name | quote }}]} ]]; then
+  {{- end }}
+  skills add {{ $skill.source }} \
+    --global --yes \
   {{- if kindIs "slice" $skill.name }}
     {{- range $i, $name := $skill.name }}
-  --skill {{ $name | quote }} \
+    --skill {{ $name | quote }} \
     {{- end -}}
   {{- else }}
-  --skill {{ $skill.name | quote }} \
+    --skill {{ $skill.name | quote }} \
   {{- end }}
-  --agent {{ join " " $agents }}
+    --agent {{ join " " $agents }}
+fi
   {{ end }}
 {{- end }}
 
