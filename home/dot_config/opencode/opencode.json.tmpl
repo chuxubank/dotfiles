@@ -10,14 +10,17 @@
     {{- $_ := set $provDict "options" (dict "baseURL" (printf "%s/v1" $ep.base_url)) -}}
   {{- end }}
 
-  {{- /* Fetch models, then merge static overrides for display names */ -}}
-  {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
+  {{- /* Static models → use as-is; models: false → skip; otherwise fetch */ -}}
   {{- $models := dict -}}
-  {{- range $id, $name := $fetched }}
-    {{- $_ := set $models $id (dict "name" $name) -}}
-  {{- end }}
   {{- if hasKey $ep "models" }}
-    {{- range $id, $name := $ep.models }}
+    {{- if ne (kindOf $ep.models) "bool" }}
+      {{- range $id, $name := $ep.models }}
+        {{- $_ := set $models $id (dict "name" $name) -}}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
+    {{- range $id, $name := $fetched }}
       {{- $_ := set $models $id (dict "name" $name) -}}
     {{- end }}
   {{- end }}

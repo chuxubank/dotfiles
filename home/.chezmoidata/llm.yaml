@@ -57,6 +57,7 @@ llm:
       providers:
         anthropic:
           provider: iv
+          models: false
         iv:
           provider: iv
           auth_field: anthropic-auth-token
