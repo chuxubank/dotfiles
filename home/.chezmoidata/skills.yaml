@@ -27,6 +27,12 @@ skills:
         enabled:
           tool: ["codex"]
 
+    - name: feishu-projects
+      source: chuxubank/skills
+      when:
+        enabled:
+          host_env: "iv"
+
     - name:
         - lark-approval
         - lark-attendance
