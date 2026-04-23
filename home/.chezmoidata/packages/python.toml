@@ -4,6 +4,7 @@ tools = [
   "black",
   "fava",
   "git-filter-repo",
+  "hf",
   "homeassistant-cli",
   "keymap-drawer",
   "kimi-cli",
