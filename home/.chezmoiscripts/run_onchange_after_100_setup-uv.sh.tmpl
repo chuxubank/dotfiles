@@ -11,7 +11,7 @@ if ! brew list uv &>/dev/null; then
 fi
 {{- end }}
 
-UV_TOOL_LIST="$(uv tool list 2>/dev/null || true)"
+UV_TOOL_LIST="$(uv tool list --show-with --show-extras --show-python 2>/dev/null || true)"
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
 DESIRED_UV_TOOLS=(
 {{- template "package/list" (dict "ctx" . "path" (list "python" "tools")) }}
@@ -37,11 +37,114 @@ uv_tool_desired() {
     return 1
 }
 
+uv_tool_header() {
+    local tool_name="$1"
+    awk -v tool_name="$tool_name" '$1 == tool_name { print; exit }' <<<"$UV_TOOL_LIST"
+}
+
+uv_tool_header_value() {
+    local tool_name="$1"
+    local field_name="$2"
+    local header
+    header="$(uv_tool_header "$tool_name")"
+    sed -nE "s/.*\\[$field_name: ([^]]+)\\].*/\\1/p" <<<"$header" | head -n 1
+}
+
+normalize_csv_list() {
+    local csv="${1:-}"
+    if [[ -z "$csv" ]]; then
+        return 0
+    fi
+    printf '%s\n' "$csv" \
+        | tr ',' '\n' \
+        | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' \
+        | tr '[:upper:]' '[:lower:]' \
+        | tr '_' '-' \
+        | awk 'NF' \
+        | sort -u \
+        | paste -sd',' -
+}
+
+uv_tool_installed_with() {
+    local tool_name="$1"
+    normalize_csv_list "$(uv_tool_header_value "$tool_name" "with")"
+}
+
+uv_tool_installed_extras() {
+    local tool_name="$1"
+    normalize_csv_list "$(uv_tool_header_value "$tool_name" "extras")"
+}
+
+uv_tool_installed_python() {
+    local tool_name="$1"
+    local header
+    header="$(uv_tool_header "$tool_name")"
+    sed -nE 's/.*\[CPython ([0-9]+\.[0-9]+)(\.[0-9]+)?\].*/\1/p' <<<"$header" | head -n 1
+}
+
+uv_tool_matches_config() {
+    local tool_name="$1"
+    local desired_python="$2"
+    local desired_with="$3"
+    local desired_extras="$4"
+
+    [[ "$(uv_tool_installed_with "$tool_name")" == "$(normalize_csv_list "$desired_with")" ]] || return 1
+    [[ "$(uv_tool_installed_extras "$tool_name")" == "$(normalize_csv_list "$desired_extras")" ]] || return 1
+
+    if [[ -n "$desired_python" ]]; then
+        [[ "$(uv_tool_installed_python "$tool_name")" == "$desired_python" ]] || return 1
+    fi
+
+    return 0
+}
+
+print_uv_tool_config_changes() {
+    local tool_name="$1"
+    local desired_python="$2"
+    local desired_with="$3"
+    local desired_extras="$4"
+    local installed_python
+    local installed_with
+    local installed_extras
+    local normalized_desired_with
+    local normalized_desired_extras
+
+    installed_python="$(uv_tool_installed_python "$tool_name")"
+    installed_with="$(uv_tool_installed_with "$tool_name")"
+    installed_extras="$(uv_tool_installed_extras "$tool_name")"
+    normalized_desired_with="$(normalize_csv_list "$desired_with")"
+    normalized_desired_extras="$(normalize_csv_list "$desired_extras")"
+
+    echo "Config changes for $tool_name:"
+
+    if [[ -n "$desired_python" && "$installed_python" != "$desired_python" ]]; then
+        echo "  python: ${installed_python:-<none>} -> ${desired_python:-<none>}"
+    fi
+
+    if [[ "$installed_with" != "$normalized_desired_with" ]]; then
+        echo "  with: ${installed_with:-<none>} -> ${normalized_desired_with:-<none>}"
+    fi
+
+    if [[ "$installed_extras" != "$normalized_desired_extras" ]]; then
+        echo "  extras: ${installed_extras:-<none>} -> ${normalized_desired_extras:-<none>}"
+    fi
+}
+
 {{ range $tool := $tools }}
   {{ if eq (kindOf $tool) "map" -}}
+{{- $withDeps := "" -}}
+{{- $extras := "" -}}
+{{- $pythonVersion := "" -}}
+{{- with index $tool "with" }}{{- $withDeps = . -}}{{- end -}}
+{{- with index $tool "with-exec" }}{{- if $withDeps }}{{- $withDeps = printf "%s,%s" $withDeps . -}}{{- else }}{{- $withDeps = . -}}{{- end -}}{{- end -}}
+{{- with index $tool "extra" }}{{- $extras = . -}}{{- end -}}
+{{- with index $tool "version" }}{{- $pythonVersion = . -}}{{- end -}}
+DESIRED_WITH={{ $withDeps | quote }}
+DESIRED_EXTRAS={{ $extras | quote }}
+DESIRED_PYTHON={{ $pythonVersion | quote }}
 if ! uv_tool_installed {{ $tool.name | quote }}; then
 echo "Install uv tool: {{ $tool.name }}"
-uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
+if uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
 	  {{- with index $tool "with" }} --with {{.}}{{ end }}
 	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
@@ -49,7 +152,23 @@ uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
 	    {{- printf " %s[%s]" $tool.name $tool.extra }}
 	  {{- else }}
 	    {{- printf " %s" $tool.name }}
-	  {{- end }} --upgrade
+	  {{- end }} --upgrade; then
+    :
+fi
+elif ! uv_tool_matches_config {{ $tool.name | quote }} "$DESIRED_PYTHON" "$DESIRED_WITH" "$DESIRED_EXTRAS"; then
+echo "Reinstall uv tool after config change: {{ $tool.name }}"
+print_uv_tool_config_changes {{ $tool.name | quote }} "$DESIRED_PYTHON" "$DESIRED_WITH" "$DESIRED_EXTRAS"
+if uv tool install --reinstall{{- if (and (index $tool "force") true) }} --force{{- end }}
+      {{- with index $tool "version" }} --python python{{ . }}{{ end }}
+	  {{- with index $tool "with" }} --with {{.}}{{ end }}
+	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
+	  {{- if hasKey $tool "extra" -}}
+	    {{- printf " %s[%s]" $tool.name $tool.extra }}
+	  {{- else }}
+	    {{- printf " %s" $tool.name }}
+	  {{- end }} --upgrade; then
+    :
+fi
 fi
   {{ else }}
 if ! uv_tool_installed {{ $tool | quote }}; then
