@@ -20,14 +20,9 @@ jobs:
         with:
           path: |
             /var/cache/apt/archives
-            /var/lib/apt/lists
           key: ${{ runner.os }}-apt-${{ hashFiles('home/.chezmoidata/packages/apt.toml') }}
           restore-keys: |
             ${{ runner.os }}-apt-
-
-      - name: Update apt
-        if: steps.cache-apt.outputs.cache-hit != 'true'
-        run: sudo apt-get update -y
 
       - name: Cache chezmoi
         uses: actions/cache@v5
