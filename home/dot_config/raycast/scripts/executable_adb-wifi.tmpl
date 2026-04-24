@@ -1,20 +1,22 @@
 #!/bin/zsh
 {{- $devices := list -}}
 {{- $titles := list -}}
-{{- $output := output "adb" "devices" "-l" -}}
-{{- range $line := splitList "\n" $output -}}
-{{-   $trimmed := trim $line -}}
-{{-   if and (ne $trimmed "") (not (hasPrefix "List" $trimmed)) -}}
-{{-     $serial := index (splitList " " $trimmed) 0 -}}
-{{-     if and (ne $serial "") (not (contains ":" $serial)) -}}
-{{-       $devices = append $devices $serial -}}
-{{-       $product := "" -}}{{ $model := "" -}}{{ $device := "" -}}
-{{-       range $part := splitList " " $trimmed -}}
-{{-         if hasPrefix "product:" $part -}}{{ $product = trimPrefix "product:" $part -}}{{ end -}}
-{{-         if hasPrefix "model:" $part -}}{{ $model = trimPrefix "model:" $part -}}{{ end -}}
-{{-         if hasPrefix "device:" $part -}}{{ $device = trimPrefix "device:" $part -}}{{ end -}}
+{{- if lookPath "adb" -}}
+{{-   $output := output "zsh" "-lc" "adb devices -l 2>/dev/null || true" -}}
+{{-   range $line := splitList "\n" $output -}}
+{{-     $trimmed := trim $line -}}
+{{-     if and (ne $trimmed "") (not (hasPrefix "List" $trimmed)) -}}
+{{-       $serial := index (splitList " " $trimmed) 0 -}}
+{{-       if and (ne $serial "") (not (contains ":" $serial)) -}}
+{{-         $devices = append $devices $serial -}}
+{{-         $product := "" -}}{{ $model := "" -}}{{ $device := "" -}}
+{{-         range $part := splitList " " $trimmed -}}
+{{-           if hasPrefix "product:" $part -}}{{ $product = trimPrefix "product:" $part -}}{{ end -}}
+{{-           if hasPrefix "model:" $part -}}{{ $model = trimPrefix "model:" $part -}}{{ end -}}
+{{-           if hasPrefix "device:" $part -}}{{ $device = trimPrefix "device:" $part -}}{{ end -}}
+{{-         end -}}
+{{-         $titles = append $titles (printf "%s (%s / %s / %s)" $serial $product $model $device) -}}
 {{-       end -}}
-{{-       $titles = append $titles (printf "%s (%s / %s / %s)" $serial $product $model $device) -}}
 {{-     end -}}
 {{-   end -}}
 {{- end }}
