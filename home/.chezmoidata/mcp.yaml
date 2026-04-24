@@ -36,6 +36,9 @@ mcp:
       description:
         chrome-devtools-mcp lets your coding agent (such as Gemini, Claude, Cursor or Copilot) control and inspect a live Chrome browser.
         It acts as a Model-Context-Protocol (MCP) server, giving your AI coding assistant access to the full power of Chrome DevTools for reliable automation, in-depth debugging, and performance analysis.
+      when:
+        disabled:
+          tool: ["opencode"]
       execution:
         type: stdio
         cmd: bunx
@@ -46,6 +49,9 @@ mcp:
         timeout: 20
     - name: Emacs MCP Server
       description: Connect Large Language Models directly to your Emacs environment! This MCP (Model Context Protocol) server exposes Emacs functionality through standardized tools, allowing LLMs like Claude to read and modify your buffers, execute elisp code, navigate files, and much more.
+      when:
+        disabled:
+          tool: ["opencode"]
       execution:
         type: stdio
         cmd: emacs-mcp-server
@@ -200,8 +206,7 @@ mcp:
         structured accessibility snapshots, bypassing the need for screenshots
         or visually-tuned models.
       when:
-        disabled:
-          tool: ["claude-code"]
+        disabled: true
       execution:
         type: stdio
         cmd: bunx
@@ -213,7 +218,7 @@ mcp:
       description: Real-time web search and intelligent data extraction capabilities.
       when:
         disabled:
-          tool: ["claude-code"]
+          tool: ["claude-code", "opencode"]
       execution:
         type: stdio
         cmd: bunx
