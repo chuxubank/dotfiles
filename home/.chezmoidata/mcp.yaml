@@ -5,8 +5,6 @@ mcp:
       when:
         enabled:
           host_env: ["personal"]
-          roles: ["daily"]
-          tool: ["goose"]
       execution:
         type: stdio
         cmd: bunx
@@ -60,7 +58,7 @@ mcp:
         from web pages, converting HTML to markdown for easier consumption.
       when:
         disabled:
-          tool: ["claude-code"]
+          tool: ["claude-code", "codex", "opencode"]
       execution:
         type: stdio
         cmd: uvx
@@ -88,8 +86,7 @@ mcp:
     - name: Figma Remote
       description: Remote Figma MCP
       when:
-        enabled:
-          host_env: ["iv"]
+        disabled: true
       execution:
         type: http
         uri: https://mcp.figma.com/mcp
@@ -101,8 +98,7 @@ mcp:
         read repositories and code files, manage issues and PRs, analyze code,
         and automate workflows. All through natural language interactions.
       when:
-        disabled:
-          tool: ["copilot", "claude-code"]
+        disabled: true
       execution:
         type: stdio
         cmd: github-mcp-server
@@ -122,9 +118,7 @@ mcp:
         With the GitLab Model Context Protocol (MCP) server, you can securely connect AI tools and applications to your GitLab instance.
         AI assistants like Claude Desktop, Claude Code, Cursor, and other MCP-compatible tools can then access your GitLab data and perform actions on your behalf.
       when:
-        enabled:
-          host_env: ["iv"]
-          tool: [""]
+        disabled: true
       execution:
         type: http
         uri: https://git.infinityparadise.com/api/v4/mcp
@@ -134,7 +128,6 @@ mcp:
       when:
         enabled:
           host_env: ["personal"]
-          roles: ["daily"]
       execution:
         type: stdio
         cmd: bunx
@@ -149,8 +142,7 @@ mcp:
     - name: JetBrains
       description: The server proxies requests from client to JetBrains IDE.
       when:
-        enabled:
-          host_env: ["iv"]
+        disabled: true
       execution:
         type: sse
         uri: http://localhost:64342/sse
