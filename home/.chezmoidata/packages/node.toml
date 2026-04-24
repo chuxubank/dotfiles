@@ -25,6 +25,7 @@ global = [
   "typescript-language-server",
   "vscode-json-languageserver",
   "yaml-language-server",
+  { name = "@fission-ai/openspec", when.enabled.host_env = ["iv"] },
   { name = "emacs-lsp-proxy", trust = true },
   { name = "opencode-ai", trust = true },
 ]

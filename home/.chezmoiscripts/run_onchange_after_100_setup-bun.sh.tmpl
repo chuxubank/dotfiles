@@ -54,7 +54,7 @@ bun upgrade
 {{- if eq (kindOf $tool) "map" }}
 if ! bun_tool_installed {{ $tool.name | quote }}; then
 echo "Install bun tool: {{ $tool.name }}"
-bun add -g {{ if $tool.trust }}--trust {{ end }}{{ $tool.name }}
+bun add -g {{ if and (hasKey $tool "trust") $tool.trust }}--trust {{ end }}{{ $tool.name }}
 fi
 {{- else }}
 if ! bun_tool_installed {{ $tool | quote }}; then
