@@ -1,0 +1,89 @@
+#!/bin/zsh
+{{- $devices := list -}}
+{{- $titles := list -}}
+{{- $output := output "adb" "devices" "-l" -}}
+{{- range $line := splitList "\n" $output -}}
+{{-   $trimmed := trim $line -}}
+{{-   if and (ne $trimmed "") (not (hasPrefix "List" $trimmed)) -}}
+{{-     $serial := index (splitList " " $trimmed) 0 -}}
+{{-     if and (ne $serial "") (not (contains ":" $serial)) -}}
+{{-       $devices = append $devices $serial -}}
+{{-       $product := "" -}}{{ $model := "" -}}{{ $device := "" -}}
+{{-       range $part := splitList " " $trimmed -}}
+{{-         if hasPrefix "product:" $part -}}{{ $product = trimPrefix "product:" $part -}}{{ end -}}
+{{-         if hasPrefix "model:" $part -}}{{ $model = trimPrefix "model:" $part -}}{{ end -}}
+{{-         if hasPrefix "device:" $part -}}{{ $device = trimPrefix "device:" $part -}}{{ end -}}
+{{-       end -}}
+{{-       $titles = append $titles (printf "%s (%s / %s / %s)" $serial $product $model $device) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end }}
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title ADB Wi-Fi
+# @raycast.mode compact
+
+# Optional parameters:
+# @raycast.icon 📡
+# @raycast.packageName Android
+{{ if gt (len $devices) 0 -}}
+# @raycast.argument1 { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $i, $s := $devices }}{{ if $i }}, {{ end }}{"title": "{{ index $titles $i }}", "value": "{{ $s }}"}{{ end }}] }
+{{ else -}}
+# @raycast.argument1 { "type": "text", "placeholder": "Serial (no devices at apply time)", "optional": true }
+{{ end }}
+# Documentation:
+# @raycast.description Connect an ADB device wirelessly via tcpip 5555
+# @raycast.author Misaka
+# @raycast.authorURL https://github.com/chuxubank
+
+serial="${1:-}"
+
+if [[ -z "$serial" ]]; then
+    lines=()
+    while IFS= read -r line; do
+        s=$(echo "$line" | awk '{print $1}')
+        [[ "$s" == *:* ]] && continue
+        lines+=("$line")
+    done < <(adb devices -l | tail -n +2 | grep -v '^$')
+
+    if [[ ${#lines[@]} -eq 0 ]]; then
+        echo "❌ No USB-connected ADB device found."
+        exit 1
+    elif [[ ${#lines[@]} -eq 1 ]]; then
+        serial=$(echo "${lines[1]}" | awk '{print $1}')
+    elif [[ -t 0 ]]; then
+        echo "Available devices:"
+        select line in "${lines[@]}"; do
+            [[ -n "$line" ]] && break
+            echo "Invalid selection, try again."
+        done
+        serial=$(echo "$line" | awk '{print $1}')
+    else
+        serial=$(echo "${lines[1]}" | awk '{print $1}')
+    fi
+fi
+
+if [[ "$serial" == *:* ]]; then
+    echo "✅ $serial is already wireless"
+    exit 0
+fi
+
+ip=$(adb -s "$serial" shell ip -4 addr show dev wlan0 2>/dev/null \
+    | grep -oE 'inet [0-9.]+' | awk '{print $2}')
+
+if [[ -z "$ip" ]]; then
+    echo "❌ Cannot get Wi-Fi IP from $serial"
+    exit 1
+fi
+
+adb -s "$serial" tcpip 5555 >/dev/null 2>&1
+sleep 2
+result=$(adb connect "${ip}:5555" 2>&1)
+
+if [[ "$result" == *"connected"* ]]; then
+    echo "✅ Connected to ${ip}:5555"
+else
+    echo "❌ $result"
+    exit 1
+fi
