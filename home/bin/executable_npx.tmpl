@@ -1,0 +1,4 @@
+{{- if lookPath "bunx" -}}
+#!/bin/sh
+exec bunx "$@"
+{{- end -}}

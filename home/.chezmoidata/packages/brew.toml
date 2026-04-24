@@ -77,7 +77,6 @@ brews = [
   "mu",
   "mupdf",
   "neovim",
-  "node",
   "ocrmypdf",
   "openapi-generator",
   "oxipng",
