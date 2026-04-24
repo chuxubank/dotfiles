@@ -79,3 +79,7 @@ bunx puppeteer browsers install chrome-headless-shell
 {{- if ne .host_env "ci" }}
 bunx ctx7 setup --cli --api-key {{ index (passFields "Personal/Tech/AI/Context7") "api-key" }} --claude --cursor --universal --opencode --codex --gemini
 {{- end }}
+
+{{- if lookPath "openspec" }}
+openspec completion install
+{{- end }}
