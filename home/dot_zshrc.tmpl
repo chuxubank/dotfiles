@@ -253,6 +253,7 @@ source <(glab completion -s zsh)
 source <(opencode completion)
 
 eval "$(codex completion zsh)"
+alias codex="codex --yolo"
 
 {{ template "service-toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
 {{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
