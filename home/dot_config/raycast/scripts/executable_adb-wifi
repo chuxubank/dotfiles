@@ -1,0 +1,58 @@
+#!/bin/zsh
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title ADB Wi-Fi
+# @raycast.mode compact
+
+# Optional parameters:
+# @raycast.icon 📡
+# @raycast.packageName Android
+
+# Documentation:
+# @raycast.description Connect an ADB device wirelessly via tcpip 5555
+# @raycast.author Misaka
+# @raycast.authorURL https://github.com/chuxubank
+
+serials=("${(@f)$(adb devices | tail -n +2 | grep -v '^$' | awk '{print $1}')}")
+
+if [[ ${#serials[@]} -eq 0 ]]; then
+    echo "❌ No ADB device found."
+    exit 1
+fi
+
+if [[ ${#serials[@]} -eq 1 ]]; then
+    serial="${serials[1]}"
+elif [[ -t 0 ]]; then
+    echo "Available devices:"
+    select serial in "${serials[@]}"; do
+        [[ -n "$serial" ]] && break
+        echo "Invalid selection, try again."
+    done
+else
+    serial="${serials[1]}"
+fi
+
+if [[ "$serial" == *:* ]]; then
+    echo "✅ $serial is already wireless"
+    exit 0
+fi
+
+ip=$(adb -s "$serial" shell ip -4 addr show dev wlan0 2>/dev/null \
+    | grep -oE 'inet [0-9.]+' | awk '{print $2}')
+
+if [[ -z "$ip" ]]; then
+    echo "❌ Cannot get Wi-Fi IP from $serial"
+    exit 1
+fi
+
+adb -s "$serial" tcpip 5555 >/dev/null 2>&1
+sleep 2
+result=$(adb connect "${ip}:5555" 2>&1)
+
+if [[ "$result" == *"connected"* ]]; then
+    echo "✅ Connected to ${ip}:5555"
+else
+    echo "❌ $result"
+    exit 1
+fi
