@@ -5,11 +5,12 @@ echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .pat
 
 {{- if eq .chezmoi.os "darwin" }}
 echo "Xray running: {{ output "brew" "services" "info" "xray" "--json" | fromJson | jq ".[0].running" | first }}"
+echo "Sing-box running: {{ output "brew" "services" "info" "sing-box" "--json" | fromJson | jq ".[0].running" | first }}"
 {{- end }}
 
 {{ if lookPath "ansible-playbook" }}
 cd {{ joinPath .chezmoi.homeDir .path.proxy }}
-ansible-playbook playbook.yml --limit localhost
+ansible-playbook playbook.yml --limit localhost --skip-tags "install"
 {{ end }}
 
 {{ end -}}
