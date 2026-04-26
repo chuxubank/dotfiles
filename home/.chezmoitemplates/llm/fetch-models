@@ -22,7 +22,7 @@
       {{- $authArg = printf "-H 'Authorization: Bearer %s'" .auth_key -}}
     {{- end }}
   {{- end }}
-  {{- $raw := output "sh" "-c" (printf "curl -sfL --connect-timeout 2 %s '%s' 2>/dev/null || echo '{}'" $authArg $fetchURL) | trim -}}
+  {{- $raw := output "sh" "-c" (printf "curl -sfL --max-time 2 %s '%s' 2>/dev/null || echo '{}'" $authArg $fetchURL) | trim -}}
   {{- $resp := $raw | fromJson -}}
   {{- if eq .type "ollama" }}
     {{- if hasKey $resp "models" }}
