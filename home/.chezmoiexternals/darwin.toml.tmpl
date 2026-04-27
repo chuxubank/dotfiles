@@ -15,6 +15,11 @@
     url = "{{ (gitHubLatestReleaseAssetURL "md-babel/swift-markdown-babel" "md-babel_macos-universal-*.tar.bz2") }}"
     path = "md-babel"
 
+["bin/android"]
+    type = "file"
+	executable = true
+	url = "https://dl.google.com/android/cli/latest/darwin_arm64/android"
+
 ["Applications/iloader.app"]
     type = "archive"
     url = "{{ (gitHubLatestReleaseAssetURL "nab138/iloader" "iloader-darwin-universal.app.tar.gz") }}"
