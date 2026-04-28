@@ -11,7 +11,6 @@ llm:
       base_url: "http://llm.invalley.co"
       auth:
         path: Work/IV/LLM
-        field: cc-auth-token
       when:
         enabled:
           host_env: ["iv"]
@@ -57,12 +56,17 @@ llm:
       model: anthropic/claude-opus-4-7
       small_model: iv/qwen3.6-plus
       providers:
+        openai:
+          provider: iv
+          models: false
+          auth_field: codex-auth-token
         anthropic:
           provider: iv
           models: false
+          auth_field: cc-auth-token
         iv:
           provider: iv
-          auth_field: anthropic-auth-token
+          auth_field: default-auth-token
         ollama:
           provider: ollama
 
