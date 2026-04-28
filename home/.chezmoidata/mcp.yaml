@@ -171,8 +171,7 @@ mcp:
         An MCP server that lets AI agents control iOS and Android devices (tap, scroll, type, take screenshots, read UI trees, and run code).
         Works with multiple devices at the same time.
       when:
-        enabled:
-          host_env: ["iv"]
+        disabled: true
       execution:
         type: stdio
         cmd: bunx
