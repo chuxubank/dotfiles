@@ -159,6 +159,7 @@ casks = [
   "chatgpt",
   "claude",
   # "codex-app",
+  "craft-agents",
   "d12frosted/emacs-plus/emacs-plus-app",
   "discord",
   "dorso",
