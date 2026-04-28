@@ -17,9 +17,9 @@
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
 
-{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") }}
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
 ["bin/android"]
     type = "file"
 	executable = true
-	url = "https://dl.google.com/android/cli/latest/{{ if eq .chezmoi.os "linux" }}linux_x86_64{{ else }}darwin_arm64{{ end }}/android"
+	url = "https://dl.google.com/android/cli/latest/{{ if eq .chezmoi.os "linux" }}linux_x86_64{{ else if eq .chezmoi.os "windows" }}windows_x86_64{{ else }}darwin_arm64{{ end }}/android{{ if eq .chezmoi.os "windows" }}.exe{{ end }}"
 {{- end }}
