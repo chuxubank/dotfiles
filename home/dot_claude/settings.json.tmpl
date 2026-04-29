@@ -15,6 +15,12 @@
   {{- end }}
 {{- end -}}
 
+{{- if eq .host_env "iv" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "claude-opus-4-6" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "claude-sonnet-4-6" -}}
+  {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}
+{{- end -}}
+
 {{- $enabledPlugins := dict
   "kotlin-lsp@claude-plugins-official" true
   "skill-creator@claude-plugins-official" true

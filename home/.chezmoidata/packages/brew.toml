@@ -221,6 +221,7 @@ casks = [
   "shortcat",
   "squirrel-app",
   "stats",
+  "warp",
   "wezterm",
   "wireshark-app",
   "xquartz",
