@@ -72,19 +72,39 @@
 
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
 
+{{- $codexConfigPath := joinPath .chezmoi.homeDir ".codex" "config.toml" -}}
+{{- $existingCodexConfig := dict -}}
+{{- if stat $codexConfigPath }}
+  {{- $existingCodexConfig = output "cat" $codexConfigPath | fromToml -}}
+{{- end -}}
+{{- $marketplaces := dict -}}
+{{- if hasKey $existingCodexConfig "marketplaces" }}
+  {{- $marketplaces = $existingCodexConfig.marketplaces -}}
+{{- end -}}
+
+{{- $plugins := dict
+  "browser-use@openai-bundled" (dict "enabled" true)
+  "computer-use@openai-bundled" (dict "enabled" true)
+  "documents@openai-primary-runtime" (dict "enabled" true)
+  "presentations@openai-primary-runtime" (dict "enabled" true)
+  "spreadsheets@openai-primary-runtime" (dict "enabled" true)
+-}}
+
 {{- $config := dict
   "model" $cfg.model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
   "projects" $projects
+  "marketplaces" $marketplaces
+  "plugins" $plugins
   "features" (dict
     "unified_exec" true
-	"shell_snapshot" true
+    "shell_snapshot" true
   )
   "tui" (dict
     "model_availability_nux" (dict
-	  "gpt-5.5" 1
-	)
+      "gpt-5.5" 4
+    )
   )
 -}}
 {{ $config | toToml }}

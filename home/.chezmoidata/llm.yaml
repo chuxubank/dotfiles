@@ -78,7 +78,7 @@ llm:
           auth_field: cc-auth-token
 
     codex:
-      model: gpt-5.4
+      model: gpt-5.5
       reasoning_effort: medium
 
     aider:
