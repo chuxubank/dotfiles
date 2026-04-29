@@ -76,8 +76,9 @@ bun update -g --latest
 bunx playwright install chromium
 bunx puppeteer browsers install chrome-headless-shell
 
-{{- if ne .host_env "ci" }}
-bunx ctx7 setup --cli --api-key {{ index (passFields "Personal/Tech/AI/Context7") "api-key" }} --claude --cursor --universal --opencode --codex --gemini
+{{- if and (lookPath "ctx7") (ne .host_env "ci") }}
+ctx7 setup --cli --claude --cursor --universal --opencode --codex --gemini \
+  --api-key {{ index (passFields "Personal/Tech/AI/Context7") "api-key" }}
 {{- end }}
 
 {{- if lookPath "openspec" }}

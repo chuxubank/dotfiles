@@ -16,22 +16,6 @@ mcp:
           AMAP_MAPS_API_KEY:
             path: Personal/Life/Amap
             field: token
-    - name: Context7
-      description: Up-to-date Docs for LLMs and AI code editors
-      when:
-        disabled:
-          tool: ["claude-code", "cursor", "opencode", "codex", "gemini"]
-      execution:
-        type: stdio
-        cmd: bunx
-        args:
-          - -y
-          - "@upstash/context7-mcp"
-        timeout: 20
-        envs:
-          CONTEXT7_API_KEY:
-            path: Personal/Tech/AI/Context7
-            field: api-key
     - name: Chrome DevTools MCP
       description:
         chrome-devtools-mcp lets your coding agent (such as Gemini, Claude, Cursor or Copilot) control and inspect a live Chrome browser.
