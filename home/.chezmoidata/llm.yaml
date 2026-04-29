@@ -75,6 +75,7 @@ llm:
       providers:
         anthropic:
           provider: iv
+          auth_field: cc-auth-token
 
     codex:
       model: gpt-5.4
