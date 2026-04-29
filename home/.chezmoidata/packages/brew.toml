@@ -158,7 +158,7 @@ casks = [
   "block-goose",
   "chatgpt",
   "claude",
-  # "codex-app",
+  "codex-app",
   "craft-agents",
   "d12frosted/emacs-plus/emacs-plus-app",
   "discord",
