@@ -54,7 +54,7 @@ llm:
   tools:
     opencode:
       model: anthropic/claude-opus-4-6
-      small_model: iv/qwen3.6-plus
+      small_model: iv/deepseek-v4-flash
       providers:
         openai:
           provider: iv
