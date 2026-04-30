@@ -204,7 +204,7 @@ casks = [
   "kiro-cli",
   "kotlin-lsp",
   "libreoffice",
-  "linear-linear",
+  "linear",
   "logseq",
   "loop",
   "lyricsx",
