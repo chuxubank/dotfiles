@@ -1,7 +1,16 @@
 layout {
-    tab_template name="ai" {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+    tab_template name="opencode" {
         pane split_direction="vertical" {
-            pane command="claude" size="40%"
+            pane command="opencode" size="70%"
             children
         }
         pane size=1 borderless=true {
@@ -10,15 +19,17 @@ layout {
     }
 
     {{- if eq .host_env "iv" }}
-    ai name="ivc" cwd="~/Developer/IV/ivc" {
+    opencode name="ivc" cwd="~/Developer/IV/ivc" {
         pane
     }
     {{- end }}
 
-    ai name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.proxy -}}" {
-        pane command="tail" {
-		    args "-f" {{ joinPath .chezmoi.homeDir .path.logs "sing-box" "sing-box.log" | quote }}
-		}
-		pane
+    tab name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.proxy -}}" {
+        pane split_direction="vertical" {
+            pane command="tail" {
+                args "-f" {{ joinPath .chezmoi.homeDir .path.logs "sing-box" "sing-box.log" | quote }}
+            }
+            pane
+        }
     }
 }
