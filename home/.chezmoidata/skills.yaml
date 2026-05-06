@@ -34,6 +34,13 @@ skills:
           host_env: "iv"
 
     - name:
+        - agp-9-upgrade
+        - edge-to-edge
+        - navigation-3
+        - r8-analyzer
+      source: "android/skills"
+
+    - name:
         - lark-approval
         - lark-attendance
         - lark-base
