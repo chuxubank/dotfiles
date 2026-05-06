@@ -53,7 +53,7 @@ llm:
   #               auth_field: cc-auth-token
   tools:
     opencode:
-      model: anthropic/claude-opus-4-6
+      model: anthropic/claude-opus-4-7
       small_model: iv/deepseek-v4-flash
       providers:
         openai:
