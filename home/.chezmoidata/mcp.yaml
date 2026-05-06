@@ -131,8 +131,6 @@ mcp:
             field: goose-map-api-key
     - name: JetBrains
       description: The server proxies requests from client to JetBrains IDE.
-      when:
-        disabled: true
       execution:
         type: sse
         uri: http://localhost:64342/sse
