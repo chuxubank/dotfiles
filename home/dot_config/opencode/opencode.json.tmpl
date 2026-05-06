@@ -34,10 +34,11 @@
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
-  "server" (dict "port" 4096)
-  "provider" $provider
-  "model" $cfg.model
-  "small_model" $cfg.small_model
+  "lsp" true
   "mcp" $mcpServers
+  "model" $cfg.model
+  "provider" $provider
+  "server" (dict "port" 4096)
+  "small_model" $cfg.small_model
 -}}
 {{ $config | toPrettyJson }}
