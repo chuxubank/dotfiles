@@ -51,8 +51,8 @@
                 sideline-flymake smartparens solaire-mode
                 swift-ts-mode system-packages telega templ-ts-mode
                 templatel toc-mode transpose-frame treemacs-magit
-                treemacs-nerd-icons treemacs-tab-bar treesit-fold
-                treesit-langs tributary ultra-scroll undo-fu-session
+                treemacs-nerd-icons treemacs-tab-bar treesit-auto
+                treesit-fold tributary ultra-scroll undo-fu-session
                 uv-mode valign vbs-repl vbscript-mode
                 vertico-prescient video-trimmer visual-basic-mode
                 vterm-toggle vundo winum yaml-pro))
