@@ -31,10 +31,17 @@
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 
+{{- $lsp := dict
+  "kotlin-lsp" (dict
+    "command" (list "kotlin-lsp" "--stdio")
+	"extensions" (list ".kt" ".kts")
+   )
+-}}
+
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
-  "lsp" true
+  "lsp" $lsp
   "mcp" $mcpServers
   "model" $cfg.model
   "provider" $provider
