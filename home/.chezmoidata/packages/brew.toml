@@ -141,6 +141,7 @@ brews = [
   { name = "awscli", when.enabled.host_env = ["aa"] },
   { name = "cocoapods", when.enabled.host_env = ["personal", "iv"] },
   { name = "glab", when.enabled.host_env = ["iv"] },
+  { name = "llama.cpp", when.enabled.roles = ["llm"] },
   { name = "ollama", when.enabled.roles = ["llm"], restart_service = true },
   { name = "podman", when.enabled.host_env = ["aa"] },
   { name = "podman-compose", when.enabled.host_env = ["aa"] },
