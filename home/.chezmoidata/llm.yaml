@@ -34,6 +34,18 @@ llm:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
 
+    llama:
+      base_url: "http://localhost:8080"
+      when:
+        enabled:
+          roles: ["llm"]
+
+    mlx:
+      base_url: "http://localhost:8000"
+      when:
+        enabled:
+          roles: ["llm"]
+
     ollama:
       type: ollama
       base_url: "http://localhost:11434"
