@@ -49,6 +49,11 @@ autoStash = true
 	process = git-lfs filter-process
 	required = true
 
+[lfs "customtransfer.xet"]
+    path = git-xet
+    args = transfer
+    concurrent = true
+
 [diff "gpg"]
     textconv = gpg --no-tty --decrypt
 [diff "word"]
