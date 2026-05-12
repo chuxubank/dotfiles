@@ -34,8 +34,8 @@ LOGROTATE
 brew services restart logrotate
 
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
-{{- if .brew }}
-brew services restart {{ or .brewName .tool }} --file=/dev/stdin <<'PLIST'
+{{- if and (hasKey . "brew") .brew }}
+brew services restart {{ .tool }} --file=/dev/stdin <<'PLIST'
 {{ template "launchagent/plist" (merge (dict) . $) }}
 PLIST
 {{- else }}
