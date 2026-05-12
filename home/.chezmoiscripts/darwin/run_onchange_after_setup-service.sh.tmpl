@@ -1,4 +1,5 @@
-#!/bin/sh
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
 set -eu
 
 launchagents_dir={{ joinPath .chezmoi.homeDir "Library" "LaunchAgents" | quote }}
@@ -42,4 +43,6 @@ cat > "$launchagents_dir/{{ .tool }}.{{ .target }}.plist" <<'PLIST'
 {{ template "launchagent/plist" (merge (dict) . $) }}
 PLIST
 {{- end }}
+{{- end }}
+
 {{- end }}
