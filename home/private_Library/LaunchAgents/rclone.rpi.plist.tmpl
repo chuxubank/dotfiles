@@ -1,31 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-	<key>Label</key>
-	<string>rclone.rpi</string>
-    <key>StandardOutPath</key>
-    <string>{{ joinPath .path.log "rclone" "rpi" "stdout.log" }}</string>
-    <key>StandardErrorPath</key>
-    <string>{{ joinPath .path.log "rclone" "rpi" "stderr.log" }}</string>
-	<key>LimitLoadToSessionType</key>
-	<array>
-	  <string>Aqua</string>
-	  <string>Background</string>
-	  <string>LoginWindow</string>
-	  <string>StandardIO</string>
-	  <string>System</string>
-	</array>
-	<key>ProgramArguments</key>
-	<array>
-      <string>{{ .path.usr }}/bin/rclone</string>
-	  <string>nfsmount</string>
-      <string>rpi:</string>
-      <string>{{ .chezmoi.homeDir }}/rpi</string>
-      <string>--vfs-cache-mode</string>
-      <string>full</string>
-      <string>--volname</string>
-      <string>rpi</string>
-	</array>
-  </dict>
-</plist>
+{{ template "launchagent/plist" merge (dict
+  "tool" "rclone"
+  "target" "rpi"
+  "programArguments" (list
+    (printf "%s/bin/rclone" .path.usr)
+    "nfsmount"
+    "rpi:"
+    (printf "%s/rpi" .chezmoi.homeDir)
+    "--vfs-cache-mode"
+    "full"
+    "--volname"
+    "rpi"
+  )
+) . }}

@@ -1,43 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-	<key>KeepAlive</key>
-	<true/>
-	<key>Label</key>
-	<string>rclone.nutstore</string>
-    <key>StandardOutPath</key>
-    <string>{{ joinPath .path.log "rclone" "rclone-nutstore-stdout.log" }}</string>
-    <key>StandardErrorPath</key>
-    <string>{{ joinPath .path.log "rclone" "rclone-nutstore-stderr.log" }}</string>
-	<key>LimitLoadToSessionType</key>
-	<array>
-	  <string>Aqua</string>
-	  <string>Background</string>
-	  <string>LoginWindow</string>
-	  <string>StandardIO</string>
-	  <string>System</string>
-	</array>
-	<key>ProgramArguments</key>
-	<array>
-      <string>{{ .path.usr }}/bin/rclone</string>
-	  <string>nfsmount</string>
-      <string>nutstore:</string>
-      <string>{{ joinPath .chezmoi.homeDir .path.nutstore }}</string>
-      <string>--volname</string>
-      <string>{{ .path.nutstore }}</string>
-	  <string>-vv</string>
-      <string>--dir-cache-time</string>
-      <string>3m</string>
-	  <string>--poll-interval</string>
-      <string>1m</string>
-      <string>--vfs-cache-mode</string>
-      <string>full</string>
-      <string>--vfs-cache-max-age</string>
-      <string>4w</string>
-      <string>--vfs-fast-fingerprint</string>
-	</array>
-	<key>RunAtLoad</key>
-	<true/>
-  </dict>
-</plist>
+{{ template "launchagent/plist" merge (dict
+  "tool" "rclone"
+  "target" "nutstore"
+  "keepAlive" true
+  "runAtLoad" true
+  "programArguments" (list
+    (printf "%s/bin/rclone" .path.usr)
+    "nfsmount"
+    "nutstore:"
+    (joinPath .chezmoi.homeDir .path.nutstore)
+    "--volname"
+    .path.nutstore
+    "-vv"
+    "--dir-cache-time"
+    "3m"
+    "--poll-interval"
+    "1m"
+    "--vfs-cache-mode"
+    "full"
+    "--vfs-cache-max-age"
+    "4w"
+    "--vfs-fast-fingerprint"
+  )
+) . }}

@@ -1,40 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-	<key>KeepAlive</key>
-	<true/>
-	<key>Label</key>
-	<string>gitwatch.org</string>
-    <key>StandardOutPath</key>
-    <string>{{ joinPath .path.log "gitwatch" "gitwatch-org-stdout.log" }}</string>
-    <key>StandardErrorPath</key>
-    <string>{{ joinPath .path.log "gitwatch" "gitwatch-org-stderr.log" }}</string>
-	<key>LimitLoadToSessionType</key>
-	<array>
-	  <string>Aqua</string>
-	  <string>Background</string>
-	  <string>LoginWindow</string>
-	  <string>StandardIO</string>
-	  <string>System</string>
-	</array>
-	<key>ProgramArguments</key>
-	<array>
-      <string>{{ .path.usr }}/bin/gitwatch</string>
-      <string>-r</string>
-      <string>origin</string>
-      <string>-s</string>
-      <string>120</string>
-      <string>-R</string>
-      <string>-M</string>
-      <string>{{ .chezmoi.homeDir }}/{{ .path.org }}</string>
-	</array>
-	<key>EnvironmentVariables</key>
-    <dict>
-        <key>PATH</key>
-        <string>{{ .path.usr }}/bin:/bin:/usr/bin</string>
-    </dict>
-	<key>RunAtLoad</key>
-	<true/>
-  </dict>
-</plist>
+{{ template "launchagent/plist" merge (dict
+  "tool" "gitwatch"
+  "target" "org"
+  "keepAlive" true
+  "runAtLoad" true
+  "programArguments" (list
+    (printf "%s/bin/gitwatch" .path.usr)
+    "-r"
+    "origin"
+    "-s"
+    "120"
+    "-R"
+    "-M"
+    (printf "%s/%s" .chezmoi.homeDir .path.org)
+  )
+  "environmentVariables" (dict
+    "PATH" (printf "%s/bin:/bin:/usr/bin" .path.usr)
+  )
+) . }}

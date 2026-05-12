@@ -1,0 +1,29 @@
+{{ template "launchagent/plist" merge (dict
+  "tool" "uv"
+  "target" "rapid-mlx"
+  "programArguments" (list
+    (joinPath .chezmoi.homeDir ".local" "bin" "rapid-mlx")
+    "serve"
+    "mlx-community/LFM2-8B-A1B-8bit"
+    "--gpu-memory-utilization"
+    "0.82"
+    "--kv-cache-quantization"
+    "--kv-cache-quantization-bits"
+    "4"
+    "--max-num-seqs"
+    "2"
+    "--prefill-batch-size"
+    "256"
+    "--completion-batch-size"
+    "64"
+    "--prefill-step-size"
+    "1024"
+    "--chunked-prefill-tokens"
+    "1024"
+    "--cache-memory-percent"
+    "0.08"
+    "--stream-interval"
+    "2"
+    "--pin-system-prompt"
+  )
+) . }}

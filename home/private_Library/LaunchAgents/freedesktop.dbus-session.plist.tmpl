@@ -1,28 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>freedesktop.dbus-session</string>
-    <key>StandardOutPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/freedesktop/dbus-stdout.log</string>
-    <key>StandardErrorPath</key>
-    <string>{{ .chezmoi.homeDir }}/Library/Logs/freedesktop/dbus-stderr.log</string>
-
-    <key>ProgramArguments</key>
-    <array>
-      <string>{{ .path.usr }}/bin/dbus-daemon</string>
-      <string>--nofork</string>
-      <string>--session</string>
-    </array>
-
-    <key>Sockets</key>
-    <dict>
-      <key>unix_domain_listener</key>
-      <dict>
-        <key>SecureSocketWithKey</key>
-        <string>DBUS_LAUNCHD_SESSION_BUS_SOCKET</string>
-      </dict>
-    </dict>
-  </dict>
-</plist>
+{{ template "launchagent/plist" merge (dict
+  "tool" "freedesktop"
+  "target" "dbus-session"
+  "limitLoadToSessionType" false
+  "programArguments" (list
+    (printf "%s/bin/dbus-daemon" .path.usr)
+    "--nofork"
+    "--session"
+  )
+  "extra" "<key>Sockets</key>\n<dict>\n  <key>unix_domain_listener</key>\n  <dict>\n    <key>SecureSocketWithKey</key>\n    <string>DBUS_LAUNCHD_SESSION_BUS_SOCKET</string>\n  </dict>\n</dict>"
+) . }}

@@ -1,0 +1,5 @@
+{{- $path := .path.log -}}
+{{- range .parts -}}
+  {{- $path = joinPath $path . -}}
+{{- end -}}
+{{- joinPath $path .file -}}
