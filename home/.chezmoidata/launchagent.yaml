@@ -1,4 +1,26 @@
 launchagent:
+  brewServices:
+    isync:
+      tool: isync
+      target: isync
+      label: homebrew.mxcl.isync
+      runAtLoad: true
+      startInterval: 300
+      programArguments:
+        - usrBin: mbsync
+        - "-a"
+      environmentVariables:
+        PATH:
+          pathList:
+            - usrPath: bin
+            - usrPath: sbin
+            - /usr/bin
+            - /bin
+            - /usr/sbin
+            - /sbin
+        PASSWORD_STORE_DIR:
+          homePath: pass
+
   services:
     - tool: freedesktop
       target: dbus-session

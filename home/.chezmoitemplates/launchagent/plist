@@ -1,4 +1,5 @@
 {{- $label := printf "%s.%s" .tool .target -}}
+{{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
 {{- $stdoutFile := printf "%s-stdout.log" .target -}}
 {{- $stderrFile := printf "%s-stderr.log" .target -}}
 {{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}
@@ -47,6 +48,10 @@
     {{- if and (hasKey . "runAtLoad") .runAtLoad }}
     <key>RunAtLoad</key>
     <true/>
+    {{- end }}
+    {{- if hasKey . "startInterval" }}
+    <key>StartInterval</key>
+    <integer>{{ .startInterval }}</integer>
     {{- end }}
     {{- if hasKey . "extra" }}
 {{ .extra | indent 4 }}

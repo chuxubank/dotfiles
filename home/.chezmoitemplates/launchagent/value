@@ -5,6 +5,8 @@
     {{- $item.literal -}}
   {{- else if hasKey $item "usrBin" -}}
     {{- joinPath $ctx.path.usr "bin" $item.usrBin -}}
+  {{- else if hasKey $item "usrPath" -}}
+    {{- joinPath $ctx.path.usr $item.usrPath -}}
   {{- else if hasKey $item "home" -}}
     {{- $path := $ctx.chezmoi.homeDir -}}
     {{- range $item.home -}}{{- $path = joinPath $path . -}}{{- end -}}
@@ -15,6 +17,12 @@
     {{- index $ctx.path $item.path -}}
   {{- else if hasKey $item "format" -}}
     {{- printf $item.format (includeTemplate "launchagent/value" (dict "ctx" $ctx "item" $item.value)) -}}
+  {{- else if hasKey $item "pathList" -}}
+    {{- $items := list -}}
+    {{- range $item.pathList -}}
+      {{- $items = append $items (includeTemplate "launchagent/value" (dict "ctx" $ctx "item" .)) -}}
+    {{- end -}}
+    {{- join ":" $items -}}
   {{- else -}}
     {{- fail (printf "unsupported launchagent value: %s" ($item | toJson)) -}}
   {{- end -}}

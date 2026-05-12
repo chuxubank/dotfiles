@@ -8,6 +8,9 @@ mkdir -p "$launchagents_dir" \
 {{- range (includeTemplate "launchagent/services" . | fromJson) -}}
   {{- $_ := set $tools .tool true -}}
 {{- end -}}
+{{- range $service := .launchagent.brewServices -}}
+  {{- $_ := set $tools $service.tool true -}}
+{{- end -}}
 {{- range ($tools | keys | sortAlpha) }}
   {{ joinPath $.path.log . | quote }} \
 {{- end }}
@@ -15,6 +18,12 @@ mkdir -p "$launchagents_dir" \
 
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
 cat > "$launchagents_dir/{{ .tool }}.{{ .target }}.plist" <<'PLIST'
-{{ template "launchagent/plist" (merge . $) }}
+{{ template "launchagent/plist" (merge (dict) . $) }}
+PLIST
+{{- end }}
+
+{{- range $name, $service := .launchagent.brewServices }}
+brew services restart {{ $name }} --file=/dev/stdin <<'PLIST'
+{{ template "launchagent/plist" (merge (dict) $service $) }}
 PLIST
 {{- end }}
