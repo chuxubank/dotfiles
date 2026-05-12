@@ -1,8 +1,0 @@
-{{ if eq .chezmoi.os "darwin" -}}
-#!/bin/zsh
-
-echo "󰯁 Setup logrotate"
-echo "Logrotate running: {{ output "brew" "services" "info" "logrotate" "--json" | fromJson | jq ".[0].running" | first }}"
-
-brew services restart logrotate
-{{ end -}}

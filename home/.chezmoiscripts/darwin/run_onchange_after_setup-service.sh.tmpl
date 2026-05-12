@@ -2,14 +2,13 @@
 set -eu
 
 launchagents_dir={{ joinPath .chezmoi.homeDir "Library" "LaunchAgents" | quote }}
+logrotate_dir={{ joinPath .path.etc "logrotate.d" | quote }}
 
 mkdir -p "$launchagents_dir" \
+  "$logrotate_dir" \
 {{- $tools := dict -}}
 {{- range (includeTemplate "launchagent/services" . | fromJson) -}}
   {{- $_ := set $tools .tool true -}}
-{{- end -}}
-{{- range $service := .launchagent.brewServices -}}
-  {{- $_ := set $tools $service.tool true -}}
 {{- end -}}
 {{- range ($tools | keys | sortAlpha) }}
   {{ joinPath $.path.log . | quote }} \
@@ -17,13 +16,30 @@ mkdir -p "$launchagents_dir" \
   {{ .path.log | quote }}
 
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
+cat > "$logrotate_dir/{{ .tool }}.{{ .target }}" <<'LOGROTATE'
+{{- range (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) }}
+{{ . | quote }}
+{{- end }}
+{
+  rotate 7
+  daily
+  missingok
+  notifempty
+  compress
+  copytruncate
+}
+LOGROTATE
+{{- end }}
+brew services restart logrotate
+
+{{- range (includeTemplate "launchagent/services" . | fromJson) }}
+{{- if .brew }}
+brew services restart {{ or .brewName .tool }} --file=/dev/stdin <<'PLIST'
+{{ template "launchagent/plist" (merge (dict) . $) }}
+PLIST
+{{- else }}
 cat > "$launchagents_dir/{{ .tool }}.{{ .target }}.plist" <<'PLIST'
 {{ template "launchagent/plist" (merge (dict) . $) }}
 PLIST
 {{- end }}
-
-{{- range $name, $service := .launchagent.brewServices }}
-brew services restart {{ $name }} --file=/dev/stdin <<'PLIST'
-{{ template "launchagent/plist" (merge (dict) $service $) }}
-PLIST
 {{- end }}

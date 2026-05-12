@@ -1,0 +1,9 @@
+{{- $stdoutFile := printf "%s-stdout.log" .service.target -}}
+{{- $stderrFile := printf "%s-stderr.log" .service.target -}}
+{{- if hasKey .service "stdoutLogFile" -}}{{- $stdoutFile = .service.stdoutLogFile -}}{{- end -}}
+{{- if hasKey .service "stderrLogFile" -}}{{- $stderrFile = .service.stderrLogFile -}}{{- end -}}
+{{- $stdout := includeTemplate "launchagent/log-path" (dict "path" .ctx.path "parts" (list .service.tool) "file" $stdoutFile) -}}
+{{- $stderr := includeTemplate "launchagent/log-path" (dict "path" .ctx.path "parts" (list .service.tool) "file" $stderrFile) -}}
+{{- if hasKey .service "standardOutPath" -}}{{- $stdout = .service.standardOutPath -}}{{- end -}}
+{{- if hasKey .service "standardErrorPath" -}}{{- $stderr = .service.standardErrorPath -}}{{- end -}}
+{{- list $stdout $stderr | toJson -}}
