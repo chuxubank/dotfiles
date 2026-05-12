@@ -255,10 +255,10 @@ source <(opencode completion)
 eval "$(codex completion zsh)"
 alias codex="codex --yolo"
 
-{{ template "service-toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
-{{ template "service-toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
-{{ template "service-toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
-{{ template "service-toggle-alias" dict "tool" "uv" "target" "rapid-mlx" "uid" .chezmoi.uid }}
+{{ template "launchagent/toggle-alias" dict "tool" "rclone" "target" "nutstore" "uid" .chezmoi.uid }}
+{{ template "launchagent/toggle-alias" dict "tool" "gitwatch" "target" "org" "uid" .chezmoi.uid }}
+{{ template "launchagent/toggle-alias" dict "tool" "freedesktop" "target" "dbus-session" "uid" .chezmoi.uid }}
+{{ template "launchagent/toggle-alias" dict "tool" "uv" "target" "rapid-mlx" "uid" .chezmoi.uid }}
 
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
