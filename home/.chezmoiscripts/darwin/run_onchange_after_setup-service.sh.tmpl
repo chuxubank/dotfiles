@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+launchagents_dir={{ joinPath .chezmoi.homeDir "Library" "LaunchAgents" | quote }}
+
+mkdir -p "$launchagents_dir" \
+{{- $tools := dict -}}
+{{- range (includeTemplate "launchagent/services" . | fromJson) -}}
+  {{- $_ := set $tools .tool true -}}
+{{- end -}}
+{{- range ($tools | keys | sortAlpha) }}
+  {{ joinPath $.path.log . | quote }} \
+{{- end }}
+  {{ .path.log | quote }}
+
+{{- range (includeTemplate "launchagent/services" . | fromJson) }}
+cat > "$launchagents_dir/{{ .tool }}.{{ .target }}.plist" <<'PLIST'
+{{ template "launchagent/plist" (merge . $) }}
+PLIST
+{{- end }}

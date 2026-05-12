@@ -1,0 +1,11 @@
+{{- $selected := list -}}
+{{- range $service := .launchagent.services -}}
+  {{- $enabled := true -}}
+  {{- if and (eq (kindOf $service) "map") (hasKey $service "when") -}}
+    {{- $enabled = includeTemplate "when/context" (merge (dict "item" $service) $) | fromJson -}}
+  {{- end -}}
+  {{- if $enabled -}}
+    {{- $selected = append $selected $service -}}
+  {{- end -}}
+{{- end -}}
+{{- $selected | toJson -}}

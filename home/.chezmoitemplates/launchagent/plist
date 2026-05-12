@@ -32,7 +32,7 @@
     <key>ProgramArguments</key>
     <array>
       {{- range .programArguments }}
-      <string>{{ . }}</string>
+      <string>{{ includeTemplate "launchagent/value" (dict "ctx" $ "item" .) }}</string>
       {{- end }}
     </array>
     {{- if hasKey . "environmentVariables" }}
@@ -40,7 +40,7 @@
     <dict>
       {{- range $key, $value := .environmentVariables }}
       <key>{{ $key }}</key>
-      <string>{{ $value }}</string>
+      <string>{{ includeTemplate "launchagent/value" (dict "ctx" $ "item" $value) }}</string>
       {{- end }}
     </dict>
     {{- end }}
