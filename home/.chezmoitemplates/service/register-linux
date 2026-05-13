@@ -3,15 +3,16 @@
 {{- $unitDir := joinPath .chezmoi.homeDir ".config/systemd/user" -}}
 {{- $unitFile := joinPath $unitDir (printf "%s.service" $label) -}}
 mkdir -p {{ $unitDir | quote }}
-{{- $stdoutFile := printf "%s-stdout.log" .target -}}
-{{- $stderrFile := printf "%s-stderr.log" .target -}}
+
+{{ $stdoutFile := printf "%s-stdout.log" .target -}}
+{{ $stderrFile := printf "%s-stderr.log" .target -}}
 {{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}
 {{- if hasKey . "stderrLogFile" -}}{{- $stderrFile = .stderrLogFile -}}{{- end -}}
-{{- $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}
-{{- $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
+{{ $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}
+{{ $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
 {{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
 {{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
-{{- $execStart := list -}}
+{{ $execStart := list -}}
 {{- range .programArguments -}}
   {{- $execStart = append $execStart (includeTemplate "service/value" (dict "ctx" $ "item" .)) -}}
 {{- end -}}
