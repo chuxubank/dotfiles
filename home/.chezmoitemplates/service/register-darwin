@@ -1,7 +1,16 @@
-{{- $label := printf "%s.%s" .tool .target -}}
+{{- $isBrew := and (hasKey . "brew") .brew -}}
+{{- $label := "" -}}
+{{- $logBase := "" -}}
+{{- if $isBrew -}}
+  {{- $label = printf "homebrew.mxcl.%s" .tool -}}
+  {{- $logBase = .tool -}}
+{{- else -}}
+  {{- $label = printf "%s.%s" .tool .target -}}
+  {{- $logBase = .target -}}
+{{- end -}}
 {{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
-{{- $stdoutFile := printf "%s-stdout.log" .target -}}
-{{- $stderrFile := printf "%s-stderr.log" .target -}}
+{{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
+{{- $stderrFile := printf "%s-stderr.log" $logBase -}}
 {{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}
 {{- if hasKey . "stderrLogFile" -}}{{- $stderrFile = .stderrLogFile -}}{{- end -}}
 {{- $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}

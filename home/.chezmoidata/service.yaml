@@ -1,8 +1,6 @@
 services:
   - tool: isync
-    target: isync
     brew: true
-    label: homebrew.mxcl.isync
     logrotate:
       stderr:
         rotate: 2

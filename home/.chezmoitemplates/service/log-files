@@ -1,5 +1,9 @@
-{{- $stdoutFile := printf "%s-stdout.log" .service.target -}}
-{{- $stderrFile := printf "%s-stderr.log" .service.target -}}
+{{- $isBrew := and (hasKey .service "brew") .service.brew -}}
+{{- $logBase := "" -}}
+{{- if $isBrew -}}{{- $logBase = .service.tool -}}
+{{- else -}}{{- $logBase = .service.target -}}{{- end -}}
+{{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
+{{- $stderrFile := printf "%s-stderr.log" $logBase -}}
 {{- if hasKey .service "stdoutLogFile" -}}{{- $stdoutFile = .service.stdoutLogFile -}}{{- end -}}
 {{- if hasKey .service "stderrLogFile" -}}{{- $stderrFile = .service.stderrLogFile -}}{{- end -}}
 {{- $stdout := includeTemplate "service/log-path" (dict "path" .ctx.path "parts" (list .service.tool) "file" $stdoutFile) -}}

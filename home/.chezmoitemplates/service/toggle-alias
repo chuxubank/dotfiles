@@ -1,4 +1,6 @@
-{{- if eq .os "darwin" -}}
+{{- if and (hasKey . "brew") .brew -}}
+{{- /* brew services manages lifecycle via `brew services ...`, no aliases needed */ -}}
+{{- else if eq .os "darwin" -}}
 alias {{ .tool }}-{{ .target }}-off='launchctl bootout gui/{{ .uid }}/{{ .tool }}.{{ .target }}'
 alias {{ .tool }}-{{ .target }}-on='launchctl bootstrap gui/{{ .uid }} ~/Library/LaunchAgents/{{ .tool }}.{{ .target }}.plist'
 alias {{ .tool }}-{{ .target }}-restart='launchctl kickstart -k gui/{{ .uid }}/{{ .tool }}.{{ .target }}'
