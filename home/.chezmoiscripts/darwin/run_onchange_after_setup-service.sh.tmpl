@@ -17,17 +17,21 @@ mkdir -p "$launchagents_dir" \
   {{ .path.log | quote }}
 
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
+{{- $logFiles := (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) -}}
+{{- $stdoutOpts := dict -}}
+{{- $stderrOpts := dict -}}
+{{- if hasKey . "logrotate" -}}
+  {{- if hasKey .logrotate "stdout" -}}{{- $stdoutOpts = .logrotate.stdout -}}{{- end -}}
+  {{- if hasKey .logrotate "stderr" -}}{{- $stderrOpts = .logrotate.stderr -}}{{- end -}}
+{{- end -}}
 cat > "$logrotate_dir/{{ .tool }}-{{ .target }}" <<'LOGROTATE'
-{{- range (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) }}
-{{ . | quote }}
-{{- end }}
+{{ index $logFiles 0 | quote }}
 {
-  rotate {{ if hasKey . "rotate" }}{{ .rotate }}{{ else }}7{{ end }}
-  daily
-  missingok
-  notifempty
-  compress
-  copytruncate
+{{ includeTemplate "launchagent/logrotate-directives" $stdoutOpts }}
+}
+{{ index $logFiles 1 | quote }}
+{
+{{ includeTemplate "launchagent/logrotate-directives" $stderrOpts }}
 }
 LOGROTATE
 {{- if and (hasKey . "brew") .brew }}

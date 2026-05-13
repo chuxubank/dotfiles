@@ -4,6 +4,10 @@ launchagent:
       target: isync
       brew: true
       label: homebrew.mxcl.isync
+      logrotate:
+        stderr:
+          rotate: 2
+          interval: weekly
       runAtLoad: true
       startInterval: 300
       programArguments:

@@ -1,0 +1,26 @@
+{{- $rotate := "7" -}}
+{{- $interval := "daily" -}}
+{{- $missingok := true -}}
+{{- $notifempty := true -}}
+{{- $compress := true -}}
+{{- $copytruncate := true -}}
+{{- if hasKey . "rotate" -}}{{- $rotate = .rotate -}}{{- end -}}
+{{- if hasKey . "interval" -}}{{- $interval = .interval -}}{{- end -}}
+{{- if hasKey . "missingok" -}}{{- $missingok = .missingok -}}{{- end -}}
+{{- if hasKey . "notifempty" -}}{{- $notifempty = .notifempty -}}{{- end -}}
+{{- if hasKey . "compress" -}}{{- $compress = .compress -}}{{- end -}}
+{{- if hasKey . "copytruncate" -}}{{- $copytruncate = .copytruncate -}}{{- end -}}
+  rotate {{ $rotate }}
+  {{ $interval }}
+{{- if $missingok }}
+  missingok
+{{- end -}}
+{{- if $notifempty }}
+  notifempty
+{{- end -}}
+{{- if $compress }}
+  compress
+{{- end -}}
+{{- if $copytruncate }}
+  copytruncate
+{{- end -}}
