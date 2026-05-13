@@ -19,7 +19,7 @@ mkdir -p "$launchagents_dir" \
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
 {{- $logFiles := (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) -}}
 {{- $stdoutOpts := dict -}}
-{{- $stderrOpts := dict -}}
+{{- $stderrOpts := dict "rotate" "2" "interval" "weekly" -}}
 {{- if hasKey . "logrotate" -}}
   {{- if hasKey .logrotate "stdout" -}}{{- $stdoutOpts = .logrotate.stdout -}}{{- end -}}
   {{- if hasKey .logrotate "stderr" -}}{{- $stderrOpts = .logrotate.stderr -}}{{- end -}}

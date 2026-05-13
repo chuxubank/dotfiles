@@ -27,7 +27,7 @@ layout {
     tab name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.proxy -}}" {
         pane split_direction="vertical" {
             pane command="tail" {
-                args "-f" {{ joinPath .chezmoi.homeDir .path.logs "sing-box" "sing-box.log" | quote }}
+                args "-f" {{ joinPath .chezmoi.homeDir .path.log "sing-box" "sing-box.log" | quote }}
             }
             pane
         }
