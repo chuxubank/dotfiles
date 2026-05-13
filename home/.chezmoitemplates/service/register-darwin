@@ -18,7 +18,7 @@
 {{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
 {{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
 {{- $plist := includeTemplate "service/plist-darwin" (merge (dict "label" $label "stdout" $stdout "stderr" $stderr) .) -}}
-{{- if and (hasKey . "brew") .brew }}
+{{- if $isBrew }}
 brew services restart {{ .tool }} --file=/dev/stdin <<'PLIST'
 {{ $plist }}PLIST
 {{- else -}}

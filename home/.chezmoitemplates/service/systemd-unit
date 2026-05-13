@@ -1,0 +1,23 @@
+[Unit]
+Description={{ .label }}
+
+[Service]
+ExecStart={{ join " " .execStart }}
+StandardOutput=append:{{ .stdout }}
+StandardError=append:{{ .stderr }}
+{{- if and (hasKey .service "keepAlive") .service.keepAlive }}
+Restart=always
+{{- else }}
+Restart=on-failure
+{{- end }}
+{{- if hasKey .service "startInterval" }}
+RestartSec={{ .service.startInterval }}
+{{- end }}
+{{- if hasKey .service "environmentVariables" }}
+{{- range $key, $value := .service.environmentVariables }}
+Environment="{{ $key }}={{ includeTemplate "service/value" (dict "ctx" $.service "item" $value) }}"
+{{- end }}
+{{- end }}
+
+[Install]
+WantedBy=default.target

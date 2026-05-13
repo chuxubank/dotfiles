@@ -1,49 +1,40 @@
-{{- $label := printf "%s.%s" .tool .target -}}
+{{- $isBrew := and (hasKey . "brew") .brew -}}
+{{- $label := "" -}}
+{{- $logBase := "" -}}
+{{- if $isBrew -}}
+  {{- $label = printf "homebrew.%s" .tool -}}
+  {{- $logBase = .tool -}}
+{{- else -}}
+  {{- $label = printf "%s.%s" .tool .target -}}
+  {{- $logBase = .target -}}
+{{- end -}}
 {{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
 {{- $unitDir := joinPath .chezmoi.homeDir ".config/systemd/user" -}}
 {{- $unitFile := joinPath $unitDir (printf "%s.service" $label) -}}
-mkdir -p {{ $unitDir | quote }}
-
-{{ $stdoutFile := printf "%s-stdout.log" .target -}}
-{{ $stderrFile := printf "%s-stderr.log" .target -}}
+{{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
+{{- $stderrFile := printf "%s-stderr.log" $logBase -}}
 {{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}
 {{- if hasKey . "stderrLogFile" -}}{{- $stderrFile = .stderrLogFile -}}{{- end -}}
-{{ $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}
-{{ $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
+{{- $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}
+{{- $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
 {{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
 {{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
-{{ $execStart := list -}}
+{{- $execStart := list -}}
 {{- range .programArguments -}}
   {{- $execStart = append $execStart (includeTemplate "service/value" (dict "ctx" $ "item" .)) -}}
 {{- end -}}
-cat > {{ $unitFile | quote }} <<'SYSTEMD'
-[Unit]
-Description={{ $label }}
-
-[Service]
-ExecStart={{ join " " $execStart }}
-StandardOutput=append:{{ $stdout }}
-StandardError=append:{{ $stderr }}
-{{- if and (hasKey . "keepAlive") .keepAlive }}
-Restart=always
+{{- $unit := includeTemplate "service/systemd-unit" (dict "label" $label "stdout" $stdout "stderr" $stderr "execStart" $execStart "service" .) -}}
+{{- if $isBrew }}
+brew services restart {{ .tool }} --file=/dev/stdin <<'SYSTEMD'
+{{ $unit }}SYSTEMD
 {{- else }}
-Restart=on-failure
-{{- end }}
-{{- if hasKey . "startInterval" }}
-RestartSec={{ .startInterval }}
-{{- end }}
-{{- if hasKey . "environmentVariables" }}
-{{- range $key, $value := .environmentVariables }}
-Environment="{{ $key }}={{ includeTemplate "service/value" (dict "ctx" $ "item" $value) }}"
-{{- end }}
-{{- end }}
-
-[Install]
-WantedBy=default.target
-SYSTEMD
+mkdir -p {{ $unitDir | quote }}
+cat > {{ $unitFile | quote }} <<'SYSTEMD'
+{{ $unit }}SYSTEMD
 systemctl --user daemon-reload
 {{- if and (hasKey . "runAtLoad") .runAtLoad }}
 systemctl --user enable --now {{ $label }}
 {{- else }}
 systemctl --user start {{ $label }}
 {{- end }}
+{{- end -}}
