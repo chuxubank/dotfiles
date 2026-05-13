@@ -7,3 +7,10 @@
 {{ template "ssh" (passFields "Network/Host/Racknerd/ssh") }}
 
 {{ template "ssh" (passFields "Work/XZ/RaspberryPi/ssh") }}
+
+{{ range $alias, $cfg := .tailscale.hosts }}
+Host {{ $alias }}
+    HostName {{ if hasKey $cfg "hostname" }}{{ $cfg.hostname }}{{ else }}{{ $alias }}{{ end }}.{{ $.tailscale.tailnet }}
+    User {{ $cfg.username }}
+    Port {{ if hasKey $cfg "port" }}{{ $cfg.port }}{{ else }}22{{ end }}
+{{ end -}}

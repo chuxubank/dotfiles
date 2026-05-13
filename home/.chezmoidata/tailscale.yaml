@@ -1,0 +1,12 @@
+tailscale:
+  tailnet: java-tiyanki.ts.net
+  hosts:
+    ai:
+      username: misaka
+    iv:
+      hostname: ivsh-lp-00046
+      username: misaka
+    midori:
+      username: chuxu
+    yui:
+      username: misaka
