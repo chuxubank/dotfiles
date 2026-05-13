@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+logrotate_dir={{ joinPath .path.etc "logrotate.d" | quote }}
+
+mkdir -p "$logrotate_dir" \
+{{- $tools := dict -}}
+{{- range (includeTemplate "launchagent/services" . | fromJson) -}}
+  {{- $_ := set $tools .tool true -}}
+{{- end -}}
+{{- range ($tools | keys | sortAlpha) }}
+  {{ joinPath $.path.log . | quote }} \
+{{- end }}
+  {{ .path.log | quote }}
+
+{{- range (includeTemplate "launchagent/services" . | fromJson) }}
+{{- $logFiles := (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) -}}
+{{- $stdoutOpts := dict -}}
+{{- $stderrOpts := dict "rotate" "2" "interval" "weekly" -}}
+{{- if hasKey . "logrotate" -}}
+  {{- if hasKey .logrotate "stdout" -}}{{- $stdoutOpts = .logrotate.stdout -}}{{- end -}}
+  {{- if hasKey .logrotate "stderr" -}}{{- $stderrOpts = .logrotate.stderr -}}{{- end -}}
+{{- end -}}
+cat > "$logrotate_dir/{{ .tool }}-{{ .target }}" <<'LOGROTATE'
+{{ index $logFiles 0 | quote }}
+{
+{{ includeTemplate "launchagent/logrotate-directives" $stdoutOpts }}
+}
+{{ index $logFiles 1 | quote }}
+{
+{{ includeTemplate "launchagent/logrotate-directives" $stderrOpts }}
+}
+LOGROTATE
+{{- end }}
