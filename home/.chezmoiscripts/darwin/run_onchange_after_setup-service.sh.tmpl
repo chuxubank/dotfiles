@@ -17,7 +17,7 @@ mkdir -p "$launchagents_dir" \
   {{ .path.log | quote }}
 
 {{- range (includeTemplate "launchagent/services" . | fromJson) }}
-cat > "$logrotate_dir/{{ .tool }}.{{ .target }}" <<'LOGROTATE'
+cat > "$logrotate_dir/{{ .tool }}-{{ .target }}" <<'LOGROTATE'
 {{- range (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) }}
 {{ . | quote }}
 {{- end }}
@@ -30,10 +30,6 @@ cat > "$logrotate_dir/{{ .tool }}.{{ .target }}" <<'LOGROTATE'
   copytruncate
 }
 LOGROTATE
-{{- end }}
-brew services restart logrotate
-
-{{- range (includeTemplate "launchagent/services" . | fromJson) }}
 {{- if and (hasKey . "brew") .brew }}
 brew services restart {{ .tool }} --file=/dev/stdin <<'PLIST'
 {{ template "launchagent/plist" (merge (dict) . $) }}
@@ -44,5 +40,6 @@ cat > "$launchagents_dir/{{ .tool }}.{{ .target }}.plist" <<'PLIST'
 PLIST
 {{- end }}
 {{- end }}
+brew services restart logrotate
 
 {{- end }}
