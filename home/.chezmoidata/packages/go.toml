@@ -1,6 +1,5 @@
 [packages]
 go = [
   "github.com/chrishrb/go-grip@latest",
-  "github.com/jaxxstorm/tscli@latest",
   "github.com/nao1215/gup@latest",
 ]
