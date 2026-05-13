@@ -24,7 +24,7 @@
   {{- $execStart = append $execStart (includeTemplate "service/value" (dict "ctx" $ "item" .)) -}}
 {{- end -}}
 {{- $unit := includeTemplate "service/systemd-unit" (dict "label" $label "stdout" $stdout "stderr" $stderr "execStart" $execStart "service" .) -}}
-{{- if $isBrew }}
+{{- if and $isBrew (ne .host_env "ci") }}
 brew services restart {{ .tool }} --file=/dev/stdin <<'SYSTEMD'
 {{ $unit }}SYSTEMD
 {{- else }}
