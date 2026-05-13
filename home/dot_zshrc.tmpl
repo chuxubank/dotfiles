@@ -255,8 +255,8 @@ source <(opencode completion)
 eval "$(codex completion zsh)"
 alias codex="codex --yolo"
 
-{{- range (includeTemplate "launchagent/services" . | fromJson) }}
-{{ template "launchagent/toggle-alias" dict "tool" .tool "target" .target "uid" $.chezmoi.uid }}
+{{- range (includeTemplate "service/services" . | fromJson) }}
+{{ template "service/toggle-alias" (merge (dict "os" $.chezmoi.os "uid" $.chezmoi.uid) .) }}
 {{- end }}
 
 # Kiro CLI post block. Keep at the bottom of this file.

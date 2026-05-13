@@ -1,0 +1,119 @@
+{{- $label := printf "%s.%s" .tool .target -}}
+{{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
+{{- $stdoutFile := printf "%s-stdout.log" .target -}}
+{{- $stderrFile := printf "%s-stderr.log" .target -}}
+{{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}
+{{- if hasKey . "stderrLogFile" -}}{{- $stderrFile = .stderrLogFile -}}{{- end -}}
+{{- $stdout := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stdoutFile) -}}
+{{- $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
+{{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
+{{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
+{{- if and (hasKey . "brew") .brew }}
+brew services restart {{ .tool }} --file=/dev/stdin <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    {{- if and (hasKey . "keepAlive") .keepAlive }}
+    <key>KeepAlive</key>
+    <true/>
+    {{- end }}
+    <key>Label</key>
+    <string>{{ $label }}</string>
+    <key>StandardOutPath</key>
+    <string>{{ $stdout }}</string>
+    <key>StandardErrorPath</key>
+    <string>{{ $stderr }}</string>
+    {{- if or (not (hasKey . "limitLoadToSessionType")) .limitLoadToSessionType }}
+    <key>LimitLoadToSessionType</key>
+    <array>
+      {{- range (list "Aqua" "Background" "LoginWindow" "StandardIO" "System") }}
+      <string>{{ . }}</string>
+      {{- end }}
+    </array>
+    {{- end }}
+    <key>ProgramArguments</key>
+    <array>
+      {{- range .programArguments }}
+      <string>{{ includeTemplate "service/value" (dict "ctx" $ "item" .) }}</string>
+      {{- end }}
+    </array>
+    {{- if hasKey . "environmentVariables" }}
+    <key>EnvironmentVariables</key>
+    <dict>
+      {{- range $key, $value := .environmentVariables }}
+      <key>{{ $key }}</key>
+      <string>{{ includeTemplate "service/value" (dict "ctx" $ "item" $value) }}</string>
+      {{- end }}
+    </dict>
+    {{- end }}
+    {{- if and (hasKey . "runAtLoad") .runAtLoad }}
+    <key>RunAtLoad</key>
+    <true/>
+    {{- end }}
+    {{- if hasKey . "startInterval" }}
+    <key>StartInterval</key>
+    <integer>{{ .startInterval }}</integer>
+    {{- end }}
+    {{- if hasKey . "extra" }}
+{{ .extra | indent 4 }}
+    {{- end }}
+  </dict>
+</plist>
+PLIST
+{{- else -}}
+{{- $launchagentsDir := joinPath .chezmoi.homeDir "Library" "LaunchAgents" -}}
+mkdir -p {{ $launchagentsDir | quote }}
+cat > {{ joinPath $launchagentsDir (printf "%s.plist" $label) | quote }} <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    {{- if and (hasKey . "keepAlive") .keepAlive }}
+    <key>KeepAlive</key>
+    <true/>
+    {{- end }}
+    <key>Label</key>
+    <string>{{ $label }}</string>
+    <key>StandardOutPath</key>
+    <string>{{ $stdout }}</string>
+    <key>StandardErrorPath</key>
+    <string>{{ $stderr }}</string>
+    {{- if or (not (hasKey . "limitLoadToSessionType")) .limitLoadToSessionType }}
+    <key>LimitLoadToSessionType</key>
+    <array>
+      {{- range (list "Aqua" "Background" "LoginWindow" "StandardIO" "System") }}
+      <string>{{ . }}</string>
+      {{- end }}
+    </array>
+    {{- end }}
+    <key>ProgramArguments</key>
+    <array>
+      {{- range .programArguments }}
+      <string>{{ includeTemplate "service/value" (dict "ctx" $ "item" .) }}</string>
+      {{- end }}
+    </array>
+    {{- if hasKey . "environmentVariables" }}
+    <key>EnvironmentVariables</key>
+    <dict>
+      {{- range $key, $value := .environmentVariables }}
+      <key>{{ $key }}</key>
+      <string>{{ includeTemplate "service/value" (dict "ctx" $ "item" $value) }}</string>
+      {{- end }}
+    </dict>
+    {{- end }}
+    {{- if and (hasKey . "runAtLoad") .runAtLoad }}
+    <key>RunAtLoad</key>
+    <true/>
+    {{- end }}
+    {{- if hasKey . "startInterval" }}
+    <key>StartInterval</key>
+    <integer>{{ .startInterval }}</integer>
+    {{- end }}
+    {{- if hasKey . "extra" }}
+{{ .extra | indent 4 }}
+    {{- end }}
+  </dict>
+</plist>
+PLIST
+{{- end -}}

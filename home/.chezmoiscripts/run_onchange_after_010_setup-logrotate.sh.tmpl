@@ -5,7 +5,7 @@ logrotate_dir={{ joinPath .path.etc "logrotate.d" | quote }}
 
 mkdir -p "$logrotate_dir" \
 {{- $tools := dict -}}
-{{- range (includeTemplate "launchagent/services" . | fromJson) -}}
+{{- range (includeTemplate "service/services" . | fromJson) -}}
   {{- $_ := set $tools .tool true -}}
 {{- end -}}
 {{- range ($tools | keys | sortAlpha) }}
@@ -13,8 +13,8 @@ mkdir -p "$logrotate_dir" \
 {{- end }}
   {{ .path.log | quote }}
 
-{{- range (includeTemplate "launchagent/services" . | fromJson) }}
-{{- $logFiles := (includeTemplate "launchagent/log-files" (dict "ctx" $ "service" .) | fromJson) -}}
+{{- range (includeTemplate "service/services" . | fromJson) }}
+{{- $logFiles := (includeTemplate "service/log-files" (dict "ctx" $ "service" .) | fromJson) -}}
 {{- $stdoutOpts := dict -}}
 {{- $stderrOpts := dict "rotate" "2" "interval" "weekly" -}}
 {{- if hasKey . "logrotate" -}}
@@ -24,11 +24,14 @@ mkdir -p "$logrotate_dir" \
 cat > "$logrotate_dir/{{ .tool }}-{{ .target }}" <<'LOGROTATE'
 {{ index $logFiles 0 | quote }}
 {
-{{ includeTemplate "launchagent/logrotate-directives" $stdoutOpts }}
+{{ includeTemplate "service/logrotate-directives" $stdoutOpts }}
 }
 {{ index $logFiles 1 | quote }}
 {
-{{ includeTemplate "launchagent/logrotate-directives" $stderrOpts }}
+{{ includeTemplate "service/logrotate-directives" $stderrOpts }}
 }
 LOGROTATE
 {{- end }}
+{{ if eq .chezmoi.os "darwin" }}
+brew services restart logrotate
+{{ end -}}

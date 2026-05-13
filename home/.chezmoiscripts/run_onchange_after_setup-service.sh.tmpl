@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+{{- range (includeTemplate "service/services" . | fromJson) }}
+{{ includeTemplate "service/register" (merge (dict) . $) }}
+{{- end }}
