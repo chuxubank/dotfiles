@@ -1,35 +1,38 @@
-[user]
-name = Misaka
-email = chuxubank@qq.com
-
-[includeIf "gitdir:~/Developer/AA/"]
-path = config_aa
-
-[includeIf "gitdir:~/Developer/IV/"]
-path = config_iv
+[init]
+    defaultBranch = main
 
 [core]
-excludesfile = ~/.config/git/ignore
-autocrlf = input
+    excludesfile = ~/.config/git/ignore
+    autocrlf = input
 
-[init]
-defaultBranch = main
+[user]
+    name = Misaka
+    email = chuxubank@qq.com
+
+[includeIf "gitdir:~/Developer/AA/"]
+    path = config_aa
+
+[includeIf "gitdir:~/Developer/IV/"]
+    path = config_iv
 
 [pull]
-rebase = true
+    rebase = true
 
 [push]
-autoSetupRemote = true
+    autoSetupRemote = true
 
 [rebase]
-autoStash = true
-autosquash = true
+    autoStash = true
+    autosquash = true
+
+[rerere]
+    enabled = true
 
 [credential]
     helper = cache
     helper = !type pass-git-helper >/dev/null && pass-git-helper $@
 {{ if eq .chezmoi.os "windows" -}}
-	helper = manager
+    helper = manager
 {{ else if eq .chezmoi.os "darwin" -}}
     helper = osxkeychain
 {{ else if eq .chezmoi.os "linux" -}}
@@ -37,18 +40,18 @@ autosquash = true
 {{ end -}}
 
 [credential "https://github.com"]
-	helper = 
-	helper = !{{ .path.gh }} auth git-credential
+    helper = 
+    helper = !{{ .path.gh }} auth git-credential
 
 [credential "https://gist.github.com"]
-	helper = 
-	helper = !{{ .path.gh }} auth git-credential
+    helper = 
+    helper = !{{ .path.gh }} auth git-credential
 
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 
 [lfs "customtransfer.xet"]
     path = git-xet
@@ -58,11 +61,9 @@ autosquash = true
 [diff "gpg"]
     textconv = gpg --no-tty --decrypt
 [diff "word"]
-	textconv = docx2txt
+    textconv = docx2txt
 [diff "exif"]
-	textconv = exiftool
+    textconv = exiftool
 
 [github]
     user = chuxubank
-[rerere]
-	enabled = true
