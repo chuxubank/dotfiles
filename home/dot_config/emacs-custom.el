@@ -30,8 +30,8 @@
                 goggles gogs gptel-magit gptel-prompts gradle-el
                 graphql-mode grip-mode groovy-mode gt gtea helpful
                 hugoista igist indent-bars kaolin-themes kdl-mode
-                kotlin-ts-mode leetcode ligature logview lsp-proxy
-                lua-mode magit-todos major-mode-hydra
+                kotlin-mode kotlin-ts-mode leetcode ligature logview
+                lsp-proxy lua-mode magit-todos major-mode-hydra
                 makefile-executor marginalia markdown-xwidget
                 math-delimiters mcp-server md-babel meow-tree-sitter
                 meow-vterm mermaid-mode minimap mistty
@@ -53,10 +53,9 @@
                 swift-ts-mode system-packages telega templ-ts-mode
                 templatel toc-mode transpose-frame treemacs-magit
                 treemacs-nerd-icons treemacs-tab-bar treesit-fold
-                treesit-langs tributary ultra-scroll undo-fu-session
-                uv-mode valign vbs-repl vbscript-mode
-                vertico-prescient video-trimmer visual-basic-mode
-                vterm-toggle vundo winum yaml-pro))
+                tributary ultra-scroll undo-fu-session uv-mode valign
+                vbs-repl vbscript-mode vertico-prescient video-trimmer
+                visual-basic-mode vterm-toggle vundo winum yaml-pro))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces
