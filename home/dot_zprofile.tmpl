@@ -1,5 +1,7 @@
 export LC_ALL=en_US.UTF-8
 
+{{- $brewBin := lookPath "brew" }}
+
 {{- if eq .chezmoi.os "darwin" }}
 # Kiro CLI pre block. Keep at the top of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
@@ -11,9 +13,12 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 # Added by Toolbox App
 export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+{{- end }}
+
+{{- if $brewBin }}
 
 # Set PATH, MANPATH, etc., for Homebrew.
-eval "$({{ .path.usr }}/bin/brew shellenv)"
+eval "$({{ $brewBin }} shellenv)"
 {{- if has .host_env (list "personal" "iv") }}
 export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
 export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
@@ -51,6 +56,9 @@ export PATH="$(brew --prefix sqlite)/bin:$PATH"
 
 # ssh
 export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
+{{- end }}
+
+{{- if eq .chezmoi.os "darwin" }}
 
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
