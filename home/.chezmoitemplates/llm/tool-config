@@ -21,12 +21,6 @@
 {{- $llmProviders := .llm.providers -}}
 {{- $result := dict -}}
 
-{{- if hasKey $toolCfg "model" }}
-  {{- $_ := set $result "model" $toolCfg.model -}}
-{{- end }}
-{{- if hasKey $toolCfg "small_model" }}
-  {{- $_ := set $result "small_model" $toolCfg.small_model -}}
-{{- end }}
 {{- if hasKey $toolCfg "reasoning_effort" }}
   {{- $_ := set $result "reasoning_effort" $toolCfg.reasoning_effort -}}
 {{- end }}
@@ -49,10 +43,40 @@
 {{- end }}
 
 {{- /* Resolve each provider reference */ -}}
+{{- $ctx := . -}}
 {{- $providers := dict -}}
 {{- range $alias, $ref := $refs }}
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
+
+  {{- /* Check if provider passes when.enabled conditions */ -}}
+  {{- $enabled := true -}}
+  {{- if hasKey $prov "when" -}}
+    {{- $when := $prov.when -}}
+    {{- if hasKey $when "enabled" -}}
+      {{- $enabledCfg := $when.enabled -}}
+      {{- if hasKey $enabledCfg "host_env" -}}
+        {{- $heOk := false -}}
+        {{- range $he := $enabledCfg.host_env -}}
+          {{- if eq $ctx.host_env $he -}}{{- $heOk = true -}}{{- end -}}
+        {{- end -}}
+        {{- if not $heOk -}}{{- $enabled = false -}}{{- end -}}
+      {{- end -}}
+      {{- if hasKey $enabledCfg "roles" -}}
+        {{- $hasRole := false -}}
+        {{- if eq (kindOf $ctx.roles) "slice" -}}
+          {{- range $ur := $ctx.roles -}}
+            {{- range $r := $enabledCfg.roles -}}
+              {{- if eq $ur $r -}}{{- $hasRole = true -}}{{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if not $hasRole -}}{{- $enabled = false -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if $enabled -}}
 
   {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
   {{- $authKey := "" -}}
@@ -82,7 +106,25 @@
   {{- end }}
 
   {{- $_ := set $providers $alias $resolved -}}
+  {{- end -}}
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
+
+{{- /* Resolve model: string → use as-is, list → pick first with available provider */ -}}
+{{- if hasKey $toolCfg "model" -}}
+  {{- if eq (kindOf $toolCfg.model) "slice" -}}
+    {{- $_ := set $result "model" (includeTemplate "llm/pick-model" (dict "models" $toolCfg.model "providers" $providers)) -}}
+  {{- else -}}
+    {{- $_ := set $result "model" $toolCfg.model -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if hasKey $toolCfg "small_model" -}}
+  {{- if eq (kindOf $toolCfg.small_model) "slice" -}}
+    {{- $_ := set $result "small_model" (includeTemplate "llm/pick-model" (dict "models" $toolCfg.small_model "providers" $providers)) -}}
+  {{- else -}}
+    {{- $_ := set $result "small_model" $toolCfg.small_model -}}
+  {{- end -}}
+{{- end -}}
 
 {{- toJson $result -}}

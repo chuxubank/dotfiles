@@ -31,6 +31,34 @@
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 
+{{- /* Auto-discover free providers from models.dev */ -}}
+{{- $md := output "sh" "-c" "curl -sfL --max-time 3 'https://models.dev/api.json' 2>/dev/null || echo '{}'" | trim | fromJson -}}
+{{- range $pid, $p := $md -}}
+  {{- if and (not (hasKey $provider $pid)) (hasKey $p "api") -}}
+    {{- $api := $p.api -}}
+    {{- if $api -}}
+      {{- $dProv := dict "options" (dict "baseURL" $api) -}}
+      {{- $dModels := dict -}}
+      {{- range $mid, $m := $p.models -}}
+        {{- $costOut := true -}}
+        {{- if hasKey $m "cost" -}}
+          {{- $cost := $m.cost -}}
+          {{- if hasKey $cost "output" -}}
+            {{- $costOut = $cost.output -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if not $costOut -}}
+          {{- $_ := set $dModels $mid (dict "name" $mid) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if gt (len $dModels) 0 -}}
+        {{- $_ := set $dProv "models" $dModels -}}
+        {{- $_ := set $provider $pid $dProv -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true

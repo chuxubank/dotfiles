@@ -53,6 +53,10 @@ llm:
         enabled:
           roles: ["llm"]
 
+    opencode:
+      base_url: "https://models.dev"
+      type: opencode
+
   # ── Tool defaults ──────────────────────────────────────────────────
   # Per-tool model selection.  `providers` overrides only the auth
   # field used for a given provider (the base_url stays the same).
@@ -65,8 +69,13 @@ llm:
   #               auth_field: cc-auth-token
   tools:
     opencode:
-      model: anthropic/claude-opus-4-7
-      small_model: iv/deepseek-v4-flash
+      model:
+        - openai/gpt-5.5
+        - anthropic/claude-opus-4-7
+        - opencode/deepseek-v4-flash-free
+      small_model:
+        - iv/deepseek-v4-flash
+        - openrouter/openai/gpt-oss-120b:free
       providers:
         openai:
           provider: iv
@@ -81,6 +90,8 @@ llm:
           auth_field: default-auth-token
         ollama:
           provider: ollama
+        opencode:
+          provider: opencode
 
     claude-code:
       model: opusplan

@@ -1,0 +1,15 @@
+{{- /* llm/pick-model — Pick first model from list whose provider is available.
+        Input: dict "models" <list> "providers" <dict>
+        Output: chosen model string
+*/ -}}
+{{- $chosen := "" -}}
+{{- range $m := .models -}}
+  {{- if not $chosen -}}
+    {{- $parts := splitList "/" $m -}}
+    {{- $alias := index $parts 0 -}}
+    {{- if hasKey $.providers $alias -}}
+      {{- $chosen = $m -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $chosen -}}{{- $chosen = index .models 0 -}}{{- end -}}{{- $chosen -}}

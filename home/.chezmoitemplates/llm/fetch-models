@@ -16,6 +16,8 @@
     {{- $fetchURL = printf "%s/api/tags" .base_url -}}
   {{- else if eq .type "gemini" }}
     {{- $fetchURL = printf "%s/v1beta/models?key=%s&pageSize=1000" .base_url .auth_key -}}
+  {{- else if eq .type "opencode" }}
+    {{- $fetchURL = printf "%s/api.json" .base_url -}}
   {{- else }}
     {{- $fetchURL = printf "%s/v1/models" .base_url -}}
     {{- if .auth_key }}
@@ -44,6 +46,15 @@
         {{- $_ := set $models $id $display -}}
       {{- end }}
     {{- end }}
+  {{- else if eq .type "opencode" }}
+    {{- if hasKey $resp "opencode" -}}
+      {{- $oc := $resp.opencode -}}
+      {{- if hasKey $oc "models" -}}
+        {{- range $id, $m := $oc.models -}}
+          {{- $_ := set $models $id $m.name -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
   {{- else }}
     {{- if hasKey $resp "data" }}
       {{- range $m := $resp.data }}
