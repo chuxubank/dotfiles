@@ -1,4 +1,10 @@
 llm:
+  # ── Data sets (model catalogs, independent from inference providers) ──
+  data_sets:
+    models-dev:
+      type: models-dev
+      base_url: "https://models.dev"
+
   # ── Providers ───────────────────────────────────────────────────────
   # Each provider = one API endpoint (base_url + default auth).
   # Tools can override auth.field to use a different API key from the
@@ -54,7 +60,6 @@ llm:
           roles: ["llm"]
 
     opencode:
-      base_url: "https://models.dev"
       type: opencode
 
   # ── Tool defaults ──────────────────────────────────────────────────
@@ -92,6 +97,16 @@ llm:
           provider: ollama
         openrouter:
           provider: openrouter
+        opencode:
+          data_set: models-dev
+          provider: opencode
+          filter:
+            cost:
+              input: 0
+              output: 0
+              cache_read: 0
+          modalities:
+            input: ["text", "image"]
 
     claude-code:
       model: opusplan

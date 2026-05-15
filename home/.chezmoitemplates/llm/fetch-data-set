@@ -1,0 +1,22 @@
+{{- /* llm/fetch-data-set — Fetch raw model data from a data set.
+   Works like fetch-models but returns full model metadata from a data catalog.
+   Input: dict with "type", "base_url" (from llm.data_sets.<name>)
+   Output: flat JSON dict of { model_id: { name, cost, open_weights, modalities, ... } }
+   Returns empty dict on failure.
+*/ -}}
+{{- $models := dict -}}
+{{- if .base_url -}}
+  {{- $fetchURL := printf "%s/api.json" .base_url -}}
+  {{- $raw := output "sh" "-c" (printf "curl -sfL --max-time 3 '%s' 2>/dev/null || echo '{}'" $fetchURL) | trim | fromJson -}}
+  {{- if eq .type "models-dev" -}}
+    {{- /* models.dev response: { provider_id: { id, name, api, models: { model_id: { name, cost, ... } } } } */ -}}
+    {{- range $pid, $p := $raw -}}
+      {{- if hasKey $p "models" -}}
+        {{- range $mid, $m := $p.models -}}
+          {{- $_ := set $models $mid $m -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $models -}}

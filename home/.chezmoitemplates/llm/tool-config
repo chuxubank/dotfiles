@@ -101,7 +101,20 @@
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
   -}}
-  {{- if hasKey $ref "models" }}
+  {{- if hasKey $ref "data_set" }}
+    {{- $dsName := $ref.data_set -}}
+    {{- $ds := index $ctx.llm.data_sets $dsName -}}
+    {{- if $ds -}}
+      {{- $allModels := includeTemplate "llm/fetch-data-set" $ds | fromJson -}}
+      {{- $filterArg := dict "models" $allModels -}}
+      {{- if hasKey $ref "filter" }}{{- $_ := set $filterArg "filter" $ref.filter -}}{{- end -}}
+      {{- if hasKey $ref "modalities" }}{{- $_ := set $filterArg "modalities" $ref.modalities -}}{{- end -}}
+      {{- $filtered := includeTemplate "llm/filter-models" $filterArg | fromJson -}}
+      {{- if gt (len $filtered) 0 -}}
+        {{- $_ := set $resolved "models" $filtered -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if hasKey $ref "models" }}
     {{- $_ := set $resolved "models" $ref.models -}}
   {{- end }}
 

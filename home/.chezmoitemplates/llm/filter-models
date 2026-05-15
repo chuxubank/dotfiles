@@ -1,0 +1,95 @@
+{{- /* llm/filter-models — Apply filter criteria to a model dict.
+   Input: dict with "models" { id: { name, cost, open_weights, modalities } },
+                   "filter" { cost: { input, output, cache_read },
+                              open_weights: bool },
+                   "modalities" { input: [str], output: [str] }
+   Output: JSON dict of { model_id: name_string } for matching models.
+
+   Cost comparison uses 'not' for zero-check (handles int/float64 mismatch).
+   All filter fields are optional — omitted fields are not checked.
+*/ -}}
+{{- $filter := .filter -}}
+{{- $modalities := .modalities -}}
+{{- $result := dict -}}
+{{- range $id, $m := .models -}}
+  {{- $keep := true -}}
+
+  {{- /* Cost filter */ -}}
+  {{- if hasKey $filter "cost" -}}
+    {{- $cost := $filter.cost -}}
+    {{- if hasKey $m "cost" -}}
+      {{- $mc := $m.cost -}}
+      {{- if hasKey $cost "input" -}}
+        {{- $fv := $cost.input -}}{{- $mv := 0 -}}{{- if hasKey $mc "input" -}}{{- $mv = $mc.input -}}{{- end -}}
+        {{- if or (and (not $fv) (not $mv)) (and $fv $mv (eq (printf "%v" $fv) (printf "%v" $mv))) -}}{{- /* match */ -}}{{- else -}}{{- $keep = false -}}{{- end -}}
+      {{- end -}}
+      {{- if $keep -}}
+      {{- if hasKey $cost "output" -}}
+        {{- $fv := $cost.output -}}{{- $mv := 0 -}}{{- if hasKey $mc "output" -}}{{- $mv = $mc.output -}}{{- end -}}
+        {{- if or (and (not $fv) (not $mv)) (and $fv $mv (eq (printf "%v" $fv) (printf "%v" $mv))) -}}{{- /* match */ -}}{{- else -}}{{- $keep = false -}}{{- end -}}
+      {{- end -}}
+      {{- end -}}
+      {{- if $keep -}}
+      {{- if hasKey $cost "cache_read" -}}
+        {{- $fv := $cost.cache_read -}}{{- $mv := 0 -}}{{- if hasKey $mc "cache_read" -}}{{- $mv = $mc.cache_read -}}{{- end -}}
+        {{- if or (and (not $fv) (not $mv)) (and $fv $mv (eq (printf "%v" $fv) (printf "%v" $mv))) -}}{{- /* match */ -}}{{- else -}}{{- $keep = false -}}{{- end -}}
+      {{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $keep = false -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* Open weights filter */ -}}
+  {{- if $keep -}}
+  {{- if hasKey $filter "open_weights" -}}
+    {{- if hasKey $m "open_weights" -}}
+      {{- if ne $filter.open_weights $m.open_weights -}}{{- $keep = false -}}{{- end -}}
+    {{- else -}}
+      {{- $keep = false -}}
+    {{- end -}}
+  {{- end -}}
+  {{- end -}}
+
+  {{- /* Modalities filter — model must have all required input/output modalities */ -}}
+  {{- if $keep -}}
+  {{- if hasKey $modalities "input" -}}
+    {{- if hasKey $m "modalities" -}}
+      {{- $mm := $m.modalities -}}
+      {{- if hasKey $mm "input" -}}
+        {{- range $req := $modalities.input -}}
+          {{- $found := false -}}
+          {{- range $mod := $mm.input -}}
+            {{- if eq $req $mod -}}{{- $found = true -}}{{- end -}}
+          {{- end -}}
+          {{- if not $found -}}{{- $keep = false -}}{{- end -}}
+        {{- end -}}
+      {{- else -}}{{- $keep = false -}}{{- end -}}
+    {{- else -}}{{- $keep = false -}}{{- end -}}
+  {{- end -}}
+  {{- end -}}
+
+  {{- if $keep -}}
+  {{- if hasKey $modalities "output" -}}
+    {{- if hasKey $m "modalities" -}}
+      {{- $mm := $m.modalities -}}
+      {{- if hasKey $mm "output" -}}
+        {{- range $req := $modalities.output -}}
+          {{- $found := false -}}
+          {{- range $mod := $mm.output -}}
+            {{- if eq $req $mod -}}{{- $found = true -}}{{- end -}}
+          {{- end -}}
+          {{- if not $found -}}{{- $keep = false -}}{{- end -}}
+        {{- end -}}
+      {{- else -}}{{- $keep = false -}}{{- end -}}
+    {{- else -}}{{- $keep = false -}}{{- end -}}
+  {{- end -}}
+  {{- end -}}
+
+  {{- if $keep -}}
+    {{- $name := $m.name -}}
+    {{- if not $name -}}{{- $name = $id -}}{{- end -}}
+    {{- $_ := set $result $id $name -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $result -}}
