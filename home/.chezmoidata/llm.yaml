@@ -29,7 +29,7 @@ llm:
         field: gemini-api-key
 
     openrouter:
-      base_url: "https://openrouter.ai"
+      base_url: "https://openrouter.ai/api"
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
@@ -90,8 +90,8 @@ llm:
           auth_field: default-auth-token
         ollama:
           provider: ollama
-        opencode:
-          provider: opencode
+        openrouter:
+          provider: openrouter
 
     claude-code:
       model: opusplan
