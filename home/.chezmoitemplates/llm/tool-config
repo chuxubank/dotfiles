@@ -101,14 +101,27 @@
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
   -}}
-  {{- if hasKey $ref "data_set" }}
-    {{- $dsName := $ref.data_set -}}
+  {{- /* Resolve data_set: alias-level takes precedence, fall back to provider-level */ -}}
+  {{- $dsName := "" -}}
+  {{- if hasKey $ref "data_set" -}}
+    {{- $dsName = $ref.data_set -}}
+  {{- else if hasKey $prov "data_set" -}}
+    {{- $dsName = $prov.data_set -}}
+  {{- end -}}
+
+  {{- if $dsName -}}
     {{- $ds := index $ctx.llm.data_sets $dsName -}}
     {{- if $ds -}}
-      {{- $allModels := includeTemplate "llm/fetch-data-set" $ds | fromJson -}}
+      {{- $dsFetchArgs := dict "type" $ds.type "base_url" $ds.base_url -}}
+      {{- if hasKey $prov "provider" -}}{{- $_ := set $dsFetchArgs "provider" $prov.provider -}}{{- end -}}
+      {{- $allModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
       {{- $filterArg := dict "models" $allModels -}}
-      {{- if hasKey $ref "filter" }}{{- $_ := set $filterArg "filter" $ref.filter -}}{{- end -}}
-      {{- if hasKey $ref "modalities" }}{{- $_ := set $filterArg "modalities" $ref.modalities -}}{{- end -}}
+      {{- $flt := dict -}}
+      {{- if hasKey $ref "filter" -}}{{- $flt = $ref.filter -}}{{- else if hasKey $prov "filter" -}}{{- $flt = $prov.filter -}}{{- end -}}
+      {{- $_ := set $filterArg "filter" $flt -}}
+      {{- $mods := dict -}}
+      {{- if hasKey $ref "modalities" -}}{{- $mods = $ref.modalities -}}{{- else if hasKey $prov "modalities" -}}{{- $mods = $prov.modalities -}}{{- end -}}
+      {{- $_ := set $filterArg "modalities" $mods -}}
       {{- $filtered := includeTemplate "llm/filter-models" $filterArg | fromJson -}}
       {{- if gt (len $filtered) 0 -}}
         {{- $_ := set $resolved "models" $filtered -}}

@@ -60,7 +60,14 @@ llm:
           roles: ["llm"]
 
     opencode:
-      type: opencode
+      data_set: models-dev
+      provider: opencode
+      filter:
+        cost:
+          input: 0
+          output: 0
+      modalities:
+        input: ["text", "image"]
 
   # ── Tool defaults ──────────────────────────────────────────────────
   # Per-tool model selection.  `providers` overrides only the auth
@@ -98,15 +105,7 @@ llm:
         openrouter:
           provider: openrouter
         opencode:
-          data_set: models-dev
           provider: opencode
-          filter:
-            cost:
-              input: 0
-              output: 0
-              cache_read: 0
-          modalities:
-            input: ["text", "image"]
 
     claude-code:
       model: opusplan
