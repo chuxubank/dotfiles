@@ -21,6 +21,8 @@ plum = ".config/plum"
 raycast = ".config/raycast"
 sdkman = ".sdkman"
 
+models-dev-api = ".cache/llm/models-dev-api.json"
+
 rime = ".local/share/rime"
 rime-sync = "Nutstore/RimeSync"
 squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"

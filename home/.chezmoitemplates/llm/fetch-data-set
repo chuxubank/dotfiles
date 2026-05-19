@@ -1,16 +1,28 @@
 {{- /* llm/fetch-data-set — Fetch raw model data from a data set.
    Works like fetch-models but returns full model metadata from a data catalog.
-   Input: dict with "type", "base_url" (from llm.data_sets.<name>)
+   Input: dict with "type", "file" or "base_url" (from llm.data_sets.<name>)
           Optional "provider" — only return models from this source provider
    Output: flat JSON dict of { model_id: { name, cost, open_weights, modalities, ... } }
    Returns empty dict on failure.
 */ -}}
 {{- $models := dict -}}
-{{- if .base_url -}}
-  {{- $fetchURL := printf "%s/api.json" .base_url -}}
-  {{- $raw := output "sh" "-c" (printf "curl -sfL --max-time 3 '%s' 2>/dev/null || echo '{}'" $fetchURL) | trim | fromJson -}}
-  {{- $targetProv := .provider -}}
-  {{- if eq .type "models-dev" -}}
+{{- $file := "" -}}
+{{- if hasKey . "file" -}}{{- $file = .file -}}{{- end -}}
+{{- $baseURL := "" -}}
+{{- if hasKey . "base_url" -}}{{- $baseURL = .base_url -}}{{- end -}}
+{{- if or $file $baseURL -}}
+  {{- $raw := dict -}}
+  {{- if $file -}}
+    {{- $raw = output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $file $file) | trim | fromJson -}}
+  {{- else -}}
+    {{- $fetchURL := printf "%s/api.json" $baseURL -}}
+    {{- $raw = output "sh" "-c" (printf "curl -sfL --max-time 3 '%s' 2>/dev/null || echo '{}'" $fetchURL) | trim | fromJson -}}
+  {{- end -}}
+  {{- $targetProv := "" -}}
+  {{- if hasKey . "provider" -}}{{- $targetProv = .provider -}}{{- end -}}
+  {{- $type := "" -}}
+  {{- if hasKey . "type" -}}{{- $type = .type -}}{{- end -}}
+  {{- if eq $type "models-dev" -}}
     {{- /* models.dev response: { provider_id: { id, name, api, models: { model_id: { name, cost, ... } } } } */ -}}
     {{- range $pid, $p := $raw -}}
       {{- if or (not $targetProv) (eq $pid $targetProv) -}}

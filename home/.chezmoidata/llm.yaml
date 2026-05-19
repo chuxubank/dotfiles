@@ -3,7 +3,7 @@ llm:
   data_sets:
     models-dev:
       type: models-dev
-      base_url: "https://models.dev"
+      file_path: models-dev-api
 
   # ── Providers ───────────────────────────────────────────────────────
   # Each provider = one API endpoint (base_url + default auth).

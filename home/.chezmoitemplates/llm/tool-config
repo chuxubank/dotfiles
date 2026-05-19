@@ -112,7 +112,16 @@
   {{- if $dsName -}}
     {{- $ds := index $ctx.llm.data_sets $dsName -}}
     {{- if $ds -}}
-      {{- $dsFetchArgs := dict "type" $ds.type "base_url" $ds.base_url -}}
+      {{- $dsFetchArgs := dict "type" $ds.type "base_url" (default "" (index $ds "base_url")) -}}
+      {{- if hasKey $ds "file_path" -}}
+        {{- $dsFile := index $ctx.path $ds.file_path -}}
+        {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath $ctx.chezmoi.homeDir $dsFile -}}{{- end -}}
+        {{- $_ := set $dsFetchArgs "file" $dsFile -}}
+      {{- else if hasKey $ds "file" -}}
+        {{- $dsFile := $ds.file -}}
+        {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath $ctx.chezmoi.homeDir $dsFile -}}{{- end -}}
+        {{- $_ := set $dsFetchArgs "file" $dsFile -}}
+      {{- end -}}
       {{- if hasKey $prov "provider" -}}{{- $_ := set $dsFetchArgs "provider" $prov.provider -}}{{- end -}}
       {{- $allModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
       {{- $filterArg := dict "models" $allModels -}}

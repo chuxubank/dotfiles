@@ -17,6 +17,11 @@
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
 
+[{{ index .path "models-dev-api" | quote }}]
+    type = "file"
+    url = "https://models.dev/api.json"
+    refreshPeriod = "24h"
+
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
 ["bin/android"]
     type = "file"
