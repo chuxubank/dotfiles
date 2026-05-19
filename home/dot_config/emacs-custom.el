@@ -53,9 +53,10 @@
                 swift-ts-mode system-packages telega templ-ts-mode
                 templatel toc-mode transpose-frame treemacs-magit
                 treemacs-nerd-icons treemacs-tab-bar treesit-fold
-                tributary ultra-scroll undo-fu-session uv-mode valign
-                vbs-repl vbscript-mode vertico-prescient video-trimmer
-                visual-basic-mode vterm-toggle vundo winum yaml-pro))
+                treesit-langs tributary ultra-scroll undo-fu-session
+                uv-mode valign vbs-repl vbscript-mode
+                vertico-prescient video-trimmer visual-basic-mode
+                vterm-toggle vundo winum yaml-pro))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces
