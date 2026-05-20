@@ -115,8 +115,19 @@ llm:
           auth_field: cc-auth-token
 
     codex:
-      model: gpt-5.5
+      model:
+        - iv/gpt-5.5
+        - openai/gpt-5.5
+        - openrouter/openai/gpt-oss-120b:free
       reasoning_effort: medium
+      providers:
+        iv:
+          provider: iv
+          auth_field: codex-auth-token
+        openai:
+          provider: openai
+        openrouter:
+          provider: openrouter
 
     aider:
       model: gemini-2.5-pro

@@ -30,6 +30,39 @@
 {{- end }}
 
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $model := $cfg.model -}}
+{{- $modelProvider := "" -}}
+{{- $modelParts := splitList "/" $model -}}
+{{- if and (gt (len $modelParts) 1) (hasKey $cfg.providers (index $modelParts 0)) -}}
+  {{- $modelProvider = index $modelParts 0 -}}
+  {{- $model = join "/" (slice $modelParts 1) -}}
+{{- end -}}
+{{- if eq $modelProvider "openai" -}}{{- $modelProvider = "" -}}{{- end -}}
+{{- $modelProviders := dict -}}
+{{- range $alias, $ep := $cfg.providers }}
+  {{- if eq $alias "openai" }}{{ continue }}{{ end -}}
+  {{- $baseURL := trimSuffix "/" $ep.base_url -}}
+  {{- if and $baseURL (not (hasSuffix "/v1" $baseURL)) -}}
+    {{- $baseURL = printf "%s/v1" $baseURL -}}
+  {{- end -}}
+  {{- $provider := dict
+    "name" $alias
+    "base_url" $baseURL
+  -}}
+  {{- if $ep.auth_path }}
+    {{- $args := list $ep.auth_path -}}
+    {{- if $ep.auth_field }}
+      {{- $args = list $ep.auth_path $ep.auth_field -}}
+    {{- end }}
+    {{- $_ := set $provider "auth" (dict
+      "command" (joinPath $.chezmoi.homeDir "bin" "pass-field")
+      "args" $args
+      "timeout_ms" 5000
+      "refresh_interval_ms" 300000
+    ) -}}
+  {{- end }}
+  {{- $_ := set $modelProviders $alias $provider -}}
+{{- end }}
 
 {{- $codexConfigPath := joinPath .chezmoi.homeDir ".codex" "config.toml" -}}
 {{- $existingCodexConfig := dict -}}
@@ -42,7 +75,7 @@
 {{- end -}}
 
 {{- $config := dict
-  "model" $cfg.model
+  "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
   "projects" $projects
@@ -57,6 +90,8 @@
     )
   )
 -}}
+{{- if $modelProvider -}}{{- $_ := set $config "model_provider" $modelProvider -}}{{- end -}}
+{{- if gt (len $modelProviders) 0 -}}{{- $_ := set $config "model_providers" $modelProviders -}}{{- end -}}
 {{ $config | toToml }}
 
 [plugins]

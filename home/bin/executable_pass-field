@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  printf 'usage: %s <pass-name> [field]\n' "${0##*/}" >&2
+  exit 2
+}
+
+[ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
+
+pass_name=$1
+field=${2-}
+
+if [ -z "$field" ]; then
+  pass show "$pass_name" | sed -n '1p'
+  exit
+fi
+
+pass show "$pass_name" | awk -v key="$field" '
+  index($0, key ": ") == 1 {
+    sub("^[^:]+: ", "")
+    print
+    found = 1
+    exit
+  }
+  END { if (!found) exit 1 }
+'

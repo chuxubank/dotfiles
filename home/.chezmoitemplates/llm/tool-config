@@ -8,6 +8,8 @@
            name      — provider key in llm.providers
            base_url  — string
            auth_key  — resolved API key (with optional field override)
+           auth_path — pass path used for auth (if set)
+           auth_field — pass field used for auth (if set)
 
        Provider reference formats:
          Short:  providers: [iv, ollama]        — alias = provider name, default auth
@@ -80,14 +82,18 @@
 
   {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
   {{- $authKey := "" -}}
+  {{- $authPath := "" -}}
+  {{- $authField := "" -}}
   {{- if hasKey $prov "auth" }}
     {{- $auth := $prov.auth -}}
+    {{- $authPath = $auth.path -}}
     {{- $field := "" -}}
     {{- if hasKey $ref "auth_field" }}
       {{- $field = $ref.auth_field -}}
     {{- else if hasKey $auth "field" }}
       {{- $field = $auth.field -}}
     {{- end }}
+    {{- $authField = $field -}}
     {{- if $field }}
       {{- $authKey = index (passFields $auth.path) $field -}}
     {{- else }}
@@ -100,6 +106,8 @@
     "type"     (default "openai" (index $prov "type"))
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
+    "auth_path" $authPath
+    "auth_field" $authField
   -}}
   {{- /* Resolve data_set: alias-level takes precedence, fall back to provider-level */ -}}
   {{- $dsName := "" -}}
