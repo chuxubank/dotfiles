@@ -75,11 +75,12 @@
 {{- end -}}
 
 {{- $config := dict
+  "marketplaces" $marketplaces
   "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
+  "personality" "pragmatic"
   "projects" $projects
-  "marketplaces" $marketplaces
   "features" (dict
     "unified_exec" true
     "shell_snapshot" true
@@ -106,11 +107,11 @@
   [plugins."spreadsheets@openai-primary-runtime"]
     enabled = true
 
+[plugins."test-android-apps@openai-curated"]
+enabled = true
+
 [plugins."browser@openai-bundled"]
 enabled = true
 
 [plugins."chrome@openai-bundled"]
-enabled = true
-
-[plugins."test-android-apps@openai-curated"]
 enabled = true
