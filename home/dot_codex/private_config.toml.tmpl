@@ -1,45 +1,4 @@
-{{- /* https://developers.openai.com/codex/mcp/ */ -}}
-
-{{- /* Build MCP servers map */ -}}
-{{- $servers := dict -}}
-{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "codex") .) | fromJson -}}
-{{- range $s := $all }}
-  {{- $server := dict -}}
-  {{- /* Support only stdio and http */ -}}
-  {{- if eq $s.type "stdio" }}
-    {{- $_ := set $server "command" $s.cmd -}}
-    {{- if $s.args }}
-      {{- $_ := set $server "args" $s.args -}}
-    {{- end }}
-  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
-    {{- $_ := set $server "url" $s.uri -}}
-    {{- if hasKey $s "bearer_token_env_var" }}
-      {{- $_ := set $server "bearer_token_env_var" $s.bearer_token_env_var -}}
-    {{- end }}
-    {{- if hasKey $s "headers" }}
-      {{- $_ := set $server "http_headers" $s.headers -}}
-    {{- end }}
-    {{- if hasKey $s "env_headers" }}
-      {{- $_ := set $server "env_http_headers" $s.env_headers -}}
-    {{- end }}
-  {{- else }}
-    {{- continue -}}
-  {{- end }}
-
-  {{- if gt $s.tool_timeout 0 }}
-    {{- $_ := set $server "tool_timeout_sec" $s.tool_timeout -}}
-  {{- end }}
-  {{- if gt $s.timeout 0 }}
-    {{- $_ := set $server "startup_timeout_sec" $s.timeout -}}
-  {{- end }}
-  {{- $_ := set $server "enabled" $s.enabled -}}
-
-  {{- if gt (len $s.envs) 0 }}
-    {{- $_ := set $server "env" $s.envs -}}
-  {{- end }}
-
-  {{- $_ := set $servers $s.name_snake $server -}}
-{{- end }}
+{{- $servers := includeTemplate "mcp/codex" . | fromJson -}}
 
 {{- /* Projects trust map */ -}}
 {{- $projects := dict -}}
