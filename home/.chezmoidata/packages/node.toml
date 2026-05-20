@@ -6,7 +6,6 @@ global = [
   "@blowmage/cursor-agent-acp",
   "@github/copilot",
   "@github/copilot-language-server",
-  "@google/gemini-cli",
   "@mariozechner/pi-coding-agent",
   "@mermaid-js/mermaid-cli",
   "@modelcontextprotocol/inspector",

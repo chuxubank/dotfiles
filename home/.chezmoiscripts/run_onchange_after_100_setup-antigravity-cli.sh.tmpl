@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "{{ template "week" . }} 󰯁 Setup Antigravity CLI"
+
+{{- if not (lookPath "agy") }}
+{{- if eq .chezmoi.os "windows" }}
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://antigravity.google/cli/install.ps1 | iex"
+{{- else }}
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+{{- end }}
+{{- end }}
