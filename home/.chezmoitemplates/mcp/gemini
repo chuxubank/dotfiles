@@ -1,4 +1,4 @@
-{{- /* https://gemini.google/advanced/aistudio/mcp */ -}}
+{{- /* https://antigravity.google/docs/mcp */ -}}
 {{- $servers := dict -}}
 {{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "gemini") $) | fromJson -}}
 {{- range $s := $all }}
