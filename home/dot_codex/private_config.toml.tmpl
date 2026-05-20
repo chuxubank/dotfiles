@@ -82,23 +82,12 @@
   {{- $marketplaces = $existingCodexConfig.marketplaces -}}
 {{- end -}}
 
-{{- $plugins := dict
-  "browser-use@openai-bundled" (dict "enabled" true)
-  "browser@openai-bundled" (dict "enabled" true)
-  "chrome@openai-bundled" (dict "enabled" true)
-  "computer-use@openai-bundled" (dict "enabled" true)
-  "documents@openai-primary-runtime" (dict "enabled" true)
-  "presentations@openai-primary-runtime" (dict "enabled" true)
-  "spreadsheets@openai-primary-runtime" (dict "enabled" true)
--}}
-
 {{- $config := dict
   "model" $cfg.model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
   "projects" $projects
   "marketplaces" $marketplaces
-  "plugins" $plugins
   "features" (dict
     "unified_exec" true
     "shell_snapshot" true
@@ -110,3 +99,21 @@
   )
 -}}
 {{ $config | toToml }}
+
+[plugins]
+  [plugins."browser-use@openai-bundled"]
+    enabled = true
+  [plugins."computer-use@openai-bundled"]
+    enabled = true
+  [plugins."documents@openai-primary-runtime"]
+    enabled = true
+  [plugins."presentations@openai-primary-runtime"]
+    enabled = true
+  [plugins."spreadsheets@openai-primary-runtime"]
+    enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
