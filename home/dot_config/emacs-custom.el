@@ -15,7 +15,9 @@
                 bbdb beacon beancount benchmark-init bing-dict
                 breadcrumb buck caddyfile-mode cape cdlatex
                 chatgpt-shell chezmoi citar-embark citar-org-roam
-                cmake-font-lock code-review codeium consult-gh-embark
+                cmake-font-lock code-review codeium compile-multi
+                compile-multi-embark compile-multi-nerd-icons
+                consult-compile-multi consult-gh-embark
                 consult-gh-forge copilot corfu-prescient dart-mode
                 dashboard deft delight devdocs diagram-preview diff-hl
                 dired-rsync-transient dirvish docker
