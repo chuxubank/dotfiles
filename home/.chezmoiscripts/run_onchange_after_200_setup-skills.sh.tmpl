@@ -26,10 +26,9 @@ installed=($(skills list -g --json | jq -r '.[].name'))
 
 # {{ $skill.source }}
   {{- if kindIs "slice" $skill.name }}
-if [[ {{- range $i, $name := $skill.name }}{{ if $i }} ||{{ end }} ! ${installed[(Ie){{ $name | quote }}]}
-  {{- end }} ]]; then
+if (( {{- range $i, $name := $skill.name }}{{ if $i }} || {{ end }} ${installed[(Ie){{ $name | quote }}]} == 0{{- end }} )); then
   {{- else }}
-if [[ ! ${installed[(Ie){{ $skill.name | quote }}]} ]]; then
+if (( ${installed[(Ie){{ $skill.name | quote }}]} == 0 )); then
   {{- end }}
   skills add {{ $skill.source }} \
     --global --yes \
