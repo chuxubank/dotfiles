@@ -87,6 +87,7 @@ llm:
         - opencode/deepseek-v4-flash-free
       small_model:
         - iv/deepseek-v4-flash
+        - opencode/deepseek-v4-flash-free
         - openrouter/openai/gpt-oss-120b:free
       providers:
         openai:
