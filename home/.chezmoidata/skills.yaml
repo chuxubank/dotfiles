@@ -25,20 +25,26 @@ skills:
       source: openai/skills
       when:
         enabled:
-          tool: ["codex"]
+          tool: codex
 
     - name: feishu-projects
       source: chuxubank/skills
       when:
         enabled:
-          host_env: "iv"
+          host_env: iv
 
     - name:
         - agp-9-upgrade
         - edge-to-edge
         - navigation-3
         - r8-analyzer
-      source: "android/skills"
+      source: android/skills
+
+    - name:
+        - kotlin-tooling-agp9-migration
+        - kotlin-tooling-cocoapods-spm-migration
+        - kotlin-tooling-java-to-kotlin
+      source: Kotlin/kotlin-agent-skills
 
     - name:
         - lark-approval
@@ -69,4 +75,4 @@ skills:
       source: larksuite/cli
       when:
         enabled:
-          host_env: "iv"
+          host_env: iv
