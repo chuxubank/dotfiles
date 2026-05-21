@@ -1,8 +1,7 @@
 {
   "agent_servers": {
-    "OpenCode": {
-      "command": "opencode",
-      "args": ["acp"]
+    "opencode": {
+      "type": "registry"
     }
   },
   "project_panel": {
