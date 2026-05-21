@@ -1,10 +1,10 @@
 {{- if ne .host_env "ci" -}}
-["Developer/XingZhi/RobotDroid"]
+[{{ joinPath (index .path "xz") "RobotDroid" | quote }}]
     type = "git-repo"
     url = "https://github.com/OpenXingZhi/RobotDroid"
     refreshPeriod = "48h"
 
-["Developer/XingZhi/RobotDroidConfig"]
+[{{ joinPath (index .path "xz") "RobotDroidConfig" | quote }}]
     type = "git-repo"
     url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
     refreshPeriod = "48h"

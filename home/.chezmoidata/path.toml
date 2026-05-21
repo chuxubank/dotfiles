@@ -11,6 +11,7 @@ nutstore = "Nutstore"
 iv = "Developer/IV"
 aa = "Developer/AA"
 asahiart = "Developer/AsahiArt"
+xz = "Developer/XingZhi"
 
 bun = ".bun"
 emacs = ".config/emacs"

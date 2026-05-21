@@ -18,7 +18,7 @@
 {{- range $k := $trustedKeys }}
   {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) $trustedLevel -}}
 {{- end }}
-{{- $trustedTreeKeys := list "iv" "aa" "asahiart" -}}
+{{- $trustedTreeKeys := list "iv" "aa" "asahiart" "xz" -}}
 {{- range $k := $trustedTreeKeys }}
   {{- $root := joinPath $.chezmoi.homeDir (index $.path $k) -}}
   {{- $dirs := output "sh" "-c" "if [ -d \"$1\" ]; then find \"$1\" -mindepth 1 -maxdepth 1 -type d -print; fi" "sh" $root -}}
