@@ -62,7 +62,7 @@ mcp:
         Make project management more convenient.
       when:
         enabled:
-          host_env: ["iv"]
+          host_env: iv
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
@@ -73,14 +73,18 @@ mcp:
         type: http
         uri: http://localhost:3845/mcp
         timeout: 20
+      when:
+        enabled:
+          host_env: iv
     - name: Figma Remote
       description: Remote Figma MCP
-      when:
-        disabled: true
       execution:
         type: http
         uri: https://mcp.figma.com/mcp
         timeout: 20
+      when:
+        disabled:
+          host_env: iv
     - name: GitHub
       description: >
         The GitHub MCP Server connects AI tools directly to GitHub's
@@ -135,6 +139,9 @@ mcp:
         type: sse
         uri: http://localhost:64342/sse
         timeout: 20
+      when:
+        enabled:
+          host_env: iv
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
       when:
