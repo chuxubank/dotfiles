@@ -1,0 +1,94 @@
+{{- /* https://agents.craft.do/docs/reference/config/config-file */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "craft-agents") .) | fromJson -}}
+{{- $configPath := joinPath .chezmoi.homeDir ".craft-agent" "config.json" -}}
+{{- $existing := dict -}}
+{{- if stat $configPath -}}
+  {{- $existing = output "cat" $configPath | fromJson -}}
+{{- end -}}
+
+{{- $connections := list -}}
+{{- range $alias, $ep := $cfg.providers -}}
+  {{- $createdAt := 0 -}}
+  {{- if hasKey $existing "llmConnections" -}}
+    {{- range $old := $existing.llmConnections -}}
+      {{- if eq $old.slug $alias -}}{{- $createdAt = $old.createdAt -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and (eq $createdAt 0) (hasKey $existing "workspaces") (gt (len $existing.workspaces) 0) -}}
+    {{- $createdAt = (index $existing.workspaces 0).createdAt -}}
+  {{- end -}}
+  {{- $baseURL := trimSuffix "/" $ep.base_url -}}
+  {{- $isPiCompat := eq $ep.type "ollama" -}}
+  {{- $isAnthropicCompat := eq $ep.type "anthropic" -}}
+  {{- $models := list -}}
+  {{- if hasKey $ep "models" -}}
+    {{- if eq (kindOf $ep.models) "slice" -}}
+      {{- range $id := $ep.models -}}
+        {{- $models = append $models $id -}}
+      {{- end -}}
+    {{- else if ne (kindOf $ep.models) "bool" -}}
+      {{- range $id, $_ := $ep.models -}}
+        {{- $models = append $models $id -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
+    {{- range $id, $_ := $fetched -}}
+      {{- $models = append $models $id -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $model := "" -}}
+  {{- $prefix := printf "%s/" $alias -}}
+  {{- if hasPrefix $prefix $cfg.model -}}
+    {{- $model = trimPrefix $prefix $cfg.model -}}
+  {{- else if gt (len $models) 0 -}}
+    {{- $model = index $models 0 -}}
+  {{- end -}}
+
+  {{- $conn := dict
+    "slug" $alias
+    "name" (default $alias $ep.display_name)
+    "createdAt" $createdAt
+  -}}
+
+  {{- if $isPiCompat -}}
+    {{- $_ := set $conn "providerType" "pi_compat" -}}
+    {{- $_ := set $conn "authType" "none" -}}
+    {{- if $baseURL -}}{{- $_ := set $conn "baseUrl" $baseURL -}}{{- end -}}
+    {{- $_ := set $conn "customEndpoint" (dict "api" "openai-completions") -}}
+  {{- else if $isAnthropicCompat -}}
+    {{- $_ := set $conn "providerType" "anthropic_compat" -}}
+    {{- if $ep.auth_path -}}
+      {{- $_ := set $conn "authType" "api_key_with_endpoint" -}}
+    {{- else -}}
+      {{- $_ := set $conn "authType" "none" -}}
+    {{- end -}}
+    {{- if $baseURL -}}{{- $_ := set $conn "baseUrl" $baseURL -}}{{- end -}}
+    {{- $_ := set $conn "customEndpoint" (dict "api" "anthropic-messages") -}}
+  {{- else -}}
+    {{- $_ := set $conn "providerType" "openai_compat" -}}
+    {{- if $ep.auth_path -}}
+      {{- $_ := set $conn "authType" "api_key_with_endpoint" -}}
+    {{- else -}}
+      {{- $_ := set $conn "authType" "none" -}}
+    {{- end -}}
+    {{- if $baseURL -}}{{- $_ := set $conn "baseUrl" $baseURL -}}{{- end -}}
+    {{- $_ := set $conn "customEndpoint" (dict "api" "openai-completions") -}}
+  {{- end -}}
+
+  {{- if $model -}}{{- $_ := set $conn "defaultModel" $model -}}{{- end -}}
+  {{- if gt (len $models) 0 -}}{{- $_ := set $conn "models" $models -}}{{- end -}}
+  {{- $connections = append $connections $conn -}}
+{{- end -}}
+
+{{- $_ := set $existing "llmConnections" $connections -}}
+{{- if $cfg.model -}}
+  {{- $defaultConnection := index (splitList "/" $cfg.model) 0 -}}
+  {{- if hasKey $cfg.providers $defaultConnection -}}
+    {{- $_ := set $existing "defaultLlmConnection" $defaultConnection -}}
+  {{- end -}}
+{{- end -}}
+{{- if not (hasKey $existing "workspaces") -}}{{- $_ := set $existing "workspaces" list -}}{{- end -}}
+{{- if not (hasKey $existing "activeWorkspaceId") -}}{{- $_ := set $existing "activeWorkspaceId" nil -}}{{- end -}}
+{{- if not (hasKey $existing "activeSessionId") -}}{{- $_ := set $existing "activeSessionId" nil -}}{{- end -}}
+{{ $existing | toPrettyJson }}

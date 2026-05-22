@@ -12,11 +12,13 @@
            auth_field — pass field used for auth (if set)
 
        Provider reference formats:
-         Short:  providers: [iv, ollama]        — alias = provider name, default auth
-         Map:    providers:
-                   anthropic:                    — alias differs from provider name
-                     provider: iv
-                     auth_field: cc-auth-token   — optional auth override
+          Short:  providers: [iv, ollama]        — alias = provider name, default auth
+          Map:    providers:
+                    anthropic:                    — alias differs from provider name
+                      provider: iv
+                      name: Anthropic             — optional display name override
+                      type: anthropic             — optional type override
+                      auth_field: cc-auth-token   — optional auth override
 */ -}}
 {{- $tool := .tool -}}
 {{- $toolCfg := index .llm.tools $tool -}}
@@ -101,9 +103,18 @@
     {{- end }}
   {{- end }}
 
+  {{- $displayName := $alias -}}
+  {{- if hasKey $prov "name" -}}
+    {{- $displayName = $prov.name -}}
+  {{- end -}}
+  {{- if hasKey $ref "name" -}}
+    {{- $displayName = $ref.name -}}
+  {{- end -}}
+
   {{- $resolved := dict
     "name"     $provName
-    "type"     (default "openai" (index $prov "type"))
+    "display_name" $displayName
+    "type"     (default (default "openai" (index $prov "type")) (index $ref "type"))
     "base_url" (default "" (index $prov "base_url"))
     "auth_key" $authKey
     "auth_path" $authPath

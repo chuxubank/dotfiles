@@ -10,10 +10,11 @@ llm:
   # Tools can override auth.field to use a different API key from the
   # same pass path.
   #
-  # type: openai (default) | ollama | gemini
+  # type: openai (default) | anthropic | ollama | gemini
   #   Controls model list endpoint path and response parsing.
   providers:
     iv:
+      name: IV
       base_url: "http://llm.invalley.co"
       auth:
         path: Work/IV/LLM
@@ -22,12 +23,14 @@ llm:
           host_env: ["iv"]
 
     openai:
+      name: OpenAI
       base_url: "https://api.openai.com"
       auth:
         path: Personal/Tech/AI/OpenAI
         field: api-key
 
     google:
+      name: Google
       type: gemini
       base_url: "https://generativelanguage.googleapis.com"
       auth:
@@ -35,12 +38,14 @@ llm:
         field: gemini-api-key
 
     openrouter:
+      name: OpenRouter
       base_url: "https://openrouter.ai/api"
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
 
     llama:
+      name: Ollama
       base_url: "http://localhost:8080"
       when:
         enabled:
@@ -78,6 +83,7 @@ llm:
   #   Map:    providers:
   #             anthropic:
   #               provider: iv
+  #               type: anthropic
   #               auth_field: cc-auth-token
   tools:
     opencode:
@@ -96,6 +102,7 @@ llm:
           auth_field: codex-auth-token
         anthropic:
           provider: iv
+          type: anthropic
           models: false
           auth_field: cc-auth-token
         iv:
@@ -113,6 +120,7 @@ llm:
       providers:
         anthropic:
           provider: iv
+          type: anthropic
           auth_field: cc-auth-token
 
     codex:
@@ -140,3 +148,26 @@ llm:
     goose:
       model: z-ai/glm-4.5-air:free
       providers: [openrouter]
+
+    craft-agents:
+      model:
+        - openai/gpt-5.5
+        - anthropic/claude-opus-4-7
+        - opencode/deepseek-v4-flash-free
+      providers:
+        openai:
+          name: OpenAI (IV)
+          provider: iv
+          auth_field: codex-auth-token
+        anthropic:
+          name: Anthropic (IV)
+          provider: iv
+          type: anthropic
+          auth_field: cc-auth-token
+        iv:
+          provider: iv
+          auth_field: default-auth-token
+        openrouter:
+          provider: openrouter
+        ollama:
+          provider: ollama
