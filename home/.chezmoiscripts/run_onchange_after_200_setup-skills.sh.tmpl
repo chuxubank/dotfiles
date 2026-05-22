@@ -18,7 +18,22 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
 {{- end }}
 
 declared=({{ range $i, $name := $declared }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }})
-installed=($(skills list -g --json | jq -r '.[].name'))
+installed_json=$(skills list -g --json)
+skills_state_dir=$(mktemp -d)
+trap 'rm -rf "$skills_state_dir"' EXIT
+
+skill_has_agent() {
+  local skill_name="$1"
+  local agent_slug="$2"
+  local agent_state="$skills_state_dir/$agent_slug.json"
+
+  if [[ ! -f "$agent_state" ]]; then
+    skills list -g --json --agent "$agent_slug" > "$agent_state"
+  fi
+
+  jq -e --arg skill_name "$skill_name" 'any(.[]; .name == $skill_name)' \
+    >/dev/null < "$agent_state"
+}
 
 {{- range $skill := .skills.providers }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
@@ -26,9 +41,9 @@ installed=($(skills list -g --json | jq -r '.[].name'))
 
 # {{ $skill.source }}
   {{- if kindIs "slice" $skill.name }}
-if (( {{- range $i, $name := $skill.name }}{{ if $i }} || {{ end }} ${installed[(Ie){{ $name | quote }}]} == 0{{- end }} )); then
+if {{- range $nameIndex, $name := $skill.name }}{{ range $agentIndex, $agent := $agents }}{{ if or $nameIndex $agentIndex }} ||{{ end }} ! skill_has_agent {{ $name | quote }} {{ $agent | quote }}{{ end }}{{ end }}; then
   {{- else }}
-if (( ${installed[(Ie){{ $skill.name | quote }}]} == 0 )); then
+if {{- range $i, $agent := $agents }}{{ if $i }} ||{{ end }} ! skill_has_agent {{ $skill.name | quote }} {{ $agent | quote }}{{ end }}; then
   {{- end }}
   skills add {{ $skill.source }} \
     --global --yes \
@@ -45,7 +60,7 @@ fi
 {{- end }}
 
 # Uninstall skills not declared in config
-installed=($(skills list -g --json | jq -r '.[].name'))
+installed=($(jq -r '.[].name' <<<"$installed_json"))
 
 for name in "${installed[@]}"; do
   if (( ! ${declared[(Ie)$name]} )); then

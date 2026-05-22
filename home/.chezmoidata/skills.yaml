@@ -27,6 +27,15 @@ skills:
         enabled:
           tool: codex
 
+    - name: android-emulator-qa
+      source: openai/plugins/plugins/test-android-apps
+      when:
+        disabled:
+          tool: codex
+
+    - name: conventional-commit
+      source: github/awesome-copilot
+
     - name: feishu-projects
       source: chuxubank/skills
       when:

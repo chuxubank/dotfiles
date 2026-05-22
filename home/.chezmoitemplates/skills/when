@@ -12,10 +12,17 @@
     {{- $when := $skill.when -}}
     {{- if and (hasKey $when "enabled") (hasKey $when.enabled "tool") -}}
       {{- $agents = $when.enabled.tool -}}
+      {{- if not (kindIs "slice" $agents) -}}
+        {{- $agents = list $agents -}}
+      {{- end -}}
     {{- else if and (hasKey $when "disabled") (hasKey $when.disabled "tool") -}}
+      {{- $disabledTools := $when.disabled.tool -}}
+      {{- if not (kindIs "slice" $disabledTools) -}}
+        {{- $disabledTools = list $disabledTools -}}
+      {{- end -}}
       {{- $agents = list -}}
       {{- range $a := $allAgents -}}
-        {{- if not (has $a $when.disabled.tool) -}}
+        {{- if not (has $a $disabledTools) -}}
           {{- $agents = append $agents $a -}}
         {{- end -}}
       {{- end -}}
