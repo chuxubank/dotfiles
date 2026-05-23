@@ -96,10 +96,12 @@
       {{- $field = $auth.field -}}
     {{- end }}
     {{- $authField = $field -}}
-    {{- if $field }}
-      {{- $authKey = index (passFields $auth.path) $field -}}
-    {{- else }}
-      {{- $authKey = pass $auth.path -}}
+    {{- if ne $ctx.host_env "ci" }}
+      {{- if $field }}
+        {{- $authKey = index (passFields $auth.path) $field -}}
+      {{- else }}
+        {{- $authKey = pass $auth.path -}}
+      {{- end }}
     {{- end }}
   {{- end }}
 
