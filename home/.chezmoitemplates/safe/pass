@@ -1,0 +1,19 @@
+{{- /* safe/pass — Resolve a pass secret, skipping in CI.
+       Input: dict "path" <pass-path> "host_env" <host_env>
+              ["field" <field-name>] — single field value
+              ["asJson" <truthy>]    — return full passFields dict as JSON
+       Output:
+         - without asJson: password string (or empty in CI)
+         - with asJson:    full dict as JSON (or {} in CI)
+*/ -}}
+{{- if ne .host_env "ci" -}}
+  {{- if .asJson -}}
+    {{- passFields .path | toJson -}}
+  {{- else if and (hasKey . "field") .field -}}
+    {{- index (passFields .path) .field -}}
+  {{- else -}}
+    {{- pass .path -}}
+  {{- end -}}
+{{- else if .asJson -}}
+  {{- dict | toJson -}}
+{{- end -}}

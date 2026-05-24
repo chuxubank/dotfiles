@@ -96,13 +96,7 @@
       {{- $field = $auth.field -}}
     {{- end }}
     {{- $authField = $field -}}
-    {{- if ne $ctx.host_env "ci" }}
-      {{- if $field }}
-        {{- $authKey = index (passFields $auth.path) $field -}}
-      {{- else }}
-        {{- $authKey = pass $auth.path -}}
-      {{- end }}
-    {{- end }}
+    {{- $authKey = includeTemplate "safe/pass" (dict "path" $auth.path "field" $field "host_env" $ctx.host_env) -}}
   {{- end }}
 
   {{- $displayName := $alias -}}

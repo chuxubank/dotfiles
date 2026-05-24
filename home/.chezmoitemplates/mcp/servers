@@ -52,11 +52,7 @@
 
   {{- /* resolved envs */ -}}
   {{- if hasKey $exec "envs" }}
-    {{- if ne $.host_env "ci" }}
-      {{- $_ := set $s "envs" (includeTemplate "mcp/envs" $exec.envs | fromJson) -}}
-    {{- else }}
-      {{- $_ := set $s "envs" dict -}}
-    {{- end }}
+    {{- $_ := set $s "envs" (includeTemplate "mcp/envs" $exec.envs | fromJson) -}}
   {{- else }}
     {{- $_ := set $s "envs" dict -}}
   {{- end }}
