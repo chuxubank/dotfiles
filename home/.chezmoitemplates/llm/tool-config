@@ -96,7 +96,7 @@
       {{- $field = $auth.field -}}
     {{- end }}
     {{- $authField = $field -}}
-    {{- $authKey = includeTemplate "safe/pass" (dict "path" $auth.path "field" $field "host_env" $ctx.host_env) -}}
+    {{- $authKey = includeTemplate "safe/pass" (merge (dict "path" $auth.path "field" $field) .) -}}
   {{- end }}
 
   {{- $displayName := $alias -}}

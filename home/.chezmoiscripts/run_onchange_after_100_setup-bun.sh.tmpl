@@ -78,7 +78,7 @@ bunx puppeteer browsers install chrome-headless-shell
 
 {{- if lookPath "ctx7" }}
 ctx7 setup --cli --claude --cursor --universal --opencode --codex --gemini \
-  --api-key {{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/AI/Context7" "field" "api-key" "host_env" .host_env) }}
+  --api-key {{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/Context7" "field" "api-key") .) }}
 {{- end }}
 
 {{- if lookPath "openspec" }}

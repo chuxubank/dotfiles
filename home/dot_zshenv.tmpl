@@ -54,9 +54,9 @@ if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
 fi
 
 # API-KEY
-export OPENAI_API_KEY="{{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/AI/OpenAI" "field" "api-key" "host_env" .host_env) }}"
-export GEMINI_API_KEY="{{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/Google" "field" "gemini-api-key" "host_env" .host_env) }}"
-export OPENROUTER_API_KEY="{{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key" "host_env" .host_env) }}"
+export OPENAI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenAI" "field" "api-key") .) }}"
+export GEMINI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Google" "field" "gemini-api-key") .) }}"
+export OPENROUTER_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key") .) }}"
 
 # Beancount
 export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount"

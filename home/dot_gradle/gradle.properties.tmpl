@@ -1,7 +1,7 @@
-GitHubPackagesPassword={{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/Git/GitHub" "field" "package-token" "host_env" .host_env) }}
-GitHubPackagesUsername={{ includeTemplate "safe/pass" (dict "path" "Personal/Tech/Git/GitHub" "field" "user" "host_env" .host_env) }}
-robotDroidSupabaseUrl={{ includeTemplate "safe/pass" (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-url" "host_env" .host_env) }}
-robotDroidSupabaseKey={{ includeTemplate "safe/pass" (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-key" "host_env" .host_env) }}
-robotDroidKeyStorePassword={{ includeTemplate "safe/pass" (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "KeyPassword" "host_env" .host_env) }}
-robotDroidKeyStoreFile={{ joinPath .chezmoi.homeDir .path.nutstore (includeTemplate "safe/pass" (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "Path" "host_env" .host_env)) }}
+GitHubPackagesPassword={{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Git/GitHub" "field" "package-token") .) }}
+GitHubPackagesUsername={{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Git/GitHub" "field" "user") .) }}
+robotDroidSupabaseUrl={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-url") .) }}
+robotDroidSupabaseKey={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-key") .) }}
+robotDroidKeyStorePassword={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "KeyPassword") .) }}
+robotDroidKeyStoreFile={{ joinPath .chezmoi.homeDir .path.nutstore (includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "Path") .)) }}
 org.gradle.daemon=false

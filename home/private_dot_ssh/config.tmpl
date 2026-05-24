@@ -10,15 +10,15 @@ Include ~/.ssh/aa/config
 Include ~/.ssh/iv/config
 {{ end -}}
 
-{{ template "ssh" (includeTemplate "safe/pass" (dict "path" "Network/Home/RaspberryPi/ssh" "host_env" .host_env "asJson" true) | fromJson) }}
+{{ template "ssh" (includeTemplate "safe/pass" (merge (dict "path" "Network/Home/RaspberryPi/ssh" "asJson" true) .) | fromJson) }}
 
-{{ template "ssh" (includeTemplate "safe/pass" (dict "path" "Network/Home/PVE/ssh" "host_env" .host_env "asJson" true) | fromJson) }}
+{{ template "ssh" (includeTemplate "safe/pass" (merge (dict "path" "Network/Home/PVE/ssh" "asJson" true) .) | fromJson) }}
 
-{{ template "ssh" (includeTemplate "safe/pass" (dict "path" "Network/Host/BandwagonHost/CN2/ssh" "host_env" .host_env "asJson" true) | fromJson) }}
+{{ template "ssh" (includeTemplate "safe/pass" (merge (dict "path" "Network/Host/BandwagonHost/CN2/ssh" "asJson" true) .) | fromJson) }}
 
-{{ template "ssh" (includeTemplate "safe/pass" (dict "path" "Network/Host/Racknerd/ssh" "host_env" .host_env "asJson" true) | fromJson) }}
+{{ template "ssh" (includeTemplate "safe/pass" (merge (dict "path" "Network/Host/Racknerd/ssh" "asJson" true) .) | fromJson) }}
 
-{{ template "ssh" (includeTemplate "safe/pass" (dict "path" "Work/XZ/RaspberryPi/ssh" "host_env" .host_env "asJson" true) | fromJson) }}
+{{ template "ssh" (includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RaspberryPi/ssh" "asJson" true) .) | fromJson) }}
 
 {{ range $alias, $cfg := .tailscale.hosts }}
 Host {{ $alias }}

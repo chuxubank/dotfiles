@@ -5,7 +5,7 @@
   {{- if eq (kindOf $envValue) "map" }}
     {{- $secret := "" -}}
     {{- if or (not (hasKey $envValue "type")) (eq $envValue.type "pass") }}
-        {{- $secret = (includeTemplate "safe/pass" (dict "path" $envValue.path "field" (index $envValue "field") "host_env" $.host_env)) -}}
+        {{- $secret = (includeTemplate "safe/pass" (merge (dict "path" $envValue.path "field" (index $envValue "field")) $data)) -}}
     {{- else if eq $envValue.type "output" }}
       {{- $secret = (outputList $envValue.cmd $envValue.args) -}}
     {{- end }}
