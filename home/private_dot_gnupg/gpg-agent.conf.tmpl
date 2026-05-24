@@ -1,4 +1,7 @@
 {{- if eq .chezmoi.os "darwin" -}}
+enable-ssh-support
+default-cache-ttl 600
+max-cache-ttl 7200
 pinentry-program {{ .path.usr }}/bin/pinentry-mac
 {{- else if eq .chezmoi.os "android" -}}
 pinentry-program {{ .path.usr }}/bin/pinentry-tty
