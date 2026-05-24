@@ -8,6 +8,7 @@ taps = [
   "railwaycat/emacsmacport",
   "sikarugir-app/sikarugir",
   "theseal/ssh-askpass",
+  "vjeantet/tap",
   { name = "atlassian/acli", when.enabled.host_env = ["aa"] },
 ]
 brews = [
@@ -128,6 +129,7 @@ brews = [
   "tree-sitter",
   "tuios",
   "uv",
+  "vjeantet/tap/alerter",
   "watch",
   "wget",
   "xray",
