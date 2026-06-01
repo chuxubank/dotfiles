@@ -28,7 +28,7 @@ skills:
           tool: codex
 
     - name: android-emulator-qa
-      source: openai/plugins/plugins/test-android-apps
+      source: openai/plugins/plugins/test-android-apps/skills
       when:
         disabled:
           tool: codex
