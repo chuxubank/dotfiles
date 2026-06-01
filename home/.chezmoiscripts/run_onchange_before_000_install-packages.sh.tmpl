@@ -9,7 +9,7 @@ pkg install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "termux" "pkg")) }}
 
 {{ else if eq .chezmoi.os "darwin" -}}
-brew bundle --quiet --cleanup --file=- <<EOF
+brew bundle --quiet --force-cleanup --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
 
