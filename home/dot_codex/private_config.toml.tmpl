@@ -69,13 +69,9 @@
 {{- if stat $codexConfigPath }}
   {{- $existingCodexConfig = output "cat" $codexConfigPath | fromToml -}}
 {{- end -}}
-{{- $marketplaces := dict -}}
-{{- if hasKey $existingCodexConfig "marketplaces" }}
-  {{- $marketplaces = $existingCodexConfig.marketplaces -}}
-{{- end -}}
+{{- $preservedCodexConfigKeys := list "marketplaces" "notify" -}}
 
 {{- $config := dict
-  "marketplaces" $marketplaces
   "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
@@ -93,6 +89,11 @@
     )
   )
 -}}
+{{- range $key := $preservedCodexConfigKeys }}
+  {{- if hasKey $existingCodexConfig $key }}
+    {{- $_ := set $config $key (index $existingCodexConfig $key) -}}
+  {{- end }}
+{{- end -}}
 {{- if $modelProvider -}}{{- $_ := set $config "model_provider" $modelProvider -}}{{- end -}}
 {{- if gt (len $modelProviders) 0 -}}{{- $_ := set $config "model_providers" $modelProviders -}}{{- end -}}
 {{ $config | toToml }}
