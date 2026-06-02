@@ -27,6 +27,8 @@ export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
 {{- end }}
 
+export LIBRARY_PATH=$LIBRARY_PATH:{{ joinPath .path.usr "lib" }}
+
 # awk
 export PATH="$(brew --prefix awk)/bin:$PATH"
 

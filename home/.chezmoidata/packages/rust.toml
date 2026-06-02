@@ -1,5 +1,6 @@
 [packages.rust]
 cargo = [
   "cargo-update",
+  "lukaj",
   "rust-script",
 ]
