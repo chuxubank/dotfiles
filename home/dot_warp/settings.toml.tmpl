@@ -1,0 +1,64 @@
+{{- $config := dict
+  "appearance" (dict
+    "themes" (dict
+      "system_theme" true
+      "theme" "dark"
+      "selected_system_themes" (dict "dark" "gruvbox_dark" "light" "gruvbox_light")
+    )
+    "vertical_tabs" (dict "enabled" true)
+    "text" (dict
+      "notebook_font_size" 14.0
+      "font_size" 13.0
+    )
+  )
+  "agents" (dict
+    "cloud_conversation_storage_enabled" true
+    "warp_agent" (dict
+      "is_any_ai_enabled" true
+      "input" (dict
+        "nld_in_terminal_enabled" true
+        "ai_auto_detection_enabled" true
+      )
+      "other" (dict
+        "show_conversation_history" true
+        "show_agent_notifications" true
+      )
+    )
+    "third_party" (dict
+      "should_render_cli_agent_toolbar" true
+    )
+  )
+  "privacy" (dict
+    "telemetry_enabled" true
+    "crash_reporting_enabled" true
+  )
+  "account" (dict
+    "is_settings_sync_enabled" true
+  )
+  "warp_drive" (dict
+    "enabled" true
+  )
+  "code" (dict
+    "editor" (dict
+      "show_global_search" true
+      "show_code_review_button" true
+      "show_project_explorer" true
+    )
+  )
+  "terminal" (dict
+    "input" (dict
+      "input_box_type_setting" "universal"
+      "alias_expansion_enabled" false
+    )
+  )
+  "general" (dict
+    "default_session_mode" "agent"
+    "default_tab_config_path" (joinPath .chezmoi.homeDir ".warp" "tab_configs" "startup_config.toml")
+  )
+-}}
+
+{{ includeTemplate "toml/with-preserved-paths" (dict
+  "config" $config
+  "path" (joinPath .chezmoi.homeDir ".warp" "settings.toml")
+  "preserve" (list "privacy")
+) }}

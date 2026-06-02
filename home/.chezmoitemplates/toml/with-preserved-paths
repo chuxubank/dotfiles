@@ -1,0 +1,30 @@
+{{- $config := .config -}}
+{{- $existing := dict -}}
+{{- if stat .path }}
+  {{- $existing = output "cat" .path | fromToml -}}
+{{- end -}}
+{{- range $path := .preserve }}
+  {{- $parts := splitList "." $path -}}
+  {{- if eq (len $parts) 1 -}}
+    {{- $k0 := index $parts 0 -}}
+    {{- if hasKey $existing $k0 -}}
+      {{- $config = $config | setValueAtPath $path (index $existing $k0) -}}
+    {{- end -}}
+  {{- else if eq (len $parts) 2 -}}
+    {{- $k0 := index $parts 0 -}}
+    {{- $k1 := index $parts 1 -}}
+    {{- if and (hasKey $existing $k0) (hasKey (index $existing $k0) $k1) -}}
+      {{- $config = $config | setValueAtPath $path (index (index $existing $k0) $k1) -}}
+    {{- end -}}
+  {{- else if eq (len $parts) 3 -}}
+    {{- $k0 := index $parts 0 -}}
+    {{- $k1 := index $parts 1 -}}
+    {{- $k2 := index $parts 2 -}}
+    {{- if and (hasKey $existing $k0) (hasKey (index $existing $k0) $k1) (hasKey (index (index $existing $k0) $k1) $k2) -}}
+      {{- $config = $config | setValueAtPath $path (index (index (index $existing $k0) $k1) $k2) -}}
+    {{- end -}}
+  {{- else -}}
+    {{- fail (printf "unsupported preserve path depth: %s" $path) -}}
+  {{- end -}}
+{{- end -}}
+{{ $config | toToml }}
