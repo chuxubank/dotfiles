@@ -64,12 +64,7 @@
   {{- $_ := set $modelProviders $alias $provider -}}
 {{- end }}
 
-{{- $codexConfigPath := joinPath .chezmoi.homeDir ".codex" "config.toml" -}}
-{{- $existingCodexConfig := dict -}}
-{{- if stat $codexConfigPath }}
-  {{- $existingCodexConfig = output "cat" $codexConfigPath | fromToml -}}
-{{- end -}}
-{{- $preservedCodexConfigKeys := list "marketplaces" "notify" -}}
+{{- $preservedCodexConfigPaths := list "marketplaces" "notify" -}}
 
 {{- $config := dict
   "model" $model
@@ -89,14 +84,13 @@
     )
   )
 -}}
-{{- range $key := $preservedCodexConfigKeys }}
-  {{- if hasKey $existingCodexConfig $key }}
-    {{- $_ := set $config $key (index $existingCodexConfig $key) -}}
-  {{- end }}
-{{- end -}}
 {{- if $modelProvider -}}{{- $_ := set $config "model_provider" $modelProvider -}}{{- end -}}
 {{- if gt (len $modelProviders) 0 -}}{{- $_ := set $config "model_providers" $modelProviders -}}{{- end -}}
-{{ $config | toToml }}
+{{ includeTemplate "toml/with-preserved-paths" (dict
+  "config" $config
+  "path" (joinPath .chezmoi.homeDir ".codex" "config.toml")
+  "preserve" $preservedCodexConfigPaths
+) }}
 
 [plugins]
   [plugins."browser-use@openai-bundled"]
