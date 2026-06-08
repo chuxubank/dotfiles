@@ -1,0 +1,128 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- $servers := includeTemplate "mcp/codex" . | fromJson -}}
+
+{{- /* Projects trust map */ -}}
+{{- $projects := dict -}}
+{{- $trustedLevel := dict "trust_level" "trusted" -}}
+{{- $_ := set $projects "/" $trustedLevel -}}
+{{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") $trustedLevel -}}
+{{- $trustedKeys := list
+  "beancount"
+  "blog"
+  "emacs"
+  "keyboard"
+  "org"
+  "org-roam"
+  "proxy"
+  "skills"
+-}}
+{{- range $k := $trustedKeys }}
+  {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) $trustedLevel -}}
+{{- end }}
+{{- $trustedTreeKeys := list "iv" "aa" "asahiart" "xz" -}}
+{{- range $k := $trustedTreeKeys }}
+  {{- $root := joinPath $.chezmoi.homeDir (index $.path $k) -}}
+  {{- $dirs := output "sh" "-c" "if [ -d \"$1\" ]; then find \"$1\" -mindepth 1 -maxdepth 1 -type d -print; fi" "sh" $root -}}
+  {{- range $dir := splitList "\n" ($dirs | trim) }}
+    {{- if $dir }}
+      {{- $_ := set $projects $dir $trustedLevel -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $model := $cfg.model -}}
+{{- $modelProvider := "" -}}
+{{- $modelParts := splitList "/" $model -}}
+{{- if and (gt (len $modelParts) 1) (hasKey $cfg.providers (index $modelParts 0)) -}}
+  {{- $modelProvider = index $modelParts 0 -}}
+  {{- $model = join "/" (slice $modelParts 1) -}}
+{{- end -}}
+{{- if eq $modelProvider "openai" -}}{{- $modelProvider = "" -}}{{- end -}}
+{{- $modelProviders := dict -}}
+{{- range $alias, $ep := $cfg.providers }}
+  {{- if eq $alias "openai" }}{{ continue }}{{ end -}}
+  {{- $baseURL := trimSuffix "/" $ep.base_url -}}
+  {{- if and $baseURL (not (hasSuffix "/v1" $baseURL)) -}}
+    {{- $baseURL = printf "%s/v1" $baseURL -}}
+  {{- end -}}
+  {{- $provider := dict
+    "name" $alias
+    "base_url" $baseURL
+  -}}
+  {{- if $ep.auth_path }}
+    {{- $args := list $ep.auth_path -}}
+    {{- if $ep.auth_field }}
+      {{- $args = list $ep.auth_path $ep.auth_field -}}
+    {{- end }}
+    {{- $_ := set $provider "auth" (dict
+      "command" (joinPath $.chezmoi.homeDir "bin" "pass-field")
+      "args" $args
+      "timeout_ms" 5000
+      "refresh_interval_ms" 300000
+    ) -}}
+  {{- end }}
+  {{- $_ := set $modelProviders $alias $provider -}}
+{{- end }}
+
+{{- $input := trim .chezmoi.stdin -}}
+{{- $config := dict -}}
+{{- if gt (len $input) 0 -}}
+  {{- $config = fromToml $input -}}
+{{- end -}}
+
+{{- $_ := set $config "model" $model -}}
+{{- $_ := set $config "model_reasoning_effort" $cfg.reasoning_effort -}}
+{{- $mcpServers := get $config "mcp_servers" | default dict -}}
+{{- range $name, $server := $servers -}}
+  {{- $_ := set $mcpServers $name $server -}}
+{{- end -}}
+{{- $_ := set $config "mcp_servers" $mcpServers -}}
+{{- $_ := set $config "personality" "pragmatic" -}}
+{{- $_ := set $config "projects" $projects -}}
+{{- $_ := setValueAtPath "features.multi_agent" true $config -}}
+{{- $_ := setValueAtPath "features.goals" true $config -}}
+{{- $_ := setValueAtPath "features.shell_snapshot" true $config -}}
+{{- $_ := setValueAtPath "features.unified_exec" true $config -}}
+{{- $tui := get $config "tui" | default dict -}}
+{{- $modelAvailabilityNux := get $tui "model_availability_nux" | default dict -}}
+{{- $_ := set $modelAvailabilityNux "gpt-5.5" 4 -}}
+{{- $_ := set $tui "model_availability_nux" $modelAvailabilityNux -}}
+{{- $_ := set $config "tui" $tui -}}
+{{- if $modelProvider -}}
+  {{- $_ := set $config "model_provider" $modelProvider -}}
+{{- else -}}
+  {{- $_ := unset $config "model_provider" -}}
+{{- end -}}
+{{- if gt (len $modelProviders) 0 -}}
+  {{- $_ := set $config "model_providers" $modelProviders -}}
+{{- else -}}
+  {{- $_ := unset $config "model_providers" -}}
+{{- end -}}
+
+{{- $plugins := dict
+  "browser-use@openai-bundled" true
+  "computer-use@openai-bundled" true
+  "documents@openai-primary-runtime" true
+  "presentations@openai-primary-runtime" true
+  "spreadsheets@openai-primary-runtime" true
+  "test-android-apps@openai-curated" true
+  "kotlin-agent-skills@Kotlin" true
+  "github@openai-curated" true
+  "browser@openai-bundled" true
+  "chrome@openai-bundled" true
+-}}
+{{- range $plugin, $enabled := $plugins -}}
+  {{- $_ := setValueAtPath (printf "plugins.%s.enabled" $plugin) $enabled $config -}}
+{{- end -}}
+
+{{- $_ := setValueAtPath "desktop.ambient-suggestions-enabled" true $config -}}
+{{- $_ := setValueAtPath "desktop.appearanceLightCodeThemeId" "codex" $config -}}
+{{- $_ := setValueAtPath "desktop.preventSleepWhileRunning" true $config -}}
+{{- $_ := setValueAtPath "desktop.keepRemoteControlAwakeWhilePluggedIn" true $config -}}
+{{- $_ := setValueAtPath "desktop.git-pull-request-merge-method" "merge" $config -}}
+{{- $_ := setValueAtPath "desktop.git-show-sidebar-pr-icons" true $config -}}
+{{- $_ := setValueAtPath "desktop.conversationDetailMode" "STEPS_COMMANDS" $config -}}
+
+{{ $config | toToml }}
