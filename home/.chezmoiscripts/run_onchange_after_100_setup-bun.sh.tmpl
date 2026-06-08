@@ -77,7 +77,7 @@ bunx playwright install chromium
 bunx puppeteer browsers install chrome-headless-shell
 
 {{- if lookPath "ctx7" }}
-ctx7 setup --cli --claude --cursor --universal --opencode --codex --gemini \
+ctx7 setup --cli --claude --cursor --opencode --codex --gemini \
   --api-key {{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/Context7" "field" "api-key") .) }}
 {{- end }}
 
