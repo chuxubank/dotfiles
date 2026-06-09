@@ -203,7 +203,7 @@ alias czd="cz diff"
 
 function up() {
   {{- if eq .chezmoi.os "darwin" }}
-  brew update && brew bundle --quiet --cleanup --global
+  brew update && brew bundle --quiet --global
   {{- else if eq .chezmoi.os "android" }}
   pkg update && pkg upgrade
   {{- end }}
