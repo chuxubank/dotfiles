@@ -102,6 +102,7 @@ brews = [
   "radare2",
   "rclone",
   "reddix",
+  "repo",
   "ripgrep",
   "rsync",
   "ruby",
