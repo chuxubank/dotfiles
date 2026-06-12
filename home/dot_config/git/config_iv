@@ -1,3 +1,6 @@
 [user]
-name = chuxu
-email = chuxu@infinityvalley.com
+	name = chuxu
+	email = chuxu@infinityvalley.com
+
+[gitlab "git.infinityparadise.com"]
+	user = chuxu
