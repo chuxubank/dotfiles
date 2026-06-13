@@ -12,6 +12,7 @@ tools = [
   "pygments",
   "pylint",
   "python-lsp-server",
+  "scenedetect",
   "you-get",
   { name = "aider-chat", extra = "help", version = "3.12", with = "pip,playwright", when.enabled = false },
   { name = "ansible", with-exec = "ansible-core,ansible-lint", with = "requests" },
