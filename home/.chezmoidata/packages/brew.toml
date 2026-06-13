@@ -241,6 +241,7 @@ casks = [
   { name = "battery", when.enabled = { host_env = ["personal"], device_type = ["laptop"] } },
   { name = "bilibili", when.enabled.device_type = ["laptop"] },
   { name = "cursor", when.enabled.host_env = ["aa"] },
+  { name = "displaylink", when.enabled.device_type = ["desktop"] },
   { name = "feishu", when.enabled.host_env = ["iv"] },
   { name = "figma", when.enabled.host_env = ["aa", "iv"] },
   { name = "google-chrome", when.enabled.host_env = ["personal", "iv"] },
