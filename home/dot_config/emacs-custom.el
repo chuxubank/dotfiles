@@ -57,7 +57,7 @@
                 treemacs-nerd-icons treemacs-tab-bar treesit-fold
                 treesit-langs tributary ultra-scroll undo-fu-session
                 uv-mode valign vbs-repl vbscript-mode
-                vertico-prescient video-trimmer visual-basic-mode
+                vertico-prescient video-trimmer visual-basic-mode vlf
                 vterm-toggle vundo winum yaml-pro))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
