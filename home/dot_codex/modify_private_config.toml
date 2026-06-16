@@ -103,15 +103,16 @@
 
 {{- $plugins := dict
   "browser-use@openai-bundled" true
+  "browser@openai-bundled" true
+  "chrome@openai-bundled" true
   "computer-use@openai-bundled" true
   "documents@openai-primary-runtime" true
+  "github@openai-curated" true
+  "kotlin-agent-skills@Kotlin" true
+  "latex@openai-bundled" true
   "presentations@openai-primary-runtime" true
   "spreadsheets@openai-primary-runtime" true
   "test-android-apps@openai-curated" true
-  "kotlin-agent-skills@Kotlin" true
-  "github@openai-curated" true
-  "browser@openai-bundled" true
-  "chrome@openai-bundled" true
 -}}
 {{- range $plugin, $enabled := $plugins -}}
   {{- $_ := setValueAtPath (printf "plugins.%s.enabled" $plugin) $enabled $config -}}
