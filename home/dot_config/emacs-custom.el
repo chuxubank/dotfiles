@@ -10,13 +10,14 @@
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
          #'org-roam-unlinked-references-section) nil nil "Customized with use-package org-roam")
  '(package-selected-packages
-   '(ace-pinyin activities agent-shell aider aidermacs anki-vocabulary
-                apheleia applescript-mode auctex avy-embark-collect
-                bbdb beacon beancount benchmark-init bing-dict
-                breadcrumb buck caddyfile-mode cape cdlatex
-                chatgpt-shell chezmoi citar-embark citar-org-roam
-                cmake-font-lock code-review codeium compile-multi
-                compile-multi-embark compile-multi-nerd-icons
+   '(ace-pinyin activities agent-shell aider aidermacs android-mode
+                anki-vocabulary apheleia applescript-mode auctex
+                avy-embark-collect bbdb beacon beancount
+                benchmark-init bing-dict breadcrumb buck
+                caddyfile-mode cape cdlatex chatgpt-shell chezmoi
+                citar-embark citar-org-roam cmake-font-lock
+                code-review codeium compile-multi-embark
+                compile-multi-nerd-icons compose-preview
                 consult-compile-multi consult-gh-embark
                 consult-gh-forge copilot corfu-prescient dart-mode
                 dashboard deft delight devdocs diagram-preview diff-hl
@@ -27,12 +28,13 @@
                 elisp-demos elogcat emacs-everywhere ement emms
                 eshell-vterm exec-path-from-shell flycheck-gradle
                 flycheck-kotlin flycheck-plantuml flymake-ansible-lint
-                flymake-bridge flymake-gradle git-link git-timemachine
-                glab go-mode go-template-helper-mode go-template-mode
-                goggles gogs gptel-magit gptel-model-updater
-                gptel-prompts gradle-el graphql-mode grip-mode
-                groovy-mode gt gtea helpful hugoista igist indent-bars
-                kaolin-themes kdl-mode kotlin-mode kotlin-ts-mode
+                flymake-bridge flymake-gradle ghostel git-link
+                git-timemachine glab go-mode go-template-helper-mode
+                go-template-mode goggles gogs gptel-magit
+                gptel-model-updater gptel-prompts gradle-el
+                graphql-mode grip-mode groovy-mode gt gtea helpful
+                hugoista igist indent-bars kaolin-themes kdl-mode
+                keycast kitty-graphics kotlin-mode kotlin-ts-mode
                 leetcode ligature logview lsp-proxy lua-mode
                 magit-todos major-mode-hydra makefile-executor
                 marginalia markdown-xwidget math-delimiters mcp-server
