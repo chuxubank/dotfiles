@@ -39,6 +39,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .gemini
 .gradle
 .ssh
+{{ .path.asahiart }}
 {{ .path.beancount }}
 {{ .path.isyncrc }}
 {{ .path.org }}
