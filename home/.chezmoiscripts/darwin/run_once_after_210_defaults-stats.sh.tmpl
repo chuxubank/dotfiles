@@ -1,14 +1,5 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
-defaults write com.apple.Maps AppleLanguages '("zh_CN")'
-defaults write com.apple.finder RelativeDates -bool false
-defaults write com.mowglii.ItsycalApp ShowDayOfWeekInIcon -bool YES
-defaults write com.mowglii.ItsycalApp ShowEventDays -int 7
-defaults write com.mowglii.ItsycalApp ShowEventPopoverOnHover -bool YES
-defaults write com.mowglii.ItsycalApp ShowLocation -bool YES
-defaults write com.mowglii.ItsycalApp ShowMonthInIcon -bool YES
-defaults write com.mowglii.ItsycalApp ShowWeeks -bool YES
-
 # ~/Library/Preferences/eu.exelban.Stats.plist
 defaults write eu.exelban.Stats.plist Battery_state -bool NO
 defaults write eu.exelban.Stats.plist CPU_line_chart_label -bool YES
@@ -28,11 +19,4 @@ defaults write eu.exelban.Stats.plist RAM_processes -int 15
 defaults write eu.exelban.Stats.plist RAM_splitValue -bool YES
 defaults write eu.exelban.Stats.plist RAM_widget -string "bar_chart"
 defaults write eu.exelban.Stats.plist SSD_bar_chart_label -bool YES
-
-# defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "1" "yyyy-MM-dd HH:mm"
-# defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "2" "yyyy-MM-dd HH:mm:ss"
-# defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "3" "yyyy-MM-dd HH:mm:ss"
-# defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add "4" "yyyy-MM-dd HH:mm:ss"
-# defaults delete NSGlobalDomain AppleICUDateFormatStrings
-# killall Finder
 {{ end -}}
