@@ -119,12 +119,18 @@
   {{- $_ := setValueAtPath (printf "plugins.%s.enabled" $plugin) $enabled $config -}}
 {{- end -}}
 
-{{- $_ := setValueAtPath "desktop.ambient-suggestions-enabled" true $config -}}
-{{- $_ := setValueAtPath "desktop.appearanceLightCodeThemeId" "codex" $config -}}
-{{- $_ := setValueAtPath "desktop.preventSleepWhileRunning" true $config -}}
-{{- $_ := setValueAtPath "desktop.keepRemoteControlAwakeWhilePluggedIn" true $config -}}
-{{- $_ := setValueAtPath "desktop.git-pull-request-merge-method" "merge" $config -}}
-{{- $_ := setValueAtPath "desktop.git-show-sidebar-pr-icons" true $config -}}
-{{- $_ := setValueAtPath "desktop.conversationDetailMode" "STEPS_COMMANDS" $config -}}
+{{- $desktop := dict
+  "ambient-suggestions-enabled" true
+  "appearanceLightCodeThemeId" "codex"
+  "conversationDetailMode" "STEPS_COMMANDS"
+  "git-pull-request-merge-method" "merge"
+  "git-show-sidebar-pr-icons" true
+  "keepRemoteControlAwakeWhilePluggedIn" true
+  "preventSleepWhileRunning" true
+  "show-context-window-usage" true
+-}}
+{{- range $key, $value := $desktop -}}
+  {{- $_ := setValueAtPath (printf "desktop.%s" $key) $value $config -}}
+{{- end -}}
 
 {{ $config | toToml }}
