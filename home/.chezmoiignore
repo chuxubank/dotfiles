@@ -39,11 +39,8 @@ Library/LaunchAgents/rclone.rpi.plist
 .gemini
 .gradle
 .ssh
-{{ .path.asahiart }}
-{{ .path.beancount }}
-{{ .path.isyncrc }}
-{{ .path.org }}
 {{ .path.pass }}
-{{ .path.proxy }}
-{{ index .path "org-roam" }}
+
+{{ .path.asahiart }}/*
+{{ .path.personal }}/*
 {{- end }}

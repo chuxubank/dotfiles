@@ -8,9 +8,10 @@ keyboard = "Developer/Personal/keyboard"
 skills = "Developer/Personal/skills"
 nutstore = "Nutstore"
 
-iv = "Developer/IV"
 aa = "Developer/AA"
 asahiart = "Developer/AsahiArt"
+iv = "Developer/IV"
+personal = "Developer/Personal"
 xz = "Developer/XingZhi"
 
 bun = ".bun"
