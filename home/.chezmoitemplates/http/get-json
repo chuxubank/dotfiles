@@ -14,13 +14,9 @@
   {{- end -}}
 {{- end -}}
 {{- $script := printf `
-tmp=$(mktemp)
-err=$(mktemp)
-trap 'rm -f "$tmp" "$err"' EXIT
-
-if curl -sSfL --max-time %v %s %q >"$tmp" 2>"$err"; then
-  if [ -s "$tmp" ]; then
-    cat "$tmp"
+if body=$(curl -sSfL --max-time %v %s %q 2>&1); then
+  if [ -n "$body" ]; then
+    printf '%%s\n' "$body"
   else
     printf 'http/get-json: empty response from %%s (%%s)\n' %q %q >&2
     printf '%%s\n' %q
@@ -28,7 +24,7 @@ if curl -sSfL --max-time %v %s %q >"$tmp" 2>"$err"; then
 else
   status=$?
   printf 'http/get-json: curl failed for %%s (%%s), exit %%s: ' %q %q "$status" >&2
-  head -c 200 "$err" >&2
+  printf '%%s' "$body" | head -c 200 >&2
   printf '\n' >&2
   printf '%%s\n' %q
 fi
