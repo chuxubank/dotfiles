@@ -40,6 +40,7 @@ llm:
     openrouter:
       name: OpenRouter
       base_url: "https://openrouter.ai/api"
+      timeout: 10
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key

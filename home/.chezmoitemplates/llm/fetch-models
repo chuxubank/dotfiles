@@ -12,6 +12,7 @@
 {{- if .base_url }}
   {{- $fetchURL := "" -}}
   {{- $headers := list -}}
+  {{- $timeout := default 2 (index . "timeout") -}}
   {{- if eq .type "ollama" }}
     {{- $fetchURL = printf "%s/api/tags" .base_url -}}
   {{- else if eq .type "gemini" }}
@@ -24,7 +25,7 @@
       {{- $headers = append $headers (printf "Authorization: Bearer %s" .auth_key) -}}
     {{- end }}
   {{- end }}
-  {{- $raw := includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" 2) -}}
+  {{- $raw := includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" $timeout) -}}
   {{- $resp := $raw | fromJson -}}
   {{- if eq .type "ollama" }}
     {{- if hasKey $resp "models" }}

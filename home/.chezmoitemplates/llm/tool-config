@@ -10,6 +10,7 @@
            auth_key  — resolved API key (with optional field override)
            auth_path — pass path used for auth (if set)
            auth_field — pass field used for auth (if set)
+           timeout   — model fetch timeout in seconds (if set)
 
        Provider reference formats:
           Short:  providers: [iv, ollama]        — alias = provider name, default auth
@@ -116,6 +117,8 @@
     "auth_path" $authPath
     "auth_field" $authField
   -}}
+  {{- if hasKey $prov "timeout" -}}{{- $_ := set $resolved "timeout" $prov.timeout -}}{{- end -}}
+  {{- if hasKey $ref "timeout" -}}{{- $_ := set $resolved "timeout" $ref.timeout -}}{{- end -}}
   {{- /* Resolve data_set: alias-level takes precedence, fall back to provider-level */ -}}
   {{- $dsName := "" -}}
   {{- if hasKey $ref "data_set" -}}
