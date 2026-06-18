@@ -175,6 +175,8 @@ casks = [
   "font-dejavu",
   "font-fira-code",
   "font-google-sans-code",
+  "font-harmonyos-sans",
+  "font-harmonyos-sans-sc",
   "font-ibm-plex-math",
   "font-ibm-plex-mono",
   "font-ibm-plex-sans",
