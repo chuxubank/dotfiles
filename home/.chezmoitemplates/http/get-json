@@ -1,0 +1,17 @@
+{{- /* http/get-json — Fetch a JSON document over HTTP.
+     Input: dict with "url"; optional "label", "headers" (list), "timeout", "fallback".
+     Output: raw JSON text. Returns fallback (default "{}") on curl failure or empty response,
+     and prints diagnostics to stderr.
+*/ -}}
+{{- $url := .url -}}
+{{- $label := default $url (index . "label") -}}
+{{- $timeout := default 3 (index . "timeout") -}}
+{{- $fallback := default "{}" (index . "fallback") -}}
+{{- $headerArgs := "" -}}
+{{- if hasKey . "headers" -}}
+  {{- range $header := .headers -}}
+    {{- $headerArgs = printf "%s -H %q" $headerArgs $header -}}
+  {{- end -}}
+{{- end -}}
+{{- $script := printf "tmp=$(mktemp); err=$(mktemp); if curl -sSfL --max-time %v %s %q >\"$tmp\" 2>\"$err\"; then if [ -s \"$tmp\" ]; then cat \"$tmp\"; else printf 'http/get-json: empty response from %%s (%%s)\\n' %q %q >&2; printf '%%s\\n' %q; fi; else status=$?; printf 'http/get-json: curl failed for %%s (%%s), exit %%s: ' %q %q \"$status\" >&2; head -c 200 \"$err\" >&2; printf '\\n' >&2; printf '%%s\\n' %q; fi; rm -f \"$tmp\" \"$err\"" $timeout $headerArgs $url $label $url $fallback $label $url $fallback -}}
+{{- output "sh" "-c" $script | trim -}}

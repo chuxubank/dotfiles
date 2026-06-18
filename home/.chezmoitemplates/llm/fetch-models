@@ -11,7 +11,7 @@
 {{- $models := dict -}}
 {{- if .base_url }}
   {{- $fetchURL := "" -}}
-  {{- $authArg := "" -}}
+  {{- $headers := list -}}
   {{- if eq .type "ollama" }}
     {{- $fetchURL = printf "%s/api/tags" .base_url -}}
   {{- else if eq .type "gemini" }}
@@ -21,10 +21,10 @@
   {{- else }}
     {{- $fetchURL = printf "%s/v1/models" .base_url -}}
     {{- if .auth_key }}
-      {{- $authArg = printf "-H 'Authorization: Bearer %s'" .auth_key -}}
+      {{- $headers = append $headers (printf "Authorization: Bearer %s" .auth_key) -}}
     {{- end }}
   {{- end }}
-  {{- $raw := output "sh" "-c" (printf "curl -sfL --max-time 2 %s '%s' 2>/dev/null || echo '{}'" $authArg $fetchURL) | trim -}}
+  {{- $raw := includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" 2) -}}
   {{- $resp := $raw | fromJson -}}
   {{- if eq .type "ollama" }}
     {{- if hasKey $resp "models" }}
