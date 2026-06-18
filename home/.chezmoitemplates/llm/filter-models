@@ -1,15 +1,16 @@
 {{- /* llm/filter-models — Apply filter criteria to a model dict.
    Input: dict with "models" { id: { name, cost, open_weights, modalities } },
                    "filter" { cost: { input, output, cache_read },
-                              open_weights: bool },
-                   "modalities" { input: [str], output: [str] }
+                              open_weights: bool,
+                              modalities: { input: [str], output: [str] } }
    Output: JSON dict of { model_id: name_string } for matching models.
 
    Cost comparison uses 'not' for zero-check (handles int/float64 mismatch).
    All filter fields are optional — omitted fields are not checked.
 */ -}}
 {{- $filter := .filter -}}
-{{- $modalities := .modalities -}}
+{{- $modalities := dict -}}
+{{- if hasKey $filter "modalities" -}}{{- $modalities = $filter.modalities -}}{{- end -}}
 {{- $result := dict -}}
 {{- range $id, $m := .models -}}
   {{- $keep := true -}}

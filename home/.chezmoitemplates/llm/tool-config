@@ -11,6 +11,8 @@
            auth_path — pass path used for auth (if set)
            auth_field — pass field used for auth (if set)
            timeout   — model fetch timeout in seconds (if set)
+           model_metadata — map of model id -> data set metadata (if resolved)
+           model_filter — model metadata filter (if set)
 
        Provider reference formats:
           Short:  providers: [iv, ollama]        — alias = provider name, default auth
@@ -140,18 +142,25 @@
         {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath $ctx.chezmoi.homeDir $dsFile -}}{{- end -}}
         {{- $_ := set $dsFetchArgs "file" $dsFile -}}
       {{- end -}}
-      {{- if hasKey $prov "provider" -}}{{- $_ := set $dsFetchArgs "provider" $prov.provider -}}{{- end -}}
       {{- $allModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
-      {{- $filterArg := dict "models" $allModels -}}
       {{- $flt := dict -}}
       {{- if hasKey $ref "filter" -}}{{- $flt = $ref.filter -}}{{- else if hasKey $prov "filter" -}}{{- $flt = $prov.filter -}}{{- end -}}
-      {{- $_ := set $filterArg "filter" $flt -}}
-      {{- $mods := dict -}}
-      {{- if hasKey $ref "modalities" -}}{{- $mods = $ref.modalities -}}{{- else if hasKey $prov "modalities" -}}{{- $mods = $prov.modalities -}}{{- end -}}
-      {{- $_ := set $filterArg "modalities" $mods -}}
-      {{- $filtered := includeTemplate "llm/filter-models" $filterArg | fromJson -}}
-      {{- if gt (len $filtered) 0 -}}
-        {{- $_ := set $resolved "models" $filtered -}}
+      {{- if gt (len $flt) 0 -}}{{- $_ := set $resolved "model_filter" $flt -}}{{- end -}}
+      {{- if hasKey $prov "provider" -}}
+        {{- $_ := set $dsFetchArgs "provider" $prov.provider -}}
+        {{- $sourceModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+        {{- if and (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $sourceModels) 0) -}}
+          {{- $sourceNames := dict -}}
+          {{- range $id, $m := $sourceModels -}}
+            {{- $name := $m.name -}}
+            {{- if not $name -}}{{- $name = $id -}}{{- end -}}
+            {{- $_ := set $sourceNames $id $name -}}
+          {{- end -}}
+          {{- $_ := set $resolved "models" $sourceNames -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if gt (len $allModels) 0 -}}
+        {{- $_ := set $resolved "model_metadata" $allModels -}}
       {{- end -}}
     {{- end -}}
   {{- else if hasKey $ref "models" }}

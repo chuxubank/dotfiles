@@ -12,18 +12,42 @@
 
   {{- /* Static models → use as-is; models: false → skip; otherwise fetch */ -}}
   {{- $models := dict -}}
+  {{- $modelMetadata := dict -}}
+  {{- if hasKey $ep "model_metadata" }}
+    {{- $modelMetadata = $ep.model_metadata -}}
+  {{- end }}
+  {{- $modelFilter := dict -}}
+  {{- if hasKey $ep "model_filter" }}
+    {{- $modelFilter = $ep.model_filter -}}
+  {{- end }}
   {{- if hasKey $ep "models" }}
     {{- if ne (kindOf $ep.models) "bool" }}
       {{- range $id, $name := $ep.models }}
-        {{- $_ := set $models $id (dict "name" $name) -}}
+        {{- $model := dict "name" $name -}}
+        {{- if hasKey $modelMetadata $id -}}
+          {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
+        {{- end -}}
+        {{- $_ := set $models $id $model -}}
       {{- end }}
     {{- end }}
   {{- else }}
     {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
     {{- range $id, $name := $fetched }}
-      {{- $_ := set $models $id (dict "name" $name) -}}
+      {{- $model := dict "name" $name -}}
+      {{- if hasKey $modelMetadata $id -}}
+        {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
+      {{- end -}}
+      {{- $_ := set $models $id $model -}}
     {{- end }}
   {{- end }}
+  {{- if and (gt (len $modelFilter) 0) (gt (len $modelMetadata) 0) -}}
+    {{- $filteredMetadata := includeTemplate "llm/filter-models" (dict "models" $modelMetadata "filter" $modelFilter) | fromJson -}}
+    {{- range $id, $_ := $models -}}
+      {{- if not (hasKey $filteredMetadata $id) -}}
+        {{- $_ := unset $models $id -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
   {{- if gt (len $models) 0 }}
     {{- $_ := set $provDict "models" $models -}}
   {{- end }}

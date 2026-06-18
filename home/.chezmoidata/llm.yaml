@@ -15,6 +15,7 @@ llm:
   providers:
     iv:
       name: IV
+      data_set: models-dev
       base_url: "http://llm.invalley.co"
       auth:
         path: Work/IV/LLM
@@ -72,8 +73,8 @@ llm:
         cost:
           input: 0
           output: 0
-      modalities:
-        input: ["text", "image"]
+        modalities:
+          input: ["text", "image"]
 
   # ── Tool defaults ──────────────────────────────────────────────────
   # Per-tool model selection.  `providers` overrides only the auth
