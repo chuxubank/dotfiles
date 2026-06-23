@@ -72,10 +72,15 @@
 [diff "exif"]
     textconv = exiftool
 
+[difftool]
+    prompt = false
 [difftool "lukaj"]
     cmd = lukaj $LOCAL $REMOTE
+[difftool "difftastic"]
+    cmd = difft "$MERGED" "$LOCAL" "abcdef1" "100644" "$REMOTE" "abcdef2" "100644"
 [alias]
-    diff-svg = "difftool -t lukaj -y"
+    diff-svg = "difftool -t lukaj"
+	difft = "difftool -t difftastic"
 
 [github]
     user = chuxubank
