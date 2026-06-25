@@ -76,6 +76,18 @@ mcp:
       when:
         enabled:
           host_env: iv
+    - name: Infinity API
+      description: Infinity API MCP
+      execution:
+        type: stdio
+        cmd: inapi
+        args:
+          - serve
+        timeout: 20
+        tool_timeout: 30
+      when:
+        enabled:
+          host_env: iv
     - name: Figma Remote
       description: Remote Figma MCP
       execution:

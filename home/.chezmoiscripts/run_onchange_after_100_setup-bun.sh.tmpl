@@ -52,9 +52,13 @@ bun upgrade
 
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
+{{- $install := $tool.name }}
+{{- if hasKey $tool "url" }}
+  {{- $install = $tool.url }}
+{{- end }}
 if ! bun_tool_installed {{ $tool.name | quote }}; then
 echo "Install bun tool: {{ $tool.name }}"
-bun add -g {{ if and (hasKey $tool "trust") $tool.trust }}--trust {{ end }}{{ $tool.name }}
+bun add -g {{ if and (hasKey $tool "trust") $tool.trust }}--trust {{ end }}{{ $install }}
 fi
 {{- else }}
 if ! bun_tool_installed {{ $tool | quote }}; then
@@ -63,6 +67,8 @@ bun add -g {{ $tool }}
 fi
 {{- end }}
 {{- end }}
+
+BUN_GLOBAL_LIST="$(bun pm ls -g 2>/dev/null || true)"
 
 while IFS= read -r installed_tool; do
     if [[ -n "$installed_tool" ]] && ! bun_tool_desired "$installed_tool"; then
