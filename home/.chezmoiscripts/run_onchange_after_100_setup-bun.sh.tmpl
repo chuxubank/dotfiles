@@ -26,7 +26,15 @@ installed_bun_tools() {
         /^[[:space:]]*[├└]── / {
             line = $0
             sub(/^[[:space:]]*[├└]── /, "", line)
-            sub(/@[0-9].*$/, "", line)
+            if (line ~ /^@/) {
+                slash = index(line, "/")
+                at = index(substr(line, slash + 1), "@")
+                if (slash > 0 && at > 0) {
+                    line = substr(line, 1, slash + at - 1)
+                }
+            } else {
+                sub(/@.*$/, "", line)
+            }
             print line
         }
     ' <<<"$BUN_GLOBAL_LIST"
