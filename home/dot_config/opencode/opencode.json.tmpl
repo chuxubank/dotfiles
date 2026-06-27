@@ -55,6 +55,10 @@
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 
+{{- $plugins := (list
+  "superpowers@git+https://github.com/obra/superpowers.git"
+) -}}
+
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
@@ -62,6 +66,7 @@
   "lsp" true
   "mcp" $mcpServers
   "model" $cfg.model
+  "plugin" $plugins
   "provider" $provider
   "server" (dict "port" 4096)
   "small_model" $cfg.small_model
