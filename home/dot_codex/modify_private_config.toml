@@ -112,7 +112,7 @@
   "latex@openai-bundled" true
   "presentations@openai-primary-runtime" true
   "spreadsheets@openai-primary-runtime" true
-  "superpowers@openai-curated" true
+  "superpowers@openai-curated" false
   "test-android-apps@openai-curated" true
 -}}
 {{- range $plugin, $enabled := $plugins -}}
