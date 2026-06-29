@@ -1,0 +1,21 @@
+{{- /* model-config/opencode — Project catalog metadata to opencode model config.
+       Input: model metadata dict
+       Output: JSON dict containing only fields accepted by opencode's
+               provider.<id>.models.<model> schema.
+       Source schema: https://opencode.ai/config.json
+       Keep this as an allowlist because that schema has additionalProperties: false.
+*/ -}}
+{{- $model := . -}}
+{{- $result := dict -}}
+{{- range $key := list "id" "name" "family" "release_date" "attachment" "reasoning" "temperature" "tool_call" "interleaved" "cost" "limit" "modalities" "status" "provider" "options" "headers" "variants" -}}
+  {{- if hasKey $model $key -}}
+    {{- $_ := set $result $key (index $model $key) -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey $model "experimental" -}}
+  {{- $experimental := $model.experimental -}}
+  {{- if eq (kindOf $experimental) "bool" -}}
+    {{- $_ := set $result "experimental" $experimental -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $result -}}

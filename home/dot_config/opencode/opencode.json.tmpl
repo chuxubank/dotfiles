@@ -27,6 +27,7 @@
         {{- if hasKey $modelMetadata $id -}}
           {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
         {{- end -}}
+        {{- $model = includeTemplate "model-config/opencode" $model | fromJson -}}
         {{- $_ := set $models $id $model -}}
       {{- end }}
     {{- end }}
@@ -37,6 +38,7 @@
       {{- if hasKey $modelMetadata $id -}}
         {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
       {{- end -}}
+      {{- $model = includeTemplate "model-config/opencode" $model | fromJson -}}
       {{- $_ := set $models $id $model -}}
     {{- end }}
   {{- end }}
