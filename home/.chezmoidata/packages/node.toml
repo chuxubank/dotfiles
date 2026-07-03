@@ -1,5 +1,6 @@
 [packages.node]
 global = [
+  "@actions/languageserver",
   "@agentclientprotocol/claude-agent-acp",
   "@ansible/ansible-language-server",
   "@anthropic-ai/claude-code",
@@ -27,8 +28,8 @@ global = [
   "vscode-json-languageserver",
   "yaml-language-server",
   { name = "@fission-ai/openspec", when.enabled.host_env = ["iv"] },
+  { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },
   { name = "@larksuite/cli", when.enabled.host_env = ["iv"] },
   { name = "emacs-lsp-proxy", trust = true },
-  { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },
   { name = "opencode-ai", trust = true },
 ]
