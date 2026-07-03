@@ -262,7 +262,7 @@ casks = [
   { name = "miro", when.enabled.host_env = ["aa"] },
   { name = "mongodb-compass", when.enabled.host_env = ["aa"] },
   { name = "mos", when.enabled.host_env = ["personal", "iv"] },
-  { name = "neteasemusic", when.enabled.host_env = ["personal"] },
+  { name = "neteasemusic", when.enabled.host_env = ["personal", "iv"] },
   { name = "opencode-desktop", when.enabled.host_env = ["personal", "iv"] },
   { name = "orbstack", when.enabled.host_env = ["personal", "iv"] },
   { name = "podman-desktop", when.enabled.host_env = ["aa"] },
