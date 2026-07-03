@@ -1,6 +1,7 @@
 {{- $envs := dict -}}
 {{- $data := . -}}
 {{- range $envKey := sortAlpha (keys $data) }}
+  {{- if eq $envKey "host_env" }}{{ continue }}{{ end -}}
   {{- $envValue := index $data $envKey -}}
   {{- if eq (kindOf $envValue) "map" }}
     {{- $secret := "" -}}
