@@ -16,6 +16,9 @@ skills:
     - name: find-skills
       source: vercel-labs/skills
 
+    - name: find-docs
+      source: upstash/context7-mcp
+
     - name: gstack
       source: garrytan/gstack
       when:
