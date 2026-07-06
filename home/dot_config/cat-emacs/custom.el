@@ -40,7 +40,6 @@
      (org-remoteimg . (:url "https://github.com/gaoDean/org-remoteimg"))
      (org-yt . (:url "https://github.com/TobiasZawada/org-yt"))
      (treemacs-activities . (:url "https://github.com/chuxubank/treemacs-activities"))
-     (tributary . (:url "https://github.com/mrkrd/tributary"))
      (ultra-scroll . (:url "https://github.com/jdtsmith/ultra-scroll"))
      (vbnet-mode . (:url "https://github.com/lelit/vbnet-mode"))
      (video-trimmer . (:url "https://github.com/xenodium/video-trimmer"))))

@@ -29,5 +29,5 @@ if [ "$ORG_VER" != "$LAST_ORG_VER" ]; then
 fi
 
 echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver $ORG_VER"
-{{ template "restart-emacs.sh" . }}
+{{ template "emacs/restart.sh" . }}
 {{ end -}}

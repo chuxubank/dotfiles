@@ -210,8 +210,8 @@ function up() {
   {{- end }}
 }
 function upe() {
-  {{ template "upgrade-emacs-packages.sh" . }}
-  {{ template "restart-emacs.sh" . }}
+  {{ template "emacs/upgrade-packages.sh" . }}
+  {{ template "emacs/restart.sh" . }}
 }
 alias upn="bun update -g --latest"
 alias upp="uv tool upgrade --all"
