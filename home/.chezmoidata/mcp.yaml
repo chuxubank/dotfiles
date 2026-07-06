@@ -82,7 +82,7 @@ mcp:
         type: http
         uri: https://mcp.context7.com/mcp
         timeout: 20
-        envs:
+        headers:
           CONTEXT7_API_KEY:
             path: Personal/Tech/AI/Context7
             field: api-key

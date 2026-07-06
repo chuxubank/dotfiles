@@ -12,8 +12,14 @@
     {{- end }}
   {{- else if eq $s.type "sse" }}
     {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
   {{- else if eq $s.type "http" }}
     {{- $_ := set $server "httpUrl" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
   {{- end }}
   {{- if gt $s.timeout 0 }}
     {{- $_ := set $server "timeout" (mul $s.timeout 1000) -}}

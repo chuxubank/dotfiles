@@ -10,7 +10,7 @@
          cmd         — string (stdio only)
          args        — list   (stdio only, may be empty)
          uri         — string (http/sse only)
-         headers     — map    (http/sse only, may be absent)
+         headers     — map    (http/sse only, resolved secrets, may be absent)
          timeout     — int seconds (from execution.timeout, 0 if absent)
          tool_timeout— int seconds (from execution.tool_timeout, 0 if absent)
          envs        — map    (resolved secrets, empty dict if none)
@@ -40,7 +40,7 @@
   {{- if or (eq $exec.type "http") (eq $exec.type "sse") }}
     {{- $_ := set $s "uri" $exec.uri -}}
     {{- if hasKey $exec "headers" }}
-      {{- $_ := set $s "headers" $exec.headers -}}
+      {{- $_ := set $s "headers" (includeTemplate "mcp/envs" (dict "envs" $exec.headers "host_env" $.host_env) | fromJson) -}}
     {{- end }}
     {{- if hasKey $exec "bearer_token_env_var" }}
       {{- $_ := set $s "bearer_token_env_var" $exec.bearer_token_env_var -}}
