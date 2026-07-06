@@ -14,27 +14,19 @@
      (chezmoi . (:url "https://github.com/Lillenne/chezmoi.el"))
      (code-review . (:url "https://github.com/doomelpa/code-review"))
      (compose-preview . (:url "https://github.com/chuxubank/emacs-studio" :lisp-dir "compose-preview/"))
-     (confluence . (:url "https://github.com/jahlborn/confluence-el"))
      (diagram-preview . (:url "https://github.com/natrys/diagram-preview"))
-     (ejira3 . (:url "https://git.sr.ht/~madearl/ejira3"))
      (elogcat . (:url "https://github.com/chuxubank/elogcat.el"))
-     (flymake-bridge . (:url "https://github.com/liuyinz/flymake-bridge"))
      (gptel-model-updater . (:url "https://github.com/chuxubank/gptel-model-updater"))
      (gptel-prompts . (:url "https://github.com/jwiegley/gptel-prompts"))
      (gradle-el . (:url "https://git.sr.ht/~vhallac/gradle-el"))
      (hydra-posframe . (:url "https://github.com/Ladicle/hydra-posframe"))
-     (jiralib3 . (:url "https://git.sr.ht/~madearl/jiralib3"))
      (kitty-graphics . (:url "https://github.com/cashmeredev/kitty-graphics.el"))
-     (lsp-bridge . (:url "https://github.com/manateelazycat/lsp-bridge"))
      (lsp-proxy . (:url "https://github.com/jadestrong/lsp-proxy"))
      (magit-difftastic . (:url "https://github.com/rschmukler/magit-difftastic"))
      (markdown-xwidget . (:url "https://github.com/cfclrk/markdown-xwidget"))
      (math-delimiters . (:url "https://github.com/oantolin/math-delimiters"))
      (mcp-server . (:url "https://github.com/rhblind/emacs-mcp-server"))
      (md-babel . (:url "https://github.com/md-babel/md-babel.el"))
-     (meow-vterm . (:url "https://github.com/accelbread/meow-vterm"))
-     (nano . (:url "https://github.com/rougier/nano-emacs"))
-     (nano-minibuffer . (:url "https://github.com/rougier/nano-minibuffer"))
      (netease-cloud-music . (:url "https://github.com/chuxubank/netease-cloud-music.el"))
      (ob-async . (:url "https://github.com/ezchi/ob-async" :branch "develop"))
      (ob-kotlin . (:url "https://github.com/chuxubank/ob-kotlin"))
@@ -126,7 +118,6 @@
      embark-consult
      ement
      emms
-     eshell-vterm
      exec-path-from-shell
      flycheck
      flycheck-gradle
@@ -269,8 +260,6 @@
      vertico-prescient
      visual-basic-mode
      vlf
-     vterm
-     vterm-toggle
      vundo
      which-key
      winum
