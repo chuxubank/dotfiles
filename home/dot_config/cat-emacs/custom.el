@@ -39,7 +39,6 @@
      (org-mode . (:url "https://code.tecosaur.net/tec/org-mode" :lisp-dir "lisp/" :branch "dev"))
      (org-remoteimg . (:url "https://github.com/gaoDean/org-remoteimg"))
      (org-yt . (:url "https://github.com/TobiasZawada/org-yt"))
-     (ox-jira3 . (:url "https://git.sr.ht/~madearl/ox-jira3"))
      (treemacs-activities . (:url "https://github.com/chuxubank/treemacs-activities"))
      (tributary . (:url "https://github.com/mrkrd/tributary"))
      (ultra-scroll . (:url "https://github.com/jdtsmith/ultra-scroll"))
@@ -131,12 +130,10 @@
      ghostel
      git-link
      git-timemachine
-     glab
      go-mode
      go-template-helper-mode
      go-template-mode
      goggles
-     gogs
      golden-ratio
      gptel
      gptel-forge-prs
