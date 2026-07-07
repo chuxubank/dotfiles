@@ -1,1 +1,1 @@
-CI=true make -C {{ joinPath .chezmoi.homeDir .path.emacs }} sync-packages
+CI=true make -C {{ joinPath .chezmoi.homeDir .path.emacs }} sync-upgrade-packages
