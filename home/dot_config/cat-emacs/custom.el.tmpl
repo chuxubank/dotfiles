@@ -1,0 +1,33 @@
+;;; -*- lexical-binding: t -*-
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(auth-source-save-behavior nil)
+ '(mouse-wheel-progressive-speed nil)
+ '(org-roam-mode-sections
+   (list #'org-roam-backlinks-section #'org-roam-reflinks-section
+         #'org-roam-unlinked-references-section) nil nil "Customized with use-package org-roam")
+ '(package-vc-selected-packages
+   '(
+{{- $vc := includeTemplate "package/items" (dict "ctx" . "path" (list "emacs" "vc")) | fromJson }}
+{{- range $pkg := $vc }}
+     ({{ $pkg.name }} . (:url "{{ $pkg.url }}"{{ if hasKey $pkg "lisp_dir" }} :lisp-dir "{{ $pkg.lisp_dir }}"{{ end }}{{ if hasKey $pkg "branch" }} :branch "{{ $pkg.branch }}"{{ end }}))
+{{- end }}))
+ '(package-selected-packages
+   '(
+{{- $selected := includeTemplate "package/select" (dict "ctx" . "path" (list "emacs" "selected")) | fromJson }}
+{{- $vcNames := includeTemplate "package/select" (dict "ctx" . "path" (list "emacs" "vc")) | fromJson }}
+{{- $all := concat $selected $vcNames | uniq | sortAlpha }}
+{{- range $name := $all }}
+     {{ $name }}
+{{- end }}))
+ '(safe-local-variable-values
+   '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
