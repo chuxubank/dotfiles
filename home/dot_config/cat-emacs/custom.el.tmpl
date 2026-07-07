@@ -17,9 +17,7 @@
 {{- end }}))
  '(package-selected-packages
    '(
-{{- $selected := includeTemplate "package/select" (dict "ctx" . "path" (list "emacs" "selected")) | fromJson }}
-{{- $vcNames := includeTemplate "package/select" (dict "ctx" . "path" (list "emacs" "vc")) | fromJson }}
-{{- $all := concat $selected $vcNames | uniq | sortAlpha }}
+{{- $all := includeTemplate "emacs/selected-packages" (dict "ctx" .) | fromJson }}
 {{- range $name := $all }}
      {{ $name }}
 {{- end }}))
