@@ -1,0 +1,29 @@
+{{- /* Fill a list of tokens to a column width, Emacs-style.
+       Args (dict):
+         items  : list of strings to emit
+         width  : max column width before wrapping (e.g. 70)
+         first  : prefix for the very first line (e.g. "   '(")
+         indent : leading whitespace for continuation lines
+         suffix : text appended after the last token (e.g. "))")
+       Output: the filled block as text (no trailing newline). */ -}}
+{{- $items := .items -}}
+{{- $width := .width -}}
+{{- $first := .first -}}
+{{- $indent := .indent -}}
+{{- $suffix := .suffix -}}
+{{- $line := "" -}}
+{{- $body := "" -}}
+{{- range $i, $n := $items -}}
+{{-   if eq $i 0 -}}
+{{-     $line = printf "%s%s" $first $n -}}
+{{-   else -}}
+{{-     $cand := printf "%s %s" $line $n -}}
+{{-     if gt (len $cand) $width -}}
+{{-       $body = printf "%s%s\n" $body $line -}}
+{{-       $line = printf "%s%s" $indent $n -}}
+{{-     else -}}
+{{-       $line = $cand -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{{- printf "%s%s%s" $body $line $suffix -}}
