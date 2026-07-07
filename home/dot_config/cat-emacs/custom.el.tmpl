@@ -21,6 +21,12 @@
 {{- range $name := $all }}
      {{ $name }}
 {{- end }}))
+ '(package-pinned-packages
+   '(
+{{- $pinned := includeTemplate "emacs/pinned-packages" (dict "ctx" .) | fromJson }}
+{{- range $pkg := $pinned }}
+     ({{ $pkg.name }} . "{{ $pkg.archive }}")
+{{- end }}))
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces

@@ -1,0 +1,15 @@
+{{- /* Resolved emacs package-pinned-packages alist.
+       Selects `when`-gated entries from the `selected` list that carry an
+       `archive` key, sorted by name. Output: JSON array of {name, archive}. */ -}}
+{{- $items := includeTemplate "package/items" (dict "ctx" .ctx "path" (list "emacs" "selected")) | fromJson -}}
+{{- $byName := dict -}}
+{{- range $pkg := $items -}}
+{{- if and (eq (kindOf $pkg) "map") (hasKey $pkg "archive") -}}
+{{- $_ := set $byName $pkg.name $pkg.archive -}}
+{{- end -}}
+{{- end -}}
+{{- $pinned := list -}}
+{{- range $name := (keys $byName | sortAlpha) -}}
+{{- $pinned = append $pinned (dict "name" $name "archive" (index $byName $name)) -}}
+{{- end -}}
+{{- $pinned | toJson -}}
