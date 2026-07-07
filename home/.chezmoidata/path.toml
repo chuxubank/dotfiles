@@ -23,7 +23,8 @@ plum = ".config/plum"
 raycast = ".config/raycast"
 sdkman = ".sdkman"
 
-models-dev-api = ".cache/llm/models-dev-api.json"
+models-dev-api = ".cache/llm/data-set/models-dev.json"
+openrouter-models-api = ".cache/llm/models/openrouter.json"
 
 rime = ".local/share/rime"
 rime-sync = "Nutstore/RimeSync"

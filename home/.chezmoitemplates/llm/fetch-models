@@ -1,5 +1,7 @@
 {{- /* llm/fetch-models — Fetch model list from a provider endpoint.
        Input: dict with "type", "base_url", "auth_key"
+              Optional "cache_file" — read the raw response from this file
+              (populated by a chezmoi external) instead of a live curl.
        Output: JSON map of { model_id: display_name, ... }
        Returns empty map on failure or missing base_url.
 
@@ -25,7 +27,14 @@
       {{- $headers = append $headers (printf "Authorization: Bearer %s" .auth_key) -}}
     {{- end }}
   {{- end }}
-  {{- $raw := includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" $timeout) -}}
+  {{- $raw := "" -}}
+  {{- $cacheFile := default "" (index . "cache_file") -}}
+  {{- if $cacheFile -}}
+    {{- /* Read cached response (chezmoi external), fall back to "{}" if missing. */ -}}
+    {{- $raw = output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $cacheFile $cacheFile) | trim -}}
+  {{- else -}}
+    {{- $raw = includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" $timeout) -}}
+  {{- end -}}
   {{- $resp := $raw | fromJson -}}
   {{- if eq .type "ollama" }}
     {{- if hasKey $resp "models" }}
