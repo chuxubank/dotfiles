@@ -3,13 +3,13 @@
          items  : list of strings to emit
          width  : max column width before wrapping (e.g. 70)
          first  : prefix for the very first line (e.g. "   '(")
-         indent : leading whitespace for continuation lines
+         indent : number of leading spaces for continuation lines
          suffix : text appended after the last token (e.g. "))")
        Output: the filled block as text (no trailing newline). */ -}}
 {{- $items := .items -}}
 {{- $width := .width -}}
 {{- $first := .first -}}
-{{- $indent := .indent -}}
+{{- $indent := repeat (int .indent) " " -}}
 {{- $suffix := .suffix -}}
 {{- $line := "" -}}
 {{- $body := "" -}}
