@@ -16,7 +16,11 @@
       {{- if not $when.enabled }}{{- $result = false -}}{{- end -}}
     {{- else if and (eq (kindOf $when.enabled) "map") (hasKey $when.enabled $key) -}}
       {{- $expected := index $when.enabled $key -}}
-      {{- if not (includeTemplate "when/match" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
+      {{- if and (eq (kindOf $expected) "map") (or (hasKey $expected "min") (hasKey $expected "max")) -}}
+        {{- if not (includeTemplate "when/range" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
+      {{- else -}}
+        {{- if not (includeTemplate "when/match" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 
@@ -26,7 +30,11 @@
       {{- if $disabledValue }}{{- $result = false -}}{{- end -}}
     {{- else if and (eq (kindOf $disabledValue) "map") (hasKey $disabledValue $key) -}}
       {{- $blocked := index $disabledValue $key -}}
-      {{- if includeTemplate "when/match" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
+      {{- if and (eq (kindOf $blocked) "map") (or (hasKey $blocked "min") (hasKey $blocked "max")) -}}
+        {{- if includeTemplate "when/range" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
+      {{- else -}}
+        {{- if includeTemplate "when/match" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
