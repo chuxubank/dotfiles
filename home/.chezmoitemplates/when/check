@@ -16,7 +16,14 @@
       {{- if not $when.enabled }}{{- $result = false -}}{{- end -}}
     {{- else if and (eq (kindOf $when.enabled) "map") (hasKey $when.enabled $key) -}}
       {{- $expected := index $when.enabled $key -}}
-      {{- if and (eq (kindOf $expected) "map") (or (hasKey $expected "min") (hasKey $expected "max")) -}}
+      {{- if and (eq $key "os") (eq (kindOf $expected) "map") -}}
+        {{- if hasKey $expected "type" -}}
+          {{- if not (includeTemplate "when/match" (dict "value" $value "rule" (index $expected "type")) | fromJson) }}{{- $result = false -}}{{- end -}}
+        {{- end -}}
+        {{- if and $result (hasKey $expected "version") -}}
+          {{- if not (includeTemplate "when/semver" (dict "value" (dig "os_version" "" .) "rule" (index $expected "version")) | fromJson) }}{{- $result = false -}}{{- end -}}
+        {{- end -}}
+      {{- else if and (eq (kindOf $expected) "map") (or (hasKey $expected "min") (hasKey $expected "max")) -}}
         {{- if not (includeTemplate "when/range" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
       {{- else -}}
         {{- if not (includeTemplate "when/match" (dict "value" $value "rule" $expected) | fromJson) }}{{- $result = false -}}{{- end -}}
@@ -30,7 +37,16 @@
       {{- if $disabledValue }}{{- $result = false -}}{{- end -}}
     {{- else if and (eq (kindOf $disabledValue) "map") (hasKey $disabledValue $key) -}}
       {{- $blocked := index $disabledValue $key -}}
-      {{- if and (eq (kindOf $blocked) "map") (or (hasKey $blocked "min") (hasKey $blocked "max")) -}}
+      {{- if and (eq $key "os") (eq (kindOf $blocked) "map") -}}
+        {{- $osMatch := true -}}
+        {{- if hasKey $blocked "type" -}}
+          {{- if not (includeTemplate "when/match" (dict "value" $value "rule" (index $blocked "type")) | fromJson) }}{{- $osMatch = false -}}{{- end -}}
+        {{- end -}}
+        {{- if and $osMatch (hasKey $blocked "version") -}}
+          {{- if not (includeTemplate "when/semver" (dict "value" (dig "os_version" "" .) "rule" (index $blocked "version")) | fromJson) }}{{- $osMatch = false -}}{{- end -}}
+        {{- end -}}
+        {{- if $osMatch }}{{- $result = false -}}{{- end -}}
+      {{- else if and (eq (kindOf $blocked) "map") (or (hasKey $blocked "min") (hasKey $blocked "max")) -}}
         {{- if includeTemplate "when/range" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
       {{- else -}}
         {{- if includeTemplate "when/match" (dict "value" $value "rule" $blocked) | fromJson }}{{- $result = false -}}{{- end -}}
