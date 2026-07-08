@@ -1,0 +1,22 @@
+{{- /* Numeric range match for capacity conditions.
+       Input:  dict "value" <int> "rule" <map with optional min/max>
+       Output: JSON boolean
+       - value == 0 means "unknown" -> pass (lenient)
+       - {min: N}        -> value >= N
+       - {max: N}        -> value <= N
+       - {min: A, max: B}-> A <= value <= B
+       - missing bound   -> unbounded on that side */ -}}
+{{- $value := .value -}}
+{{- $rule := .rule -}}
+{{- $result := true -}}
+{{- if eq $value 0 -}}
+  {{- $result = true -}}
+{{- else -}}
+  {{- if hasKey $rule "min" -}}
+    {{- if lt $value (index $rule "min") }}{{- $result = false -}}{{- end -}}
+  {{- end -}}
+  {{- if and $result (hasKey $rule "max") -}}
+    {{- if gt $value (index $rule "max") }}{{- $result = false -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $result -}}
