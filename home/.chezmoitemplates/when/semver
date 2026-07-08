@@ -1,0 +1,11 @@
+{{- /* Semver constraint match for os version conditions.
+       Input:  dict "value" <version string> "rule" <semverCompare constraint>
+       Output: JSON boolean
+       - value == "" means "unknown" -> pass (lenient; also avoids throw) */ -}}
+{{- $value := .value -}}
+{{- $rule := .rule -}}
+{{- $result := true -}}
+{{- if ne $value "" -}}
+  {{- $result = semverCompare $rule $value -}}
+{{- end -}}
+{{- toJson $result -}}
