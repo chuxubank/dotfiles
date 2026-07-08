@@ -22,6 +22,17 @@
 {{- $isDarkMode := false }}
 {{- $os := .chezmoi.os -}}
 
+{{- $memGb := 0 -}}
+{{- $diskGb := 0 -}}
+{{- if eq $os "darwin" -}}
+  {{- $memGb = atoi (output "sh" "-c" "echo $(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))" | trim) -}}
+{{- else if or (eq $os "linux") (eq $os "android") -}}
+  {{- $memGb = atoi (output "sh" "-c" "awk '/MemTotal/{printf \"%d\", int($2/1048576)}' /proc/meminfo 2>/dev/null || echo 0" | trim) -}}
+{{- end -}}
+{{- if or (eq $os "darwin") (eq $os "linux") (eq $os "android") -}}
+  {{- $diskGb = atoi (output "sh" "-c" "df -k / 2>/dev/null | awk 'NR==2{printf \"%d\", int($2/1048576)}' || echo 0" | trim) -}}
+{{- end -}}
+
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
@@ -68,6 +79,8 @@ encryption = "gpg"
     host_env = {{- $hostEnv | quote }}
     roles = {{- $roles | toToml }}
 	isDarkMode = {{- $isDarkMode }}
+    mem_gb = {{ $memGb }}
+    disk_gb = {{ $diskGb }}
 
 [data.path]
     pass = {{- $passDir | quote }}
