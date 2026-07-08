@@ -244,7 +244,7 @@ casks = [
   { name = "1password-cli", when.enabled.host_env = ["aa"] },
   { name = "Sikarugir-App/sikarugir/sikarugir", when.enabled = { host_env = ["personal"], roles = ["game"] } },
   { name = "alma", when.enabled = { host_env = ["personal"], roles = ["llm"] } },
-  { name = "battery", when.enabled = { host_env = ["personal"], device_type = ["laptop"] } },
+  { name = "battery", when.enabled = { device_type = ["laptop"], os = { type = "darwin", version = "<26.4" } } },
   { name = "bilibili", when.enabled.device_type = ["laptop"] },
   { name = "cursor", when.enabled.host_env = ["aa"] },
   { name = "displaylink", when.enabled.device_type = ["desktop"] },
