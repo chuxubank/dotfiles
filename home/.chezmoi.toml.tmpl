@@ -33,6 +33,17 @@
   {{- $diskGb = atoi (output "sh" "-c" "df -k / 2>/dev/null | awk 'NR==2{printf \"%d\", int($2/1048576)}' || echo 0" | trim) -}}
 {{- end -}}
 
+{{- $osVersion := "" -}}
+{{- if eq $os "darwin" -}}
+  {{- $osVersion = output "sh" "-c" "sw_vers -productVersion 2>/dev/null || echo" | trim -}}
+{{- else if eq $os "linux" -}}
+  {{- $osVersion = (splitList "-" (output "sh" "-c" "uname -r 2>/dev/null || echo" | trim)) | first -}}
+{{- else if eq $os "android" -}}
+  {{- $osVersion = output "sh" "-c" "getprop ro.build.version.release 2>/dev/null || echo" | trim -}}
+{{- else if eq $os "windows" -}}
+  {{- $osVersion = .chezmoi.windowsVersion | default "" -}}
+{{- end -}}
+
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
@@ -81,6 +92,7 @@ encryption = "gpg"
 	isDarkMode = {{- $isDarkMode }}
     mem_gb = {{ $memGb }}
     disk_gb = {{ $diskGb }}
+    os_version = {{ $osVersion | quote }}
 
 [data.path]
     pass = {{- $passDir | quote }}
