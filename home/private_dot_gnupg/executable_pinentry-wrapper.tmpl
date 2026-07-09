@@ -1,0 +1,25 @@
+{{- /* Resolve pinentry binaries at apply time via lookPath, with fallbacks. */ -}}
+{{- $curses := or (lookPath "pinentry-curses") (lookPath "pinentry-tty") "pinentry" -}}
+{{- $tty := or (lookPath "pinentry-tty") (lookPath "pinentry-curses") "pinentry" -}}
+{{- $gui := $tty -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $gui = or (lookPath "pinentry-mac") $curses -}}
+{{- else if eq .chezmoi.os "linux" -}}
+{{-   $gui = or (lookPath "pinentry-gnome3") (lookPath "pinentry-qt") (lookPath "pinentry-gtk-2") $curses -}}
+{{- end -}}
+#!/bin/sh
+# Managed by chezmoi. Picks the pinentry backend at runtime so that GUI
+# sessions get a graphical pinentry while headless SSH sessions fall back
+# to a terminal pinentry. gpg-agent forwards the client's PINENTRY_USER_DATA.
+# The concrete binaries are resolved at apply time via chezmoi lookPath.
+case "$PINENTRY_USER_DATA" in
+  *USE_CURSES*)
+    exec {{ $curses }} "$@"
+    ;;
+  *USE_TTY*)
+    exec {{ $tty }} "$@"
+    ;;
+  *)
+    exec {{ $gui }} "$@"
+    ;;
+esac

@@ -175,6 +175,10 @@ export LANG=en_US.UTF-8
 if [[ -n $SSH_CONNECTION ]]; then
   unset SSH_ASKPASS
   unset SUDO_ASKPASS
+  # Force terminal pinentry so gpg/pass prompts work without a GUI.
+  export PINENTRY_USER_DATA=USE_CURSES
+  export GPG_TTY=$(tty)
+  gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1
   export EDITOR='vim'
 else
   export EDITOR='emacsclient -a=""'
