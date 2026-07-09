@@ -104,7 +104,6 @@ selected = [
   "leetcode",
   "ligature",
   "logview",
-  "lsp-dart",
   "lua-mode",
   "magit-todos",
   "major-mode-hydra",
