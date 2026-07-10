@@ -30,6 +30,19 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+{{- if eq .host_env "aa" }}
+ '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
+ '(telega-use-docker "podman")
+{{- else }}
+ '(telega-docker-run-arguments "--platform linux/amd64")
+ '(telega-use-docker "docker")
+{{- end }}
+{{- if eq .host_env "iv" }}
+ '(cat-forge-alist
+   '(("git.infinityparadise.com" "git.infinityparadise.com/api/v4"
+      "git.infinityparadise.com" forge-gitlab-repository)))
+ '(cat-gptel-forge-prs-prompt-file "prompt/iv-mr.yml.j2")
+{{- end }}
  '(mouse-wheel-progressive-speed nil)
  '(org-roam-mode-sections
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
