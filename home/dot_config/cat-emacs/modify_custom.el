@@ -43,6 +43,22 @@
       "git.infinityparadise.com" forge-gitlab-repository)))
  '(cat-gptel-forge-prs-prompt-file "prompt/iv-mr.yml.j2")
 {{- end }}
+ '(gptel-model-updater-backends
+   '(gptel--gemini
+{{- if eq .host_env "iv" }}
+     (gptel--iv :providers (all))
+{{- end }}
+     gptel--llama gptel--mlx gptel--ollama gptel--openrouter))
+ '(gptel-model-updater-external-targets
+   '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
+                          ({{ if eq .host_env "iv" }}"IV:deepseek-v4-flash"
+                           {{ end }}"OpenRouter:openai/gpt-oss-120b:free"))
+     (gptel-forge-prs-backend gptel-forge-prs-model "GPTel-Forge-Prs"
+                              ({{ if eq .host_env "iv" }}"IV:deepseek-v4-flash"
+                               {{ end }}"OpenRouter:openai/gpt-oss-120b:free"))))
+ '(gptel-model-updater-models
+   '({{ if eq .host_env "iv" }}"IV:gpt-5.4" "IV:claude-opus-4-7"
+     "IV:deepseek-v4-pro" {{ end }}"OpenRouter:auto"))
  '(mouse-wheel-progressive-speed nil)
  '(org-roam-mode-sections
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
@@ -63,3 +79,14 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+{{- if eq .host_env "iv" }}
+
+(with-eval-after-load 'gptel
+  (setq gptel--iv
+        (gptel-make-openai "IV"
+          :models '()
+          :host "llm.invalley.co"
+          :protocol "http"
+          :key 'gptel-api-key
+          :stream t)))
+{{- end }}
