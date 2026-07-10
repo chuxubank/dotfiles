@@ -111,6 +111,7 @@
   "kotlin-agent-skills@Kotlin" true
   "latex@openai-bundled" true
   "presentations@openai-primary-runtime" true
+  "record-and-replay@openai-bundled" true
   "spreadsheets@openai-primary-runtime" true
   "superpowers@openai-curated" true
   "test-android-apps@openai-curated" true
