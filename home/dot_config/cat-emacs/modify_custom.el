@@ -48,17 +48,22 @@
 {{- if eq .host_env "iv" }}
      (gptel--iv :providers (all))
 {{- end }}
-     gptel--llama gptel--mlx gptel--ollama gptel--openrouter))
+{{- if has "llm" .roles }}
+     gptel--llama gptel--mlx gptel--ollama
+{{- end }}
+     gptel--openrouter))
  '(gptel-model-updater-external-targets
    '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
-                          ({{ if eq .host_env "iv" }}"IV:deepseek-v4-flash"
-                           {{ end }}"OpenRouter:openai/gpt-oss-120b:free"))
+                          ("IV:deepseek-v4-flash"
+                           "OpenRouter:openai/gpt-oss-120b:free"))
      (gptel-forge-prs-backend gptel-forge-prs-model "GPTel-Forge-Prs"
-                              ({{ if eq .host_env "iv" }}"IV:deepseek-v4-flash"
-                               {{ end }}"OpenRouter:openai/gpt-oss-120b:free"))))
+                              ("IV:deepseek-v4-flash"
+                               "OpenRouter:openai/gpt-oss-120b:free"))))
  '(gptel-model-updater-models
-   '({{ if eq .host_env "iv" }}"IV:gpt-5.4" "IV:claude-opus-4-7"
-     "IV:deepseek-v4-pro" {{ end }}"OpenRouter:auto"))
+   '("IV:gpt-5.4"
+     "IV:claude-opus-4-7"
+     "IV:deepseek-v4-pro"
+     "OpenRouter:auto"))
  '(mouse-wheel-progressive-speed nil)
  '(org-roam-mode-sections
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
@@ -87,6 +92,7 @@
           :models '()
           :host "llm.invalley.co"
           :protocol "http"
-          :key 'gptel-api-key
+          :key (cat/gptel-api-key-from-pass
+                "Work/IV/LLM" "default-auth-token")
           :stream t)))
 {{- end }}
