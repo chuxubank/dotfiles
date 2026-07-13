@@ -4,12 +4,12 @@
 {{- $vc := includeTemplate "package/items" (dict "ctx" . "path" (list "emacs" "vc")) | fromJson -}}
 {{- $pinned := includeTemplate "emacs/pinned-packages" (dict "ctx" .) | fromJson -}}
 {{- /* Fill package-selected-packages to fill-column like Emacs does:
-       first token after "   '(", continuation lines indented 16 spaces,
-       wrapping at 70 columns. */ -}}
+first token after "   '(", continuation lines indented 16 spaces,
+wrapping at 70 columns. */ -}}
 {{- $selBody := includeTemplate "emacs/fill-list" (dict "items" $selected "width" 70 "first" "   '(" "indent" 16 "suffix" "))") -}}
 {{- /* Fill package-vc-selected-packages the same way: each element is a
-       plist (name :url URL [:lisp-dir DIR] [:branch B]) wrapped at 70
-       columns, continuation lines aligned under the first token. */ -}}
+plist (name :url URL [:lisp-dir DIR] [:branch B]) wrapped at 70
+columns, continuation lines aligned under the first token. */ -}}
 {{- $vcElems := list -}}
 {{- range $p := $vc -}}
 {{-   $toks := list ":url" (printf "%q" $p.url) -}}
@@ -30,27 +30,27 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
-{{- if eq .host_env "aa" }}
+ {{- if eq .host_env "aa" }}
  '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
  '(telega-use-docker "podman")
-{{- else }}
+ {{- else }}
  '(telega-docker-run-arguments "--platform linux/amd64")
  '(telega-use-docker "docker")
-{{- end }}
-{{- if eq .host_env "iv" }}
+ {{- end }}
+ {{- if eq .host_env "iv" }}
  '(cat-forge-alist
    '(("git.infinityparadise.com" "git.infinityparadise.com/api/v4"
       "git.infinityparadise.com" forge-gitlab-repository)))
  '(cat-gptel-forge-prs-prompt-file "prompt/iv-mr.yml.j2")
-{{- end }}
+ {{- end }}
  '(gptel-model-updater-backends
    '(gptel--gemini
-{{- if eq .host_env "iv" }}
+     {{- if eq .host_env "iv" }}
      (gptel--iv :providers (all))
-{{- end }}
-{{- if has "llm" .roles }}
+     {{- end }}
+     {{- if has "llm" .roles }}
      gptel--llama gptel--mlx gptel--ollama
-{{- end }}
+     {{- end }}
      gptel--openrouter))
  '(gptel-model-updater-external-targets
    '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
@@ -74,25 +74,38 @@
      ({{ $p.name }} . "{{ $p.archive }}")
      {{- end }}))
  '(package-selected-packages
-{{ $selBody }}
-{{ $vcBody }}
- '(safe-local-variable-values
-   '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-{{- if eq .host_env "iv" }}
-
-(with-eval-after-load 'gptel
-  (setq gptel--iv
-        (gptel-make-openai "IV"
-          :models '()
-          :host "llm.invalley.co"
-          :protocol "http"
-          :key (cat/gptel-api-key-from-pass
-                "Work/IV/LLM" "default-auth-token")
-          :stream t)))
-{{- end }}
+   {{ $selBody }}
+   {{ $vcBody }}
+   '(safe-local-variable-values
+     '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
+ (custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+  )
+ {{- if eq .host_env "iv" }}
+ (with-eval-after-load 'gptel
+   (setq gptel--iv
+         (gptel-make-openai "IV"
+           :models '()
+           :host "llm.invalley.co"
+           :protocol "http"
+           :key (cat/gptel-api-key-from-pass
+                 "Work/IV/LLM" "default-auth-token")
+           :stream t)
+         gptel--openai
+         (gptel-make-openai "OpenAI"
+           :host "llm.invalley.co"
+           :protocol "http"
+           :key (cat/gptel-api-key-from-pass
+                 "Work/IV/LLM" "codex-auth-token")
+           :stream t)
+         gptel--anthropic
+         (gptel-make-anthropic "Anthropic"
+           :host "llm.invalley.co"
+           :protocol "http"
+           :key (cat/gptel-api-key-from-pass
+                 "Work/IV/LLM" "cc-auth-token")
+           :stream t)))
+ {{- end }}
