@@ -30,6 +30,7 @@ columns, continuation lines aligned under the first token. */ -}}
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+ '(smtpmail-smtp-server "smtp.qq.com")
  {{- if eq .host_env "aa" }}
  '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
  '(telega-use-docker "podman")
