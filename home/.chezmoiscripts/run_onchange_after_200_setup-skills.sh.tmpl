@@ -67,7 +67,8 @@ skill_has_agent() {
     skills list -g --json --agent "$agent_slug" > "$agent_state"
   fi
 
-  jq -e --arg skill_name "$skill_name" 'any(.[]; .name == $skill_name)' \
+  jq -e --arg skill_name "$skill_name" \
+    'any(.[]; ((.path // "") | split("/")[-1]) == $skill_name)' \
     >/dev/null < "$agent_state"
 }
 
@@ -118,7 +119,7 @@ fi
 {{- end }}
 
 # Uninstall skills not declared in config
-installed=("${(@f)$(jq -r '.[].name' <<<"$installed_json")}")
+installed=("${(@f)$(jq -r '.[].path | split("/")[-1]' <<<"$installed_json")}")
 
 if $cleanup_enabled; then
   for name in "${installed[@]}"; do
