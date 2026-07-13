@@ -3,6 +3,7 @@
 echo "{{ template "week" . }} 󰯁 Setup skills"
 
 declared=()
+updateable=()
 cleanup_enabled=true
 installed_json=$(skills list -g --json)
 skills_state_dir=$(mktemp -d)
@@ -75,6 +76,8 @@ skill_has_agent() {
 {{- range $skill := .skills.providers }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
+  {{- /* `skills update` loses repository subpaths and can report nested skills as deleted. */ -}}
+  {{- $directSource := eq (len (splitList "/" $skill.source)) 2 }}
 
 # {{ $skill.source }}
 patterns=({{- if kindIs "slice" $skill.name }}{{ range $i, $name := $skill.name }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }}{{ else }}{{ $skill.name | quote }}{{ end }})
@@ -87,25 +90,32 @@ else
     if (( ! ${declared[(Ie)$name]} )); then
       declared+=("$name")
     fi
+    {{- if $directSource }}
+    if (( ! ${updateable[(Ie)$name]} )); then
+      updateable+=("$name")
+    fi
+    {{- end }}
   done
 
   if (( ! ${#resolved[@]} )); then
     print -u2 -- "No skills matched ${patterns[*]} in {{ $skill.source }}"
   else
-    needs_install=false
+    needs_install={{ if $directSource }}false{{ else }}true{{ end }}
     skill_args=()
     for name in "${resolved[@]}"; do
       skill_args+=(--skill "$name")
     done
 
-    for name in "${resolved[@]}"; do
-      for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
-        if ! skill_has_agent "$name" "$agent"; then
-          needs_install=true
-          break 2
-        fi
+    {{- if $directSource }}
+      for name in "${resolved[@]}"; do
+        for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
+          if ! skill_has_agent "$name" "$agent"; then
+            needs_install=true
+            break 2
+          fi
+        done
       done
-    done
+    {{- end }}
 
     if $needs_install; then
       skills add {{ $skill.source }} \
@@ -130,4 +140,6 @@ if $cleanup_enabled; then
   done
 fi
 
-skills update -g
+if (( ${#updateable[@]} )); then
+  skills update -g "${updateable[@]}"
+fi
