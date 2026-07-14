@@ -22,20 +22,23 @@
 {{- end -}}
 
 {{- $enabledPlugins := dict
+  "chrome-devtools-mcp@claude-plugins-official" true
   "kotlin-lsp@claude-plugins-official" true
+  "mattpocock-skills@mattpocock" true
   "skill-creator@claude-plugins-official" true
   "superpowers@claude-plugins-official" false
-  "chrome-devtools-mcp@claude-plugins-official" true
 -}}
 
-{{- $extraKnownMarketplaces := dict
-  "anthropic-agent-skills" (dict
-    "source" (dict
-      "source" "github"
-      "repo" "anthropics/skills"
-    )
-  )
+{{- $githubMarketplaces := dict
+  "anthropic-agent-skills" "anthropics/skills"
+  "mattpocock" "mattpocock/skills"
 -}}
+{{- $extraKnownMarketplaces := dict -}}
+{{- range $name, $repo := $githubMarketplaces -}}
+  {{- $_ := set $extraKnownMarketplaces $name (dict
+    "source" (dict "source" "github" "repo" $repo)
+  ) -}}
+{{- end -}}
 
 {{- $permissions := dict
     "defaultMode" "auto"

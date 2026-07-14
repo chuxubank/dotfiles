@@ -24,6 +24,12 @@ skills:
       when:
         enabled: false
 
+    - name: "*"
+      source: mattpocock/skills
+      when:
+        disabled:
+          tool: claude-code
+
     - name: ["cli-creator", "figma-implement-design"]
       source: openai/skills
       when:
