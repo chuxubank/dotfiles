@@ -2,6 +2,9 @@
 #!/bin/sh
 set -eu
 
+{{ $customFile := joinPath "dot_config" "cat-emacs" "modify_custom.el" -}}
+# custom.el hash: {{ include $customFile | sha256sum }}
+
 {{ $emacsDir := joinPath .chezmoi.homeDir .path.emacs -}}
 {{ $orgDir := joinPath $emacsDir "elpa" "org-mode" -}}
 

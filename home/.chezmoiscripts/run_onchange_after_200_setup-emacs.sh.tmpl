@@ -1,10 +1,7 @@
 {{ if not (eq .host_env "ci") -}}
 #!/bin/sh
-{{/* Re-trigger when the resolved emacs package lists change. */ -}}
-{{- $selected := includeTemplate "emacs/selected-packages" (dict "ctx" .) -}}
-{{- $vc := includeTemplate "package/items" (dict "ctx" . "path" (list "emacs" "vc")) | fromJson -}}
-{{- $pinned := includeTemplate "emacs/pinned-packages" (dict "ctx" .) -}}
-# packages hash: {{ list $selected $vc $pinned | toJson | sha256sum }}
+{{ $customPackages := includeTemplate "emacs/custom-packages.el" . -}}
+# packages hash: {{ $customPackages | sha256sum }}
 
 echo "{{ template "week" . }} 󰯁 Setup emacs"
 
