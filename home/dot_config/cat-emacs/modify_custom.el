@@ -47,6 +47,8 @@ columns, continuation lines aligned under the first token. */ -}}
    '(gptel--gemini
      {{- if eq .host_env "iv" }}
      (gptel--iv :providers (all))
+     (gptel--openai :providers (all))
+     (gptel--anthropic :providers (all))
      {{- end }}
      {{- if has "llm" .roles }}
      gptel--llama gptel--mlx gptel--ollama
