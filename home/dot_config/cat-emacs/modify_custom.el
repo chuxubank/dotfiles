@@ -6,7 +6,7 @@
 {{- /* Fill package-selected-packages to fill-column like Emacs does:
 first token after "   '(", continuation lines indented 16 spaces,
 wrapping at 70 columns. */ -}}
-{{- $selBody := includeTemplate "emacs/fill-list" (dict "items" $selected "width" 70 "first" "   '(" "indent" 16 "suffix" "))") -}}
+{{- $selBody := includeTemplate "emacs/fill-list" (dict "items" $selected "width" 70 "first" "   '(" "indent" 16 "suffix" ")") -}}
 {{- /* Fill package-vc-selected-packages the same way: each element is a
 plist (name :url URL [:lisp-dir DIR] [:branch B]) wrapped at 70
 columns, continuation lines aligned under the first token. */ -}}
@@ -20,9 +20,8 @@ columns, continuation lines aligned under the first token. */ -}}
 {{- end -}}
 {{- $vcBody := "" -}}
 {{- range $i, $e := $vcElems -}}
-{{-   if eq $i 0 }}{{ $vcBody = printf "   '(%s" $e }}{{ else }}{{ $vcBody = printf "%s\n     %s" $vcBody $e }}{{ end -}}
+{{-   if eq $i 0 }}{{ $vcBody = $e }}{{ else }}{{ $vcBody = printf "%s\n     %s" $vcBody $e }}{{ end -}}
 {{- end -}}
-{{- $vcBody = printf " '(package-vc-selected-packages\n%s))" $vcBody -}}
 ;;; -*- lexical-binding: t -*-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -75,38 +74,39 @@ columns, continuation lines aligned under the first token. */ -}}
      ({{ $p.name }} . "{{ $p.archive }}")
      {{- end }}))
  '(package-selected-packages
-   {{ $selBody }}
-   {{ $vcBody }}
-   '(safe-local-variable-values
-     '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
- (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
-  )
- {{- if eq .host_env "iv" }}
- (with-eval-after-load 'gptel
-   (setq gptel--iv
-         (gptel-make-openai "IV"
-           :models '()
-           :host "llm.invalley.co"
-           :protocol "http"
-           :key (cat/gptel-api-key-from-pass
-                 "Work/IV/LLM" "default-auth-token")
-           :stream t)
-         gptel--openai
-         (gptel-make-openai "OpenAI"
-           :host "llm.invalley.co"
-           :protocol "http"
-           :key (cat/gptel-api-key-from-pass
-                 "Work/IV/LLM" "codex-auth-token")
-           :stream t)
-         gptel--anthropic
-         (gptel-make-anthropic "Anthropic"
-           :host "llm.invalley.co"
-           :protocol "http"
-           :key (cat/gptel-api-key-from-pass
-                 "Work/IV/LLM" "cc-auth-token")
-           :stream t)))
- {{- end }}
+   {{ $selBody }})
+ '(package-vc-selected-packages
+   '({{ $vcBody }}))
+ '(safe-local-variable-values
+   '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+{{- if eq .host_env "iv" }}
+(with-eval-after-load 'gptel
+  (setq gptel--iv
+        (gptel-make-openai "IV"
+          :models '()
+          :host "llm.invalley.co"
+          :protocol "http"
+          :key (cat/gptel-api-key-from-pass
+                "Work/IV/LLM" "default-auth-token")
+          :stream t)
+        gptel--openai
+        (gptel-make-openai "OpenAI"
+          :host "llm.invalley.co"
+          :protocol "http"
+          :key (cat/gptel-api-key-from-pass
+                "Work/IV/LLM" "codex-auth-token")
+          :stream t)
+        gptel--anthropic
+        (gptel-make-anthropic "Anthropic"
+          :host "llm.invalley.co"
+          :protocol "http"
+          :key (cat/gptel-api-key-from-pass
+                "Work/IV/LLM" "cc-auth-token")
+          :stream t)))
+{{- end }}
