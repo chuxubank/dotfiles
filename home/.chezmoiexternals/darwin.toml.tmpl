@@ -19,4 +19,9 @@
     type = "archive"
     url = "{{ (gitHubLatestReleaseAssetURL "nab138/iloader" "iloader-darwin-universal.app.tar.gz") }}"
 	stripComponents = 1
+
+["Applications/TuxGuitar.app"]
+    type = "archive"
+    url = "{{ (gitHubLatestReleaseAssetURL "helge17/tuxguitar" "tuxguitar-*-macosx-swt-cocoa-x86_64.app.tar.gz") }}"
+    stripComponents = 1
 {{- end }}
