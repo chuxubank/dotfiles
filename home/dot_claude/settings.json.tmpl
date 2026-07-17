@@ -23,6 +23,7 @@
 
 {{- $enabledPlugins := dict
   "chrome-devtools-mcp@claude-plugins-official" true
+  "codex@openai-codex" true
   "kotlin-lsp@claude-plugins-official" true
   "mattpocock-skills@mattpocock" true
   "skill-creator@claude-plugins-official" true
@@ -32,6 +33,7 @@
 {{- $githubMarketplaces := dict
   "anthropic-agent-skills" "anthropics/skills"
   "mattpocock" "mattpocock/skills"
+  "openai-codex" "openai/codex-plugin-cc"
 -}}
 {{- $extraKnownMarketplaces := dict -}}
 {{- range $name, $repo := $githubMarketplaces -}}
