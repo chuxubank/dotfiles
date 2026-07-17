@@ -2,7 +2,7 @@
 
 echo "{{ template "week" . }} 󰯁 Setup bun"
 
-BUN_INSTALL="$HOME/{{ .path.bun }}"
+BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 PATH="$BUN_INSTALL/bin:$PATH"
 
 {{- if not (lookPath "bun") }}

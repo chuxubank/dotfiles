@@ -1,16 +1,16 @@
 {{- if ne .host_env "ci" -}}
-[{{ joinPath (index .path "xz") "RobotDroid" | quote }}]
+[{{ joinPath (index .path.workspace "xz") "RobotDroid" | quote }}]
     type = "git-repo"
     url = "https://github.com/OpenXingZhi/RobotDroid"
     refreshPeriod = "48h"
 
-[{{ joinPath (index .path "xz") "RobotDroidConfig" | quote }}]
+[{{ joinPath (index .path.workspace "xz") "RobotDroidConfig" | quote }}]
     type = "git-repo"
     url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
     refreshPeriod = "48h"
 
 {{- if has "qmk" .roles -}}
-["{{ .path.qmk }}"]
+["{{ .path.workspace.qmk }}"]
     type = "git-repo"
     url = "https://github.com/qmk/qmk_firmware"
     refreshPeriod = "48h"

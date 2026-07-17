@@ -1,10 +1,10 @@
 #!/bin/sh
 
-{{- $plum_dir :=  joinPath .chezmoi.homeDir .path.plum }}
+{{- $plum_dir :=  joinPath .chezmoi.homeDir .path.tool.plum }}
 
 {{- if eq .chezmoi.os "darwin" }}
 echo "󰯁 Update librime for Emacs usage"
-export rime_dir={{ joinPath .chezmoi.homeDir .path.rime }}
+export rime_dir={{ joinPath .chezmoi.homeDir .path.data.rime }}
 bash {{ joinPath $plum_dir "rime-install" }} double-pinyin
 bash {{ joinPath $plum_dir "rime-install" }} emoji:customize:schema=luna_pinyin
 bash {{ joinPath $plum_dir "rime-install" }} emoji:customize:schema=double_pinyin_flypy

@@ -1,30 +1,4 @@
 [path]
-skills = "Developer/Personal/skills"
-nutstore = "Nutstore"
-
-aa = "Developer/AA"
-asahiart = "Developer/AsahiArt"
-iv = "Developer/IV"
-xz = "Developer/XingZhi"
-
-bun = ".bun"
-emacs-site-lisp = ".local/share/emacs/site-lisp"
-isyncrc = ".config/isyncrc"
-mail = ".maildir"
-plum = ".config/plum"
-raycast = ".config/raycast"
-sdkman = ".sdkman"
-
-models-dev-api = ".cache/llm/data-set/models-dev.json"
-openrouter-models-api = ".cache/llm/models/openrouter.json"
-
-rime = ".local/share/rime"
-rime-sync = "Nutstore/RimeSync"
-squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
-
-zotero-ext = "Profiles/Misaka/extensions"
-qmk = "Developer/Example/QMK"
-
 [path.personal]
 pass = ".password-store"
 beancount = "Developer/Personal/beancount"
@@ -34,3 +8,31 @@ emacs = ".config/emacs"
 org = "Developer/Personal/org"
 org-roam = "Developer/Personal/org-roam"
 blog = "Developer/Personal/blog"
+skills = "Developer/Personal/skills"
+
+[path.workspace]
+aa = "Developer/AA"
+asahiart = "Developer/AsahiArt"
+iv = "Developer/IV"
+xz = "Developer/XingZhi"
+qmk = "Developer/Example/QMK"
+
+[path.tool]
+bun = ".bun"
+emacs-site-lisp = ".local/share/emacs/site-lisp"
+isyncrc = ".config/isyncrc"
+plum = ".config/plum"
+raycast = ".config/raycast"
+sdkman = ".sdkman"
+
+[path.data]
+nutstore = "Nutstore"
+mail = ".maildir"
+rime = ".local/share/rime"
+rime-sync = "Nutstore/RimeSync"
+squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
+zotero-ext = "Profiles/Misaka/extensions"
+
+[path.cache]
+models-dev-api = ".cache/llm/data-set/models-dev.json"
+openrouter-models-api = ".cache/llm/models/openrouter.json"

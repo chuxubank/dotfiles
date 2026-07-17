@@ -2,13 +2,13 @@
 #!/bin/sh
 
 echo "󰯁 Setup isync and mu"
-mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/qq
-mkdir -p {{ joinPath .chezmoi.homeDir .path.mail }}/gmail
+mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/qq
+mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/gmail
 echo "Sync all emails..."
 mbsync -a
 {{- if not (stat (joinPath .chezmoi.homeDir ".cache" "mu")) }}
 echo "Init mu..."
-mu init --ignored-address=/.*no.*reply.*/ --maildir={{ joinPath .chezmoi.homeDir .path.mail }} --my-address={{ .email }}
+mu init --ignored-address=/.*no.*reply.*/ --maildir={{ joinPath .chezmoi.homeDir .path.data.mail }} --my-address={{ .email }}
 {{- end }}
 echo "Call mu index..."
 mu index

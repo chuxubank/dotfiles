@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
 
-{{ $scriptFile := joinPath .chezmoi.homeDir .path.raycast "scripts/install-anki-add-on" -}}
+{{ $scriptFile := joinPath .chezmoi.homeDir .path.tool.raycast "scripts/install-anki-add-on" -}}
 
 echo "󰯁 Install Anki add-on with {{ include $scriptFile | sha256sum }}"
 

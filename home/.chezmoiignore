@@ -41,6 +41,6 @@ Library/LaunchAgents/rclone.rpi.plist
 .ssh
 {{ .path.personal.pass }}
 
-{{ .path.asahiart }}/*
+{{ .path.workspace.asahiart }}/*
 Developer/Personal/*
 {{- end }}

@@ -63,14 +63,14 @@ export BEANCOUNT_FILE="$HOME/{{ .path.personal.beancount }}/ledger/ledger.beanco
 export FAVA_PORT=8888
 
 # Bun
-export BUN_INSTALL="$HOME/{{ .path.bun }}"
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Claude
 export CLAUDE_CODE_NO_FLICKER=1
 
 # Emacs
-export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path "emacs-site-lisp" }}:"
+export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path.tool "emacs-site-lisp" }}:"
 
 # Go
 export GOPATH="$XDG_DATA_HOME/go"
@@ -97,16 +97,16 @@ export OPENCODE_DISABLE_CLAUDE_CODE=1
 export PASSWORD_STORE_DIR="$HOME/{{ .path.personal.pass }}"
 
 # plum
-export plum_dir="$HOME/{{ .path.plum }}"
+export plum_dir="$HOME/{{ .path.tool.plum }}"
 export PATH=$plum_dir:$PATH
 
 {{- if has "qmk" .roles -}}
 # QMK
-export QMK_HOME=$HOME/{{ .path.qmk }}
+export QMK_HOME=$HOME/{{ .path.workspace.qmk }}
 {{- end -}}
 
 # Raycast
-export PATH=$HOME/{{ .path.raycast }}/scripts:$PATH
+export PATH=$HOME/{{ .path.tool.raycast }}/scripts:$PATH
 
 # Rust
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
@@ -114,10 +114,10 @@ export CARGO_HOME="$XDG_DATA_HOME/cargo"
 export PATH="$CARGO_HOME/bin:$PATH"
 
 # StarDict
-export STARDICT_DATA_DIR="$HOME/{{ .path.nutstore }}/Dictionary"
+export STARDICT_DATA_DIR="$HOME/{{ .path.data.nutstore }}/Dictionary"
 
 # SDKMAN
-export SDKMAN_DIR="$HOME/{{ .path.sdkman }}"
+export SDKMAN_DIR="$HOME/{{ .path.tool.sdkman }}"
 
 # VCPKG
 export VCPKG_ROOT="$HOME/vcpkg"

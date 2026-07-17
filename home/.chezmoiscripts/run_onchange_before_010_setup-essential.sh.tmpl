@@ -42,9 +42,9 @@ else
     gh repo clone pass "$PASSWORD_STORE_DIR"
 fi
 
-if [ -d "$HOME/{{ .path.nutstore }}" ]; then
+if [ -d "$HOME/{{ .path.data.nutstore }}" ]; then
     echo "✅ Nutstore dir exist."
 else
-    mkdir $HOME/{{ .path.nutstore }}
+    mkdir $HOME/{{ .path.data.nutstore }}
 fi
 {{ end -}}

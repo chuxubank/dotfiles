@@ -133,7 +133,7 @@
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
   {{- else if hasKey $prov "models_cache" -}}{{- $cacheKey = $prov.models_cache -}}{{- end -}}
   {{- if $cacheKey -}}
-    {{- $cacheFile := index $ctx.path $cacheKey -}}
+    {{- $cacheFile := index $ctx.path.cache $cacheKey -}}
     {{- if not (hasPrefix "/" $cacheFile) -}}{{- $cacheFile = joinPath $ctx.chezmoi.homeDir $cacheFile -}}{{- end -}}
     {{- $_ := set $resolved "cache_file" $cacheFile -}}
   {{- end -}}
@@ -150,7 +150,7 @@
     {{- if $ds -}}
       {{- $dsFetchArgs := dict "type" $ds.type "base_url" (default "" (index $ds "base_url")) -}}
       {{- if hasKey $ds "file_path" -}}
-        {{- $dsFile := index $ctx.path $ds.file_path -}}
+        {{- $dsFile := index $ctx.path.cache $ds.file_path -}}
         {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath $ctx.chezmoi.homeDir $dsFile -}}{{- end -}}
         {{- $_ := set $dsFetchArgs "file" $dsFile -}}
       {{- else if hasKey $ds "file" -}}

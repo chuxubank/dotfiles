@@ -11,8 +11,8 @@ IMAPStore qq-remote
 Account qq
 
 MaildirStore qq-local
-Path {{ joinPath .chezmoi.homeDir .path.mail "qq" -}} {{- .chezmoi.pathSeparator }}
-Inbox {{ joinPath .chezmoi.homeDir .path.mail "qq" "Inbox" }}
+Path {{ joinPath .chezmoi.homeDir .path.data.mail "qq" -}} {{- .chezmoi.pathSeparator }}
+Inbox {{ joinPath .chezmoi.homeDir .path.data.mail "qq" "Inbox" }}
 SubFolders Verbatim
 
 Channel qq
@@ -37,8 +37,8 @@ Account gmail
 Path "[Gmail]/"
 
 MaildirStore gmail-local
-Path {{ joinPath .chezmoi.homeDir .path.mail "gmail" -}} {{- .chezmoi.pathSeparator }}
-Inbox {{ joinPath .chezmoi.homeDir .path.mail "gmail" "Inbox" }}
+Path {{ joinPath .chezmoi.homeDir .path.data.mail "gmail" -}} {{- .chezmoi.pathSeparator }}
+Inbox {{ joinPath .chezmoi.homeDir .path.data.mail "gmail" "Inbox" }}
 SubFolders Verbatim
 
 Channel gmail

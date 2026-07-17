@@ -3,5 +3,5 @@ GitHubPackagesUsername={{ includeTemplate "safe/pass" (merge (dict "path" "Perso
 robotDroidSupabaseUrl={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-url") .) }}
 robotDroidSupabaseKey={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/Supabase" "field" "robotdroid-key") .) }}
 robotDroidKeyStorePassword={{ includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "KeyPassword") .) }}
-robotDroidKeyStoreFile={{ joinPath .chezmoi.homeDir .path.nutstore (includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "Path") .)) }}
+robotDroidKeyStoreFile={{ joinPath .chezmoi.homeDir .path.data.nutstore (includeTemplate "safe/pass" (merge (dict "path" "Work/XZ/RobotDroid/KeyStore" "field" "Path") .)) }}
 org.gradle.daemon=false

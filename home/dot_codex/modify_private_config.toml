@@ -6,9 +6,8 @@
 {{- $projects := dict -}}
 {{- $trustedLevel := dict "trust_level" "trusted" -}}
 {{- $trustedPaths := list
-  "/"
-  (joinPath .chezmoi.homeDir ".local" "share" "chezmoi")
-  (joinPath .chezmoi.homeDir .path.skills)
+  .chezmoi.homeDir
+  .chezmoi.workingTree
 -}}
 {{- range $path := values (omit .path.personal "pass") }}
   {{- $trustedPaths = append $trustedPaths (joinPath $.chezmoi.homeDir $path) -}}
