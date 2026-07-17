@@ -67,8 +67,8 @@ skills:
         - kotlin-tooling-java-to-kotlin
       source: Kotlin/kotlin-agent-skills
 
-    - name: "lark-*"
-      source: larksuite/cli
+    - name: "*"
+      source: larksuite/cli/skills
       when:
         enabled:
           host_env: iv
