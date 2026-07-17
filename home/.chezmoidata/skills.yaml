@@ -30,6 +30,9 @@ skills:
         disabled:
           tool: claude-code
 
+    - name: sim-use
+      source: lycorp-jp/sim-use/skills
+
     - name: ["cli-creator", "figma-implement-design"]
       source: openai/skills
       when:
