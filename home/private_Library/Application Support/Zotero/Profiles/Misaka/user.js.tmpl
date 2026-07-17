@@ -1,4 +1,4 @@
-{{- $repo := joinPath .chezmoi.homeDir (index .path "org-roam") -}}
+{{- $repo := joinPath .chezmoi.homeDir (index .path.personal "org-roam") -}}
 {{- $file := joinPath "bibliography" "zotero.bib" -}}
 {{- $bibFile := joinPath $repo $file -}}
 

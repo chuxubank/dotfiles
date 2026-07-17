@@ -61,6 +61,11 @@
   "superpowers@git+https://github.com/obra/superpowers.git"
 ) -}}
 
+{{- $references := dict -}}
+{{- range $name, $path := .path.personal }}
+  {{- $_ := set $references $name (dict "path" (printf "~/%s" $path)) -}}
+{{- end }}
+
 {{- $config := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
@@ -70,6 +75,7 @@
   "model" $cfg.model
   "plugin" $plugins
   "provider" $provider
+  "references" $references
   "server" (dict "port" 4096)
   "small_model" $cfg.small_model
 -}}

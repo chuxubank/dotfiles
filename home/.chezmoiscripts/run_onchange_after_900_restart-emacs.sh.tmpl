@@ -5,7 +5,7 @@ set -eu
 {{ $customFile := joinPath "dot_config" "cat-emacs" "modify_custom.el" -}}
 # custom.el hash: {{ include $customFile | sha256sum }}
 
-{{ $emacsDir := joinPath .chezmoi.homeDir .path.emacs -}}
+{{ $emacsDir := joinPath .chezmoi.homeDir .path.personal.emacs -}}
 {{ $orgDir := joinPath $emacsDir "elpa" "org-mode" -}}
 
 # Get current Emacs and Org-mode short commit hashes

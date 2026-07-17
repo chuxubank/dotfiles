@@ -1,41 +1,41 @@
-["{{ .path.pass }}"]
+["{{ .path.personal.pass }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/pass"
     refreshPeriod = "4h"
 
-["{{ .path.beancount }}"]
+["{{ .path.personal.beancount }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/beancount"
     refreshPeriod = "24h"
 
-["{{ .path.proxy }}"]
+["{{ .path.personal.proxy }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/proxy-config"
     refreshPeriod = "4h"
 	clone.args = ["-b", "stable"]
 	pull.args = ["--ff-only", "origin", "stable"]
 
-["{{ .path.keyboard }}"]
+["{{ .path.personal.keyboard }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/keyboard-config"
     refreshPeriod = "4h"
 
-["{{ .path.emacs }}"]
+["{{ .path.personal.emacs }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/cat-emacs"
     refreshPeriod = "4h"
 
-["{{ .path.org }}"]
+["{{ .path.personal.org }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org"
     refreshPeriod = "4h"
 
-["{{ index .path "org-roam" }}"]
+["{{ index .path.personal "org-roam" }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/org-roam"
     refreshPeriod = "4h"
 
-["{{ .path.blog }}"]
+["{{ .path.personal.blog }}"]
     type = "git-repo"
     url = "https://github.com/chuxubank/chuxubank.github.io"
     refreshPeriod = "4h"

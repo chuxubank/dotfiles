@@ -1,7 +1,7 @@
 {{ if not (eq .host_env "ci") -}}
 #!/bin/sh
 
-echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.proxy) "rev-parse" "HEAD" }}"
+echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.personal.proxy) "rev-parse" "HEAD" }}"
 
 {{- if eq .chezmoi.os "darwin" }}
 echo "Xray running: {{ output "brew" "services" "info" "xray" "--json" | fromJson | jq ".[0].running" | first }}"
@@ -9,7 +9,7 @@ echo "Sing-box running: {{ output "brew" "services" "info" "sing-box" "--json" |
 {{- end }}
 
 {{ if lookPath "ansible-playbook" }}
-cd {{ joinPath .chezmoi.homeDir .path.proxy }}
+cd {{ joinPath .chezmoi.homeDir .path.personal.proxy }}
 ansible-playbook playbook.yml --limit localhost --skip-tags "install"
 {{ end }}
 

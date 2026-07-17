@@ -1,21 +1,13 @@
 [path]
-org = "Developer/Personal/org"
-org-roam = "Developer/Personal/org-roam"
-beancount = "Developer/Personal/beancount"
-blog = "Developer/Personal/blog"
-proxy = "Developer/Personal/proxy"
-keyboard = "Developer/Personal/keyboard"
 skills = "Developer/Personal/skills"
 nutstore = "Nutstore"
 
 aa = "Developer/AA"
 asahiart = "Developer/AsahiArt"
 iv = "Developer/IV"
-personal = "Developer/Personal"
 xz = "Developer/XingZhi"
 
 bun = ".bun"
-emacs = ".config/emacs"
 emacs-site-lisp = ".local/share/emacs/site-lisp"
 isyncrc = ".config/isyncrc"
 mail = ".maildir"
@@ -32,3 +24,13 @@ squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
 
 zotero-ext = "Profiles/Misaka/extensions"
 qmk = "Developer/Example/QMK"
+
+[path.personal]
+pass = ".password-store"
+beancount = "Developer/Personal/beancount"
+proxy = "Developer/Personal/proxy"
+keyboard = "Developer/Personal/keyboard"
+emacs = ".config/emacs"
+org = "Developer/Personal/org"
+org-roam = "Developer/Personal/org-roam"
+blog = "Developer/Personal/blog"

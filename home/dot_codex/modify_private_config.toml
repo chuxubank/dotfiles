@@ -5,28 +5,26 @@
 {{- /* Projects trust map */ -}}
 {{- $projects := dict -}}
 {{- $trustedLevel := dict "trust_level" "trusted" -}}
-{{- $_ := set $projects "/" $trustedLevel -}}
-{{- $_ := set $projects (joinPath .chezmoi.homeDir ".local" "share" "chezmoi") $trustedLevel -}}
-{{- $trustedKeys := list
-  "beancount"
-  "blog"
-  "emacs"
-  "keyboard"
-  "org"
-  "org-roam"
-  "proxy"
-  "skills"
+{{- $trustedPaths := list
+  "/"
+  (joinPath .chezmoi.homeDir ".local" "share" "chezmoi")
+  (joinPath .chezmoi.homeDir .path.skills)
 -}}
-{{- range $k := $trustedKeys }}
-  {{- $_ := set $projects (joinPath $.chezmoi.homeDir (index $.path $k)) $trustedLevel -}}
+{{- range $path := values (omit .path.personal "pass") }}
+  {{- $trustedPaths = append $trustedPaths (joinPath $.chezmoi.homeDir $path) -}}
+{{- end }}
+{{- range $path := $trustedPaths }}
+  {{- $_ := set $projects $path $trustedLevel -}}
 {{- end }}
 {{- $trustedTreeKeys := list "iv" "aa" "asahiart" "xz" -}}
 {{- range $k := $trustedTreeKeys }}
   {{- $root := joinPath $.chezmoi.homeDir (index $.path $k) -}}
-  {{- $dirs := output "sh" "-c" "if [ -d \"$1\" ]; then find \"$1\" -mindepth 1 -maxdepth 1 -type d -print; fi" "sh" $root -}}
-  {{- range $dir := splitList "\n" ($dirs | trim) }}
-    {{- if $dir }}
-      {{- $_ := set $projects $dir $trustedLevel -}}
+  {{- if stat $root }}
+    {{- $dirs := output "fd" "--hidden" "--no-ignore" "--min-depth" "1" "--max-depth" "1" "--type" "d" "--absolute-path" "--format" "{}" "." $root -}}
+    {{- range $dir := splitList "\n" ($dirs | trim) }}
+      {{- if $dir }}
+        {{- $_ := set $projects $dir $trustedLevel -}}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

@@ -39,8 +39,8 @@ Library/LaunchAgents/rclone.rpi.plist
 .gemini
 .gradle
 .ssh
-{{ .path.pass }}
+{{ .path.personal.pass }}
 
 {{ .path.asahiart }}/*
-{{ .path.personal }}/*
+Developer/Personal/*
 {{- end }}

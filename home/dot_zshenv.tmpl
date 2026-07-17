@@ -59,7 +59,7 @@ export GEMINI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Perso
 export OPENROUTER_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key") .) }}"
 
 # Beancount
-export BEANCOUNT_FILE="$HOME/{{ .path.beancount }}/ledger/ledger.beancount"
+export BEANCOUNT_FILE="$HOME/{{ .path.personal.beancount }}/ledger/ledger.beancount"
 export FAVA_PORT=8888
 
 # Bun
@@ -87,14 +87,14 @@ export HASS_SERVER=http://homeassistant.local:8123
 export JIRA_URL="https://aaecosystem.atlassian.net"
 
 # Org
-export ORG_DIR="$HOME/{{ .path.org }}"
+export ORG_DIR="$HOME/{{ .path.personal.org }}"
 
 # OpenCode
 export OPENCODE_ENABLE_EXA=true
 export OPENCODE_DISABLE_CLAUDE_CODE=1
 
 # Pass
-export PASSWORD_STORE_DIR="$HOME/{{ .path.pass }}"
+export PASSWORD_STORE_DIR="$HOME/{{ .path.personal.pass }}"
 
 # plum
 export plum_dir="$HOME/{{ .path.plum }}"
