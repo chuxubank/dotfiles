@@ -2,8 +2,9 @@
        Input: dict "tool" <tool-name> (merged with root context $)
        Output JSON:
          model       — default model id
-         small_model — small model id (if set)
-         reasoning_effort — string (if set)
+          small_model — small model id (if set)
+          reasoning_effort — string (if set)
+          default_models — map of role -> model id (if set)
          providers   — map of alias -> resolved provider:
            name      — provider key in llm.providers
            base_url  — string
@@ -30,6 +31,10 @@
 
 {{- if hasKey $toolCfg "reasoning_effort" }}
   {{- $_ := set $result "reasoning_effort" $toolCfg.reasoning_effort -}}
+{{- end }}
+
+{{- if hasKey $toolCfg "default_models" }}
+  {{- $_ := set $result "default_models" $toolCfg.default_models -}}
 {{- end }}
 
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}

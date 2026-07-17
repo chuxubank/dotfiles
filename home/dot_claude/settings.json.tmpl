@@ -6,7 +6,9 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
+{{- $anthropicResolved := false -}}
 {{- range $_, $ep := $cfg.providers }}
+  {{- if eq $ep.type "anthropic" }}{{- $anthropicResolved = true -}}{{- end }}
   {{- if $ep.base_url }}
     {{- $_ := set $env "ANTHROPIC_BASE_URL" (printf "%s/v1" $ep.base_url) -}}
   {{- end }}
@@ -15,10 +17,11 @@
   {{- end }}
 {{- end -}}
 
-{{- if eq .host_env "iv" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" "claude-opus-4-6" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" "claude-sonnet-4-6" -}}
-  {{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" "claude-haiku-4-5-20251001" -}}
+{{- if and $anthropicResolved (hasKey $cfg "default_models") -}}
+  {{- $dm := $cfg.default_models -}}
+  {{- if hasKey $dm "opus" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" $dm.opus -}}{{- end }}
+  {{- if hasKey $dm "sonnet" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" $dm.sonnet -}}{{- end }}
+  {{- if hasKey $dm "haiku" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" $dm.haiku -}}{{- end }}
 {{- end -}}
 
 {{- $enabledPlugins := dict
