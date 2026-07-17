@@ -4,9 +4,31 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
 
 declared=()
 updateable=()
+installed=()
 cleanup_enabled=true
-installed_json=$(skills list -g --json)
-skills_state_dir=$(mktemp -d)
+had_errors=false
+
+if installed_json=$(skills list -g --json); then
+  if jq -e 'type == "array"' >/dev/null <<<"$installed_json"; then
+    if installed_output=$(jq -r '.[].path | split("/")[-1]' <<<"$installed_json"); then
+      installed=(${(f)installed_output})
+    else
+      print -u2 -- "Could not parse installed skills; skipping undeclared-skill cleanup"
+      cleanup_enabled=false
+      had_errors=true
+    fi
+  else
+    print -u2 -- "skills list returned invalid JSON; skipping undeclared-skill cleanup"
+    cleanup_enabled=false
+    had_errors=true
+  fi
+else
+  print -u2 -- "Could not list installed skills; skipping undeclared-skill cleanup"
+  cleanup_enabled=false
+  had_errors=true
+fi
+
+skills_state_dir=$(mktemp -d) || exit 1
 trap 'rm -rf "$skills_state_dir"' EXIT
 
 skill_name_is_pattern() {
@@ -22,14 +44,21 @@ skill_name_matches() {
 
 list_source_skills() {
   local source="$1"
-  local output
+  local output listing
 
   if ! output=$(NO_COLOR=1 skills add "$source" --list 2>&1); then
     print -u2 -r -- "$output"
     return 1
   fi
 
-  print -r -- "$output" | sed -n 's/^│    \([^ ].*\)$/\1/p'
+  listing=$(print -r -- "$output" | sed -n 's/^│    \([^ ].*\)$/\1/p')
+  if [[ -z "$listing" ]]; then
+    print -u2 -r -- "$output"
+    print -u2 -- "Could not parse the skill list for $source"
+    return 1
+  fi
+
+  print -r -- "$listing"
 }
 
 resolve_skill_names() {
@@ -63,9 +92,21 @@ skill_has_agent() {
   local skill_name="$1"
   local agent_slug="$2"
   local agent_state="$skills_state_dir/$agent_slug.json"
+  local agent_state_tmp="$agent_state.tmp"
 
   if [[ ! -f "$agent_state" ]]; then
-    skills list -g --json --agent "$agent_slug" > "$agent_state"
+    if ! skills list -g --json --agent "$agent_slug" > "$agent_state_tmp"; then
+      print -u2 -- "Could not list skills for agent $agent_slug"
+      return 2
+    fi
+    if ! jq -e 'type == "array"' >/dev/null < "$agent_state_tmp"; then
+      print -u2 -- "skills list returned invalid JSON for agent $agent_slug"
+      return 2
+    fi
+    if ! mv "$agent_state_tmp" "$agent_state"; then
+      print -u2 -- "Could not cache skills for agent $agent_slug"
+      return 2
+    fi
   fi
 
   jq -e --arg skill_name "$skill_name" \
@@ -83,9 +124,10 @@ skill_has_agent() {
 patterns=({{- if kindIs "slice" $skill.name }}{{ range $i, $name := $skill.name }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }}{{ else }}{{ $skill.name | quote }}{{ end }})
 if ! resolved_output=$(resolve_skill_names {{ $skill.source | quote }} "${patterns[@]}"); then
   cleanup_enabled=false
+  had_errors=true
   print -u2 -- "Could not resolve ${patterns[*]} in {{ $skill.source }}; skipping undeclared-skill cleanup"
 else
-  resolved=("${(@f)resolved_output}")
+  resolved=(${(f)resolved_output})
   for name in "${resolved[@]}"; do
     if (( ! ${declared[(Ie)$name]} )); then
       declared+=("$name")
@@ -99,47 +141,72 @@ else
 
   if (( ! ${#resolved[@]} )); then
     print -u2 -- "No skills matched ${patterns[*]} in {{ $skill.source }}"
+    cleanup_enabled=false
+    had_errors=true
   else
     needs_install={{ if $directSource }}false{{ else }}true{{ end }}
+    state_ok=true
     skill_args=()
-    for name in "${resolved[@]}"; do
-      skill_args+=(--skill "$name")
-    done
+    if (( ${#patterns[@]} == 1 )) && [[ ${patterns[1]} == '*' ]]; then
+      skill_args+=(--skill '*')
+    else
+      for name in "${resolved[@]}"; do
+        skill_args+=(--skill "$name")
+      done
+    fi
 
     {{- if $directSource }}
       for name in "${resolved[@]}"; do
         for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
-          if ! skill_has_agent "$name" "$agent"; then
-            needs_install=true
-            break 2
+          skill_has_agent "$name" "$agent"
+          skill_status=$?
+          if (( skill_status == 0 )); then
+            continue
           fi
+
+          if (( skill_status == 1 )); then
+            needs_install=true
+          else
+            state_ok=false
+            cleanup_enabled=false
+            had_errors=true
+          fi
+          break 2
         done
       done
     {{- end }}
 
-    if $needs_install; then
-      skills add {{ $skill.source }} \
+    if $state_ok && $needs_install; then
+      if ! skills add {{ $skill.source }} \
         --global --yes \
         "${skill_args[@]}" \
-        --agent {{ join " " $agents }}
+        --agent {{ join " " $agents }}; then
+        cleanup_enabled=false
+        had_errors=true
+      fi
     fi
   fi
 fi
   {{ end }}
 {{- end }}
 
-# Uninstall skills not declared in config
-installed=("${(@f)$(jq -r '.[].path | split("/")[-1]' <<<"$installed_json")}")
-
 if $cleanup_enabled; then
   for name in "${installed[@]}"; do
     if (( ! ${declared[(Ie)$name]} )); then
       echo "Removing undeclared skill: $name"
-      skills remove "$name" -g --yes
+      if ! skills remove "$name" -g --yes; then
+        had_errors=true
+      fi
     fi
   done
 fi
 
 if (( ${#updateable[@]} )); then
-  skills update -g "${updateable[@]}"
+  if ! skills update -g "${updateable[@]}"; then
+    had_errors=true
+  fi
+fi
+
+if $had_errors; then
+  exit 1
 fi
