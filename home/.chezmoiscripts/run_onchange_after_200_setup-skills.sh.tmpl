@@ -144,7 +144,7 @@ else
     cleanup_enabled=false
     had_errors=true
   else
-    needs_install={{ if $directSource }}false{{ else }}true{{ end }}
+    needs_install=false
     state_ok=true
     skill_args=()
     if (( ${#patterns[@]} == 1 )) && [[ ${patterns[1]} == '*' ]]; then
@@ -155,26 +155,24 @@ else
       done
     fi
 
-    {{- if $directSource }}
-      for name in "${resolved[@]}"; do
-        for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
-          skill_has_agent "$name" "$agent"
-          skill_status=$?
-          if (( skill_status == 0 )); then
-            continue
-          fi
+    for name in "${resolved[@]}"; do
+      for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
+        skill_has_agent "$name" "$agent"
+        skill_status=$?
+        if (( skill_status == 0 )); then
+          continue
+        fi
 
-          if (( skill_status == 1 )); then
-            needs_install=true
-          else
-            state_ok=false
-            cleanup_enabled=false
-            had_errors=true
-          fi
-          break 2
-        done
+        if (( skill_status == 1 )); then
+          needs_install=true
+        else
+          state_ok=false
+          cleanup_enabled=false
+          had_errors=true
+        fi
+        break 2
       done
-    {{- end }}
+    done
 
     if $state_ok && $needs_install; then
       if ! skills add {{ $skill.source }} \
