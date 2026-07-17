@@ -17,11 +17,12 @@
   {{- end }}
 {{- end -}}
 
+{{- /* Map each default_models alias → ANTHROPIC_DEFAULT_<ALIAS>_MODEL
+       (opus, sonnet, haiku, fable, …). Only when an anthropic provider resolved. */ -}}
 {{- if and $anthropicResolved (hasKey $cfg "default_models") -}}
-  {{- $dm := $cfg.default_models -}}
-  {{- if hasKey $dm "opus" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_OPUS_MODEL" $dm.opus -}}{{- end }}
-  {{- if hasKey $dm "sonnet" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_SONNET_MODEL" $dm.sonnet -}}{{- end }}
-  {{- if hasKey $dm "haiku" }}{{- $_ := set $env "ANTHROPIC_DEFAULT_HAIKU_MODEL" $dm.haiku -}}{{- end }}
+  {{- range $alias, $model := $cfg.default_models -}}
+    {{- $_ := set $env (printf "ANTHROPIC_DEFAULT_%s_MODEL" (upper $alias)) $model -}}
+  {{- end -}}
 {{- end -}}
 
 {{- $enabledPlugins := dict
