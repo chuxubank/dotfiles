@@ -13,6 +13,10 @@
     url = "https://github.com/rime/plum"
     refreshPeriod = "168h"
 
+[{{ joinPath ".config" "cat-emacs" "library-of-babel.org" | quote }}]
+    type = "file"
+    url = "https://orgmode.org/worg/library-of-babel.org"
+
 ["bin/jar/pdf-unstamper.jar"]
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
