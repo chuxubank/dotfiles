@@ -273,7 +273,7 @@ casks = [
   { name = "slack", when.enabled.host_env = ["aa"] },
   { name = "spotify", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "steam", when.enabled = { host_env = ["personal"], roles = ["game"] } },
-  { name = "wechat", when.enabled.host_env = ["personal"] },
+  { name = "wechat", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "wechatwork", when.enabled.host_env = ["aa"] },
   { name = "windows-app", when.enabled.host_env = ["personal"] },
   { name = "xquartz", when.enabled.disk_gb.min = 256 },
