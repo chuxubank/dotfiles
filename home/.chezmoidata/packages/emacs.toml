@@ -250,6 +250,7 @@ vc = [
   { name = "org-remoteimg", url = "https://github.com/gaoDean/org-remoteimg" },
   { name = "org-yt", url = "https://github.com/TobiasZawada/org-yt" },
   { name = "poly-any-go-template", url = "https://github.com/chuxubank/poly-any-template", main_file = "poly-any-go-template.el" },
+  { name = "poly-treesit-fold", url = "https://github.com/chuxubank/poly-any-template", main_file = "poly-treesit-fold.el" },
   { name = "chezmoi", url = "https://github.com/chuxubank/chezmoi.el" },
   { name = "poly-any-jinja2", url = "https://github.com/chuxubank/poly-any-template", main_file = "poly-any-jinja2.el" },
   { name = "treemacs-activities", url = "https://github.com/chuxubank/treemacs-activities" },
