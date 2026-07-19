@@ -252,7 +252,6 @@ vc = [
   { name = "poly-any-go-template", url = "https://github.com/chuxubank/poly-any-template", main_file = "poly-any-go-template.el" },
   { name = "chezmoi", url = "https://github.com/chuxubank/chezmoi.el" },
   { name = "poly-any-jinja2", url = "https://github.com/chuxubank/poly-any-template", main_file = "poly-any-jinja2.el" },
-  { name = "zsh-ts-mode", url = "https://github.com/zardoz03/zsh-ts-mode" },
   { name = "treemacs-activities", url = "https://github.com/chuxubank/treemacs-activities" },
   { name = "ultra-scroll", url = "https://github.com/jdtsmith/ultra-scroll" },
   { name = "vbnet-mode", url = "https://github.com/lelit/vbnet-mode" },
