@@ -253,6 +253,7 @@ vc = [
   { name = "poly-any-go-template", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/go-template" },
   { name = "poly-any-jinja2", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/jinja2" },
   { name = "poly-any-template", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/shared" },
+  { name = "poly-ansible-jinja2", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/ansible" },
   { name = "poly-treesit-fold", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/treesit-fold" },
   { name = "treemacs-activities", url = "https://github.com/chuxubank/treemacs-activities" },
   { name = "ultra-scroll", url = "https://github.com/jdtsmith/ultra-scroll" },
