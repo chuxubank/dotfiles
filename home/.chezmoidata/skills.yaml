@@ -25,7 +25,13 @@ skills:
         enabled: false
 
     - name: "*"
-      source: mattpocock/skills
+      source: mattpocock/skills/skills/productivity
+      when:
+        disabled:
+          tool: claude-code
+
+    - name: "*"
+      source: mattpocock/skills/skills/engineering
       when:
         disabled:
           tool: claude-code
