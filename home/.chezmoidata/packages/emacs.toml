@@ -221,6 +221,7 @@ selected = [
 vc = [
   { name = "android-mode", url = "https://github.com/chuxubank/emacs-studio", lisp_dir = "android-mode/" },
   { name = "chezmoi-mode", url = "https://github.com/chuxubank/chezmoi-mode" },
+  { name = "chezmoi-transient", url = "https://github.com/chuxubank/chezmoi-mode", lisp_dir = "extensions/chezmoi-transient/" },
   { name = "code-review", url = "https://github.com/doomelpa/code-review" },
   { name = "compose-preview", url = "https://github.com/chuxubank/emacs-studio", lisp_dir = "compose-preview/" },
   { name = "diagram-preview", url = "https://github.com/natrys/diagram-preview" },
