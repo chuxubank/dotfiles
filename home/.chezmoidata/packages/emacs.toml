@@ -250,6 +250,7 @@ vc = [
   { name = "org-mode", url = "https://code.tecosaur.net/tec/org-mode", lisp_dir = "lisp/", branch = "dev" },
   { name = "org-remoteimg", url = "https://github.com/gaoDean/org-remoteimg" },
   { name = "org-yt", url = "https://github.com/TobiasZawada/org-yt" },
+  { name = "package-vc-skip-unchanged", url = "https://github.com/chuxubank/package-vc-skip-unchanged" },
   { name = "poly-any-go-template", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/go-template" },
   { name = "poly-any-jinja2", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/jinja2" },
   { name = "poly-any-template", url = "https://github.com/chuxubank/poly-any-template", lisp_dir = "lisp/shared" },
