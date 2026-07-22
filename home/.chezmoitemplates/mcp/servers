@@ -32,7 +32,11 @@
 
   {{- /* stdio fields */ -}}
   {{- if eq $exec.type "stdio" }}
-    {{- $_ := set $s "cmd" $exec.cmd -}}
+    {{- $cmd := $exec.cmd -}}
+    {{- if hasPrefix "~/" $cmd -}}
+      {{- $cmd = joinPath $.chezmoi.homeDir (trimPrefix "~/" $cmd) -}}
+    {{- end -}}
+    {{- $_ := set $s "cmd" $cmd -}}
     {{- $_ := set $s "args" (default list (index $exec "args")) -}}
   {{- end }}
 

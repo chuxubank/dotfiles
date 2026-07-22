@@ -31,15 +31,25 @@ mcp:
           - --no-usage-statistics
           - --autoConnect
         timeout: 20
-    - name: Emacs MCP Server
-      description: Connect Large Language Models directly to your Emacs environment! This MCP (Model Context Protocol) server exposes Emacs functionality through standardized tools, allowing LLMs like Claude to read and modify your buffers, execute elisp code, navigate files, and much more.
-      when:
-        disabled:
-          tool: ["opencode"]
+    - name: Elisp Dev
+      description: MCP Server for Agentic Elisp Development
       execution:
         type: stdio
-        cmd: emacs-mcp-server
-        args: [""]
+        cmd: ~/.config/emacs/.local/etc/emacs-mcp-stdio.sh
+        args:
+          - --init-function=elisp-dev-mcp-enable
+          - --stop-function=elisp-dev-mcp-disable
+          - --server-id=elisp-dev-mcp
+        timeout: 20
+    - name: Org
+      description: Interact with your Org files
+      execution:
+        type: stdio
+        cmd: ~/.config/emacs/.local/etc/emacs-mcp-stdio.sh
+        args:
+          - --init-function=elisp-dev-mcp-enable
+          - --stop-function=elisp-dev-mcp-disable
+          - --server-id=org-mcp
         timeout: 20
     - name: Fetch
       description:
