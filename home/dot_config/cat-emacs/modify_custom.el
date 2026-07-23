@@ -48,7 +48,6 @@
  '(org-roam-mode-sections
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
          #'org-roam-unlinked-references-section) nil nil "Customized with use-package org-roam")
-{{ includeTemplate "emacs/custom-packages.el" . }}
  '(safe-local-variable-values
    '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
 (custom-set-faces

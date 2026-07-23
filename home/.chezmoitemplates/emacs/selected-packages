@@ -1,7 +1,0 @@
-{{- /* Resolved emacs package-selected-packages list.
-       Merges the `selected` list with all `vc` package names (so vc packages
-       are not flagged as orphans by package-autoremove), applies `when`
-       gating for the current host, dedupes and sorts. Output: JSON array. */ -}}
-{{- $selected := includeTemplate "package/select" (dict "ctx" .ctx "path" (list "emacs" "selected")) | fromJson -}}
-{{- $vcNames := includeTemplate "package/select" (dict "ctx" .ctx "path" (list "emacs" "vc")) | fromJson -}}
-{{- concat $selected $vcNames | uniq | sortAlpha | toJson -}}

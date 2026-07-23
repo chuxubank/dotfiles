@@ -1,7 +1,5 @@
 {{ if not (eq .host_env "ci") -}}
 #!/bin/sh
-{{ $customPackages := includeTemplate "emacs/custom-packages.el" . -}}
-# packages hash: {{ $customPackages | sha256sum }}
 
 echo "{{ template "week" . }} 󰯁 Setup emacs"
 
