@@ -150,6 +150,7 @@ brews = [
   { name = "atlassian/homebrew-acli/acli", when.enabled.host_env = ["aa"] },
   { name = "awscli", when.enabled.host_env = ["aa"] },
   { name = "cocoapods", when.enabled.host_env = ["personal", "iv"] },
+  { name = "ios-deploy", when.enabled.host_env = ["iv"] },
   { name = "glab", when.enabled.host_env = ["iv"] },
   { name = "llama.cpp", when.enabled.roles = ["llm"] },
   { name = "ollama", when.enabled.roles = ["llm"], restart_service = true },
