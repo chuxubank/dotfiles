@@ -1,0 +1,33 @@
+{{- /* raycast/adb-device-argument — Render a Raycast ADB device argument.
+       Input: dict "argument" <argument-number>
+              ["usbOnly" <bool>] — exclude wireless serials containing ":"
+*/ -}}
+{{- $argument := .argument -}}
+{{- $usbOnly := default false (index . "usbOnly") -}}
+{{- $devices := list -}}
+{{- if lookPath "adb" -}}
+  {{- $output := output "adb" "devices" "-l" -}}
+  {{- range $line := splitList "\n" $output -}}
+    {{- $parts := regexSplit "\\s+" (trim $line) -1 -}}
+    {{- if and (ge (len $parts) 2) (eq (index $parts 1) "device") -}}
+      {{- $serial := index $parts 0 -}}
+      {{- if not (and $usbOnly (contains ":" $serial)) -}}
+        {{- $product := "" -}}
+        {{- $model := "" -}}
+        {{- $device := "" -}}
+        {{- range $part := $parts -}}
+          {{- if hasPrefix "product:" $part -}}{{- $product = trimPrefix "product:" $part -}}{{- end -}}
+          {{- if hasPrefix "model:" $part -}}{{- $model = trimPrefix "model:" $part -}}{{- end -}}
+          {{- if hasPrefix "device:" $part -}}{{- $device = trimPrefix "device:" $part -}}{{- end -}}
+        {{- end -}}
+        {{- $title := printf "%s (%s / %s / %s)" $serial $product $model $device -}}
+        {{- $devices = append $devices (dict "serial" $serial "title" $title) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $devices) 0 -}}
+# @raycast.argument{{ $argument }} { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $index, $item := $devices }}{{ if $index }}, {{ end }}{"title": {{ $item.title | toJson }}, "value": {{ $item.serial | toJson }}}{{ end }}] }
+{{- else -}}
+# @raycast.argument{{ $argument }} { "type": "text", "placeholder": "Serial (no devices at apply time)", "optional": true }
+{{- end }}

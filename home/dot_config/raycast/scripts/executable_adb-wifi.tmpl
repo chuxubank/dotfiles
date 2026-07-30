@@ -1,25 +1,4 @@
 #!/bin/zsh
-{{- $devices := list -}}
-{{- $titles := list -}}
-{{- if lookPath "adb" -}}
-{{-   $output := output "zsh" "-lc" "adb devices -l 2>/dev/null || true" -}}
-{{-   range $line := splitList "\n" $output -}}
-{{-     $trimmed := trim $line -}}
-{{-     if and (ne $trimmed "") (not (hasPrefix "List" $trimmed)) -}}
-{{-       $serial := index (splitList " " $trimmed) 0 -}}
-{{-       if and (ne $serial "") (not (contains ":" $serial)) -}}
-{{-         $devices = append $devices $serial -}}
-{{-         $product := "" -}}{{ $model := "" -}}{{ $device := "" -}}
-{{-         range $part := splitList " " $trimmed -}}
-{{-           if hasPrefix "product:" $part -}}{{ $product = trimPrefix "product:" $part -}}{{ end -}}
-{{-           if hasPrefix "model:" $part -}}{{ $model = trimPrefix "model:" $part -}}{{ end -}}
-{{-           if hasPrefix "device:" $part -}}{{ $device = trimPrefix "device:" $part -}}{{ end -}}
-{{-         end -}}
-{{-         $titles = append $titles (printf "%s (%s / %s / %s)" $serial $product $model $device) -}}
-{{-       end -}}
-{{-     end -}}
-{{-   end -}}
-{{- end }}
 
 # Required parameters:
 # @raycast.schemaVersion 1
@@ -29,11 +8,8 @@
 # Optional parameters:
 # @raycast.icon 📡
 # @raycast.packageName Android
-{{ if gt (len $devices) 0 -}}
-# @raycast.argument1 { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $i, $s := $devices }}{{ if $i }}, {{ end }}{"title": "{{ index $titles $i }}", "value": "{{ $s }}"}{{ end }}] }
-{{ else -}}
-# @raycast.argument1 { "type": "text", "placeholder": "Serial (no devices at apply time)", "optional": true }
-{{ end }}
+{{ includeTemplate "raycast/adb-device-argument" (dict "argument" 1 "usbOnly" true) -}}
+
 # Documentation:
 # @raycast.description Connect an ADB device wirelessly via tcpip 5555
 # @raycast.author Misaka
