@@ -3,11 +3,28 @@ set -u
 
 usage() {
 	cat <<'EOF'
-usage: services [SERVICE ...]
+usage: services [list|status] [SERVICE ...]
+       services <start|stop|restart> SERVICE ...
 
-List configured user services. SERVICE may be a tool name such as
-gitwatch or a full service name such as gitwatch.org.
+SERVICE may be a tool name such as gitwatch or a full service name such
+as gitwatch.org. A tool name selects all of that tool's services.
 EOF
+}
+
+validate_selector() {
+	case "$1" in
+{{- range (includeTemplate "service/services" . | fromJson) }}
+	{{- $isBrew := and (hasKey . "brew") .brew }}
+	{{- $name := .tool }}
+	{{- if not $isBrew }}{{- $name = printf "%s.%s" .tool .target }}{{- end }}
+	{{- if eq $name .tool }}
+	{{ $name | quote }}) return 0 ;;
+	{{- else }}
+	{{ $name | quote }} | {{ .tool | quote }}) return 0 ;;
+	{{- end }}
+{{- end }}
+	esac
+	return 1
 }
 
 selected() {
@@ -23,17 +40,9 @@ selected() {
 	return 1
 }
 
-print_service() {
-	service_name=$1
-	tool_name=$2
-	label=$3
-	manager=$4
-	file=$5
-	scheduled=$6
-	shift 6
-
-	selected "$service_name" "$tool_name" "$@" || return 0
-	matched=$((matched + 1))
+service_status() {
+	label=$1
+	scheduled=$2
 	status=none
 
 {{- if eq .chezmoi.os "darwin" }}
@@ -77,8 +86,70 @@ print_service() {
 		fi
 	fi
 {{- end }}
+}
 
-	printf '%-26s %-12s %-8s %s\n' "$service_name" "$status" "$manager" "$file"
+control_service() {
+	action=$1
+	service_name=$2
+	label=$3
+
+{{- if eq .chezmoi.os "darwin" }}
+	domain="gui/{{ .chezmoi.uid }}"
+	plist="$HOME/Library/LaunchAgents/$label.plist"
+	case "$action" in
+	start)
+		if launchctl print "$domain/$label" >/dev/null 2>&1; then
+			launchctl kickstart "$domain/$label"
+		else
+			launchctl bootstrap "$domain" "$plist" &&
+				launchctl kickstart "$domain/$label"
+		fi
+		;;
+	stop)
+		if launchctl print "$domain/$label" >/dev/null 2>&1; then
+			launchctl bootout "$domain/$label"
+		fi
+		;;
+	restart)
+		if launchctl print "$domain/$label" >/dev/null 2>&1; then
+			launchctl kickstart -k "$domain/$label"
+		else
+			launchctl bootstrap "$domain" "$plist" &&
+				launchctl kickstart "$domain/$label"
+		fi
+		;;
+	esac
+{{- else if eq .chezmoi.os "linux" }}
+	systemctl --user "$action" "$label.service"
+{{- end }}
+	result=$?
+
+	if [ "$result" -ne 0 ]; then
+		printf 'services: failed to %s %s\n' "$action" "$service_name" >&2
+		failures=$((failures + 1))
+		return
+	fi
+	printf '%-26s %s\n' "$service_name" "$action"
+}
+
+handle_service() {
+	action=$1
+	service_name=$2
+	tool_name=$3
+	label=$4
+	manager=$5
+	file=$6
+	scheduled=$7
+	shift 7
+
+	selected "$service_name" "$tool_name" "$@" || return 0
+
+	if [ "$action" = list ]; then
+		service_status "$label" "$scheduled"
+		printf '%-26s %-12s %-8s %s\n' "$service_name" "$status" "$manager" "$file"
+	else
+		control_service "$action" "$service_name" "$label"
+	fi
 }
 
 case "${1-}" in
@@ -86,10 +157,34 @@ case "${1-}" in
 	usage
 	exit 0
 	;;
+list | status)
+	action=list
+	shift
+	;;
+start | stop | restart)
+	action=$1
+	shift
+	if [ "$#" -eq 0 ]; then
+		usage >&2
+		exit 2
+	fi
+	;;
+*)
+	action=list
+	;;
 esac
 
-matched=0
-printf '%-26s %-12s %-8s %s\n' Name Status Manager File
+for selector; do
+	if ! validate_selector "$selector"; then
+		printf 'services: unknown service: %s\n' "$selector" >&2
+		exit 1
+	fi
+done
+
+failures=0
+if [ "$action" = list ]; then
+	printf '%-26s %-12s %-8s %s\n' Name Status Manager File
+fi
 {{- range (includeTemplate "service/services" . | fromJson) }}
 {{- $isBrew := and (hasKey . "brew") .brew }}
 {{- $name := "" }}
@@ -103,19 +198,16 @@ printf '%-26s %-12s %-8s %s\n' Name Status Manager File
 {{- if eq $.chezmoi.os "darwin" }}
   {{- $manager := "launchd" }}
   {{- if $isBrew }}{{- $manager = "brew" }}{{- end }}
-print_service {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
+handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
 	{{ $manager | quote }} {{ printf "~/Library/LaunchAgents/%s.plist" $label | quote }} \
 	{{ $scheduled }} "$@"
 {{- else if eq $.chezmoi.os "linux" }}
   {{- $manager := "systemd" }}
   {{- if and $isBrew (lookPath "brew") }}{{- $manager = "brew" }}{{- end }}
-print_service {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
+handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
 	{{ $manager | quote }} {{ printf "~/.config/systemd/user/%s.service" $label | quote }} \
 	{{ $scheduled }} "$@"
 {{- end }}
 {{- end }}
 
-if [ "$#" -gt 0 ] && [ "$matched" -eq 0 ]; then
-	printf 'services: no configured service matches: %s\n' "$*" >&2
-	exit 1
-fi
+exit "$failures"

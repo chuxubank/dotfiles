@@ -263,9 +263,5 @@ source <(opencode completion)
 eval "$(codex completion zsh)"
 alias codex="codex --yolo"
 
-{{- range (includeTemplate "service/services" . | fromJson) }}
-{{ template "service/toggle-alias" (merge (dict "os" $.chezmoi.os "uid" $.chezmoi.uid) .) }}
-{{- end }}
-
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
