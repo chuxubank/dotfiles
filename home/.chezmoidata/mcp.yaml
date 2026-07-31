@@ -117,6 +117,7 @@ mcp:
       when:
         disabled:
           host_env: iv
+          tool: ["claude-code"]
     - name: GitHub
       description: >
         The GitHub MCP Server connects AI tools directly to GitHub's
