@@ -1,14 +1,11 @@
 {{- $isBrew := and (hasKey . "brew") .brew -}}
-{{- $label := "" -}}
 {{- $logBase := "" -}}
+{{- $label := includeTemplate "service/label" (dict "os" .chezmoi.os "service" .) -}}
 {{- if $isBrew -}}
-  {{- $label = printf "homebrew.mxcl.%s" .tool -}}
   {{- $logBase = .tool -}}
 {{- else -}}
-  {{- $label = printf "%s.%s" .tool .target -}}
   {{- $logBase = .target -}}
 {{- end -}}
-{{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
 {{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
 {{- $stderrFile := printf "%s-stderr.log" $logBase -}}
 {{- if hasKey . "stdoutLogFile" -}}{{- $stdoutFile = .stdoutLogFile -}}{{- end -}}

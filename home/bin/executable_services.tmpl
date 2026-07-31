@@ -1,0 +1,121 @@
+#!/bin/sh
+set -u
+
+usage() {
+	cat <<'EOF'
+usage: services [SERVICE ...]
+
+List configured user services. SERVICE may be a tool name such as
+gitwatch or a full service name such as gitwatch.org.
+EOF
+}
+
+selected() {
+	service_name=$1
+	tool_name=$2
+	shift 2
+
+	[ "$#" -eq 0 ] && return 0
+	for selector; do
+		[ "$selector" = "$service_name" ] || [ "$selector" = "$tool_name" ] || continue
+		return 0
+	done
+	return 1
+}
+
+print_service() {
+	service_name=$1
+	tool_name=$2
+	label=$3
+	manager=$4
+	file=$5
+	scheduled=$6
+	shift 6
+
+	selected "$service_name" "$tool_name" "$@" || return 0
+	matched=$((matched + 1))
+	status=none
+
+{{- if eq .chezmoi.os "darwin" }}
+	if launch_data=$(launchctl print "gui/{{ .chezmoi.uid }}/$label" 2>/dev/null); then
+		launch_state=$(printf '%s\n' "$launch_data" |
+			awk -F '= ' '/^[[:space:]]*state = / { print $2; exit }')
+		exit_code=$(printf '%s\n' "$launch_data" |
+			awk -F '= ' '/^[[:space:]]*last exit code = / { print $2; exit }')
+
+		if [ "$launch_state" = "running" ]; then
+			status=started
+		elif [ -n "$exit_code" ] && [ "$exit_code" != "0" ] &&
+			[ "$exit_code" != "(never exited)" ]; then
+			status="error $exit_code"
+		elif [ "$scheduled" = true ]; then
+			status=scheduled
+		else
+			status=stopped
+		fi
+	fi
+{{- else if eq .chezmoi.os "linux" }}
+	if systemd_data=$(systemctl --user show "$label.service" \
+		--property=LoadState \
+		--property=ActiveState \
+		--property=ExecMainStatus 2>/dev/null); then
+		load_state=$(printf '%s\n' "$systemd_data" |
+			awk -F= '$1 == "LoadState" { print $2 }')
+		active_state=$(printf '%s\n' "$systemd_data" |
+			awk -F= '$1 == "ActiveState" { print $2 }')
+		exit_code=$(printf '%s\n' "$systemd_data" |
+			awk -F= '$1 == "ExecMainStatus" { print $2 }')
+
+		if [ "$load_state" != "not-found" ]; then
+			case "$active_state" in
+			active) status=started ;;
+			activating) status=starting ;;
+			deactivating) status=stopping ;;
+			failed) status="error $exit_code" ;;
+			*) status=stopped ;;
+			esac
+		fi
+	fi
+{{- end }}
+
+	printf '%-26s %-12s %-8s %s\n' "$service_name" "$status" "$manager" "$file"
+}
+
+case "${1-}" in
+-h | --help)
+	usage
+	exit 0
+	;;
+esac
+
+matched=0
+printf '%-26s %-12s %-8s %s\n' Name Status Manager File
+{{- range (includeTemplate "service/services" . | fromJson) }}
+{{- $isBrew := and (hasKey . "brew") .brew }}
+{{- $name := "" }}
+{{- if $isBrew }}
+  {{- $name = .tool }}
+{{- else }}
+  {{- $name = printf "%s.%s" .tool .target }}
+{{- end }}
+{{- $label := includeTemplate "service/label" (dict "os" $.chezmoi.os "service" .) }}
+{{- $scheduled := or (hasKey . "startInterval") (and (hasKey . "extra") (contains "<key>Sockets</key>" .extra)) }}
+{{- if eq $.chezmoi.os "darwin" }}
+  {{- $manager := "launchd" }}
+  {{- if $isBrew }}{{- $manager = "brew" }}{{- end }}
+print_service {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
+	{{ $manager | quote }} {{ printf "~/Library/LaunchAgents/%s.plist" $label | quote }} \
+	{{ $scheduled }} "$@"
+{{- else if eq $.chezmoi.os "linux" }}
+  {{- $manager := "systemd" }}
+  {{- if and $isBrew (lookPath "brew") }}{{- $manager = "brew" }}{{- end }}
+print_service {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
+	{{ $manager | quote }} {{ printf "~/.config/systemd/user/%s.service" $label | quote }} \
+	{{ $scheduled }} "$@"
+{{- end }}
+{{- end }}
+
+if [ "$#" -gt 0 ] && [ "$matched" -eq 0 ]; then
+	printf 'services: no configured service matches: %s\n' "$*" >&2
+	exit 1
+fi

@@ -1,0 +1,12 @@
+{{- $label := "" -}}
+{{- if and (hasKey .service "brew") .service.brew -}}
+  {{- if eq .os "darwin" -}}
+    {{- $label = printf "homebrew.mxcl.%s" .service.tool -}}
+  {{- else -}}
+    {{- $label = printf "homebrew.%s" .service.tool -}}
+  {{- end -}}
+{{- else -}}
+  {{- $label = printf "%s.%s" .service.tool .service.target -}}
+{{- end -}}
+{{- if hasKey .service "label" -}}{{- $label = .service.label -}}{{- end -}}
+{{- $label -}}

@@ -1,15 +1,12 @@
 {{- $isBrew := and (hasKey . "brew") .brew -}}
 {{- $hasBrew := lookPath "brew" -}}
-{{- $label := "" -}}
 {{- $logBase := "" -}}
+{{- $label := includeTemplate "service/label" (dict "os" .chezmoi.os "service" .) -}}
 {{- if $isBrew -}}
-  {{- $label = printf "homebrew.%s" .tool -}}
   {{- $logBase = .tool -}}
 {{- else -}}
-  {{- $label = printf "%s.%s" .tool .target -}}
   {{- $logBase = .target -}}
 {{- end -}}
-{{- if hasKey . "label" -}}{{- $label = .label -}}{{- end -}}
 {{- $unitDir := joinPath .chezmoi.homeDir ".config/systemd/user" -}}
 {{- $unitFile := joinPath $unitDir (printf "%s.service" $label) -}}
 {{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
