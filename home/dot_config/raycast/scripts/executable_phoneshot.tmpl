@@ -1,4 +1,5 @@
 #!/bin/zsh
+{{- $deviceTypes := list "simulator" "usb" "wifi" }}
 
 # Required parameters:
 # @raycast.schemaVersion 1
@@ -8,7 +9,7 @@
 # Optional parameters:
 # @raycast.icon 📱
 # @raycast.packageName Mobile Development
-{{ includeTemplate "raycast/mobile-device-argument" (dict "argument" 1 "types" (list "simulator" "usb" "wifi")) -}}
+{{ includeTemplate "raycast/mobile-device-argument" (merge (dict "argument" 1 "types" $deviceTypes) .) -}}
 # @raycast.argument2 { "type": "text", "placeholder": "Filename (optional)", "optional": true }
 
 # Documentation:
@@ -21,65 +22,15 @@ copy_to_clipboard="${PHONESHOT_COPY:-true}"
 selection="${1:-}"
 filename="${2:-phoneshot}"
 out_file="${save_dir}/${filename}.png"
+device_types={{ join "," $deviceTypes | quote }}
 
-list_mobile_devices() {
-    if command -v adb >/dev/null 2>&1; then
-        while IFS= read -r line; do
-            [[ "$(echo "$line" | awk '{print $2}')" == "device" ]] || continue
-            local serial model
-            serial=$(echo "$line" | awk '{print $1}')
-            model=$(echo "$line" | sed -nE 's/.* model:([^ ]+).*/\1/p')
-            print -r -- "android\t${serial}\tAndroid: ${model:-$serial}"
-        done < <(adb devices -l | tail -n +2)
-    fi
-
-    if command -v xcrun >/dev/null 2>&1; then
-        xcrun simctl list devices booted --json 2>/dev/null \
-            | jq -r '
-                .devices
-                | to_entries[]
-                | select(.key | contains(".iOS-"))
-                | .value[]
-                | select(.isAvailable == true and .state == "Booted")
-                | ["simulator", .udid, ("iOS: " + .name + " (Simulator)")]
-                | @tsv
-            '
-
-        local device_json
-        device_json=$(mktemp)
-        if xcrun devicectl list devices --quiet --json-output "$device_json" >/dev/null 2>&1; then
-            jq -r '
-                .result.devices[]
-                | .hardwareProperties.udid as $udid
-                | select(
-                    .hardwareProperties.platform == "iOS"
-                    and .hardwareProperties.reality == "physical"
-                    and .connectionProperties.tunnelState == "connected"
-                )
-                | [
-                    (if .connectionProperties.transportType == "localNetwork"
-                     then "device-network"
-                     else "device-usb"
-                     end),
-                    $udid,
-                    ("iOS: " + .deviceProperties.name
-                     + " (" + .hardwareProperties.marketingName
-                     + ", "
-                     + (if .connectionProperties.transportType == "localNetwork"
-                        then "Network"
-                        else "USB"
-                        end)
-                     + ")")
-                ]
-                | @tsv
-            ' "$device_json"
-        fi
-        rm -f "$device_json"
-    fi
-}
+if ! command -v mobile-device-list >/dev/null 2>&1; then
+    echo "❌ mobile-device-list is not installed. Run chezmoi apply."
+    exit 1
+fi
 
 if [[ -z "$selection" ]]; then
-    entries=("${(@f)$(list_mobile_devices)}")
+    entries=("${(@f)$(mobile-device-list --types "$device_types" --format tsv)}")
     entries=("${(@)entries:#}")
 
     if [[ ${#entries[@]} -eq 0 ]]; then

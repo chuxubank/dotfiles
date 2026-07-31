@@ -1,4 +1,5 @@
 #!/bin/zsh
+{{- $deviceTypes := list "simulator" "usb" }}
 
 # Required parameters:
 # @raycast.schemaVersion 1
@@ -8,7 +9,7 @@
 # Optional parameters:
 # @raycast.icon 📡
 # @raycast.packageName Android
-{{ includeTemplate "raycast/adb-device-argument" (dict "argument" 1 "types" (list "simulator" "usb")) -}}
+{{ includeTemplate "raycast/adb-device-argument" (merge (dict "argument" 1 "types" $deviceTypes) .) -}}
 
 # Documentation:
 # @raycast.description Connect an ADB device wirelessly via tcpip 5555
@@ -16,33 +17,38 @@
 # @raycast.authorURL https://github.com/chuxubank
 
 serial="${1:-}"
+device_types={{ join "," $deviceTypes | quote }}
 
-if [[ -z "$serial" ]]; then
-    lines=()
-    while IFS= read -r line; do
-        s=$(echo "$line" | awk '{print $1}')
-        [[ "$s" == *:* ]] && continue
-        lines+=("$line")
-    done < <(adb devices -l | tail -n +2 | grep -v '^$')
-
-    if [[ ${#lines[@]} -eq 0 ]]; then
-        echo "❌ No USB-connected ADB device found."
-        exit 1
-    elif [[ ${#lines[@]} -eq 1 ]]; then
-        serial=$(echo "${lines[1]}" | awk '{print $1}')
-    elif [[ -t 0 ]]; then
-        echo "Available devices:"
-        select line in "${lines[@]}"; do
-            [[ -n "$line" ]] && break
-            echo "Invalid selection, try again."
-        done
-        serial=$(echo "$line" | awk '{print $1}')
-    else
-        serial=$(echo "${lines[1]}" | awk '{print $1}')
-    fi
+if ! command -v mobile-device-list >/dev/null 2>&1; then
+    echo "❌ mobile-device-list is not installed. Run chezmoi apply."
+    exit 1
 fi
 
-if [[ "$serial" == *:* ]]; then
+if [[ -z "$serial" ]]; then
+    entries=("${(@f)$(mobile-device-list --platforms android --types "$device_types" --format tsv)}")
+    entries=("${(@)entries:#}")
+
+    if [[ ${#entries[@]} -eq 0 ]]; then
+        echo "❌ No USB-connected ADB device found."
+        exit 1
+    elif [[ ${#entries[@]} -eq 1 ]]; then
+        entry="${entries[1]}"
+    elif [[ -t 0 ]]; then
+        echo "Available devices:"
+        select entry in "${entries[@]}"; do
+            [[ -n "$entry" ]] && break
+            echo "Invalid selection, try again."
+        done
+    else
+        entry="${entries[1]}"
+    fi
+
+    remainder="${entry#*$'\t'}"
+    serial="${remainder%%$'\t'*}"
+fi
+
+if mobile-device-list --platforms android --types wifi --format tsv \
+    | awk -F '\t' -v serial="$serial" '$2 == serial { found = 1 } END { exit !found }'; then
     echo "✅ $serial is already wireless"
     exit 0
 fi

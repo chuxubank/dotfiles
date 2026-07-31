@@ -3,7 +3,7 @@
               ["types" <list>] — any of simulator, usb, wifi
 */ -}}
 {{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
-{{- $devices := includeTemplate "raycast/adb-devices" (dict "types" $types) | fromJson -}}
+{{- $devices := includeTemplate "raycast/adb-devices" (merge (dict "types" $types) .) | fromJson -}}
 {{- includeTemplate "raycast/device-argument" (dict
       "argument" .argument
       "devices" $devices

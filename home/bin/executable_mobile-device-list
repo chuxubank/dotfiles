@@ -1,0 +1,145 @@
+#!/bin/zsh
+
+platforms="android,ios"
+types="simulator,usb,wifi"
+format="json"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --platforms)
+            platforms="$2"
+            shift 2
+            ;;
+        --types)
+            types="$2"
+            shift 2
+            ;;
+        --format)
+            format="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if ! command -v jq >/dev/null 2>&1; then
+    echo "jq is required to list mobile devices." >&2
+    exit 1
+fi
+
+contains_value() {
+    [[ ",$1," == *",$2,"* ]]
+}
+
+records_file=$(mktemp)
+trap 'rm -f "$records_file"' EXIT
+
+emit_record() {
+    jq -cn \
+        --arg platform "$1" \
+        --arg type "$2" \
+        --arg kind "$3" \
+        --arg id "$4" \
+        --arg title "$5" \
+        '{platform: $platform, type: $type, kind: $kind, id: $id, title: $title}' \
+        >> "$records_file"
+}
+
+if contains_value "$platforms" android && command -v adb >/dev/null 2>&1; then
+    while IFS= read -r line; do
+        parts=(${=line})
+        [[ ${#parts[@]} -ge 2 && "${parts[2]}" == "device" ]] || continue
+
+        serial="${parts[1]}"
+        type="wifi"
+        if [[ "$serial" == emulator-* ]]; then
+            type="simulator"
+        elif [[ " $line" == *" usb:"* ]]; then
+            type="usb"
+        fi
+        contains_value "$types" "$type" || continue
+
+        product=""
+        model=""
+        device=""
+        for part in "${parts[@]}"; do
+            case "$part" in
+                product:*) product="${part#product:}" ;;
+                model:*) model="${part#model:}" ;;
+                device:*) device="${part#device:}" ;;
+            esac
+        done
+
+        emit_record android "$type" android "$serial" "$serial ($product / $model / $device)"
+    done < <(adb devices -l 2>/dev/null | tail -n +2)
+fi
+
+if contains_value "$platforms" ios && command -v xcrun >/dev/null 2>&1; then
+    if contains_value "$types" simulator; then
+        while IFS=$'\t' read -r name udid; do
+            [[ -n "$udid" ]] || continue
+            emit_record ios simulator simulator "$udid" "$name (Simulator)"
+        done < <(
+            xcrun simctl list devices booted --json 2>/dev/null \
+                | jq -r '
+                    .devices
+                    | to_entries[]
+                    | select(.key | contains(".iOS-"))
+                    | .value[]
+                    | select(.isAvailable == true and .state == "Booted")
+                    | [.name, .udid]
+                    | @tsv
+                '
+        )
+    fi
+
+    if contains_value "$types" usb || contains_value "$types" wifi; then
+        device_json=$(mktemp)
+        if xcrun devicectl --timeout 5 list devices --quiet --json-output "$device_json" >/dev/null 2>&1; then
+            while IFS=$'\t' read -r type kind udid title; do
+                [[ -n "$udid" ]] || continue
+                contains_value "$types" "$type" || continue
+                emit_record ios "$type" "$kind" "$udid" "$title"
+            done < <(
+                jq -r '
+                    .result.devices[]
+                    | select(
+                        .hardwareProperties.platform == "iOS"
+                        and .hardwareProperties.reality == "physical"
+                        and .connectionProperties.tunnelState == "connected"
+                    )
+                    | (if .connectionProperties.transportType == "localNetwork"
+                       then {type: "wifi", kind: "device-network", transport: "Wi-Fi"}
+                       else {type: "usb", kind: "device-usb", transport: "USB"}
+                       end) as $connection
+                    | [
+                        $connection.type,
+                        $connection.kind,
+                        .hardwareProperties.udid,
+                        (.deviceProperties.name
+                         + " (" + .hardwareProperties.marketingName
+                         + ", " + $connection.transport + ")")
+                    ]
+                    | @tsv
+                ' "$device_json"
+            )
+        fi
+        rm -f "$device_json"
+    fi
+fi
+
+case "$format" in
+    json)
+        jq -s '.' "$records_file"
+        ;;
+    tsv)
+        jq -r -s '.[] | [.kind, .id, .title] | @tsv' "$records_file"
+        ;;
+    *)
+        echo "Unsupported format: $format" >&2
+        exit 2
+        ;;
+esac

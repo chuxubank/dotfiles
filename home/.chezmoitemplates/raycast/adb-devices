@@ -7,34 +7,12 @@
 {{- $titlePrefix := default "" (index . "titlePrefix") -}}
 {{- $valuePrefix := default "" (index . "valuePrefix") -}}
 {{- $devices := list -}}
-{{- if lookPath "adb" -}}
-  {{- $output := output "adb" "devices" "-l" -}}
-  {{- range $line := splitList "\n" $output -}}
-    {{- $parts := regexSplit "\\s+" (trim $line) -1 -}}
-    {{- if and (ge (len $parts) 2) (eq (index $parts 1) "device") -}}
-      {{- $serial := index $parts 0 -}}
-      {{- $type := "usb" -}}
-      {{- if hasPrefix "emulator-" $serial -}}
-        {{- $type = "simulator" -}}
-      {{- else if contains ":" $serial -}}
-        {{- $type = "wifi" -}}
-      {{- end -}}
-      {{- if has $type $types -}}
-        {{- $product := "" -}}
-        {{- $model := "" -}}
-        {{- $device := "" -}}
-        {{- range $part := $parts -}}
-          {{- if hasPrefix "product:" $part -}}{{- $product = trimPrefix "product:" $part -}}{{- end -}}
-          {{- if hasPrefix "model:" $part -}}{{- $model = trimPrefix "model:" $part -}}{{- end -}}
-          {{- if hasPrefix "device:" $part -}}{{- $device = trimPrefix "device:" $part -}}{{- end -}}
-        {{- end -}}
-        {{- $devices = append $devices (dict
-              "title" (printf "%s%s (%s / %s / %s)" $titlePrefix $serial $product $model $device)
-              "type" $type
-              "value" (printf "%s%s" $valuePrefix $serial)
-            ) -}}
-      {{- end -}}
-    {{- end -}}
+{{- $helper := joinPath .chezmoi.sourceDir "bin/executable_mobile-device-list" -}}
+{{- $output := output "zsh" "-f" $helper "--platforms" "android" "--types" (join "," $types) "--format" "json" | fromJson -}}
+{{- range $device := $output -}}
+  {{- $devices = append $devices (dict
+        "title" (printf "%s%s" $titlePrefix $device.title)
+        "value" (printf "%s%s" $valuePrefix $device.id)
+      ) -}}
   {{- end -}}
-{{- end -}}
 {{- $devices | toJson -}}

@@ -4,10 +4,10 @@
 */ -}}
 {{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
 {{- $devices := list -}}
-{{- range $device := includeTemplate "raycast/adb-devices" (dict "types" $types "titlePrefix" "Android: " "valuePrefix" "android:") | fromJson -}}
+{{- range $device := includeTemplate "raycast/adb-devices" (merge (dict "types" $types "titlePrefix" "Android: " "valuePrefix" "android:") .) | fromJson -}}
   {{- $devices = append $devices $device -}}
 {{- end -}}
-{{- range $device := includeTemplate "raycast/ios-devices" (dict "types" $types "titlePrefix" "iOS: ") | fromJson -}}
+{{- range $device := includeTemplate "raycast/ios-devices" (merge (dict "types" $types "titlePrefix" "iOS: ") .) | fromJson -}}
   {{- $devices = append $devices $device -}}
 {{- end -}}
 {{- includeTemplate "raycast/device-argument" (dict
