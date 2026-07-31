@@ -1,8 +1,9 @@
 {{- /* raycast/adb-device-argument — Render a Raycast ADB device argument.
        Input: dict "argument" <argument-number>
-              ["usbOnly" <bool>] — exclude wireless serials containing ":"
+              ["types" <list>] — any of simulator, usb, wifi
 */ -}}
-{{- $devices := includeTemplate "raycast/adb-devices" (dict "usbOnly" (default false (index . "usbOnly"))) | fromJson -}}
+{{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
+{{- $devices := includeTemplate "raycast/adb-devices" (dict "types" $types) | fromJson -}}
 {{- includeTemplate "raycast/device-argument" (dict
       "argument" .argument
       "devices" $devices

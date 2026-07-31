@@ -1,6 +1,8 @@
 {{- /* raycast/ios-devices — Return available iOS devices as JSON.
-       Input: ["titlePrefix" <text>]
+       Input: ["types" <list>] — any of simulator, usb, wifi
+              ["titlePrefix" <text>]
 */ -}}
+{{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
 {{- $titlePrefix := default "" (index . "titlePrefix") -}}
 {{- $devices := list -}}
 {{- if lookPath "xcrun" -}}
@@ -8,9 +10,10 @@
   {{- range $runtime, $runtimeDevices := $simulatorOutput.devices -}}
     {{- if contains ".iOS-" $runtime -}}
       {{- range $device := $runtimeDevices -}}
-        {{- if and $device.isAvailable (eq $device.state "Booted") -}}
+        {{- if and $device.isAvailable (eq $device.state "Booted") (has "simulator" $types) -}}
           {{- $devices = append $devices (dict
                 "title" (printf "%s%s (Simulator)" $titlePrefix $device.name)
+                "type" "simulator"
                 "value" (printf "simulator:%s" $device.udid)
               ) -}}
         {{- end -}}
@@ -21,10 +24,15 @@
   {{- $physicalJSON := output "sh" "-c" `json_file=$(mktemp); trap 'rm -f "$json_file"' EXIT; if xcrun devicectl list devices --quiet --json-output "$json_file" >/dev/null 2>&1; then cat "$json_file"; else printf '{"result":{"devices":[]}}'; fi` -}}
   {{- $physicalOutput := $physicalJSON | fromJson -}}
   {{- range $device := $physicalOutput.result.devices -}}
+    {{- $type := "usb" -}}
+    {{- if eq $device.connectionProperties.transportType "localNetwork" -}}
+      {{- $type = "wifi" -}}
+    {{- end -}}
     {{- if and
           (eq $device.hardwareProperties.platform "iOS")
           (eq $device.hardwareProperties.reality "physical")
           (eq $device.connectionProperties.tunnelState "connected")
+          (has $type $types)
     -}}
       {{- $transport := "USB" -}}
       {{- $kind := "device-usb" -}}
@@ -34,6 +42,7 @@
       {{- end -}}
       {{- $devices = append $devices (dict
             "title" (printf "%s%s (%s, %s)" $titlePrefix $device.deviceProperties.name $device.hardwareProperties.marketingName $transport)
+            "type" $type
             "value" (printf "%s:%s" $kind $device.hardwareProperties.udid)
           ) -}}
     {{- end -}}

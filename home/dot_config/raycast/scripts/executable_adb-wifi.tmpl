@@ -8,7 +8,7 @@
 # Optional parameters:
 # @raycast.icon 📡
 # @raycast.packageName Android
-{{ includeTemplate "raycast/adb-device-argument" (dict "argument" 1 "usbOnly" true) -}}
+{{ includeTemplate "raycast/adb-device-argument" (dict "argument" 1 "types" (list "simulator" "usb")) -}}
 
 # Documentation:
 # @raycast.description Connect an ADB device wirelessly via tcpip 5555

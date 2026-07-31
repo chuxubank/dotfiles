@@ -1,9 +1,9 @@
 {{- /* raycast/adb-devices — Return available ADB devices as JSON.
-       Input: ["usbOnly" <bool>] — exclude wireless serials containing ":"
+       Input: ["types" <list>] — any of simulator, usb, wifi
               ["titlePrefix" <text>]
               ["valuePrefix" <text>]
 */ -}}
-{{- $usbOnly := default false (index . "usbOnly") -}}
+{{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
 {{- $titlePrefix := default "" (index . "titlePrefix") -}}
 {{- $valuePrefix := default "" (index . "valuePrefix") -}}
 {{- $devices := list -}}
@@ -13,7 +13,13 @@
     {{- $parts := regexSplit "\\s+" (trim $line) -1 -}}
     {{- if and (ge (len $parts) 2) (eq (index $parts 1) "device") -}}
       {{- $serial := index $parts 0 -}}
-      {{- if not (and $usbOnly (contains ":" $serial)) -}}
+      {{- $type := "usb" -}}
+      {{- if hasPrefix "emulator-" $serial -}}
+        {{- $type = "simulator" -}}
+      {{- else if contains ":" $serial -}}
+        {{- $type = "wifi" -}}
+      {{- end -}}
+      {{- if has $type $types -}}
         {{- $product := "" -}}
         {{- $model := "" -}}
         {{- $device := "" -}}
@@ -24,6 +30,7 @@
         {{- end -}}
         {{- $devices = append $devices (dict
               "title" (printf "%s%s (%s / %s / %s)" $titlePrefix $serial $product $model $device)
+              "type" $type
               "value" (printf "%s%s" $valuePrefix $serial)
             ) -}}
       {{- end -}}
