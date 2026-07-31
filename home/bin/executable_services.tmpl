@@ -5,6 +5,7 @@ usage() {
 	cat <<'EOF'
 usage: services [list|status] [SERVICE ...]
        services <start|stop|restart> SERVICE ...
+       services log SERVICE ...
 
 SERVICE may be a tool name such as gitwatch or a full service name such
 as gitwatch.org. A tool name selects all of that tool's services.
@@ -38,6 +39,15 @@ selected() {
 		return 0
 	done
 	return 1
+}
+
+append_log_file() {
+	if [ -n "$log_files" ]; then
+		log_files="$log_files
+$1"
+	else
+		log_files=$1
+	fi
 }
 
 service_status() {
@@ -140,13 +150,18 @@ handle_service() {
 	manager=$5
 	file=$6
 	scheduled=$7
-	shift 7
+	stdout_log=$8
+	stderr_log=$9
+	shift 9
 
 	selected "$service_name" "$tool_name" "$@" || return 0
 
 	if [ "$action" = list ]; then
 		service_status "$label" "$scheduled"
 		printf '%-26s %-12s %-8s %s\n' "$service_name" "$status" "$manager" "$file"
+	elif [ "$action" = log ]; then
+		append_log_file "$stdout_log"
+		append_log_file "$stderr_log"
 	else
 		control_service "$action" "$service_name" "$label"
 	fi
@@ -161,7 +176,7 @@ list | status)
 	action=list
 	shift
 	;;
-start | stop | restart)
+start | stop | restart | log)
 	action=$1
 	shift
 	if [ "$#" -eq 0 ]; then
@@ -182,6 +197,7 @@ for selector; do
 done
 
 failures=0
+log_files=
 if [ "$action" = list ]; then
 	printf '%-26s %-12s %-8s %s\n' Name Status Manager File
 fi
@@ -195,19 +211,31 @@ fi
 {{- end }}
 {{- $label := includeTemplate "service/label" (dict "os" $.chezmoi.os "service" .) }}
 {{- $scheduled := or (hasKey . "startInterval") (and (hasKey . "extra") (contains "<key>Sockets</key>" .extra)) }}
+{{- $logFiles := includeTemplate "service/log-files" (dict "ctx" $ "service" .) | fromJson }}
 {{- if eq $.chezmoi.os "darwin" }}
   {{- $manager := "launchd" }}
   {{- if $isBrew }}{{- $manager = "brew" }}{{- end }}
 handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
 	{{ $manager | quote }} {{ printf "~/Library/LaunchAgents/%s.plist" $label | quote }} \
-	{{ $scheduled }} "$@"
+	{{ $scheduled }} {{ index $logFiles 0 | quote }} {{ index $logFiles 1 | quote }} "$@"
 {{- else if eq $.chezmoi.os "linux" }}
   {{- $manager := "systemd" }}
   {{- if and $isBrew (lookPath "brew") }}{{- $manager = "brew" }}{{- end }}
 handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
 	{{ $manager | quote }} {{ printf "~/.config/systemd/user/%s.service" $label | quote }} \
-	{{ $scheduled }} "$@"
+	{{ $scheduled }} {{ index $logFiles 0 | quote }} {{ index $logFiles 1 | quote }} "$@"
 {{- end }}
 {{- end }}
+
+if [ "$action" = log ]; then
+	old_ifs=$IFS
+	IFS='
+'
+	set -f
+	# log_files is newline-delimited so paths containing spaces stay intact.
+	set -- $log_files
+	IFS=$old_ifs
+	exec tail -n 100 -F "$@"
+fi
 
 exit "$failures"
