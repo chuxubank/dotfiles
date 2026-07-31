@@ -1,0 +1,45 @@
+#compdef services
+
+_services() {
+	local -a commands service_names
+
+	commands=(
+		'list:list configured services'
+		'status:list configured services'
+		'start:start one or more services'
+		'stop:stop one or more services'
+		'restart:restart one or more services'
+		'log:follow service logs'
+	)
+
+	service_names=(
+{{- $tools := dict }}
+{{- range (includeTemplate "service/services" . | fromJson) }}
+	{{- $isBrew := and (hasKey . "brew") .brew }}
+	{{- $name := .tool }}
+	{{- if not $isBrew }}{{- $name = printf "%s.%s" .tool .target }}{{- end }}
+	{{- if not (hasKey $tools .tool) }}
+		{{ printf "%s:all %s services" .tool .tool | quote }}
+		{{- $_ := set $tools .tool true }}
+	{{- end }}
+	{{- if ne $name .tool }}
+		{{ printf "%s:%s service %s" $name .tool .target | quote }}
+	{{- end }}
+{{- end }}
+	)
+
+	if (( CURRENT == 2 )); then
+		if [[ $PREFIX == -* ]]; then
+			_values 'option' \
+				'-h[show help]' \
+				'--help[show help]'
+		else
+			_describe -t commands 'command' commands
+			_describe -t services 'service' service_names
+		fi
+	else
+		_describe -t services 'service' service_names
+	fi
+}
+
+_services "$@"
