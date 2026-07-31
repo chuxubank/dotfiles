@@ -34,9 +34,6 @@ contains_value() {
     [[ ",$1," == *",$2,"* ]]
 }
 
-records_file=$(mktemp)
-trap 'rm -f "$records_file"' EXIT
-
 emit_record() {
     jq -cn \
         --arg platform "$1" \
@@ -44,40 +41,43 @@ emit_record() {
         --arg kind "$3" \
         --arg id "$4" \
         --arg title "$5" \
-        '{platform: $platform, type: $type, kind: $kind, id: $id, title: $title}' \
-        >> "$records_file"
+        '{platform: $platform, type: $type, kind: $kind, id: $id, title: $title}'
 }
 
-if contains_value "$platforms" android && command -v adb >/dev/null 2>&1; then
-    while IFS= read -r line; do
-        parts=(${=line})
-        [[ ${#parts[@]} -ge 2 && "${parts[2]}" == "device" ]] || continue
+list_devices() {
+    if contains_value "$platforms" android && command -v adb >/dev/null 2>&1; then
+        while IFS= read -r line; do
+            parts=(${=line})
+            [[ ${#parts[@]} -ge 2 && "${parts[2]}" == device ]] || continue
 
-        serial="${parts[1]}"
-        type="wifi"
-        if [[ "$serial" == emulator-* ]]; then
-            type="simulator"
-        elif [[ " $line" == *" usb:"* ]]; then
-            type="usb"
-        fi
-        contains_value "$types" "$type" || continue
+            serial="${parts[1]}"
+            type=wifi
+            if [[ "$serial" == emulator-* ]]; then
+                type=simulator
+            elif [[ " $line" == *" usb:"* ]]; then
+                type=usb
+            fi
+            contains_value "$types" "$type" || continue
 
-        product=""
-        model=""
-        device=""
-        for part in "${parts[@]}"; do
-            case "$part" in
-                product:*) product="${part#product:}" ;;
-                model:*) model="${part#model:}" ;;
-                device:*) device="${part#device:}" ;;
-            esac
-        done
+            product=""
+            model=""
+            device=""
+            for part in "${parts[@]}"; do
+                case "$part" in
+                    product:*) product="${part#product:}" ;;
+                    model:*) model="${part#model:}" ;;
+                    device:*) device="${part#device:}" ;;
+                esac
+            done
 
-        emit_record android "$type" android "$serial" "$serial ($product / $model / $device)"
-    done < <(adb devices -l 2>/dev/null | tail -n +2)
-fi
+            emit_record android "$type" android "$serial" "$serial ($product / $model / $device)"
+        done < <(adb devices -l 2>/dev/null | tail -n +2)
+    fi
 
-if contains_value "$platforms" ios && command -v xcrun >/dev/null 2>&1; then
+    if ! contains_value "$platforms" ios || ! command -v xcrun >/dev/null 2>&1; then
+        return
+    fi
+
     if contains_value "$types" simulator; then
         while IFS=$'\t' read -r name udid; do
             [[ -n "$udid" ]] || continue
@@ -129,14 +129,14 @@ if contains_value "$platforms" ios && command -v xcrun >/dev/null 2>&1; then
         fi
         rm -f "$device_json"
     fi
-fi
+}
 
 case "$format" in
     json)
-        jq -s '.' "$records_file"
+        list_devices | jq -s '.'
         ;;
     tsv)
-        jq -r -s '.[] | [.kind, .id, .title] | @tsv' "$records_file"
+        list_devices | jq -r '[.kind, .id, .title] | @tsv'
         ;;
     *)
         echo "Unsupported format: $format" >&2

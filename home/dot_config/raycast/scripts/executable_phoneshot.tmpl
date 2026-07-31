@@ -9,7 +9,12 @@
 # Optional parameters:
 # @raycast.icon 📱
 # @raycast.packageName Mobile Development
-{{ includeTemplate "raycast/mobile-device-argument" (merge (dict "argument" 1 "types" $deviceTypes) .) -}}
+{{ includeTemplate "raycast/mobile-device-argument" (dict
+      "argument" 1
+      "platforms" (list "android" "ios")
+      "types" $deviceTypes
+      "chezmoi" .chezmoi
+    ) -}}
 # @raycast.argument2 { "type": "text", "placeholder": "Filename (optional)", "optional": true }
 
 # Documentation:
@@ -17,7 +22,7 @@
 # @raycast.author Misaka
 # @raycast.authorURL https://github.com/chuxubank
 
-save_dir="${PHONESHOT_DIR:-${IOSSHOT_DIR:-$HOME/Downloads}}"
+save_dir="${PHONESHOT_DIR:-$HOME/Downloads}"
 copy_to_clipboard="${PHONESHOT_COPY:-true}"
 selection="${1:-}"
 filename="${2:-phoneshot}"
@@ -48,14 +53,13 @@ if [[ -z "$selection" ]]; then
         entry="${entries[1]}"
     fi
 
-    kind="${entry%%$'\t'*}"
+    selection="${entry%%$'\t'*}"
     remainder="${entry#*$'\t'}"
-    device_id="${remainder%%$'\t'*}"
-else
-    kind="${selection%%:*}"
-    device_id="${selection#*:}"
+    selection+=":${remainder%%$'\t'*}"
 fi
 
+kind="${selection%%:*}"
+device_id="${selection#*:}"
 if [[ -z "$device_id" || "$device_id" == "$selection" ]]; then
     echo "❌ Invalid device selection: $selection"
     exit 1
@@ -72,17 +76,10 @@ case "$kind" in
             exit 1
         fi
 
-        remote_file="/sdcard/phoneshot-$$.png"
-        if ! adb -s "$device_id" shell screencap -p "$remote_file"; then
+        if ! adb -s "$device_id" exec-out screencap -p > "$out_file"; then
             echo "❌ Failed to capture Android device $device_id."
             exit 1
         fi
-        if ! adb -s "$device_id" pull "$remote_file" "$out_file"; then
-            adb -s "$device_id" shell rm "$remote_file" >/dev/null 2>&1
-            echo "❌ Failed to save screenshot from Android device $device_id."
-            exit 1
-        fi
-        adb -s "$device_id" shell rm "$remote_file" >/dev/null 2>&1
         ;;
     simulator)
         if ! xcrun simctl io "$device_id" screenshot "$out_file"; then

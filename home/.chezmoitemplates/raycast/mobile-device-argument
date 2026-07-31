@@ -1,17 +1,18 @@
-{{- /* raycast/mobile-device-argument — Render Android and iOS devices together.
-       Input: dict "argument" <argument-number>
+{{- /* Render a Raycast argument for available mobile devices.
+       Input: "argument" <number>
+              ["platforms" <list>] — any of android, ios
               ["types" <list>] — any of simulator, usb, wifi
 */ -}}
+{{- $platforms := default (list "android" "ios") (index . "platforms") -}}
 {{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
-{{- $devices := list -}}
-{{- range $device := includeTemplate "raycast/adb-devices" (merge (dict "types" $types "titlePrefix" "Android: " "valuePrefix" "android:") .) | fromJson -}}
-  {{- $devices = append $devices $device -}}
-{{- end -}}
-{{- range $device := includeTemplate "raycast/ios-devices" (merge (dict "types" $types "titlePrefix" "iOS: ") .) | fromJson -}}
-  {{- $devices = append $devices $device -}}
-{{- end -}}
-{{- includeTemplate "raycast/device-argument" (dict
-      "argument" .argument
-      "devices" $devices
-      "emptyPlaceholder" "Device type and identifier"
-    ) -}}
+{{- $helper := joinPath .chezmoi.sourceDir "bin/executable_mobile-device-list" -}}
+{{- $devices := output "zsh" "-f" $helper
+      "--platforms" (join "," $platforms)
+      "--types" (join "," $types)
+      "--format" "json" | fromJson -}}
+{{- $platformNames := dict "android" "Android" "ios" "iOS" -}}
+{{- if $devices -}}
+# @raycast.argument{{ .argument }} { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $index, $device := $devices }}{{ if $index }}, {{ end }}{"title": {{ printf "%s: %s" (index $platformNames $device.platform) $device.title | toJson }}, "value": {{ printf "%s:%s" $device.kind $device.id | toJson }}}{{ end }}] }
+{{- else -}}
+# @raycast.argument{{ .argument }} { "type": "text", "placeholder": "Device type and identifier", "optional": true }
+{{- end }}
