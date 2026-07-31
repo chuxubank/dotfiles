@@ -7,70 +7,171 @@
 
 # Optional parameters:
 # @raycast.icon 📱
-# @raycast.packageName Android
-{{ includeTemplate "raycast/adb-device-argument" (dict "argument" 1) -}}
+# @raycast.packageName Mobile Development
+{{ includeTemplate "raycast/mobile-device-argument" (dict "argument" 1) -}}
 # @raycast.argument2 { "type": "text", "placeholder": "Filename (optional)", "optional": true }
 
 # Documentation:
+# @raycast.description Capture an Android or iOS device and copy it to the clipboard
 # @raycast.author Misaka
 # @raycast.authorURL https://github.com/chuxubank
 
-save_dir="${PHONESHOT_DIR:-$HOME/Downloads}"
+save_dir="${PHONESHOT_DIR:-${IOSSHOT_DIR:-$HOME/Downloads}}"
 copy_to_clipboard="${PHONESHOT_COPY:-true}"
-serial="${1:-}"
+selection="${1:-}"
 filename="${2:-phoneshot}"
 out_file="${save_dir}/${filename}.png"
 
-if ! command -v adb >/dev/null 2>&1; then
-    echo "❌ adb is not installed or not in PATH."
-    exit 1
-fi
+list_mobile_devices() {
+    if command -v adb >/dev/null 2>&1; then
+        while IFS= read -r line; do
+            [[ "$(echo "$line" | awk '{print $2}')" == "device" ]] || continue
+            local serial model
+            serial=$(echo "$line" | awk '{print $1}')
+            model=$(echo "$line" | sed -nE 's/.* model:([^ ]+).*/\1/p')
+            print -r -- "android\t${serial}\tAndroid: ${model:-$serial}"
+        done < <(adb devices -l | tail -n +2)
+    fi
 
-if [[ -z "$serial" ]]; then
-    lines=()
-    while IFS= read -r line; do
-        [[ "$(echo "$line" | awk '{print $2}')" == "device" ]] && lines+=("$line")
-    done < <(adb devices -l | tail -n +2)
+    if command -v xcrun >/dev/null 2>&1; then
+        xcrun simctl list devices booted --json 2>/dev/null \
+            | jq -r '
+                .devices
+                | to_entries[]
+                | select(.key | contains(".iOS-"))
+                | .value[]
+                | select(.isAvailable == true and .state == "Booted")
+                | ["simulator", .udid, ("iOS: " + .name + " (Simulator)")]
+                | @tsv
+            '
 
-    if [[ ${#lines[@]} -eq 0 ]]; then
-        echo "❌ No Android device found. Please connect your phone and enable USB debugging."
+        local device_json
+        device_json=$(mktemp)
+        if xcrun devicectl list devices --quiet --json-output "$device_json" >/dev/null 2>&1; then
+            jq -r '
+                .result.devices[]
+                | .hardwareProperties.udid as $udid
+                | select(
+                    .hardwareProperties.platform == "iOS"
+                    and .hardwareProperties.reality == "physical"
+                    and .connectionProperties.tunnelState == "connected"
+                )
+                | [
+                    (if .connectionProperties.transportType == "localNetwork"
+                     then "device-network"
+                     else "device-usb"
+                     end),
+                    $udid,
+                    ("iOS: " + .deviceProperties.name
+                     + " (" + .hardwareProperties.marketingName
+                     + ", "
+                     + (if .connectionProperties.transportType == "localNetwork"
+                        then "Network"
+                        else "USB"
+                        end)
+                     + ")")
+                ]
+                | @tsv
+            ' "$device_json"
+        fi
+        rm -f "$device_json"
+    fi
+}
+
+if [[ -z "$selection" ]]; then
+    entries=("${(@f)$(list_mobile_devices)}")
+    entries=("${(@)entries:#}")
+
+    if [[ ${#entries[@]} -eq 0 ]]; then
+        echo "❌ No available Android or iOS device found."
         exit 1
-    elif [[ ${#lines[@]} -eq 1 ]]; then
-        serial=$(echo "${lines[1]}" | awk '{print $1}')
+    elif [[ ${#entries[@]} -eq 1 ]]; then
+        entry="${entries[1]}"
     elif [[ -t 0 ]]; then
         echo "Available devices:"
-        select line in "${lines[@]}"; do
-            [[ -n "$line" ]] && break
+        select entry in "${entries[@]}"; do
+            [[ -n "$entry" ]] && break
             echo "Invalid selection, try again."
         done
-        serial=$(echo "$line" | awk '{print $1}')
     else
-        serial=$(echo "${lines[1]}" | awk '{print $1}')
+        entry="${entries[1]}"
     fi
+
+    kind="${entry%%$'\t'*}"
+    remainder="${entry#*$'\t'}"
+    device_id="${remainder%%$'\t'*}"
+else
+    kind="${selection%%:*}"
+    device_id="${selection#*:}"
 fi
 
-if [[ "$(adb -s "$serial" get-state 2>/dev/null)" != "device" ]]; then
-    echo "❌ Android device $serial is not available."
+if [[ -z "$device_id" || "$device_id" == "$selection" ]]; then
+    echo "❌ Invalid device selection: $selection"
     exit 1
 fi
 
-remote_file="/sdcard/${filename}.png"
+case "$kind" in
+    android)
+        if ! command -v adb >/dev/null 2>&1; then
+            echo "❌ adb is not installed or not in PATH."
+            exit 1
+        fi
+        if [[ "$(adb -s "$device_id" get-state 2>/dev/null)" != "device" ]]; then
+            echo "❌ Android device $device_id is not available."
+            exit 1
+        fi
 
-if ! adb -s "$serial" shell screencap -p "$remote_file"; then
-    echo "❌ Failed to capture screenshot from $serial."
+        remote_file="/sdcard/phoneshot-$$.png"
+        if ! adb -s "$device_id" shell screencap -p "$remote_file"; then
+            echo "❌ Failed to capture Android device $device_id."
+            exit 1
+        fi
+        if ! adb -s "$device_id" pull "$remote_file" "$out_file"; then
+            adb -s "$device_id" shell rm "$remote_file" >/dev/null 2>&1
+            echo "❌ Failed to save screenshot from Android device $device_id."
+            exit 1
+        fi
+        adb -s "$device_id" shell rm "$remote_file" >/dev/null 2>&1
+        ;;
+    simulator)
+        if ! xcrun simctl io "$device_id" screenshot "$out_file"; then
+            echo "❌ Failed to capture Simulator $device_id."
+            exit 1
+        fi
+        ;;
+    device-usb|device-network)
+        if ! command -v pymobiledevice3 >/dev/null 2>&1; then
+            echo "❌ pymobiledevice3 is required for physical iOS devices. Run chezmoi apply to install Python tools."
+            exit 1
+        fi
+
+        device_options=(--userspace --udid "$device_id")
+        if [[ "$kind" == "device-network" ]]; then
+            device_options+=(--mobdev2)
+        fi
+
+        if ! pymobiledevice3 developer dvt screenshot "${device_options[@]}" "$out_file"; then
+            echo "❌ Failed to capture iOS device $device_id."
+            exit 1
+        fi
+        ;;
+    *)
+        echo "❌ Unsupported device type: $kind"
+        exit 1
+        ;;
+esac
+
+if [[ ! -s "$out_file" ]]; then
+    echo "❌ Screenshot was not created: $out_file"
     exit 1
 fi
-
-if ! adb -s "$serial" pull "$remote_file" "$out_file"; then
-    adb -s "$serial" shell rm "$remote_file" >/dev/null 2>&1
-    echo "❌ Failed to save screenshot from $serial."
-    exit 1
-fi
-
-adb -s "$serial" shell rm "$remote_file"
-echo "Saved phone screenshot to $out_file"
 
 if [[ $copy_to_clipboard == true ]]; then
-    clip-image "$out_file"
+    if ! clip-image "$out_file"; then
+        echo "❌ Screenshot saved, but it could not be copied to the clipboard: $out_file"
+        exit 1
+    fi
     echo "Copied screenshot to clipboard"
 fi
+
+echo "Saved screenshot to $out_file"

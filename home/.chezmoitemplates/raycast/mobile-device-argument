@@ -1,0 +1,15 @@
+{{- /* raycast/mobile-device-argument — Render Android and iOS devices together.
+       Input: dict "argument" <argument-number>
+*/ -}}
+{{- $devices := list -}}
+{{- range $device := includeTemplate "raycast/adb-devices" (dict "titlePrefix" "Android: " "valuePrefix" "android:") | fromJson -}}
+  {{- $devices = append $devices $device -}}
+{{- end -}}
+{{- range $device := includeTemplate "raycast/ios-devices" (dict "titlePrefix" "iOS: ") | fromJson -}}
+  {{- $devices = append $devices $device -}}
+{{- end -}}
+{{- includeTemplate "raycast/device-argument" (dict
+      "argument" .argument
+      "devices" $devices
+      "emptyPlaceholder" "Device type and identifier"
+    ) -}}

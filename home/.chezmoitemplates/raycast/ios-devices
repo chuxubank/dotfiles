@@ -1,8 +1,7 @@
-{{- /* raycast/ios-device-argument — Render a Raycast iOS device argument.
-       Input: dict "argument" <argument-number>
-       Values are prefixed with simulator:, device-usb:, or device-network:.
+{{- /* raycast/ios-devices — Return available iOS devices as JSON.
+       Input: ["titlePrefix" <text>]
 */ -}}
-{{- $argument := .argument -}}
+{{- $titlePrefix := default "" (index . "titlePrefix") -}}
 {{- $devices := list -}}
 {{- if lookPath "xcrun" -}}
   {{- $simulatorOutput := output "xcrun" "simctl" "list" "devices" "booted" "--json" | fromJson -}}
@@ -11,7 +10,7 @@
       {{- range $device := $runtimeDevices -}}
         {{- if and $device.isAvailable (eq $device.state "Booted") -}}
           {{- $devices = append $devices (dict
-                "title" (printf "%s (Simulator)" $device.name)
+                "title" (printf "%s%s (Simulator)" $titlePrefix $device.name)
                 "value" (printf "simulator:%s" $device.udid)
               ) -}}
         {{- end -}}
@@ -34,14 +33,10 @@
         {{- $kind = "device-network" -}}
       {{- end -}}
       {{- $devices = append $devices (dict
-            "title" (printf "%s (%s, %s)" $device.deviceProperties.name $device.hardwareProperties.marketingName $transport)
+            "title" (printf "%s%s (%s, %s)" $titlePrefix $device.deviceProperties.name $device.hardwareProperties.marketingName $transport)
             "value" (printf "%s:%s" $kind $device.hardwareProperties.udid)
           ) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- if gt (len $devices) 0 -}}
-# @raycast.argument{{ $argument }} { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $index, $item := $devices }}{{ if $index }}, {{ end }}{"title": {{ $item.title | toJson }}, "value": {{ $item.value | toJson }}}{{ end }}] }
-{{- else -}}
-# @raycast.argument{{ $argument }} { "type": "text", "placeholder": "Device type and UDID", "optional": true }
-{{- end }}
+{{- $devices | toJson -}}

@@ -1,0 +1,13 @@
+{{- /* raycast/device-argument — Render a Raycast device argument.
+       Input: dict "argument" <argument-number>
+                   "devices" <list of {title, value}>
+              ["emptyPlaceholder" <text>]
+*/ -}}
+{{- $argument := .argument -}}
+{{- $devices := .devices -}}
+{{- $emptyPlaceholder := default "Device identifier (no devices at apply time)" (index . "emptyPlaceholder") -}}
+{{- if gt (len $devices) 0 -}}
+# @raycast.argument{{ $argument }} { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $index, $item := $devices }}{{ if $index }}, {{ end }}{"title": {{ $item.title | toJson }}, "value": {{ $item.value | toJson }}}{{ end }}] }
+{{- else -}}
+# @raycast.argument{{ $argument }} { "type": "text", "placeholder": {{ $emptyPlaceholder | toJson }}, "optional": true }
+{{- end }}
