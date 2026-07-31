@@ -1,0 +1,3 @@
+{{- if lookPath "bun" }}
+{{- joinPath .chezmoi.homeDir .path.tool.bun "bin" "bun" -}}
+{{- end }}
