@@ -9,6 +9,7 @@ tools = [
   "keymap-drawer",
   "kimi-cli",
   "my-cookies",
+  "pymobiledevice3",
   "pygments",
   "pylint",
   "python-lsp-server",

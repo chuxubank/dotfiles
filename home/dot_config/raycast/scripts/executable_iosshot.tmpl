@@ -1,0 +1,147 @@
+#!/bin/zsh
+
+# Required parameters:
+# @raycast.schemaVersion 1
+# @raycast.title iOS Shot
+# @raycast.mode compact
+
+# Optional parameters:
+# @raycast.icon 📱
+# @raycast.packageName Apple Development
+{{ includeTemplate "raycast/ios-device-argument" (dict "argument" 1) -}}
+# @raycast.argument2 { "type": "text", "placeholder": "Filename (optional)", "optional": true }
+
+# Documentation:
+# @raycast.description Capture an iOS device or Simulator and copy it to the clipboard
+# @raycast.author Misaka
+# @raycast.authorURL https://github.com/chuxubank
+
+save_dir="${IOSSHOT_DIR:-$HOME/Downloads}"
+selection="${1:-}"
+filename="${2:-iosshot-$(date +%Y%m%d-%H%M%S)}"
+out_file="${save_dir}/${filename}.png"
+
+list_ios_devices() {
+    if command -v xcrun >/dev/null 2>&1; then
+        xcrun simctl list devices booted --json 2>/dev/null \
+            | jq -r '
+                .devices
+                | to_entries[]
+                | select(.key | contains(".iOS-"))
+                | .value[]
+                | select(.isAvailable == true and .state == "Booted")
+                | ["simulator", .udid, (.name + " (Simulator)")]
+                | @tsv
+            '
+
+        local device_json
+        device_json=$(mktemp)
+        if xcrun devicectl list devices --quiet --json-output "$device_json" >/dev/null 2>&1; then
+            jq -r '
+                .result.devices[]
+                | .hardwareProperties.udid as $udid
+                | select(
+                    .hardwareProperties.platform == "iOS"
+                    and .hardwareProperties.reality == "physical"
+                    and .connectionProperties.tunnelState == "connected"
+                )
+                | [
+                    (if .connectionProperties.transportType == "localNetwork"
+                     then "device-network"
+                     else "device-usb"
+                     end),
+                    $udid,
+                    (.deviceProperties.name
+                     + " (" + .hardwareProperties.marketingName
+                     + ", "
+                     + (if .connectionProperties.transportType == "localNetwork"
+                        then "Network"
+                        else "USB"
+                        end)
+                     + ")")
+                ]
+                | @tsv
+            ' "$device_json"
+        fi
+        rm -f "$device_json"
+    fi
+}
+
+if [[ -z "$selection" ]]; then
+    entries=("${(@f)$(list_ios_devices)}")
+    entries=("${(@)entries:#}")
+
+    if [[ ${#entries[@]} -eq 0 ]]; then
+        echo "❌ No available iOS device or booted Simulator found."
+        exit 1
+    elif [[ ${#entries[@]} -eq 1 ]]; then
+        entry="${entries[1]}"
+    elif [[ -t 0 ]]; then
+        echo "Available devices:"
+        select entry in "${entries[@]}"; do
+            [[ -n "$entry" ]] && break
+            echo "Invalid selection, try again."
+        done
+    else
+        entry="${entries[1]}"
+    fi
+
+    kind="${entry%%$'\t'*}"
+    remainder="${entry#*$'\t'}"
+    udid="${remainder%%$'\t'*}"
+else
+    kind="${selection%%:*}"
+    udid="${selection#*:}"
+fi
+
+if [[ -z "$udid" || "$udid" == "$selection" ]]; then
+    echo "❌ Invalid device selection: $selection"
+    exit 1
+fi
+
+if [[ -e "$out_file" ]]; then
+    echo "❌ Output file already exists: $out_file"
+    exit 1
+fi
+
+case "$kind" in
+    simulator)
+        if ! xcrun simctl io "$udid" screenshot "$out_file"; then
+            echo "❌ Failed to capture Simulator $udid."
+            exit 1
+        fi
+        ;;
+    device-usb|device-network)
+        if ! command -v pymobiledevice3 >/dev/null 2>&1; then
+            echo "❌ pymobiledevice3 is required for physical devices. Run chezmoi apply to install Python tools."
+            exit 1
+        fi
+
+        device_options=(--userspace --udid "$udid")
+        if [[ "$kind" == "device-network" ]]; then
+            device_options+=(--mobdev2)
+        fi
+
+        if ! pymobiledevice3 developer dvt screenshot "${device_options[@]}" "$out_file"; then
+            echo "❌ Failed to capture iOS device $udid."
+            exit 1
+        fi
+        ;;
+    *)
+        echo "❌ Unsupported iOS device type: $kind"
+        exit 1
+        ;;
+esac
+
+if [[ ! -s "$out_file" ]]; then
+    echo "❌ Screenshot was not created: $out_file"
+    exit 1
+fi
+
+if ! clip-image "$out_file"; then
+    echo "❌ Screenshot saved, but it could not be copied to the clipboard: $out_file"
+    exit 1
+fi
+
+echo "Saved screenshot to $out_file"
+echo "Copied screenshot to clipboard"
