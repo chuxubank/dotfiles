@@ -12,9 +12,10 @@
     {{- range $item.home -}}{{- $path = joinPath $path . -}}{{- end -}}
     {{- $path -}}
   {{- else if hasKey $item "homePath" -}}
-    {{- joinPath $ctx.chezmoi.homeDir (index $ctx.path $item.homePath) -}}
+    {{- $pathValue := includeTemplate "service/path-value" (dict "path" $ctx.path "keys" $item.homePath) -}}
+    {{- joinPath $ctx.chezmoi.homeDir $pathValue -}}
   {{- else if hasKey $item "path" -}}
-    {{- index $ctx.path $item.path -}}
+    {{- includeTemplate "service/path-value" (dict "path" $ctx.path "keys" $item.path) -}}
   {{- else if hasKey $item "format" -}}
     {{- printf $item.format (includeTemplate "service/value" (dict "ctx" $ctx "item" $item.value)) -}}
   {{- else if hasKey $item "pathList" -}}

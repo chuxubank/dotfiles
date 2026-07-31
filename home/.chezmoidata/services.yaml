@@ -51,7 +51,9 @@ services:
       - "120"
       - "-R"
       - "-M"
-      - homePath: org
+      - homePath:
+          - personal
+          - org
     environmentVariables:
       PATH:
         format: "%s/bin:/bin:/usr/bin"
@@ -66,9 +68,13 @@ services:
       - usrBin: rclone
       - nfsmount
       - "nutstore:"
-      - homePath: nutstore
+      - homePath:
+          - data
+          - nutstore
       - "--volname"
-      - path: nutstore
+      - path:
+          - data
+          - nutstore
       - "-vv"
       - "--dir-cache-time"
       - "3m"

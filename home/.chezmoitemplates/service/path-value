@@ -1,0 +1,19 @@
+{{- $keys := .keys -}}
+{{- if eq (kindOf $keys) "string" -}}
+  {{- $keys = list $keys -}}
+{{- else if ne (kindOf $keys) "slice" -}}
+  {{- fail (printf "service path must be a string or list, got %s" (kindOf $keys)) -}}
+{{- end -}}
+{{- $value := .path -}}
+{{- $visited := list -}}
+{{- range $key := $keys -}}
+  {{- $visited = append $visited $key -}}
+  {{- if or (ne (kindOf $value) "map") (not (hasKey $value $key)) -}}
+    {{- fail (printf "unknown service path: path.%s" (join "." $visited)) -}}
+  {{- end -}}
+  {{- $value = index $value $key -}}
+{{- end -}}
+{{- if ne (kindOf $value) "string" -}}
+  {{- fail (printf "service path is not a string: path.%s" (join "." $visited)) -}}
+{{- end -}}
+{{- $value -}}
