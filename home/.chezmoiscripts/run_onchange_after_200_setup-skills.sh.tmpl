@@ -44,14 +44,17 @@ skill_name_matches() {
 
 list_source_skills() {
   local source="$1"
-  local output listing
+  local output clean_output listing
 
   if ! output=$(NO_COLOR=1 skills add "$source" --list 2>&1); then
     print -u2 -r -- "$output"
     return 1
   fi
 
-  listing=$(print -r -- "$output" | sed -n 's/^│    \([^ ].*\)$/\1/p')
+  # `skills add --list` emits ANSI color codes even when NO_COLOR is set.
+  # Strip all CSI escape sequences before parsing the indented skill names.
+  clean_output=$(print -r -- "$output" | sed $'s/\033\\[[0-9;?]*[ -\\/]*[@-~]//g')
+  listing=$(print -r -- "$clean_output" | sed -n 's/^│    \([^ ].*\)$/\1/p')
   if [[ -z "$listing" ]]; then
     print -u2 -r -- "$output"
     print -u2 -- "Could not parse the skill list for $source"
