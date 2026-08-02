@@ -121,6 +121,7 @@
   "ambient-suggestions-enabled" true
   "appearanceLightCodeThemeId" "codex"
   "conversationDetailMode" "STEPS_COMMANDS"
+  "enabled-reasoning-efforts" (list "low" "medium" "high" "xhigh" "ultra" "max")
   "git-pull-request-merge-method" "merge"
   "git-show-sidebar-pr-icons" true
   "keepRemoteControlAwakeWhilePluggedIn" true
