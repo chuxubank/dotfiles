@@ -168,7 +168,6 @@ casks = [
   "blackhole-16ch",
   "block-goose",
   "chatgpt",
-  "chatgpt-classic",
   "claude",
   "d12frosted/emacs-plus/emacs-plus-app",
   "dorso",
