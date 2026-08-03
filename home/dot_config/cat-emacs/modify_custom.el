@@ -7,6 +7,14 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+ '(face-font-family-alternatives
+   '(("Sans Serif UI" "Inter" "Avenir Next" "DejaVu Sans")
+     ("Serif" "Charter" "Roboto Serif" "DejaVu Serif" "Georgia")
+     ("Monospace Narrow" "Iosevka" "Iosevka Term")
+     ("Monospace Code" "Maple Mono" "Source Code Pro")
+     ("Monospace Sans Serif" "Roboto Mono" "DejaVu Sans Mono")
+     ("Slab Serif" "Roboto Slab" "American Typewriter")
+     ("Quasi Proportional" "Iosevka Etoile" "Iosevka Aile")))
  '(smtpmail-smtp-server "smtp.qq.com")
  {{- if eq .host_env "aa" }}
  '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
