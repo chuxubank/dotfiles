@@ -14,7 +14,12 @@
      ("Monospace Code" "Maple Mono" "Source Code Pro")
      ("Monospace Sans Serif" "Roboto Mono" "DejaVu Sans Mono")
      ("Slab Serif" "Roboto Slab" "American Typewriter")
-     ("Quasi Proportional" "Iosevka Etoile" "Iosevka Aile")))
+     ("Quasi Proportional" "Iosevka Etoile" "Iosevka Aile")
+     ("CJK Serif" "Songti SC" "LXGW WenKai" "Noto Serif CJK SC"
+      "Source Han Serif SC")
+     ("CJK Sans Serif" "PingFang SC" "Hiragino Sans GB"
+      "Noto Sans CJK SC" "Source Han Sans SC" "Microsoft YaHei")
+     ("CJK Monospace" "LXGW WenKai Mono" "Sarasa Mono SC")))
  '(smtpmail-smtp-server "smtp.qq.com")
  {{- if eq .host_env "aa" }}
  '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
