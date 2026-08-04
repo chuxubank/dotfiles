@@ -1,8 +1,11 @@
-{{- /* Check whether an item passes host_env/device_type/roles conditions. */ -}}
-{{- $deviceTypeOk := includeTemplate "when/check" (dict "item" .item "key" "device_type" "value" .device_type) | fromJson -}}
-{{- $hostEnvOk := includeTemplate "when/check" (dict "item" .item "key" "host_env" "value" .host_env) | fromJson -}}
-{{- $osOk := includeTemplate "when/check" (dict "item" .item "key" "os" "value" .chezmoi.os "os_version" (dig "os_version" "" .)) | fromJson -}}
-{{- $rolesOk := includeTemplate "when/check" (dict "item" .item "key" "roles" "value" .roles) | fromJson -}}
-{{- $memOk := includeTemplate "when/check" (dict "item" .item "key" "mem_gb" "value" (dig "mem_gb" 0 .)) | fromJson -}}
-{{- $diskOk := includeTemplate "when/check" (dict "item" .item "key" "disk_gb" "value" (dig "disk_gb" 0 .)) | fromJson -}}
-{{- toJson (and $hostEnvOk $deviceTypeOk $osOk $rolesOk $memOk $diskOk) -}}
+{{- /* Check whether an item passes all host context conditions. */ -}}
+{{- includeTemplate "when/evaluate" (dict
+      "item" .item
+      "values" (dict
+        "device_type" .device_type
+        "host_env" .host_env
+        "os" .chezmoi.os
+        "roles" .roles
+        "mem_gb" (dig "mem_gb" 0 .)
+        "disk_gb" (dig "disk_gb" 0 .))
+      "os_version" (dig "os_version" "" .)) -}}

@@ -1,32 +1,21 @@
 {{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions. */ -}}
 {{- $skill := .skill -}}
 {{- $allAgents := .skills.agents -}}
-
-{{- $contextOk := includeTemplate "when/context" (merge (dict "item" $skill) .) | fromJson -}}
-
-{{- if not $contextOk -}}
-  {{- toJson list -}}
-{{- else -}}
-  {{- $agents := $allAgents -}}
-  {{- if hasKey $skill "when" -}}
-    {{- $when := $skill.when -}}
-    {{- if and (hasKey $when "enabled") (hasKey $when.enabled "tool") -}}
-      {{- $agents = $when.enabled.tool -}}
-      {{- if not (kindIs "slice" $agents) -}}
-        {{- $agents = list $agents -}}
-      {{- end -}}
-    {{- else if and (hasKey $when "disabled") (hasKey $when.disabled "tool") -}}
-      {{- $disabledTools := $when.disabled.tool -}}
-      {{- if not (kindIs "slice" $disabledTools) -}}
-        {{- $disabledTools = list $disabledTools -}}
-      {{- end -}}
-      {{- $agents = list -}}
-      {{- range $a := $allAgents -}}
-        {{- if not (has $a $disabledTools) -}}
-          {{- $agents = append $agents $a -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
+{{- $agents := list -}}
+{{- range $agent := $allAgents -}}
+  {{- $enabled := includeTemplate "when/evaluate" (dict
+        "item" $skill
+        "values" (dict
+          "device_type" $.device_type
+          "host_env" $.host_env
+          "os" $.chezmoi.os
+          "roles" $.roles
+          "mem_gb" (dig "mem_gb" 0 $)
+          "disk_gb" (dig "disk_gb" 0 $)
+          "tool" $agent)
+        "os_version" (dig "os_version" "" $)) | fromJson -}}
+  {{- if $enabled -}}
+    {{- $agents = append $agents $agent -}}
   {{- end -}}
-  {{- toJson $agents -}}
 {{- end -}}
+{{- toJson $agents -}}

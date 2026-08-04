@@ -1,4 +1,12 @@
 {{- /* Determine whether a provider is enabled based on `when.enabled` / `when.disabled`. */ -}}
-{{- $contextOk := includeTemplate "when/context" (merge (dict "item" .provider) .) | fromJson -}}
-{{- $toolOk := includeTemplate "when/check" (dict "item" .provider "key" "tool" "value" .tool) | fromJson -}}
-{{- toJson (and $contextOk $toolOk) -}}
+{{- includeTemplate "when/evaluate" (dict
+      "item" .provider
+      "values" (dict
+        "device_type" .device_type
+        "host_env" .host_env
+        "os" .chezmoi.os
+        "roles" .roles
+        "mem_gb" (dig "mem_gb" 0 .)
+        "disk_gb" (dig "disk_gb" 0 .)
+        "tool" .tool)
+      "os_version" (dig "os_version" "" .)) -}}

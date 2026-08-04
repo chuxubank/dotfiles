@@ -1,0 +1,50 @@
+{{- /* Evaluate complete `when.enabled` / `when.disabled` groups.
+       Conditions within each group use AND semantics. */ -}}
+{{- $item := .item -}}
+{{- $values := .values -}}
+{{- $enabled := true -}}
+{{- $disabled := false -}}
+
+{{- if hasKey $item "when" -}}
+  {{- $when := $item.when -}}
+  {{- if hasKey $when "enabled" -}}
+    {{- $enabledRule := $when.enabled -}}
+    {{- if eq (kindOf $enabledRule) "bool" -}}
+      {{- $enabled = $enabledRule -}}
+    {{- else if eq (kindOf $enabledRule) "map" -}}
+      {{- range $key, $rule := $enabledRule -}}
+        {{- if not (hasKey $values $key) -}}
+          {{- $enabled = false -}}
+        {{- else if not (includeTemplate "when/check" (dict
+              "item" (dict "when" (dict "enabled" (dict $key $rule)))
+              "key" $key
+              "value" (index $values $key)
+              "os_version" (dig "os_version" "" $)) | fromJson) -}}
+          {{- $enabled = false -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if hasKey $when "disabled" -}}
+    {{- $disabledRule := $when.disabled -}}
+    {{- if eq (kindOf $disabledRule) "bool" -}}
+      {{- $disabled = $disabledRule -}}
+    {{- else if eq (kindOf $disabledRule) "map" -}}
+      {{- $disabled = gt (len $disabledRule) 0 -}}
+      {{- range $key, $rule := $disabledRule -}}
+        {{- if not (hasKey $values $key) -}}
+          {{- $disabled = false -}}
+        {{- else if not (includeTemplate "when/check" (dict
+              "item" (dict "when" (dict "enabled" (dict $key $rule)))
+              "key" $key
+              "value" (index $values $key)
+              "os_version" (dig "os_version" "" $)) | fromJson) -}}
+          {{- $disabled = false -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- toJson (and $enabled (not $disabled)) -}}
