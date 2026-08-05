@@ -7,19 +7,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
- '(face-font-family-alternatives
-   '(("Sans Serif UI" "Inter" "Avenir Next" "DejaVu Sans")
-     ("Serif" "Charter" "Roboto Serif" "DejaVu Serif" "Georgia")
-     ("Monospace Narrow" "Iosevka" "Iosevka Term")
-     ("Monospace Code" "Maple Mono" "Source Code Pro")
-     ("Monospace Sans Serif" "Roboto Mono" "DejaVu Sans Mono")
-     ("Slab Serif" "Roboto Slab" "American Typewriter")
-     ("Quasi Proportional" "Iosevka Etoile" "Iosevka Aile")
-     ("CJK Serif" "Songti SC" "LXGW WenKai" "Noto Serif CJK SC"
-      "Source Han Serif SC")
-     ("CJK Sans Serif" "PingFang SC" "Hiragino Sans GB"
-      "Noto Sans CJK SC" "Source Han Sans SC" "Microsoft YaHei")
-     ("CJK Monospace" "LXGW WenKai Mono" "Sarasa Mono SC")))
  '(smtpmail-smtp-server "smtp.qq.com")
  {{- if eq .host_env "aa" }}
  '(telega-docker-run-arguments "--platform linux/amd64 --userns=keep-id")
@@ -48,13 +35,13 @@
  '(gptel-model-updater-external-targets
    '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
                           ("IV:deepseek-v4-flash"
-                           "OpenRouter:openai/gpt-oss-120b:free"))
+                           "OpenRouter:openrouter/free"))
      (gptel-forge-prs-backend gptel-forge-prs-model "GPTel-Forge-Prs"
                               ("IV:deepseek-v4-flash"
-                               "OpenRouter:openai/gpt-oss-120b:free"))))
+                               "OpenRouter:openrouter/free"))))
  '(gptel-model-updater-models
-   '("IV:gpt-5.4"
-     "IV:claude-opus-4-7"
+   '("IV:gpt-5.6-sol"
+     "IV:claude-opus-5"
      "IV:deepseek-v4-pro"
      "OpenRouter:auto"))
  '(mouse-wheel-progressive-speed nil)
