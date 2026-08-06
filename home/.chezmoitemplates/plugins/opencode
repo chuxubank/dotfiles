@@ -1,0 +1,9 @@
+{{- /* plugins/opencode — Enabled plugin sources as a JSON array.
+       opencode installs what is listed, so disabled plugins are omitted. */ -}}
+{{- $out := list -}}
+{{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "opencode") .) | fromJson -}}
+  {{- if $p.enabled -}}
+    {{- $out = append $out $p.source -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $out -}}

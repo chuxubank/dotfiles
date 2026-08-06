@@ -98,21 +98,7 @@
   {{- $_ := unset $config "model_providers" -}}
 {{- end -}}
 
-{{- $plugins := dict
-  "browser-use@openai-bundled" true
-  "browser@openai-bundled" true
-  "chrome@openai-bundled" true
-  "computer-use@openai-bundled" true
-  "documents@openai-primary-runtime" true
-  "github@openai-curated" true
-  "kotlin-agent-skills@Kotlin" true
-  "latex@openai-bundled" true
-  "presentations@openai-primary-runtime" true
-  "record-and-replay@openai-bundled" true
-  "spreadsheets@openai-primary-runtime" true
-  "superpowers@openai-curated" false
-  "test-android-apps@openai-curated" true
--}}
+{{- $plugins := includeTemplate "plugins/enabled-map" (merge (dict "tool" "codex") .) | fromJson -}}
 {{- range $plugin, $enabled := $plugins -}}
   {{- $_ := setValueAtPath (printf "plugins.%s.enabled" $plugin) $enabled $config -}}
 {{- end -}}

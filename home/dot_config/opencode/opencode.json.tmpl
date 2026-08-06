@@ -57,9 +57,7 @@
   {{- $_ := set $provider $alias $provDict -}}
 {{- end }}
 
-{{- $plugins := (list
-  "superpowers@git+https://github.com/obra/superpowers.git"
-) -}}
+{{- $plugins := includeTemplate "plugins/opencode" (merge (dict "tool" "opencode") .) | fromJson -}}
 
 {{- $references := dict -}}
 {{- range $name, $path := .path.personal }}

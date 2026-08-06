@@ -1,0 +1,66 @@
+{{- /* plugins/resolve — Normalize plugin providers for one tool.
+       Input: dict "tool" <tool-name> (merged with root context $)
+
+       Reads two sources and concatenates them:
+         plugins.providers         — cross-tool (plugins/common.yaml); needs a
+                                     `sources` map keyed by tool. Entries
+                                     lacking `tool` are skipped.
+         plugins.<tool>.providers  — tool-specific (plugins/<tool>.yaml); the
+                                     tool is implied, so a plain `source`
+                                     string is enough.
+
+       Emits a JSON array. Each element carries:
+         name        — logical plugin name
+         description — provider.description (may be absent)
+         source      — tool-specific plugin identifier
+         enabled     — bool (resolved via when/evaluate)
+*/ -}}
+{{- $tool := .tool -}}
+{{- $plugins := default dict .plugins -}}
+
+{{- /* Collect (provider, source) pairs before evaluating `when`. */ -}}
+{{- $pairs := list -}}
+{{- range $provider := dig "providers" (list) $plugins -}}
+  {{- $sources := dig "sources" (dict) $provider -}}
+  {{- if hasKey $sources $tool -}}
+    {{- $pairs = append $pairs (dict "provider" $provider "source" (index $sources $tool)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $scoped := dig $tool (dict) $plugins -}}
+{{- range $provider := dig "providers" (list) $scoped -}}
+  {{- $source := "" -}}
+  {{- if hasKey $provider "source" -}}
+    {{- $source = $provider.source -}}
+  {{- else if hasKey (dig "sources" (dict) $provider) $tool -}}
+    {{- $source = index $provider.sources $tool -}}
+  {{- end -}}
+  {{- if $source -}}
+    {{- $pairs = append $pairs (dict "provider" $provider "source" $source) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $out := list -}}
+{{- range $pair := $pairs -}}
+  {{- $provider := $pair.provider -}}
+  {{- $enabled := includeTemplate "when/evaluate" (dict
+        "item" $provider
+        "values" (dict
+          "device_type" $.device_type
+          "host_env" $.host_env
+          "os" $.chezmoi.os
+          "roles" $.roles
+          "mem_gb" (dig "mem_gb" 0 $)
+          "disk_gb" (dig "disk_gb" 0 $)
+          "tool" $tool)
+        "os_version" (dig "os_version" "" $)) | fromJson -}}
+  {{- $p := dict
+    "name"    $provider.name
+    "source"  $pair.source
+    "enabled" $enabled
+  -}}
+  {{- if hasKey $provider "description" -}}
+    {{- $_ := set $p "description" $provider.description -}}
+  {{- end -}}
+  {{- $out = append $out $p -}}
+{{- end -}}
+{{- toJson $out -}}

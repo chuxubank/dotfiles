@@ -1,0 +1,9 @@
+{{- /* plugins/enabled-map — source → bool map for tools that toggle plugins in place.
+       Input: dict "tool" <tool-name> (merged with root context $)
+       Disabled entries are kept as `false` so bundled/marketplace plugins that
+       default to on are explicitly turned off. */ -}}
+{{- $out := dict -}}
+{{- range $p := includeTemplate "plugins/resolve" . | fromJson -}}
+  {{- $_ := set $out $p.source $p.enabled -}}
+{{- end -}}
+{{- toJson $out -}}

@@ -1,0 +1,44 @@
+plugins:
+  # Codex-only plugins (plugins/codex.yaml). The tool is implied by the
+  # filename, so a plain `source` string is enough. `when` conditions work
+  # the same as elsewhere.
+  codex:
+    providers:
+      - name: github
+        description: GitHub repository and PR workflows
+        source: github@openai-curated
+
+      - name: kotlin-agent-skills
+        description: Kotlin tooling and migration skills
+        source: kotlin-agent-skills@Kotlin
+
+      - name: test-android-apps
+        description: Android emulator QA workflows
+        source: test-android-apps@openai-curated
+
+      - name: browser
+        source: browser@openai-bundled
+
+      - name: browser-use
+        source: browser-use@openai-bundled
+
+      - name: chrome
+        source: chrome@openai-bundled
+
+      - name: computer-use
+        source: computer-use@openai-bundled
+
+      - name: latex
+        source: latex@openai-bundled
+
+      - name: record-and-replay
+        source: record-and-replay@openai-bundled
+
+      - name: documents
+        source: documents@openai-primary-runtime
+
+      - name: presentations
+        source: presentations@openai-primary-runtime
+
+      - name: spreadsheets
+        source: spreadsheets@openai-primary-runtime

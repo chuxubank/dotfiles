@@ -1,0 +1,23 @@
+plugins:
+  # Claude Code-only plugins (plugins/claude-code.yaml). The tool is implied
+  # by the filename, so a plain `source` string is enough. `when` conditions
+  # work the same as elsewhere.
+  claude-code:
+    providers:
+      - name: chrome-devtools-mcp
+        source: chrome-devtools-mcp@claude-plugins-official
+
+      - name: codex
+        source: codex@openai-codex
+
+      - name: figma
+        source: figma@claude-plugins-official
+
+      - name: kotlin-lsp
+        source: kotlin-lsp@claude-plugins-official
+
+      - name: mattpocock-skills
+        source: mattpocock-skills@mattpocock
+
+      - name: skill-creator
+        source: skill-creator@claude-plugins-official
