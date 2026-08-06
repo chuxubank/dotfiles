@@ -32,6 +32,11 @@ llm:
         path: Personal/Tech/AI/OpenAI
         field: api-key
 
+    # Pi's built-in ChatGPT subscription provider. It has no endpoint or API
+    # key here: pi owns its OAuth flow and bundled model catalog.
+    openai-codex:
+      name: OpenAI Codex
+
     google:
       name: Google
       type: gemini
