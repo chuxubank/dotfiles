@@ -5,7 +5,6 @@
 {{ if eq .chezmoi.os "android" -}}
 termux-x11 :1 -xstartup "\emacs" &
 {{ else -}}
-env TERM_PROGRAM=
 if \emacs --version 2>&1 | \grep -q 'Emacs Mac Port'; then
     \emacs &
 else
