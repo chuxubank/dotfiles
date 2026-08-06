@@ -1,0 +1,41 @@
+llm:
+  # opencode model defaults (llm/opencode.yaml). Providers listed here
+  # reference llm.providers from llm/common.yaml and override only the auth
+  # field used for that endpoint.
+  #
+  # Provider reference formats:
+  #   Short:  providers: [iv, ollama]
+  #   Map:    providers:
+  #             anthropic:
+  #               provider: iv
+  #               type: anthropic
+  #               auth_field: cc-auth-token
+  tools:
+    opencode:
+      model:
+        - anthropic/claude-opus-5
+        - openai/gpt-5.6-sol
+        - opencode/deepseek-v4-flash-free
+      small_model:
+        - iv/deepseek-v4-flash
+        - opencode/deepseek-v4-flash-free
+        - openrouter/openai/gpt-oss-120b:free
+      providers:
+        openai:
+          provider: iv
+          models: false
+          auth_field: codex-auth-token
+        anthropic:
+          provider: iv
+          type: anthropic
+          models: false
+          auth_field: cc-auth-token
+        iv:
+          provider: iv
+          auth_field: default-auth-token
+        ollama:
+          provider: ollama
+        openrouter:
+          provider: openrouter
+        opencode:
+          provider: opencode

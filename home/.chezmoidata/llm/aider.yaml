@@ -1,0 +1,8 @@
+llm:
+  tools:
+    aider:
+      model: gemini-2.5-pro
+      providers:
+        gemini:
+          provider: google
+          auth_field: aider-gemini-api-key

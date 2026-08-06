@@ -1,0 +1,5 @@
+llm:
+  tools:
+    goose:
+      model: z-ai/glm-4.5-air:free
+      providers: [openrouter]

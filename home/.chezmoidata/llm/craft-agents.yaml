@@ -1,0 +1,24 @@
+llm:
+  tools:
+    craft-agents:
+      model:
+        - openai/gpt-5.5
+        - anthropic/claude-opus-4-7
+        - opencode/deepseek-v4-flash-free
+      providers:
+        openai:
+          name: OpenAI (IV)
+          provider: iv
+          auth_field: codex-auth-token
+        anthropic:
+          name: Anthropic (IV)
+          provider: iv
+          type: anthropic
+          auth_field: cc-auth-token
+        iv:
+          provider: iv
+          auth_field: default-auth-token
+        openrouter:
+          provider: openrouter
+        ollama:
+          provider: ollama

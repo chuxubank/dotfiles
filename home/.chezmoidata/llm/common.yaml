@@ -1,0 +1,80 @@
+llm:
+  # ── Data sets (model catalogs, independent from inference providers) ──
+  data_sets:
+    models-dev:
+      type: models-dev
+      file_path: models-dev-api
+
+  # ── Providers ───────────────────────────────────────────────────────
+  # Each provider = one API endpoint (base_url + default auth).
+  # Tools override only `auth.field` to pick a different API key from the
+  # same pass path; the base_url stays shared.
+  #
+  # type: openai (default) | anthropic | ollama | gemini
+  #   Controls model list endpoint path and response parsing.
+  #
+  # Per-tool model selection lives in llm/<tool>.yaml.
+  providers:
+    iv:
+      name: IV
+      data_set: models-dev
+      base_url: "http://llm.invalley.co"
+      auth:
+        path: Work/IV/LLM
+      when:
+        enabled:
+          host_env: ["iv"]
+
+    openai:
+      name: OpenAI
+      base_url: "https://api.openai.com"
+      auth:
+        path: Personal/Tech/AI/OpenAI
+        field: api-key
+
+    google:
+      name: Google
+      type: gemini
+      base_url: "https://generativelanguage.googleapis.com"
+      auth:
+        path: Personal/Tech/Google
+        field: gemini-api-key
+
+    openrouter:
+      name: OpenRouter
+      base_url: "https://openrouter.ai/api"
+      timeout: 10
+      models_cache: openrouter-models-api
+      auth:
+        path: Personal/Tech/AI/OpenRouter
+        field: api-key
+
+    llama:
+      name: Ollama
+      base_url: "http://localhost:8080"
+      when:
+        enabled:
+          roles: ["llm"]
+
+    mlx:
+      base_url: "http://localhost:8000"
+      when:
+        enabled:
+          roles: ["llm"]
+
+    ollama:
+      type: ollama
+      base_url: "http://localhost:11434"
+      when:
+        enabled:
+          roles: ["llm"]
+
+    opencode:
+      data_set: models-dev
+      provider: opencode
+      filter:
+        cost:
+          input: 0
+          output: 0
+        modalities:
+          input: ["text", "image"]
