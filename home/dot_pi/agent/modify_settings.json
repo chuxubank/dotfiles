@@ -6,7 +6,14 @@
 
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "pi") .) | fromJson -}}
 {{- $packages := includeTemplate "plugins/pi" . | fromJson -}}
-{{- $theme := ternary "dark" "light" .isDarkMode -}}
+
+{{- /* "<light>/<dark>" is pi's auto form: exactly one slash, light theme first.
+       It re-detects the terminal background on every start
+       (resolveThemeSetting + detectTerminalThemeForAuto), so it tracks the
+       terminal live. Deliberately not `ternary ... .isDarkMode` — that is
+       captured once when chezmoi init runs the AppleInterfaceStyle probe, so it
+       would freeze the theme and not even follow a later apply. */ -}}
+{{- $theme := "light/dark" -}}
 
 {{- /* llm.yaml states models as "<alias>/<id>"; pi splits them across
        defaultProvider and defaultModel. */ -}}
