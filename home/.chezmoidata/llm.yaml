@@ -91,7 +91,7 @@ llm:
   tools:
     opencode:
       model:
-        - anthropic/claude-opus-4-8
+        - anthropic/claude-opus-5
         - openai/gpt-5.6-sol
         - opencode/deepseek-v4-flash-free
       small_model:
