@@ -1,0 +1,54 @@
+{{- /* model-config/pi — Project catalog metadata to a pi ProviderModelConfig.
+       Input: model metadata dict, plus:
+         id  — model id (required)
+         api — pi Api string for the owning provider (required)
+       Output: JSON dict matching pi's ProviderModelConfig.
+
+       pi requires every field below, so absent metadata is filled with
+       conservative defaults rather than omitted. Source schema:
+       @mariozechner/pi-coding-agent/docs/custom-provider.md
+*/ -}}
+{{- $model := . -}}
+{{- $id := $model.id -}}
+
+{{- /* cost: models.dev uses cache_read/cache_write, pi uses cacheRead/cacheWrite */ -}}
+{{- $cost := dict "input" 0.0 "output" 0.0 "cacheRead" 0.0 "cacheWrite" 0.0 -}}
+{{- if hasKey $model "cost" -}}
+  {{- $c := $model.cost -}}
+  {{- $_ := set $cost "input"      (float64 (default 0 (index $c "input"))) -}}
+  {{- $_ := set $cost "output"     (float64 (default 0 (index $c "output"))) -}}
+  {{- $_ := set $cost "cacheRead"  (float64 (default 0 (index $c "cache_read"))) -}}
+  {{- $_ := set $cost "cacheWrite" (float64 (default 0 (index $c "cache_write"))) -}}
+{{- end -}}
+
+{{- /* input modalities: pi only understands text and image */ -}}
+{{- $input := list -}}
+{{- if hasKey $model "modalities" -}}
+  {{- range $m := default (list) (index $model.modalities "input") -}}
+    {{- if or (eq $m "text") (eq $m "image") -}}
+      {{- $input = append $input $m -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $input -}}{{- $input = list "text" -}}{{- end -}}
+
+{{- /* limits: models.dev nests them under `limit` */ -}}
+{{- $contextWindow := 128000 -}}
+{{- $maxTokens := 8192 -}}
+{{- if hasKey $model "limit" -}}
+  {{- $l := $model.limit -}}
+  {{- $contextWindow = int (default $contextWindow (index $l "context")) -}}
+  {{- $maxTokens = int (default $maxTokens (index $l "output")) -}}
+{{- end -}}
+
+{{- $result := dict
+  "id"            $id
+  "name"          (default $id (index $model "name"))
+  "api"           $model.api
+  "reasoning"     (eq true (index $model "reasoning"))
+  "input"         $input
+  "cost"          $cost
+  "contextWindow" $contextWindow
+  "maxTokens"     $maxTokens
+-}}
+{{- toJson $result -}}

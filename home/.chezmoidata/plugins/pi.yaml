@@ -1,0 +1,18 @@
+plugins:
+  # pi-only packages (plugins/pi.yaml). The tool is implied by the filename,
+  # so a plain `source` string is enough. `when` conditions work the same as
+  # elsewhere.
+  #
+  # Sources follow pi's package spec: `npm:<pkg>[@version]`, `git:<host>/<repo>[@ref]`,
+  # or an absolute/relative local path. Versioned specs are pinned and skipped
+  # by `pi update`.
+  pi:
+    providers:
+      - name: pi-mcp-adapter
+        description: >-
+          MCP client for pi, exposed as one proxy tool instead of hundreds of
+          tool definitions. pi ships no built-in MCP, so this is what makes
+          mcp.yaml reachable. Reads <pi agent dir>/mcp.json.
+          Needs the @earendil-works pi (>= 2.11 peers on @earendil-works/pi-ai);
+          it fails to load against the retired @mariozechner build.
+        source: npm:pi-mcp-adapter

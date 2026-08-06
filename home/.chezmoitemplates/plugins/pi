@@ -1,0 +1,10 @@
+{{- /* plugins/pi — Enabled package sources as a JSON array.
+       pi loads what `settings.packages` lists, so disabled entries are
+       omitted rather than written as `false`. */ -}}
+{{- $out := list -}}
+{{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson -}}
+  {{- if $p.enabled -}}
+    {{- $out = append $out $p.source -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $out -}}

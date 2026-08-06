@@ -38,6 +38,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .double-entry-generator.yaml
 .gemini
 .gradle
+.pi
 .ssh
 {{ .path.personal.pass }}
 

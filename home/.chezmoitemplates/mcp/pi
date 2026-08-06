@@ -1,0 +1,45 @@
+{{- /* mcp/pi — mcp.providers as a pi-mcp-adapter mcpServers map.
+       pi ships no built-in MCP; this targets the pi-mcp-adapter schema
+       (npm:pi-mcp-adapter), which reads <pi agent dir>/mcp.json.
+
+       Disabled providers are kept with `disabled: true` rather than dropped,
+       so a server turned off here overrides any lower-precedence config file
+       (~/.config/mcp/mcp.json, ~/.agents/mcp.json, .mcp.json).
+*/ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "pi") $) | fromJson -}}
+{{- range $s := $all }}
+  {{- $server := dict -}}
+
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if gt (len $s.args) 0 }}
+      {{- $_ := set $server "args" $s.args -}}
+    {{- end }}
+    {{- if gt (len $s.envs) 0 }}
+      {{- $_ := set $server "env" $s.envs -}}
+    {{- end }}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- /* The adapter uses StreamableHTTP with SSE fallback for both. */ -}}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
+  {{- else }}
+    {{- continue -}}
+  {{- end }}
+
+  {{- if not $s.enabled }}
+    {{- $_ := set $server "disabled" true -}}
+  {{- end }}
+
+  {{- /* mcp.yaml carries seconds; the adapter wants milliseconds. */ -}}
+  {{- if gt $s.tool_timeout 0 }}
+    {{- $_ := set $server "requestTimeoutMs" (mul $s.tool_timeout 1000) -}}
+  {{- else if gt $s.timeout 0 }}
+    {{- $_ := set $server "requestTimeoutMs" (mul $s.timeout 1000) -}}
+  {{- end }}
+
+  {{- $_ := set $servers $s.name $server -}}
+{{- end -}}
+{{- toJson (dict "mcpServers" $servers) -}}

@@ -1,0 +1,43 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* pi settings — schema: @earendil-works/pi-coding-agent/docs/settings.md
+       A modify-template, not a plain template, so keys pi owns at runtime
+       (lastChangelogVersion, whatever /settings writes) survive an apply. */ -}}
+
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "pi") .) | fromJson -}}
+{{- $packages := includeTemplate "plugins/pi" . | fromJson -}}
+{{- $theme := ternary "dark" "light" .isDarkMode -}}
+
+{{- /* llm.yaml states models as "<alias>/<id>"; pi splits them across
+       defaultProvider and defaultModel. */ -}}
+{{- $provider := "" -}}
+{{- $model := $cfg.model -}}
+{{- $parts := splitList "/" $model -}}
+{{- if and (gt (len $parts) 1) (hasKey $cfg.providers (index $parts 0)) -}}
+  {{- $provider = index $parts 0 -}}
+  {{- $model = join "/" (slice $parts 1) -}}
+{{- end -}}
+
+{{- /* No enabledModels: llm.yaml's `model` is a fallback chain (first
+       resolvable provider wins), not a cycling set. Deriving `<alias>/*` globs
+       from it makes pi warn at startup for every alias unusable on this host,
+       so leave it unset and let pi offer whatever actually resolved. It is
+       deleted rather than skipped to clear the key if it was ever written. */ -}}
+
+{{- $in := trim .chezmoi.stdin -}}
+{{- $settings := dict -}}
+{{- if gt (len $in) 0 -}}
+  {{- $settings = fromJson $in -}}
+{{- end -}}
+
+{{- $settings = $settings
+	| deleteValueAtPath "enabledModels"
+	| setValueAtPath "defaultModel" $model
+	| setValueAtPath "defaultThinkingLevel" (default "medium" (index $cfg "reasoning_effort"))
+	| setValueAtPath "packages" $packages
+	| setValueAtPath "theme" $theme
+-}}
+{{- if $provider -}}
+  {{- $settings = setValueAtPath "defaultProvider" $provider $settings -}}
+{{- end -}}
+{{- $settings | toPrettyJson -}}

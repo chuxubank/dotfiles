@@ -118,6 +118,41 @@ llm:
         opencode:
           provider: opencode
 
+    pi:
+      # `models: false` means "leave pi's bundled catalog alone, only point it
+      # at our endpoint". Use it where pi's own list is the accurate one.
+      # The IV-backed aliases must enumerate instead: the proxy serves ids pi
+      # does not ship (claude-opus-5, the -thinking variants) and omits others
+      # it does, so the proxy is the source of truth. models-dev metadata is
+      # merged in, so the enumerated entries keep real costs and limits.
+      model:
+        - anthropic/claude-opus-5
+        - openai/gpt-5.6-sol
+        - opencode/deepseek-v4-flash-free
+      reasoning_effort: high
+      providers:
+        openai:
+          provider: iv
+          auth_field: codex-auth-token
+        anthropic:
+          provider: iv
+          type: anthropic
+          auth_field: cc-auth-token
+        iv:
+          provider: iv
+          auth_field: default-auth-token
+        ollama:
+          provider: ollama
+        openrouter:
+          provider: openrouter
+          models: false
+        # No base_url to override, so models.json omits it entirely and pi's
+        # bundled opencode provider stands; the alias exists only so model
+        # fallbacks can resolve against it.
+        opencode:
+          provider: opencode
+          models: false
+
     claude-code:
       model: opusplan
       # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL env var (opus/sonnet/haiku/fable).
