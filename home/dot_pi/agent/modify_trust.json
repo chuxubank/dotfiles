@@ -1,0 +1,47 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* pi project trust — schema: @earendil-works/pi-coding-agent/docs/security.md
+       Flat map of canonical absolute directory → bool. Trust gates loading
+       .pi/settings.json, project extensions/skills/prompts/themes, and project
+       package installs — i.e. arbitrary code from the repo you are sitting in.
+
+       A modify-template, not a plain template, so decisions saved by /trust
+       survive an apply.
+
+       Mirrors the set codex trusts in dot_codex/modify_private_config.toml
+       (chezmoi working tree, path.personal minus pass, path.workspace roots),
+       with two deliberate differences:
+
+       1. No home directory entry. pi applies the closest decision on the
+          current *or parent* path, so "$HOME": true would blanket-trust every
+          repo on the machine and defeat the prompt entirely. codex can list
+          $HOME safely because it matches exact directories only.
+       2. Workspace roots are listed as roots, not enumerated per child. The
+          same parent cascade covers their subprojects, so codex's depth-1 `fd`
+          expansion is unnecessary here.
+
+       Paths are written whether or not they exist yet, keeping output identical
+       across hosts and pre-approving a repo for whenever it gets cloned. */ -}}
+
+{{- $trusted := list .chezmoi.workingTree -}}
+{{- range $path := values (omit .path.personal "pass") -}}
+  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
+{{- end -}}
+{{- range $path := values .path.workspace -}}
+  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
+{{- end -}}
+
+{{- $in := trim .chezmoi.stdin -}}
+{{- $decisions := dict -}}
+{{- if gt (len $in) 0 -}}
+  {{- $decisions = fromJson $in -}}
+{{- end -}}
+
+{{- /* Only add. An explicit `false` saved by /trust stays untouched: revoking
+       trust is a decision worth keeping. */ -}}
+{{- range $path := sortAlpha (uniq $trusted) -}}
+  {{- if not (hasKey $decisions $path) -}}
+    {{- $_ := set $decisions $path true -}}
+  {{- end -}}
+{{- end -}}
+{{- $decisions | toPrettyJson -}}
