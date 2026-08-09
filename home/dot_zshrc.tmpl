@@ -217,6 +217,7 @@ function up() {
   {{- end }}
 }
 function upe() {
+  cz -R apply --exclude=scripts "{{ joinPath .chezmoi.homeDir .path.personal.emacs }}"
   {{ template "emacs/upgrade-packages.sh" . }}
   {{ template "emacs/restart.sh" . }}
 }

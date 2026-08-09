@@ -10,7 +10,11 @@ set -eu
 
 # Get current Emacs and Org-mode short commit hashes
 EMACS_VER="{{ output "git" "-C" $emacsDir "rev-parse" "--short" "HEAD" | trim }}"
+{{ if stat (joinPath $orgDir ".git") -}}
 ORG_VER="{{ output "git" "-C" $orgDir "rev-parse" "--short" "HEAD" | trim }}"
+{{ else -}}
+ORG_VER=""
+{{ end -}}
 
 # Determine cache directory following XDG spec
 CACHE_HOME="${XDG_CACHE_HOME:-{{ joinPath .chezmoi.homeDir ".cache" }}}"
@@ -25,12 +29,12 @@ else
     LAST_ORG_VER=""
 fi
 
-if [ "$ORG_VER" != "$LAST_ORG_VER" ]; then
+if [ -n "$ORG_VER" ] && [ "$ORG_VER" != "$LAST_ORG_VER" ]; then
     echo "⚡ Org-mode updated ($LAST_ORG_VER → $ORG_VER), rebuilding autoloads..."
     make -C "{{ $orgDir }}" compile autoloads
     echo "$ORG_VER" > "$CACHE_FILE"
 fi
 
-echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver $ORG_VER"
+echo "󰯁 Restart emacs with $EMACS_VER, org-mode ver ${ORG_VER:-not-installed}"
 {{ template "emacs/restart.sh" . }}
 {{ end -}}
