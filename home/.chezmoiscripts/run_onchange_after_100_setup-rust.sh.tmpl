@@ -11,7 +11,7 @@ rustup component add rust-analyzer
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "rust" "cargo")) | fromJson }}
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
-cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }} {{ $tool.name }}
+cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }}{{- with index $tool "root" }} --root {{ if eq . "home" }}{{ $.chezmoi.homeDir | quote }}{{ else if eq . "local" }}{{ joinPath $.chezmoi.homeDir ".local" | quote }}{{ else }}{{ . | quote }}{{ end }}{{ end }} {{ $tool.name }}
 {{- else }}
 cargo install {{ $tool }}
 {{- end }}
