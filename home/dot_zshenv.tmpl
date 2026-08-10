@@ -42,16 +42,6 @@ export PATH=$HOME/bin:$PATH
 # Android
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
-if [ -d "$ANDROID_HOME/build-tools" ]; then
-  export ANDROID_BUILD_TOOLS_VERSION=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
-  export PATH="$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$PATH"
-fi
-if [ -d "$ANDROID_HOME/platform-tools" ]; then
-  export PATH="$ANDROID_HOME/platform-tools:$PATH"
-fi
-if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
-  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-fi
 
 # API-KEY
 export OPENAI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenAI" "field" "api-key") .) }}"
@@ -64,7 +54,6 @@ export FAVA_PORT=8888
 
 # Bun
 export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
-export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Claude
 export CLAUDE_CODE_NO_FLICKER=1
@@ -75,7 +64,6 @@ export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path
 # Go
 export GOPATH="$XDG_DATA_HOME/go"
 export GOBIN="$XDG_BIN_HOME/go"
-export PATH=$GOBIN:$PATH
 
 # Hugging Face
 export HF_ENDPOINT=https://hf-mirror.com
@@ -98,20 +86,15 @@ export PASSWORD_STORE_DIR="$HOME/{{ .path.personal.pass }}"
 
 # plum
 export plum_dir="$HOME/{{ .path.tool.plum }}"
-export PATH=$plum_dir:$PATH
 
-{{- if has "qmk" .roles -}}
+{{ if has "qmk" .roles -}}
 # QMK
 export QMK_HOME=$HOME/{{ .path.workspace.qmk }}
-{{- end -}}
-
-# Raycast
-export PATH=$HOME/{{ .path.tool.raycast }}/scripts:$PATH
+{{ end -}}
 
 # Rust
 export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
-export PATH="$CARGO_HOME/bin:$PATH"
 
 # StarDict
 export STARDICT_DATA_DIR="$HOME/{{ .path.data.nutstore }}/Dictionary"
@@ -121,4 +104,3 @@ export SDKMAN_DIR="$HOME/{{ .path.tool.sdkman }}"
 
 # VCPKG
 export VCPKG_ROOT="$HOME/vcpkg"
-export PATH=$VCPKG_ROOT:$PATH

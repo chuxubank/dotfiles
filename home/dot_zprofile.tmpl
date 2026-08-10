@@ -11,8 +11,6 @@ source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofil
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 {{- end }}
 
-# Added by Toolbox App
-export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 {{- end }}
 
 {{- if $brewBin }}
@@ -29,34 +27,6 @@ export HOMEBREW_NO_REQUIRE_TAP_TRUST=1
 
 export LIBRARY_PATH=$LIBRARY_PATH:{{ joinPath .path.usr "lib" }}
 
-# awk
-export PATH="$(brew --prefix awk)/bin:$PATH"
-
-# bind
-export PATH="$(brew --prefix bind)/bin:$PATH"
-
-# bison
-export PATH="$(brew --prefix bison)/bin:$PATH"
-
-# curl
-export PATH="$(brew --prefix curl)/bin:$PATH"
-
-# grep
-export PATH="$(brew --prefix grep)/libexec/gunbin:$PATH"
-
-# python
-export PATH="$(brew --prefix python)/libexec/bin:$PATH"
-
-# ruby
-export PATH="$(brew --prefix ruby)/bin:$PATH"
-export PATH="$(gem env gemdir)/bin:$PATH"
-
-# rust
-export PATH="$(brew --prefix rustup)/bin:$PATH"
-
-# sqlite
-export PATH="$(brew --prefix sqlite)/bin:$PATH"
-
 # ssh
 export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
 export SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh"
@@ -69,6 +39,43 @@ source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofil
 {{- end }}
 
 export SUDO_ASKPASS="$SSH_ASKPASS"
+
+# PATH
+{{- if eq .chezmoi.os "darwin" }}
+export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+{{- end }}
+
+if [ -d "$ANDROID_HOME/build-tools" ]; then
+  export ANDROID_BUILD_TOOLS_VERSION=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+  export PATH="$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$PATH"
+fi
+if [ -d "$ANDROID_HOME/platform-tools" ]; then
+  export PATH="$ANDROID_HOME/platform-tools:$PATH"
+fi
+if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
+  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+fi
+
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$GOBIN:$PATH"
+export PATH="$plum_dir:$PATH"
+export PATH="$HOME/{{ .path.tool.raycast }}/scripts:$PATH"
+export PATH="$CARGO_HOME/bin:$PATH"
+export PATH="$VCPKG_ROOT:$PATH"
+
+{{- if $brewBin }}
+export PATH="$(brew --prefix awk)/bin:$PATH"
+export PATH="$(brew --prefix bind)/bin:$PATH"
+export PATH="$(brew --prefix bison)/bin:$PATH"
+export PATH="$(brew --prefix curl)/bin:$PATH"
+export PATH="$(brew --prefix grep)/libexec/gunbin:$PATH"
+export PATH="$(brew --prefix python)/libexec/bin:$PATH"
+export PATH="$(brew --prefix ruby)/bin:$PATH"
+export PATH="$(gem env gemdir)/bin:$PATH"
+export PATH="$(brew --prefix rustup)/bin:$PATH"
+export PATH="$(brew --prefix sqlite)/bin:$PATH"
+{{- end }}
+
 source_if "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Prefer user-managed executables over package-manager versions.
