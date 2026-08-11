@@ -16,3 +16,9 @@ plugins:
           Needs the @earendil-works pi (>= 2.11 peers on @earendil-works/pi-ai);
           it fails to load against the retired @mariozechner build.
         source: npm:pi-mcp-adapter
+
+      - name: pi-computer-use
+        description: >-
+          Desktop computer-use tools for Pi on macOS, Windows, and Linux.
+          macOS requires Accessibility and Screen Recording permissions.
+        source: npm:@injaneity/pi-computer-use
