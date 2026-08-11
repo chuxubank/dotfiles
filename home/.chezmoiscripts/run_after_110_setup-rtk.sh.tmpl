@@ -3,6 +3,11 @@
 
 set -eu
 
+if ! command -v rtk >/dev/null 2>&1; then
+  echo "󰯁 Skip RTK agent integrations: rtk is not installed"
+  exit 0
+fi
+
 echo "󰯁 Setup RTK agent integrations"
 
 rtk init --global --auto-patch

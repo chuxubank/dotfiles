@@ -19,6 +19,10 @@ Library
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
+{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") }}
+.config/rtk
+{{- end }}
+
 {{- if ne .host_env "aa" }}
 .ssh/aa
 {{- else if ne .host_env "iv" }}

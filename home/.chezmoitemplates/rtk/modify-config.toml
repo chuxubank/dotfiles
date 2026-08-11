@@ -1,0 +1,8 @@
+{{- $input := trim .chezmoi.stdin -}}
+{{- $config := dict -}}
+{{- if gt (len $input) 0 -}}
+  {{- $config = fromToml $input -}}
+{{- end -}}
+
+{{- $managed := includeTemplate "rtk/config.toml" . | fromToml -}}
+{{- mergeOverwrite $config $managed | toToml -}}
