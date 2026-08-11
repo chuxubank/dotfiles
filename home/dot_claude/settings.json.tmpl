@@ -43,6 +43,16 @@
     "defaultMode" "auto"
 -}}
 
+{{- $hooks := dict
+  "PreToolUse" (list (dict
+    "matcher" "Bash"
+    "hooks" (list (dict
+      "type" "command"
+      "command" "rtk hook claude"
+    ))
+  ))
+-}}
+
 {{- $statusLine := dict
     "type" "command"
 	"command" (joinPath .chezmoi.homeDir ".claude" "statusline.sh")
@@ -53,6 +63,7 @@
   "enabledPlugins" $enabledPlugins
   "env" $env
   "extraKnownMarketplaces" $extraKnownMarketplaces
+  "hooks" $hooks
   "model" $cfg.model
   "permissions" $permissions
   "skipAutoPermissionPrompt" true

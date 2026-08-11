@@ -111,6 +111,7 @@ brews = [
   "repo",
   "ripgrep",
   "rsync",
+  "rtk",
   "ruby",
   "rustup",
   "samba",

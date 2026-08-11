@@ -1,0 +1,16 @@
+{{- if ne .chezmoi.os "windows" -}}
+#!/bin/sh
+
+set -eu
+
+echo "󰯁 Setup RTK agent integrations"
+
+rtk init --global --auto-patch
+rtk init --global --codex
+rtk init --global --gemini --auto-patch
+rtk init --global --opencode
+rtk init --global --agent pi
+{{- if eq .host_env "aa" }}
+rtk init --global --agent cursor
+{{- end }}
+{{- end }}
