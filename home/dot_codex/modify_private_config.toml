@@ -63,45 +63,38 @@
   {{- $_ := set $modelProviders $alias $provider -}}
 {{- end }}
 
-{{- $input := trim .chezmoi.stdin -}}
-{{- $config := dict -}}
-{{- if gt (len $input) 0 -}}
-  {{- $config = fromToml $input -}}
-{{- end -}}
-
-{{- $_ := set $config "model" $model -}}
-{{- $_ := set $config "model_reasoning_effort" $cfg.reasoning_effort -}}
-{{- $mcpServers := get $config "mcp_servers" | default dict -}}
-{{- range $name, $server := $servers -}}
-  {{- $_ := set $mcpServers $name $server -}}
-{{- end -}}
-{{- $_ := set $config "mcp_servers" $mcpServers -}}
-{{- $_ := set $config "personality" "pragmatic" -}}
-{{- $_ := set $config "projects" $projects -}}
-{{- $_ := setValueAtPath "features.multi_agent" true $config -}}
-{{- $_ := setValueAtPath "features.goals" true $config -}}
-{{- $_ := setValueAtPath "features.shell_snapshot" true $config -}}
-{{- $_ := setValueAtPath "features.unified_exec" true $config -}}
-{{- $tui := get $config "tui" | default dict -}}
-{{- $modelAvailabilityNux := get $tui "model_availability_nux" | default dict -}}
-{{- $_ := set $modelAvailabilityNux "gpt-5.5" 4 -}}
-{{- $_ := set $tui "model_availability_nux" $modelAvailabilityNux -}}
-{{- $_ := set $config "tui" $tui -}}
+{{- $managed := dict
+  "model" $model
+  "model_reasoning_effort" $cfg.reasoning_effort
+  "mcp_servers" $servers
+  "personality" "pragmatic"
+  "features" (dict
+    "multi_agent" true
+    "goals" true
+    "shell_snapshot" true
+    "unified_exec" true
+  )
+  "tui" (dict "model_availability_nux" (dict "gpt-5.5" 4))
+-}}
+{{- $remove := list -}}
 {{- if $modelProvider -}}
-  {{- $_ := set $config "model_provider" $modelProvider -}}
+  {{- $_ := set $managed "model_provider" $modelProvider -}}
 {{- else -}}
-  {{- $_ := unset $config "model_provider" -}}
+  {{- $remove = append $remove "model_provider" -}}
 {{- end -}}
+{{- $replace := dict "projects" $projects -}}
 {{- if gt (len $modelProviders) 0 -}}
-  {{- $_ := set $config "model_providers" $modelProviders -}}
+  {{- $_ := set $replace "model_providers" $modelProviders -}}
 {{- else -}}
-  {{- $_ := unset $config "model_providers" -}}
+  {{- $remove = append $remove "model_providers" -}}
 {{- end -}}
 
 {{- $plugins := includeTemplate "plugins/enabled-map" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $managedPlugins := dict -}}
 {{- range $plugin, $enabled := $plugins -}}
-  {{- $_ := setValueAtPath (printf "plugins.%s.enabled" $plugin) $enabled $config -}}
+  {{- $managedPlugins = setValueAtPath (printf "%s.enabled" $plugin) $enabled $managedPlugins -}}
 {{- end -}}
+{{- $_ := set $managed "plugins" $managedPlugins -}}
 
 {{- $desktop := dict
   "ambient-suggestions-enabled" true
@@ -114,8 +107,12 @@
   "preventSleepWhileRunning" true
   "show-context-window-usage" true
 -}}
-{{- range $key, $value := $desktop -}}
-  {{- $_ := setValueAtPath (printf "desktop.%s" $key) $value $config -}}
-{{- end -}}
+{{- $_ := set $managed "desktop" $desktop -}}
 
-{{ $config | toToml }}
+{{ includeTemplate "config/merge" (dict
+  "format" "toml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+  "replace" $replace
+  "remove" $remove
+) }}

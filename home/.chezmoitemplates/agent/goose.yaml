@@ -1,3 +1,4 @@
+{{- /* Goose managed configuration. */ -}}
 extensions:
   computercontroller:
     enabled: true
@@ -14,15 +15,6 @@ extensions:
     name: developer
     description: ''
     display_name: Developer
-    timeout: 300
-    bundled: true
-    available_tools: []
-  jetbrains:
-    enabled: false
-    type: builtin
-    name: jetbrains
-    description: ''
-    display_name: JetBrains
     timeout: 300
     bundled: true
     available_tools: []

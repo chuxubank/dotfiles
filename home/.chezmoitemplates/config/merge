@@ -1,0 +1,47 @@
+{{- /*
+Merge managed configuration into an existing JSON, TOML, or YAML document.
+
+Interface:
+  format:  "json", "toml", or "yaml"
+  input:   existing serialized document (empty is allowed)
+  managed: map of values to deep-merge over the existing document
+  replace: optional map of dotted paths to replace atomically
+  remove:  optional list of dotted paths to delete after merging
+*/ -}}
+
+{{- $format := .format -}}
+{{- if not (has $format (list "json" "toml" "yaml")) -}}
+  {{- fail (printf "config/merge: unsupported format %q" $format) -}}
+{{- end -}}
+
+{{- $input := trim (default "" .input) -}}
+{{- $config := dict -}}
+{{- if gt (len $input) 0 -}}
+  {{- if eq $format "json" -}}
+    {{- $config = fromJson $input -}}
+  {{- else if eq $format "toml" -}}
+    {{- $config = fromToml $input -}}
+  {{- else -}}
+    {{- $config = fromYaml $input -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $config = mergeOverwrite (deepCopy $config) (deepCopy .managed) -}}
+{{- if hasKey . "replace" -}}
+  {{- range $path, $value := .replace -}}
+    {{- $config = setValueAtPath $path $value $config -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey . "remove" -}}
+  {{- range $path := .remove -}}
+    {{- $config = deleteValueAtPath $path $config -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if eq $format "json" -}}
+  {{- $config | toPrettyJson -}}
+{{- else if eq $format "toml" -}}
+  {{- $config | toToml -}}
+{{- else -}}
+  {{- $config | toYaml -}}
+{{- end -}}

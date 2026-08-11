@@ -1,3 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+
 {{- /* https://opencode.ai/docs/config/ */ -}}
 
 {{- $mcpServers := includeTemplate "mcp/opencode" (merge (dict "tool" "opencode") .) | fromJson -}}
@@ -64,7 +66,7 @@
   {{- $_ := set $references $name (dict "path" (printf "~/%s" $path)) -}}
 {{- end }}
 
-{{- $config := dict
+{{- $managed := dict
   "$schema" "https://opencode.ai/config.json"
   "autoupdate" true
   "formatter" true
@@ -77,4 +79,15 @@
   "server" (dict "port" 4096)
   "small_model" $cfg.small_model
 -}}
-{{ $config | toPrettyJson }}
+{{- $replace := dict
+  "mcp" $mcpServers
+  "plugin" $plugins
+  "provider" $provider
+  "references" $references
+-}}
+{{ includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+  "replace" $replace
+) }}

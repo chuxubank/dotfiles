@@ -1,0 +1,9 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- $managed := includeTemplate "agent/goose.yaml" . | fromYaml -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "yaml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+  "replace" (dict "extensions" $managed.extensions)
+) -}}

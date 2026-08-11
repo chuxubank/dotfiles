@@ -1,3 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "claude-code") .) | fromJson -}}
 
 {{- $env := dict
@@ -58,7 +60,7 @@
 	"command" (joinPath .chezmoi.homeDir ".claude" "statusline.sh")
 -}}
 
-{{- dict
+{{- $managed := dict
   "effortLevel" "medium"
   "enabledPlugins" $enabledPlugins
   "env" $env
@@ -68,5 +70,9 @@
   "permissions" $permissions
   "skipAutoPermissionPrompt" true
   "statusLine" $statusLine
-  | toPrettyJson
 -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+) -}}

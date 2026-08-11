@@ -31,20 +31,18 @@
        so leave it unset and let pi offer whatever actually resolved. It is
        deleted rather than skipped to clear the key if it was ever written. */ -}}
 
-{{- $in := trim .chezmoi.stdin -}}
-{{- $settings := dict -}}
-{{- if gt (len $in) 0 -}}
-  {{- $settings = fromJson $in -}}
-{{- end -}}
-
-{{- $settings = $settings
-	| deleteValueAtPath "enabledModels"
-	| setValueAtPath "defaultModel" $model
-	| setValueAtPath "defaultThinkingLevel" (default "medium" (index $cfg "reasoning_effort"))
-	| setValueAtPath "packages" $packages
-	| setValueAtPath "theme" $theme
+{{- $managed := dict
+  "defaultModel" $model
+  "defaultThinkingLevel" (default "medium" (index $cfg "reasoning_effort"))
+  "packages" $packages
+  "theme" $theme
 -}}
 {{- if $provider -}}
-  {{- $settings = setValueAtPath "defaultProvider" $provider $settings -}}
+  {{- $_ := set $managed "defaultProvider" $provider -}}
 {{- end -}}
-{{- $settings | toPrettyJson -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+  "remove" (list "enabledModels")
+) -}}
