@@ -2,7 +2,8 @@
 
 echo "{{ template "week" . }} 󰯁 Setup go"
 
-source $HOME/.zshenv
+source "$HOME/.zshenv"
+export PATH="$GOBIN:$PATH"
 
 GO_PACKAGES=(
 {{- template "package/list" (dict "ctx" . "path" (list "go")) }}
