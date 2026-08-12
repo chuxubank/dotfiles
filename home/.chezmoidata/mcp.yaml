@@ -166,7 +166,7 @@ mcp:
           GOOGLE_MAPS_API_KEY:
             path: Personal/Tech/Google
             field: goose-map-api-key
-    - name: JetBrains
+    - name: JetBrains MCP
       description: The server proxies requests from client to JetBrains IDE.
       execution:
         type: sse
@@ -175,6 +175,8 @@ mcp:
       when:
         enabled:
           host_env: iv
+        disabled:
+          tool: ["goose"]
     - name: MarkItDown
       description: Python tool for converting files and office documents to Markdown.
       when:
