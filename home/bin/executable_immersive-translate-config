@@ -5,26 +5,102 @@ config_file=${XDG_CONFIG_HOME:-"$HOME/.config"}/immersive-translate/config.json
 
 usage() {
 	cat <<'EOF'
-usage: immersive-translate-config [import|path]
+usage: immersive-translate-config [import [all|BROWSER]|path]
 
-  import  Open the Immersive Translate import page and reveal the config file
+  import  Open the import page in every installed browser (default), reveal the
+          config, and copy its path. BROWSER can be safari, chrome, edge,
+          firefox, arc, brave, vivaldi, chromium, opera, orion, or zen.
   path    Print the managed config file path
 EOF
+}
+
+open_if_available() {
+	app=$1
+	if open -Ra "$app" >/dev/null 2>&1; then
+		open -a "$app" 'https://dash.immersivetranslate.com/#import_export'
+		printf '  - %s\n' "$app"
+		opened_count=$((opened_count + 1))
+	fi
+}
+
+open_required() {
+	app=$1
+	if ! open -Ra "$app" >/dev/null 2>&1; then
+		printf 'immersive-translate-config: browser is not installed: %s\n' "$app" >&2
+		exit 1
+	fi
+	open -a "$app" 'https://dash.immersivetranslate.com/#import_export'
+	printf '  - %s\n' "$app"
+	opened_count=$((opened_count + 1))
 }
 
 case "${1-import}" in
 import)
 	if [ "$(uname -s)" != Darwin ]; then
-		printf '%s\n' 'immersive-translate-config: Safari import requires macOS' >&2
+		printf '%s\n' 'immersive-translate-config: browser import requires macOS' >&2
 		exit 1
 	fi
 	if [ ! -f "$config_file" ]; then
 		printf 'immersive-translate-config: missing config: %s\n' "$config_file" >&2
 		exit 1
 	fi
+	requested_browser=${2-all}
+	case "$requested_browser" in
+	all | safari | chrome | edge | firefox | arc | brave | vivaldi | chromium | opera | orion | zen) ;;
+	*)
+		printf 'immersive-translate-config: unsupported browser: %s\n' "$requested_browser" >&2
+		usage >&2
+		exit 2
+		;;
+	esac
+	printf '%s' "$config_file" | pbcopy
 	open -R "$config_file"
-	open -a Safari 'https://dash.immersivetranslate.com/#import_export'
-	printf '%s\n' 'Choose "From file" and select the revealed config.json.'
+	printf '%s\n' 'Opened the import page in:'
+	opened_count=0
+	case "$requested_browser" in
+	all)
+		for app in \
+			'Safari' \
+			'Safari Technology Preview' \
+			'Google Chrome' \
+			'Google Chrome Beta' \
+			'Google Chrome Dev' \
+			'Google Chrome Canary' \
+			'Microsoft Edge' \
+			'Microsoft Edge Beta' \
+			'Microsoft Edge Dev' \
+			'Microsoft Edge Canary' \
+			'Firefox' \
+			'Firefox Developer Edition' \
+			'Firefox Nightly' \
+			'Arc' \
+			'Brave Browser' \
+			'Vivaldi' \
+			'Chromium' \
+			'Opera' \
+			'Orion' \
+			'Zen'; do
+			open_if_available "$app"
+		done
+		;;
+	safari) open_required 'Safari' ;;
+	chrome) open_required 'Google Chrome' ;;
+	edge) open_required 'Microsoft Edge' ;;
+	firefox) open_required 'Firefox' ;;
+	arc) open_required 'Arc' ;;
+	brave) open_required 'Brave Browser' ;;
+	vivaldi) open_required 'Vivaldi' ;;
+	chromium) open_required 'Chromium' ;;
+	opera) open_required 'Opera' ;;
+	orion) open_required 'Orion' ;;
+	zen) open_required 'Zen' ;;
+	esac
+	if [ "$opened_count" -eq 0 ]; then
+		printf '%s\n' 'immersive-translate-config: no supported browser is installed' >&2
+		exit 1
+	fi
+	printf 'Copied this path to the clipboard:\n%s\n' "$config_file"
+	printf '%s\n' 'Choose "From file", press Command-Shift-G, and paste the path.'
 	;;
 path)
 	printf '%s\n' "$config_file"
