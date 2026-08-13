@@ -1,0 +1,88 @@
+{
+  "isChangedAlwaysTranslatedUrls": false,
+  "userTranslationServices": {
+    "translationService": "google-free"
+  },
+  "updatedAt": "2026-05-26T00:33:16.332Z",
+  "targetLanguage": "zh-CN",
+  "translationServiceChangedbyUserAt": "2026-05-26T00:33:16.332Z",
+  "rewardCenterOpenTime": "1762177581588",
+  "aiWritingOnboardingShown": true,
+  "localUpdatedAt": "2026-05-26T00:33:16.332Z",
+  "interfaceLanguage": "zh-CN",
+  "notificationShowTimes": {
+    "new-guide": "1757397977955"
+  },
+  "pcFloatBall": {
+    "enable": false,
+    "clickType": "translate",
+    "afterInstalledAt": "2023-10-28",
+    "enableSidePanel": true,
+    "blockUrls": [
+      "*immersivetranslate.*/preview",
+      "*.immersivetranslate.*/download-subtitle*",
+      "dash.immersivetranslate.*/*"
+    ],
+    "isPc": true,
+    "enablePinSidePanel": true,
+    "transparency": 30,
+    "guideBlockUrls": [
+      "https://immersivetranslate.*/accounts/login*",
+      "https://immersivetranslate.*/profile/",
+      "https://onboarding.immersivetranslate.**",
+      "https://*.immersivetranslate.*/*/intro/tutorial/step-1*",
+      "https://*.immersivetranslate.*/*/new-guide/step-1*",
+      "https://*.immersivetranslate.*/*/new-guide/step-2*"
+    ],
+    "guideArrowPermanentUrls": [
+      "https://*.immersivetranslate.*/*/intro/step-1",
+      "https://*.immersivetranslate.*/*/tutorial/step-2",
+      "https://*.immersivetranslate.*/*/new-guide/step-3"
+    ],
+    "guideContentBlockUrls": [
+      "https://*.immersivetranslate.*/*/tutorial/*",
+      "https://*.immersivetranslate.*/*/intro/*",
+      "https://*.immersivetranslate.*/*/init/*",
+      "https://*.immersivetranslate.*/*/new-guide/*"
+    ],
+    "defaultShowGuideNums": 4,
+    "upgradeVisible": true,
+    "upgradeShowLimit": 20,
+    "fixedPosition": "right"
+  },
+  "translationService": "google",
+  "translationTheme": "weakening",
+  "pcFloatBallMainBtnTooltipShownCount": 3,
+  "aiAssistantIds": [
+    "paraphrase",
+    "paragraph-summarizer-expert",
+    "plain-english",
+    "twitter",
+    "tech",
+    "reddit",
+    "paper",
+    "news",
+    "music",
+    "medical",
+    "legal",
+    "github",
+    "ecommerce",
+    "financial",
+    "fiction",
+    "ao3",
+    "ebook",
+    "design",
+    "bilingual-mix",
+    "web3",
+    "game"
+  ],
+  "generalRule": {
+    "subtitleRule.add": {
+      "isShowedAiSubtitleTip": true
+    },
+    "mouseHoverHoldKey": "Alt",
+    "mouseHoverPreferenceKey": "Alt"
+  },
+  "isShowInputTranslationConsent": false,
+  "enableInputTranslation": true
+}

@@ -1,0 +1,39 @@
+#!/bin/sh
+set -eu
+
+config_file=${XDG_CONFIG_HOME:-"$HOME/.config"}/immersive-translate/config.json
+
+usage() {
+	cat <<'EOF'
+usage: immersive-translate-config [import|path]
+
+  import  Open the Immersive Translate import page and reveal the config file
+  path    Print the managed config file path
+EOF
+}
+
+case "${1-import}" in
+import)
+	if [ "$(uname -s)" != Darwin ]; then
+		printf '%s\n' 'immersive-translate-config: Safari import requires macOS' >&2
+		exit 1
+	fi
+	if [ ! -f "$config_file" ]; then
+		printf 'immersive-translate-config: missing config: %s\n' "$config_file" >&2
+		exit 1
+	fi
+	open -R "$config_file"
+	open -a Safari 'https://dash.immersivetranslate.com/#import_export'
+	printf '%s\n' 'Choose "From file" and select the revealed config.json.'
+	;;
+path)
+	printf '%s\n' "$config_file"
+	;;
+-h | --help)
+	usage
+	;;
+*)
+	usage >&2
+	exit 2
+	;;
+esac
