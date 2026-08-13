@@ -14,6 +14,12 @@
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "lxgw/Pengli" "PengliWenKai-Regular.ttf") }}"
 
+["Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/scripts/kiss-translator.user.js"]
+    type = "archive-file"
+    url = "{{ (gitHubLatestReleaseAssetURL "fishjar/kiss-translator" "kiss-translator_*_userscript.zip") }}"
+    path = "userscript/kiss-translator-ios-safari.user.js"
+    refreshPeriod = "24h"
+
 ["bin/md-babel"]
     type = "archive-file"
     url = "{{ (gitHubLatestReleaseAssetURL "md-babel/swift-markdown-babel" "md-babel_macos-universal-*.tar.bz2") }}"
