@@ -40,44 +40,33 @@ source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofil
 
 export SUDO_ASKPASS="$SSH_ASKPASS"
 
-# PATH
-{{- if eq .chezmoi.os "darwin" }}
-export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
-{{- end }}
-
+# Dynamic PATH entries resolved at login.
+typeset -a cat_dynamic_path=()
 if [ -d "$ANDROID_HOME/build-tools" ]; then
   export ANDROID_BUILD_TOOLS_VERSION=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
-  export PATH="$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION:$PATH"
+  cat_dynamic_path+=("$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION")
 fi
-if [ -d "$ANDROID_HOME/platform-tools" ]; then
-  export PATH="$ANDROID_HOME/platform-tools:$PATH"
-fi
-if [ -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
-  export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-fi
-
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$GOBIN:$PATH"
-export PATH="$plum_dir:$PATH"
-export PATH="$HOME/{{ .path.tool.raycast }}/scripts:$PATH"
-export PATH="$CARGO_HOME/bin:$PATH"
-export PATH="$VCPKG_ROOT:$PATH"
 
 {{- if $brewBin }}
-export PATH="$(brew --prefix awk)/bin:$PATH"
-export PATH="$(brew --prefix bind)/bin:$PATH"
-export PATH="$(brew --prefix bison)/bin:$PATH"
-export PATH="$(brew --prefix curl)/bin:$PATH"
-export PATH="$(brew --prefix grep)/libexec/gunbin:$PATH"
-export PATH="$(brew --prefix python)/libexec/bin:$PATH"
-export PATH="$(brew --prefix ruby)/bin:$PATH"
-export PATH="$(gem env gemdir)/bin:$PATH"
-export PATH="$(brew --prefix rustup)/bin:$PATH"
-export PATH="$(brew --prefix sqlite)/bin:$PATH"
+cat_dynamic_path+=(
+  "$(brew --prefix awk)/bin"
+  "$(brew --prefix bind)/bin"
+  "$(brew --prefix bison)/bin"
+  "$(brew --prefix curl)/bin"
+  "$(brew --prefix grep)/libexec/gunbin"
+  "$(brew --prefix python)/libexec/bin"
+  "$(brew --prefix ruby)/bin"
+  "$(gem env gemdir)/bin"
+  "$(brew --prefix rustup)/bin"
+  "$(brew --prefix sqlite)/bin"
+)
 {{- end }}
 
 source_if "$SDKMAN_DIR/bin/sdkman-init.sh"
 
-# Prefer user-managed executables over package-manager versions.
-export PATH="$HOME/bin:${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
+# Keep user-managed static paths ahead of resolved package-manager paths,
+# followed by paths contributed by shell initializers and the parent process.
+path=("${cat_static_path[@]}" "${cat_dynamic_path[@]}" "${path[@]}")
 typeset -U path PATH
+export PATH
+unset cat_dynamic_path

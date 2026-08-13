@@ -34,11 +34,6 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_BIN_HOME="$HOME/.local/bin"
 
-# Bin
-export PATH={{ joinPath .path.usr "bin" }}:$PATH
-export PATH=$XDG_BIN_HOME:$PATH
-export PATH=$HOME/bin:$PATH
-
 # Android
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_HOME
@@ -104,3 +99,25 @@ export SDKMAN_DIR="$HOME/{{ .path.tool.sdkman }}"
 
 # VCPKG
 export VCPKG_ROOT="$HOME/vcpkg"
+
+# Static PATH shared by interactive shells, scripts, and GUI launchers.
+typeset -ga cat_static_path
+cat_static_path=(
+  "$HOME/bin"
+  "$XDG_BIN_HOME"
+  "{{ joinPath .path.usr "bin" }}"
+  "$BUN_INSTALL/bin"
+  "$GOBIN"
+  "$CARGO_HOME/bin"
+  "$plum_dir"
+  "$HOME/{{ .path.tool.raycast }}/scripts"
+  "$ANDROID_HOME/platform-tools"
+  "$ANDROID_HOME/cmdline-tools/latest/bin"
+  "$VCPKG_ROOT"
+{{- if eq .chezmoi.os "darwin" }}
+  "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+{{- end }}
+)
+typeset -U path PATH
+path=("${cat_static_path[@]}" "${path[@]}")
+export PATH
