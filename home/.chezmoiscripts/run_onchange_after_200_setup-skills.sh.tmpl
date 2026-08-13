@@ -2,6 +2,9 @@
 
 echo "{{ template "week" . }} 󰯁 Setup skills"
 
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
 declared=()
 updateable=()
 installed=()

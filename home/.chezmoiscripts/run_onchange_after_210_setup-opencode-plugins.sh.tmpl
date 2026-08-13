@@ -2,6 +2,9 @@
 
 echo "{{ template "week" . }} 󰯁 Setup opencode plugins"
 
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
 if ! command -v ocx >/dev/null 2>&1; then
     echo "ocx is not installed; skipping opencode plugin setup."
     exit 0
