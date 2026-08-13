@@ -1,0 +1,39 @@
+{{- $ctx := . -}}
+{{- $lines := list -}}
+{{- $paths := list -}}
+{{- $variables := dict -}}
+{{- range $tool := .environment.static -}}
+  {{- $enabled := true -}}
+  {{- if hasKey $tool "when" -}}
+    {{- $enabled = eq "true" (includeTemplate "when/context" (merge (dict "item" $tool) $ctx)) -}}
+  {{- end -}}
+  {{- if $enabled -}}
+    {{- $lines = append $lines (printf "# %s" $tool.tool) -}}
+    {{- range $name, $item := dig "variables" (dict) $tool -}}
+      {{- if not (regexMatch "^[A-Za-z_][A-Za-z0-9_]*$" $name) -}}
+        {{- fail (printf "invalid environment variable name for %s: %s" $tool.tool $name) -}}
+      {{- end -}}
+      {{- if hasKey $variables $name -}}
+        {{- fail (printf "duplicate environment variable %s in %s and %s" $name (index $variables $name) $tool.tool) -}}
+      {{- end -}}
+      {{- $_ := set $variables $name $tool.tool -}}
+      {{- $value := includeTemplate "environment/value" (dict "ctx" $ctx "item" $item) -}}
+      {{- $lines = append $lines (printf "export %s=%s" $name ($value | quote)) -}}
+    {{- end -}}
+    {{- $lines = append $lines "" -}}
+    {{- range dig "path" (list) $tool -}}
+      {{- $paths = append $paths (includeTemplate "environment/value" (dict "ctx" $ctx "item" .)) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{ join "\n" $lines }}
+# Static PATH shared by interactive shells, scripts, and GUI launchers.
+typeset -ga dotfiles_static_path
+dotfiles_static_path=(
+{{- range $paths }}
+  {{ . | quote }}
+{{- end }}
+)
+typeset -U path PATH
+path=("${dotfiles_static_path[@]}" "${path[@]}")
+export PATH

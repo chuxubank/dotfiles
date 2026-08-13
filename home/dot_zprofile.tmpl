@@ -1,5 +1,3 @@
-export LC_ALL=en_US.UTF-8
-
 {{- $brewBin := lookPath "brew" }}
 
 {{- if eq .chezmoi.os "darwin" }}
@@ -41,14 +39,14 @@ source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofil
 export SUDO_ASKPASS="$SSH_ASKPASS"
 
 # Dynamic PATH entries resolved at login.
-typeset -a cat_dynamic_path=()
+typeset -a dotfiles_dynamic_path=()
 if [ -d "$ANDROID_HOME/build-tools" ]; then
   export ANDROID_BUILD_TOOLS_VERSION=$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
-  cat_dynamic_path+=("$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION")
+  dotfiles_dynamic_path+=("$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS_VERSION")
 fi
 
 {{- if $brewBin }}
-cat_dynamic_path+=(
+dotfiles_dynamic_path+=(
   "$(brew --prefix awk)/bin"
   "$(brew --prefix bind)/bin"
   "$(brew --prefix bison)/bin"
@@ -66,7 +64,7 @@ source_if "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Keep user-managed static paths ahead of resolved package-manager paths,
 # followed by paths contributed by shell initializers and the parent process.
-path=("${cat_static_path[@]}" "${cat_dynamic_path[@]}" "${path[@]}")
+path=("${dotfiles_static_path[@]}" "${dotfiles_dynamic_path[@]}" "${path[@]}")
 typeset -U path PATH
 export PATH
-unset cat_dynamic_path
+unset dotfiles_dynamic_path

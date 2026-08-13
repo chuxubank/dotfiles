@@ -1,0 +1,159 @@
+# Each entry owns one tool's static variables and PATH contributions.
+# List order defines PATH priority. Values support literal, home, homePath,
+# path, pathList, and an optional suffix; when uses the shared host conditions.
+environment:
+  static:
+    - tool: user
+      variables:
+        LC_ALL:
+          literal: en_US.UTF-8
+        XDG_BIN_HOME:
+          home: [.local, bin]
+        XDG_CACHE_HOME:
+          home: [.cache]
+        XDG_CONFIG_HOME:
+          home: [.config]
+        XDG_DATA_HOME:
+          home: [.local, share]
+        XDG_STATE_HOME:
+          home: [.local, state]
+      path:
+        - home: [bin]
+        - home: [.local, bin]
+        - path: usr
+          suffix: [bin]
+
+    - tool: bun
+      variables:
+        BUN_INSTALL:
+          homePath: [tool, bun]
+      path:
+        - homePath: [tool, bun]
+          suffix: [bin]
+
+    - tool: go
+      variables:
+        GOBIN:
+          home: [.local, bin, go]
+        GOPATH:
+          home: [.local, share, go]
+      path:
+        - home: [.local, bin, go]
+
+    - tool: rust
+      variables:
+        CARGO_HOME:
+          home: [.local, share, cargo]
+        RUSTUP_HOME:
+          home: [.local, share, rustup]
+      path:
+        - home: [.local, share, cargo, bin]
+
+    - tool: plum
+      variables:
+        plum_dir:
+          homePath: [tool, plum]
+      path:
+        - homePath: [tool, plum]
+
+    - tool: raycast
+      path:
+        - homePath: [tool, raycast]
+          suffix: [scripts]
+
+    - tool: android
+      variables:
+        ANDROID_HOME:
+          home: [Library, Android, sdk]
+        ANDROID_SDK_ROOT:
+          home: [Library, Android, sdk]
+      path:
+        - home: [Library, Android, sdk, platform-tools]
+        - home: [Library, Android, sdk, cmdline-tools, latest, bin]
+
+    - tool: vcpkg
+      variables:
+        VCPKG_ROOT:
+          home: [vcpkg]
+      path:
+        - home: [vcpkg]
+
+    - tool: toolbox
+      when:
+        enabled:
+          os: [darwin]
+      path:
+        - home: [Library, "Application Support", JetBrains, Toolbox, scripts]
+
+    - tool: beancount
+      variables:
+        BEANCOUNT_FILE:
+          homePath: [personal, beancount]
+          suffix: [ledger, ledger.beancount]
+        FAVA_PORT:
+          literal: "8888"
+
+    - tool: claude-code
+      variables:
+        CLAUDE_CODE_NO_FLICKER:
+          literal: "1"
+
+    - tool: emacs
+      variables:
+        EMACSLOADPATH:
+          pathList:
+            - path: usr
+              suffix: [share, emacs, site-lisp]
+            - homePath: [tool, emacs-site-lisp]
+          trailingSeparator: true
+
+    - tool: hugging-face
+      variables:
+        HF_ENDPOINT:
+          literal: https://hf-mirror.com
+
+    - tool: home-assistant
+      variables:
+        HASS_SERVER:
+          literal: http://homeassistant.local:8123
+
+    - tool: jira
+      variables:
+        JIRA_URL:
+          literal: https://aaecosystem.atlassian.net
+
+    - tool: org
+      variables:
+        ORG_DIR:
+          homePath: [personal, org]
+
+    - tool: opencode
+      variables:
+        OPENCODE_DISABLE_CLAUDE_CODE:
+          literal: "1"
+        OPENCODE_ENABLE_EXA:
+          literal: "true"
+
+    - tool: pass
+      variables:
+        PASSWORD_STORE_DIR:
+          homePath: [personal, pass]
+
+    - tool: qmk
+      when:
+        enabled:
+          roles: [qmk]
+      variables:
+        QMK_HOME:
+          homePath: [workspace, qmk]
+
+    - tool: sdkman
+      variables:
+        SDKMAN_DIR:
+          homePath: [tool, sdkman]
+
+    - tool: stardict
+      variables:
+        STARDICT_DATA_DIR:
+          homePath: [data, nutstore]
+          suffix: [Dictionary]

@@ -1,0 +1,42 @@
+{{- $item := .item -}}
+{{- $ctx := .ctx -}}
+{{- if eq (kindOf $item) "map" -}}
+  {{- $value := "" -}}
+  {{- if hasKey $item "literal" -}}
+    {{- $value = printf "%v" $item.literal -}}
+  {{- else if hasKey $item "usrBin" -}}
+    {{- $value = joinPath $ctx.path.usr "bin" $item.usrBin -}}
+  {{- else if hasKey $item "usrPath" -}}
+    {{- $value = joinPath $ctx.path.usr $item.usrPath -}}
+  {{- else if hasKey $item "home" -}}
+    {{- $value = $ctx.chezmoi.homeDir -}}
+    {{- $parts := $item.home -}}
+    {{- if eq (kindOf $parts) "string" -}}{{- $parts = list $parts -}}{{- end -}}
+    {{- range $parts -}}{{- $value = joinPath $value . -}}{{- end -}}
+  {{- else if hasKey $item "homePath" -}}
+    {{- $pathValue := includeTemplate "environment/path-value" (dict "path" $ctx.path "keys" $item.homePath) -}}
+    {{- $value = joinPath $ctx.chezmoi.homeDir $pathValue -}}
+  {{- else if hasKey $item "path" -}}
+    {{- $value = includeTemplate "environment/path-value" (dict "path" $ctx.path "keys" $item.path) -}}
+  {{- else if hasKey $item "pathList" -}}
+    {{- $items := list -}}
+    {{- range $item.pathList -}}
+      {{- $items = append $items (includeTemplate "environment/value" (dict "ctx" $ctx "item" .)) -}}
+    {{- end -}}
+    {{- $separator := dig "separator" ":" $item -}}
+    {{- $value = join $separator $items -}}
+    {{- if dig "trailingSeparator" false $item -}}
+      {{- $value = printf "%s%s" $value $separator -}}
+    {{- end -}}
+  {{- else -}}
+    {{- fail (printf "unsupported environment value: %s" ($item | toJson)) -}}
+  {{- end -}}
+  {{- if hasKey $item "suffix" -}}
+    {{- $suffix := $item.suffix -}}
+    {{- if eq (kindOf $suffix) "string" -}}{{- $suffix = list $suffix -}}{{- end -}}
+    {{- range $suffix -}}{{- $value = joinPath $value . -}}{{- end -}}
+  {{- end -}}
+  {{- $value -}}
+{{- else -}}
+  {{- $item -}}
+{{- end -}}

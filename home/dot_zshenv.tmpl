@@ -27,97 +27,9 @@ export DEVICE_TYPE={{ .device_type | quote }}
 export HOST_ENV={{ .host_env | quote }}
 export HOST_ROLES=({{ join " " .roles }})
 
-# XDG
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_STATE_HOME="$HOME/.local/state"
-export XDG_BIN_HOME="$HOME/.local/bin"
-
-# Android
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export ANDROID_SDK_ROOT=$ANDROID_HOME
-
 # API-KEY
 export OPENAI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenAI" "field" "api-key") .) }}"
 export GEMINI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Google" "field" "gemini-api-key") .) }}"
 export OPENROUTER_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key") .) }}"
 
-# Beancount
-export BEANCOUNT_FILE="$HOME/{{ .path.personal.beancount }}/ledger/ledger.beancount"
-export FAVA_PORT=8888
-
-# Bun
-export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
-
-# Claude
-export CLAUDE_CODE_NO_FLICKER=1
-
-# Emacs
-export EMACSLOADPATH="{{ .path.usr }}/share/emacs/site-lisp:$HOME/{{ index .path.tool "emacs-site-lisp" }}:"
-
-# Go
-export GOPATH="$XDG_DATA_HOME/go"
-export GOBIN="$XDG_BIN_HOME/go"
-
-# Hugging Face
-export HF_ENDPOINT=https://hf-mirror.com
-
-# HASS
-export HASS_SERVER=http://homeassistant.local:8123
-
-# Jira
-export JIRA_URL="https://aaecosystem.atlassian.net"
-
-# Org
-export ORG_DIR="$HOME/{{ .path.personal.org }}"
-
-# OpenCode
-export OPENCODE_ENABLE_EXA=true
-export OPENCODE_DISABLE_CLAUDE_CODE=1
-
-# Pass
-export PASSWORD_STORE_DIR="$HOME/{{ .path.personal.pass }}"
-
-# plum
-export plum_dir="$HOME/{{ .path.tool.plum }}"
-
-{{ if has "qmk" .roles -}}
-# QMK
-export QMK_HOME=$HOME/{{ .path.workspace.qmk }}
-{{ end -}}
-
-# Rust
-export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
-export CARGO_HOME="$XDG_DATA_HOME/cargo"
-
-# StarDict
-export STARDICT_DATA_DIR="$HOME/{{ .path.data.nutstore }}/Dictionary"
-
-# SDKMAN
-export SDKMAN_DIR="$HOME/{{ .path.tool.sdkman }}"
-
-# VCPKG
-export VCPKG_ROOT="$HOME/vcpkg"
-
-# Static PATH shared by interactive shells, scripts, and GUI launchers.
-typeset -ga cat_static_path
-cat_static_path=(
-  "$HOME/bin"
-  "$XDG_BIN_HOME"
-  "{{ joinPath .path.usr "bin" }}"
-  "$BUN_INSTALL/bin"
-  "$GOBIN"
-  "$CARGO_HOME/bin"
-  "$plum_dir"
-  "$HOME/{{ .path.tool.raycast }}/scripts"
-  "$ANDROID_HOME/platform-tools"
-  "$ANDROID_HOME/cmdline-tools/latest/bin"
-  "$VCPKG_ROOT"
-{{- if eq .chezmoi.os "darwin" }}
-  "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
-{{- end }}
-)
-typeset -U path PATH
-path=("${cat_static_path[@]}" "${path[@]}")
-export PATH
+{{ template "environment/zsh-static" . }}
