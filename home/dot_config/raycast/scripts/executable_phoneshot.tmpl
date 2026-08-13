@@ -27,7 +27,20 @@ copy_to_clipboard="${PHONESHOT_COPY:-true}"
 selection="${1:-}"
 filename="${2:-phoneshot}"
 out_file="${save_dir}/${filename}.png"
+capture_file="$out_file"
+temporary_file=""
+temporary_dir=""
 device_types={{ join "," $deviceTypes | quote }}
+
+if ! mkdir -p "$save_dir" 2>/dev/null || [[ ! -w "$save_dir" ]]; then
+    temporary_dir=$(mktemp -d "${TMPDIR:-/tmp}/phoneshot.XXXXXX") || {
+        echo "❌ Cannot write screenshot to $out_file or create a temporary file."
+        exit 1
+    }
+    temporary_file="$temporary_dir/phoneshot.png"
+    capture_file="$temporary_file"
+fi
+trap '[[ -n "$temporary_file" ]] && rm -f "$temporary_file"; [[ -n "$temporary_dir" ]] && rmdir "$temporary_dir" 2>/dev/null' EXIT
 
 if ! command -v mobile-device-list >/dev/null 2>&1; then
     echo "❌ mobile-device-list is not installed. Run chezmoi apply."
@@ -76,13 +89,13 @@ case "$kind" in
             exit 1
         fi
 
-        if ! adb -s "$device_id" exec-out screencap -p > "$out_file"; then
+        if ! adb -s "$device_id" exec-out screencap -p > "$capture_file"; then
             echo "❌ Failed to capture Android device $device_id."
             exit 1
         fi
         ;;
     simulator)
-        if ! xcrun simctl io "$device_id" screenshot "$out_file"; then
+        if ! xcrun simctl io "$device_id" screenshot "$capture_file"; then
             echo "❌ Failed to capture Simulator $device_id."
             exit 1
         fi
@@ -98,7 +111,7 @@ case "$kind" in
             device_options+=(--mobdev2)
         fi
 
-        if ! pymobiledevice3 developer dvt screenshot "${device_options[@]}" "$out_file"; then
+        if ! pymobiledevice3 developer dvt screenshot "${device_options[@]}" "$capture_file"; then
             echo "❌ Failed to capture iOS device $device_id."
             exit 1
         fi
@@ -109,17 +122,21 @@ case "$kind" in
         ;;
 esac
 
-if [[ ! -s "$out_file" ]]; then
-    echo "❌ Screenshot was not created: $out_file"
+if [[ ! -s "$capture_file" ]]; then
+    echo "❌ Screenshot was not created."
     exit 1
 fi
 
 if [[ $copy_to_clipboard == true ]]; then
-    if ! clip-image "$out_file"; then
-        echo "❌ Screenshot saved, but it could not be copied to the clipboard: $out_file"
+    if ! clip-image "$capture_file"; then
+        echo "❌ Screenshot was captured, but it could not be copied to the clipboard."
         exit 1
     fi
     echo "Copied screenshot to clipboard"
 fi
 
-echo "Saved screenshot to $out_file"
+if [[ -n "$temporary_file" ]]; then
+    echo "⚠️ Cannot save screenshot to $out_file; check Raycast Files and Folders permission."
+elif [[ "$capture_file" == "$out_file" ]]; then
+    echo "Saved screenshot to $out_file"
+fi
