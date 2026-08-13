@@ -54,6 +54,12 @@ skills:
     - name: conventional-commit
       source: github/awesome-copilot
 
+    - name: "*"
+      source: MindReset/dot_skill/skills
+      when:
+        disabled:
+          tool: codex
+
     - name: feishu-projects
       source: chuxubank/skills
       when:

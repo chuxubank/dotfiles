@@ -63,10 +63,24 @@
   {{- $_ := set $modelProviders $alias $provider -}}
 {{- end }}
 
+{{- $codexPluginConfig := dig "codex" (dict) .plugins -}}
+{{- $marketplaces := dict -}}
+{{- range $marketplace := dig "marketplaces" (list) $codexPluginConfig }}
+  {{- $entry := dict
+    "source" $marketplace.source
+    "source_type" (default "git" $marketplace.source_type)
+  -}}
+  {{- if hasKey $marketplace "ref" -}}
+    {{- $_ := set $entry "ref" $marketplace.ref -}}
+  {{- end -}}
+  {{- $_ := set $marketplaces $marketplace.name $entry -}}
+{{- end }}
+
 {{- $managed := dict
   "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
   "mcp_servers" $servers
+  "marketplaces" $marketplaces
   "personality" "pragmatic"
   "features" (dict
     "multi_agent" true

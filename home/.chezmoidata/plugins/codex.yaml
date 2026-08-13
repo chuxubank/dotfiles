@@ -3,6 +3,11 @@ plugins:
   # filename, so a plain `source` string is enough. `when` conditions work
   # the same as elsewhere.
   codex:
+    marketplaces:
+      - name: mindreset-dot-skill
+        source: https://github.com/MindReset/dot_skill.git
+        source_type: git
+
     providers:
       - name: github
         description: GitHub repository and PR workflows
@@ -36,6 +41,10 @@ plugins:
 
       - name: documents
         source: documents@openai-primary-runtime
+
+      - name: dot-skill
+        description: Dot. device control and Canvas layout skills
+        source: dot-skill@mindreset-dot-skill
 
       - name: presentations
         source: presentations@openai-primary-runtime
