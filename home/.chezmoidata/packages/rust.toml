@@ -3,5 +3,6 @@ cargo = [
   "cargo-update",
   { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git" },
   "lukaj",
+  "mermaid-rs-renderer",
   "rust-script",
 ]
