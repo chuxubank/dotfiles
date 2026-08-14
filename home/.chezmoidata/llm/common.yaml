@@ -5,41 +5,6 @@ llm:
       type: models-dev
       file_path: models-dev-api
 
-  model_caches:
-    iv-default-models-api:
-      provider: iv
-      auth_field: default-auth-token
-      when:
-        enabled:
-          host_env: ["iv"]
-    iv-codex-models-api:
-      provider: iv
-      auth_field: codex-auth-token
-      when:
-        enabled:
-          host_env: ["iv"]
-    iv-cc-models-api:
-      provider: iv
-      auth_field: cc-auth-token
-      when:
-        enabled:
-          host_env: ["iv"]
-    openai-models-api:
-      provider: openai
-      auth_field: api-key
-    google-models-api:
-      provider: google
-      auth_field: aider-gemini-api-key
-    ollama-models-api:
-      provider: ollama
-      when:
-        enabled:
-          roles: ["llm"]
-    openrouter-models-api:
-      provider: openrouter
-      auth_field: api-key
-      managed: external
-
   # ── Providers ───────────────────────────────────────────────────────
   # Each provider = one API endpoint (base_url + default auth).
   # Tools override only `auth.field` to pick a different API key from the
@@ -54,6 +19,13 @@ llm:
       name: IV
       data_set: models-dev
       base_url: "http://llm.invalley.co"
+      model_caches:
+        iv-default-models-api:
+          auth_field: default-auth-token
+        iv-codex-models-api:
+          auth_field: codex-auth-token
+        iv-cc-models-api:
+          auth_field: cc-auth-token
       auth:
         path: Work/IV/LLM
       when:
@@ -63,6 +35,9 @@ llm:
     openai:
       name: OpenAI
       base_url: "https://api.openai.com"
+      model_caches:
+        openai-models-api:
+          auth_field: api-key
       auth:
         path: Personal/Tech/AI/OpenAI
         field: api-key
@@ -76,6 +51,9 @@ llm:
       name: Google
       type: gemini
       base_url: "https://generativelanguage.googleapis.com"
+      model_caches:
+        google-models-api:
+          auth_field: aider-gemini-api-key
       auth:
         path: Personal/Tech/Google
         field: gemini-api-key
@@ -84,6 +62,10 @@ llm:
       name: OpenRouter
       base_url: "https://openrouter.ai/api"
       timeout: 10
+      model_caches:
+        openrouter-models-api:
+          auth_field: api-key
+          managed: external
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key
@@ -104,6 +86,8 @@ llm:
     ollama:
       type: ollama
       base_url: "http://localhost:11434"
+      model_caches:
+        ollama-models-api: {}
       when:
         enabled:
           roles: ["llm"]

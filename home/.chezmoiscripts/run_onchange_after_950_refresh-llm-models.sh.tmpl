@@ -4,9 +4,10 @@ set -eu
 echo "{{ template "week" . }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
 
-{{ range $cacheKey, $cache := .llm.model_caches }}
-{{ if and (ne (default "" (index $cache "managed")) "external") (includeTemplate "when/evaluate" (dict "item" $cache "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson) }}
-  {{- $provider := index $.llm.providers $cache.provider -}}
+{{ range $providerName, $provider := .llm.providers }}
+{{ if and (hasKey $provider "model_caches") (includeTemplate "when/evaluate" (dict "item" $provider "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson) }}
+{{ range $cacheKey, $cache := $provider.model_caches }}
+{{ if ne (default "" (index $cache "managed")) "external" }}
   {{- $endpoint := includeTemplate "llm/model-endpoint" $provider | fromJson -}}
   {{- $authPath := "" -}}
   {{- if hasKey $provider "auth" -}}{{- $authPath = $provider.auth.path -}}{{- end -}}
@@ -14,5 +15,7 @@ export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quo
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
   {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}
+{{ end }}
+{{ end }}
 {{ end }}
 {{ end }}
