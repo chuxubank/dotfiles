@@ -1,7 +1,7 @@
 {{- /* llm/fetch-models — Fetch model list from a provider endpoint.
        Input: dict with "type", "base_url", "auth_key"
        Optional "cache_file" — read the raw response from this file
-              (populated by an external or llm-refresh-models) instead of
+              (populated by an external or refresh script) instead of
               a live curl.
        Output: JSON map of { model_id: display_name, ... }
        Returns empty map on failure or missing base_url.
