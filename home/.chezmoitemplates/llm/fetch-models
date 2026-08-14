@@ -31,7 +31,11 @@
   {{- $cacheFile := default "" (index . "cache_file") -}}
   {{- if $cacheFile -}}
     {{- /* Read cached response (chezmoi external), fall back to "{}" if missing. */ -}}
-    {{- $raw = output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $cacheFile $cacheFile) | trim -}}
+    {{- if exec "test" "-r" $cacheFile -}}
+      {{- $raw = output "cat" $cacheFile | trim -}}
+    {{- else -}}
+      {{- $raw = "{}" -}}
+    {{- end -}}
   {{- else -}}
     {{- $raw = includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" $timeout) -}}
   {{- end -}}
