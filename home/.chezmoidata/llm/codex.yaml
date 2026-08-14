@@ -3,7 +3,7 @@ llm:
     codex:
       model:
         - iv/gpt-5.6-sol
-        - openai/gpt-5.6-luna
+        - openai/gpt-5.6-sol
         - openrouter/openai/gpt-oss-120b:free
       reasoning_effort: high
       providers:
