@@ -4,6 +4,37 @@ set -eu
 echo "{{ template "week" . }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
 
+fetch_model_response() {
+  output_file=$1
+  url=$2
+  auth_mode=$3
+  token=${4-}
+
+  case "$auth_mode" in
+    bearer)
+      curl -sSfL --fail-with-body \
+        -H "Authorization: Bearer $token" \
+        "$url" >"$output_file"
+      ;;
+    query:*)
+      query_param=${auth_mode#query:}
+      separator='?'
+      case "$url" in
+        *\?*) separator='&' ;;
+      esac
+      curl -sSfL --fail-with-body \
+        "$url${separator}${query_param}=${token}" >"$output_file"
+      ;;
+    none)
+      curl -sSfL --fail-with-body "$url" >"$output_file"
+      ;;
+    *)
+      printf 'unknown model cache auth mode: %s\n' "$auth_mode" >&2
+      return 2
+      ;;
+  esac
+}
+
 refresh_models() {
   cache_file=$1
   url=$2
@@ -16,10 +47,7 @@ refresh_models() {
     bearer|query:*)
       token=$({{ joinPath .chezmoi.homeDir "bin" "pass-field" | quote }} "$pass_path" "$pass_field")
       ;;
-    *)
-      printf 'unknown model cache auth mode: %s\n' "$auth_mode" >&2
-      return 2
-      ;;
+    *) return 2 ;;
   esac
 
   cache_dir=${cache_file%/*}
@@ -28,23 +56,18 @@ refresh_models() {
   tmp_file=$(mktemp "$cache_dir/.models.XXXXXX")
   trap 'rm -f "$tmp_file"' 0 HUP INT TERM
 
-  if [ "$auth_mode" = bearer ]; then
-    curl -sSfL --fail-with-body \
-      -H "Authorization: Bearer $token" \
-      "$url" >"$tmp_file"
-  elif [ "${auth_mode#query:}" != "$auth_mode" ]; then
-    query_param=${auth_mode#query:}
-    separator='?'
-    case "$url" in
-      *\?*) separator='&' ;;
-    esac
-    curl -sSfL --fail-with-body \
-      "$url${separator}${query_param}=${token}" >"$tmp_file"
-  else
-    curl -sSfL --fail-with-body "$url" >"$tmp_file"
+  if ! fetch_model_response "$tmp_file" "$url" "$auth_mode" "${token-}"; then
+    rm -f "$tmp_file"
+    trap - 0 HUP INT TERM
+    return 1
   fi
 
-  test -s "$tmp_file"
+  if [ ! -s "$tmp_file" ]; then
+    printf 'empty model response from %s\n' "$url" >&2
+    rm -f "$tmp_file"
+    trap - 0 HUP INT TERM
+    return 1
+  fi
   mv "$tmp_file" "$cache_file"
   trap - 0 HUP INT TERM
 }
@@ -56,10 +79,13 @@ refresh_models() {
   {{- $endpoint := includeTemplate "llm/model-endpoint" $provider | fromJson -}}
   {{- $authPath := "" -}}
   {{- if hasKey $provider "auth" -}}{{- $authPath = $provider.auth.path -}}{{- end -}}
-refresh_models \
+if ! refresh_models \
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
-  {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}
+  {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}; then
+  printf 'warning: failed to refresh provider=%s cache=%s url=%s\n' \
+    {{ $providerName | quote }} {{ $cacheKey | quote }} {{ $endpoint.url | quote }} >&2
+fi
 {{ end }}
 {{ end }}
 {{ end }}
