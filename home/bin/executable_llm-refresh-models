@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  printf 'usage: %s <cache-file> <url> [auth-mode [pass-path [pass-field]]] [-- ...]\n' "${0##*/}" >&2
+  exit 2
+}
+
+[ "$#" -ge 2 ] || usage
+
+while [ "$#" -gt 0 ]; do
+  [ "$1" != "--" ] || { shift; continue; }
+  [ "$#" -ge 2 ] || usage
+
+  cache_file=$1
+  url=$2
+  shift 2
+  auth_mode=none
+  pass_path=
+  pass_field=
+  if [ "$#" -gt 0 ] && [ "$1" != "--" ]; then
+    auth_mode=$1
+    shift
+    if [ "$#" -gt 0 ] && [ "$1" != "--" ]; then
+      pass_path=$1
+      shift
+      if [ "$#" -gt 0 ] && [ "$1" != "--" ]; then
+        pass_field=$1
+        shift
+      fi
+    fi
+  fi
+
+  case "$auth_mode" in
+    none) ;;
+    bearer|query:*)
+      [ -n "$pass_path" ] || usage
+      token=$(pass-field "$pass_path" "$pass_field")
+      ;;
+    *) usage ;;
+  esac
+
+  cache_dir=${cache_file%/*}
+  [ "$cache_dir" = "$cache_file" ] && cache_dir=.
+  mkdir -p "$cache_dir"
+  tmp_file=$(mktemp "$cache_dir/.models.XXXXXX")
+  trap 'rm -f "$tmp_file"' 0 HUP INT TERM
+
+  if [ "$auth_mode" = bearer ]; then
+    curl -sSfL --fail-with-body \
+      -H "Authorization: Bearer $token" \
+      "$url" >"$tmp_file"
+  elif [ "${auth_mode#query:}" != "$auth_mode" ]; then
+    query_param=${auth_mode#query:}
+    [ -n "$query_param" ] || usage
+    separator='?'
+    case "$url" in
+      *\?*) separator='&' ;;
+    esac
+    curl -sSfL --fail-with-body \
+      "$url${separator}${query_param}=${token}" >"$tmp_file"
+  else
+    curl -sSfL --fail-with-body "$url" >"$tmp_file"
+  fi
+
+  test -s "$tmp_file"
+  mv "$tmp_file" "$cache_file"
+  trap - 0 HUP INT TERM
+  [ "$#" -gt 0 ] || break
+done

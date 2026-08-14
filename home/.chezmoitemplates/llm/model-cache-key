@@ -1,0 +1,10 @@
+{{- $provider := .provider -}}
+{{- $authField := default "" (index . "auth_field") -}}
+{{- $result := "" -}}
+{{- range $key, $cache := .llm.model_caches -}}
+  {{- $cacheField := default "" (index $cache "auth_field") -}}
+  {{- if and (eq $result "") (eq $cache.provider $provider) (eq $cacheField $authField) -}}
+    {{- $result = $key -}}
+  {{- end -}}
+{{- end -}}
+{{- $result -}}

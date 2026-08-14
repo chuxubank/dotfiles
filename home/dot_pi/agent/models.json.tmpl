@@ -14,21 +14,9 @@
 
 {{- $providers := dict -}}
 {{- range $alias, $ep := $cfg.providers -}}
-  {{- /* Map our provider type onto a pi api id and normalize the base URL. pi
-         passes baseUrl to the SDK as-is, so the version suffix has to match
-         what each api expects. */ -}}
-  {{- $api := "openai-completions" -}}
-  {{- $baseURL := trimSuffix "/" $ep.base_url -}}
-  {{- if eq $ep.type "anthropic" -}}
-    {{- $api = "anthropic-messages" -}}
-  {{- else if eq $ep.type "gemini" -}}
-    {{- $api = "google-generative-ai" -}}
-    {{- if and $baseURL (not (hasSuffix "/v1beta" $baseURL)) -}}
-      {{- $baseURL = printf "%s/v1beta" $baseURL -}}
-    {{- end -}}
-  {{- else if and $baseURL (not (hasSuffix "/v1" $baseURL)) -}}
-    {{- $baseURL = printf "%s/v1" $baseURL -}}
-  {{- end -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- $api := $endpoint.api -}}
+  {{- $baseURL := $endpoint.api_base_url -}}
 
   {{- /* models: false → endpoint override only, keep pi's catalog untouched. */ -}}
   {{- $models := list -}}

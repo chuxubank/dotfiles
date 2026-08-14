@@ -40,13 +40,10 @@
 {{- $modelProviders := dict -}}
 {{- range $alias, $ep := $cfg.providers }}
   {{- if eq $alias "openai" }}{{ continue }}{{ end -}}
-  {{- $baseURL := trimSuffix "/" $ep.base_url -}}
-  {{- if and $baseURL (not (hasSuffix "/v1" $baseURL)) -}}
-    {{- $baseURL = printf "%s/v1" $baseURL -}}
-  {{- end -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
   {{- $provider := dict
     "name" $alias
-    "base_url" $baseURL
+    "base_url" $endpoint.api_base_url
   -}}
   {{- if $ep.auth_path }}
     {{- $args := list $ep.auth_path -}}

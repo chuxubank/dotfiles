@@ -35,4 +35,10 @@ zotero-ext = "Profiles/Misaka/extensions"
 
 [path.cache]
 models-dev-api = ".cache/llm/data-set/models-dev.json"
+iv-default-models-api = ".cache/llm/models/iv-default.json"
+iv-codex-models-api = ".cache/llm/models/iv-codex.json"
+iv-cc-models-api = ".cache/llm/models/iv-cc.json"
+openai-models-api = ".cache/llm/models/openai.json"
+google-models-api = ".cache/llm/models/google.json"
+ollama-models-api = ".cache/llm/models/ollama.json"
 openrouter-models-api = ".cache/llm/models/openrouter.json"

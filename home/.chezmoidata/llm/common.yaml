@@ -5,6 +5,41 @@ llm:
       type: models-dev
       file_path: models-dev-api
 
+  model_caches:
+    iv-default-models-api:
+      provider: iv
+      auth_field: default-auth-token
+      when:
+        enabled:
+          host_env: ["iv"]
+    iv-codex-models-api:
+      provider: iv
+      auth_field: codex-auth-token
+      when:
+        enabled:
+          host_env: ["iv"]
+    iv-cc-models-api:
+      provider: iv
+      auth_field: cc-auth-token
+      when:
+        enabled:
+          host_env: ["iv"]
+    openai-models-api:
+      provider: openai
+      auth_field: api-key
+    google-models-api:
+      provider: google
+      auth_field: aider-gemini-api-key
+    ollama-models-api:
+      provider: ollama
+      when:
+        enabled:
+          roles: ["llm"]
+    openrouter-models-api:
+      provider: openrouter
+      auth_field: api-key
+      managed: external
+
   # ── Providers ───────────────────────────────────────────────────────
   # Each provider = one API endpoint (base_url + default auth).
   # Tools override only `auth.field` to pick a different API key from the
@@ -49,7 +84,6 @@ llm:
       name: OpenRouter
       base_url: "https://openrouter.ai/api"
       timeout: 10
-      models_cache: openrouter-models-api
       auth:
         path: Personal/Tech/AI/OpenRouter
         field: api-key

@@ -1,0 +1,45 @@
+{{- /* Resolve a provider type and base URL into model-list and inference endpoints.
+     Input: "type" (optional, defaults to openai), "base_url".
+     Output: JSON with url, auth_mode, api_base_url, and api.
+     Query auth uses query:<param>. */ -}}
+{{- $type := default "openai" (index . "type") -}}
+{{- $baseURL := trimSuffix "/" .base_url -}}
+{{- $url := "" -}}
+{{- $authMode := "bearer" -}}
+{{- $apiBaseURL := $baseURL -}}
+{{- $api := "openai-completions" -}}
+{{- if eq $type "gemini" -}}
+  {{- if and $apiBaseURL (not (hasSuffix "/v1beta" $apiBaseURL)) -}}
+    {{- $apiBaseURL = printf "%s/v1beta" $apiBaseURL -}}
+  {{- end -}}
+  {{- $url = printf "%s/models?pageSize=1000" $apiBaseURL -}}
+  {{- $authMode = "query:key" -}}
+  {{- $api = "google-generative-ai" -}}
+{{- else if eq $type "ollama" -}}
+  {{- $url = printf "%s/api/tags" $baseURL -}}
+  {{- $authMode = "none" -}}
+  {{- if and $apiBaseURL (not (hasSuffix "/v1" $apiBaseURL)) -}}
+    {{- $apiBaseURL = printf "%s/v1" $apiBaseURL -}}
+  {{- end -}}
+{{- else if eq $type "opencode" -}}
+  {{- $url = printf "%s/api.json" $baseURL -}}
+  {{- $authMode = "none" -}}
+{{- else if eq $type "anthropic" -}}
+  {{- $api = "anthropic-messages" -}}
+  {{- $listBaseURL := $baseURL -}}
+  {{- if and $listBaseURL (not (hasSuffix "/v1" $listBaseURL)) -}}
+    {{- $listBaseURL = printf "%s/v1" $listBaseURL -}}
+  {{- end -}}
+  {{- $url = printf "%s/models" $listBaseURL -}}
+{{- else -}}
+  {{- if and $apiBaseURL (not (hasSuffix "/v1" $apiBaseURL)) -}}
+    {{- $apiBaseURL = printf "%s/v1" $apiBaseURL -}}
+  {{- end -}}
+  {{- $url = printf "%s/models" $apiBaseURL -}}
+{{- end -}}
+{{- dict
+  "url" $url
+  "auth_mode" $authMode
+  "api_base_url" $apiBaseURL
+  "api" $api
+  | toJson -}}

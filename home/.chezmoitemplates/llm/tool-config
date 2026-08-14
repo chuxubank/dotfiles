@@ -126,12 +126,13 @@
   -}}
   {{- if hasKey $prov "timeout" -}}{{- $_ := set $resolved "timeout" $prov.timeout -}}{{- end -}}
   {{- if hasKey $ref "timeout" -}}{{- $_ := set $resolved "timeout" $ref.timeout -}}{{- end -}}
-  {{- /* Resolve models_cache: a path key whose cached file holds the model list.
-         Alias-level overrides provider-level. Resolved to an absolute path so
-         fetch-models can read it instead of doing a live curl. */ -}}
+  {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
   {{- else if hasKey $prov "models_cache" -}}{{- $cacheKey = $prov.models_cache -}}{{- end -}}
+  {{- if not $cacheKey -}}
+    {{- $cacheKey = includeTemplate "llm/model-cache-key" (merge (dict "provider" $provName "auth_field" $authField) $ctx) | trim -}}
+  {{- end -}}
   {{- if $cacheKey -}}
     {{- $cacheFile := index $ctx.path.cache $cacheKey -}}
     {{- if not (hasPrefix "/" $cacheFile) -}}{{- $cacheFile = joinPath $ctx.chezmoi.homeDir $cacheFile -}}{{- end -}}
