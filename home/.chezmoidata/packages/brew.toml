@@ -233,6 +233,7 @@ casks = [
   "squirrel-app",
   "stats",
   "thaw",
+  "uuremote",
   "wezterm",
   "wireshark-app",
   "zed",
