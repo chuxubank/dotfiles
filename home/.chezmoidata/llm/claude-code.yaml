@@ -5,7 +5,7 @@ llm:
       # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL env var (opus/sonnet/haiku/fable).
       # Only emitted when an anthropic provider resolves (i.e. iv is enabled).
       default_models:
-        opus: claude-opus-4-8
+        opus: claude-opus-5
         sonnet: claude-sonnet-5
         haiku: claude-haiku-4-5-20251001
       providers:
