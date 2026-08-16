@@ -11,9 +11,9 @@ blog = "Developer/Personal/blog"
 skills = "Developer/Personal/skills"
 
 [path.workspace]
-aa = "Developer/AA"
+aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"
-iv = "Developer/IV"
+iv = "Developer/InfinityValley"
 xz = "Developer/XingZhi"
 qmk = "Developer/Example/QMK"
 
