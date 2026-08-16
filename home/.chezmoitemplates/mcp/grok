@@ -1,0 +1,34 @@
+{{- /* https://grok.x.ai docs: ~/.grok/docs/user-guide/07-mcp-servers.md */ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" (default "grok" $.tool)) $) | fromJson -}}
+{{- range $s := $all }}
+  {{- $server := dict -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if $s.args }}
+      {{- $_ := set $server "args" $s.args -}}
+    {{- end }}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
+  {{- else }}
+    {{- continue -}}
+  {{- end }}
+
+  {{- if gt $s.tool_timeout 0 }}
+    {{- $_ := set $server "tool_timeout_sec" $s.tool_timeout -}}
+  {{- end }}
+  {{- if gt $s.timeout 0 }}
+    {{- $_ := set $server "startup_timeout_sec" $s.timeout -}}
+  {{- end }}
+  {{- $_ := set $server "enabled" $s.enabled -}}
+
+  {{- if gt (len $s.envs) 0 }}
+    {{- $_ := set $server "env" $s.envs -}}
+  {{- end }}
+
+  {{- $_ := set $servers $s.name $server -}}
+{{- end -}}
+{{- toJson $servers -}}

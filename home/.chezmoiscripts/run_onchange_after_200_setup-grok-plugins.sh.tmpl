@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Setup grok plugins"
+
+if ! command -v grok >/dev/null; then
+  print -u2 -- "grok is not installed; skipping plugin setup"
+  exit 0
+fi
+
+had_errors=false
+installed_json='[]'
+if list_json=$(grok plugin list --json); then
+  if jq -e 'type == "array"' >/dev/null <<<"$list_json"; then
+    installed_json=$list_json
+  fi
+fi
+
+{{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "grok") .) | fromJson }}
+{{- if $p.enabled }}
+
+if ! jq -e --arg name {{ $p.name | quote }} 'any(.[]; .name == $name)' >/dev/null <<<"$installed_json"; then
+  echo "Install grok plugin: {{ $p.name }}"
+  if grok plugin install {{ $p.source | quote }} --trust; then
+    installed_json=$(grok plugin list --json 2>/dev/null || print -r -- "$installed_json")
+  else
+    print -u2 -- "Could not install grok plugin {{ $p.name }}"
+    had_errors=true
+  fi
+fi
+grok plugin enable {{ $p.name | quote }} >/dev/null 2>&1 || true
+{{- end }}
+{{- end }}
+
+if $had_errors; then
+  exit 1
+fi

@@ -1,0 +1,34 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- $servers := includeTemplate "mcp/grok" (merge (dict "tool" "grok") .) | fromJson -}}
+{{- $enabledPlugins := includeTemplate "plugins/enabled-names" (merge (dict "tool" "grok") .) | fromJson -}}
+
+{{- $sources := list -}}
+{{- range $marketplace := dig "marketplaces" (list) (dig "grok" (dict) .plugins) }}
+  {{- $entry := dict "name" $marketplace.name -}}
+  {{- if eq (default "git" $marketplace.source_type) "path" -}}
+    {{- $_ := set $entry "path" $marketplace.source -}}
+  {{- else -}}
+    {{- $_ := set $entry "git" $marketplace.source -}}
+  {{- end -}}
+  {{- if hasKey $marketplace "branch" -}}
+    {{- $_ := set $entry "branch" $marketplace.branch -}}
+  {{- end -}}
+  {{- $sources = append $sources $entry -}}
+{{- end }}
+
+{{- $managed := dict -}}
+{{- $replace := dict
+  "mcp_servers" $servers
+  "plugins.enabled" $enabledPlugins
+-}}
+{{- if gt (len $sources) 0 -}}
+  {{- $_ := set $replace "marketplace.sources" $sources -}}
+{{- end -}}
+
+{{ includeTemplate "config/merge" (dict
+  "format" "toml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+  "replace" $replace
+) }}

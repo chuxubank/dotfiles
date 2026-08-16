@@ -1,0 +1,12 @@
+plugins:
+  # Grok Build-only plugins (plugins/grok.yaml). The tool is implied by the
+  # filename, so a plain `source` string is enough. `when` conditions work
+  # the same as elsewhere.
+  #
+  # Claude Code marketplaces and plugins are not installed here. Grok already
+  # reads ~/.agents/skills and has its own xAI Official marketplace.
+  grok:
+    marketplaces:
+      - name: xAI Official
+        source: https://github.com/xai-org/plugin-marketplace.git
+        source_type: git

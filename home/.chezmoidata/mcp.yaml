@@ -58,7 +58,7 @@ mcp:
         from web pages, converting HTML to markdown for easier consumption.
       when:
         disabled:
-          tool: ["claude-code", "codex", "opencode"]
+          tool: ["claude-code", "codex", "grok", "opencode"]
       execution:
         type: stdio
         cmd: uvx
@@ -241,7 +241,7 @@ mcp:
       description: Real-time web search and intelligent data extraction capabilities.
       when:
         disabled:
-          tool: ["claude-code", "opencode"]
+          tool: ["claude-code", "grok", "opencode"]
       execution:
         type: stdio
         cmd: bunx

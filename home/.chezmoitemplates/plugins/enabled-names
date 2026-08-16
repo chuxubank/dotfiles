@@ -1,0 +1,11 @@
+{{- /* plugins/enabled-names — enabled plugin names as a JSON array.
+       Input: dict "tool" <tool-name> (merged with root context $)
+       Used by tools (e.g. grok) that take a list of plugin names rather
+       than a source → bool map. Disabled entries are omitted. */ -}}
+{{- $out := list -}}
+{{- range $p := includeTemplate "plugins/resolve" . | fromJson -}}
+  {{- if $p.enabled -}}
+    {{- $out = append $out $p.name -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $out -}}
