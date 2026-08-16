@@ -92,12 +92,17 @@ llm:
         enabled:
           roles: ["llm"]
 
+    # OpenCode Zen's official provider ID is `opencode`. Both Zen and Go
+    # expose an OpenAI-shaped /v1/models endpoint; models-dev supplies the
+    # richer per-model protocol metadata used by OpenCode itself.
     opencode:
+      name: OpenCode Zen
       data_set: models-dev
       provider: opencode
-      filter:
-        cost:
-          input: 0
-          output: 0
-        modalities:
-          input: ["text", "image"]
+      base_url: "https://opencode.ai/zen"
+
+    opencode-go:
+      name: OpenCode Go
+      data_set: models-dev
+      provider: opencode-go
+      base_url: "https://opencode.ai/zen/go"

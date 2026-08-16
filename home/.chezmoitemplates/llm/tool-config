@@ -160,12 +160,18 @@
         {{- $_ := set $dsFetchArgs "file" $dsFile -}}
       {{- end -}}
       {{- $allModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+      {{- $metadataModels := $allModels -}}
       {{- $flt := dict -}}
       {{- if hasKey $ref "filter" -}}{{- $flt = $ref.filter -}}{{- else if hasKey $prov "filter" -}}{{- $flt = $prov.filter -}}{{- end -}}
       {{- if gt (len $flt) 0 -}}{{- $_ := set $resolved "model_filter" $flt -}}{{- end -}}
       {{- if hasKey $prov "provider" -}}
         {{- $_ := set $dsFetchArgs "provider" $prov.provider -}}
         {{- $sourceModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+        {{- if gt (len $sourceModels) 0 -}}
+          {{- /* Provider-scoped catalogs carry endpoint-specific metadata,
+                 especially the per-model protocol used by OpenCode Zen/Go. */ -}}
+          {{- $metadataModels = $sourceModels -}}
+        {{- end -}}
         {{- if and (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $sourceModels) 0) -}}
           {{- $sourceNames := dict -}}
           {{- range $id, $m := $sourceModels -}}
@@ -176,8 +182,8 @@
           {{- $_ := set $resolved "models" $sourceNames -}}
         {{- end -}}
       {{- end -}}
-      {{- if gt (len $allModels) 0 -}}
-        {{- $_ := set $resolved "model_metadata" $allModels -}}
+      {{- if gt (len $metadataModels) 0 -}}
+        {{- $_ := set $resolved "model_metadata" $metadataModels -}}
       {{- end -}}
     {{- end -}}
   {{- else if hasKey $ref "models" }}

@@ -37,5 +37,9 @@ llm:
           provider: ollama
         openrouter:
           provider: openrouter
+        # Official OpenCode provider IDs. Their model lists come from the
+        # live Zen/Go /v1/models endpoints; models-dev only enriches metadata.
         opencode:
           provider: opencode
+        opencode-go:
+          provider: opencode-go
