@@ -19,6 +19,7 @@ global = [
   "ctx7",
   "graphql-language-service-cli",
   "ocx",
+  "opencode-ai",
   "pi-acp",
   "prettier",
   "pyright",
@@ -31,5 +32,4 @@ global = [
   { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },
   { name = "@larksuite/cli", when.enabled.host_env = ["iv"] },
   { name = "emacs-lsp-proxy", trust = true },
-  { name = "opencode-ai", trust = true },
 ]
