@@ -34,6 +34,7 @@
 {{- $managed := dict
   "defaultModel" $model
   "defaultThinkingLevel" (default "medium" (index $cfg "reasoning_effort"))
+  "npmCommand" (list "bun")
   "packages" $packages
   "theme" $theme
 -}}
