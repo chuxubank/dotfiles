@@ -1,0 +1,171 @@
+{{- /* llm/codex-model-catalog — Build a static model catalog for Codex.
+   Produces the model_catalog_json format: { "models": [ ModelInfo, ... ] }.
+
+   model_catalog_json REPLACES the bundled catalog, so this template starts from
+   the built-in OpenAI catalog (models_cache.json) and appends every model from
+   the resolved codex tool-config providers (data-set metadata for data-set
+   backed providers, cache responses for cache-only providers such as openrouter).
+
+   Each ModelInfo carries both:
+     - codex-rs required fields: slug, display_name, supported_reasoning_levels,
+       shell_type, visibility, supported_in_api, priority, support_verbosity,
+       truncation_policy
+     - desktop-app routing fields (ignored by codex-rs): provider (= a
+       model_providers.<id> alias), name, model (the real API model id),
+       supports_tools, supports_parallel_tool_calls
+
+   Custom-provider slugs are namespaced as "<alias>/<model-id>" so the catalog
+   stays collision-free even when the same model id exists on several providers.
+*/ -}}
+
+{{- $levelDesc := dict
+  "minimal" "Lightweight reasoning for simple, direct responses"
+  "low" "Fast responses with lighter reasoning"
+  "medium" "Balances speed and reasoning depth for everyday tasks"
+  "high" "Greater reasoning depth for complex problems"
+  "xhigh" "Extra high reasoning depth for complex problems"
+  "max" "Maximum reasoning depth for the hardest problems"
+  "ultra" "Maximum reasoning with automatic task delegation"
+-}}
+
+{{- $models := list -}}
+
+{{- /* 1. Built-in OpenAI catalog — required so the default model (gpt-5.6-sol)
+        still resolves when model_catalog_json replaces the bundled catalog. */ -}}
+{{- $builtinCache := joinPath $.chezmoi.homeDir ".codex" "models_cache.json" -}}
+{{- if exec "test" "-r" $builtinCache -}}
+  {{- $builtin := output "cat" $builtinCache | fromJson -}}
+  {{- if hasKey $builtin "models" -}}
+    {{- range $m := $builtin.models -}}
+      {{- $models = append $models $m -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+
+{{- range $alias, $ep := $cfg.providers }}
+  {{- if eq $alias "openai" }}{{ continue }}{{ end }}
+
+  {{- /* Collect candidate entries: (id, name, context, reasoning_efforts, tools) */ -}}
+  {{- $candidates := list -}}
+
+  {{- $meta := dict -}}
+  {{- if hasKey $ep "model_metadata" -}}{{- $meta = $ep.model_metadata -}}{{- end -}}
+  {{- if and $meta (gt (len $meta) 0) }}
+    {{- range $id, $m := $meta }}
+      {{- $efforts := list -}}
+      {{- if $m.reasoning -}}
+        {{- range $o := $m.reasoning_options }}
+          {{- if eq $o.type "effort" -}}{{- $efforts = concat $efforts $o.values -}}{{- end -}}
+        {{- end -}}
+        {{- if lt (len $efforts) 1 -}}{{- $efforts = list "low" "medium" "high" -}}{{- end -}}
+      {{- end -}}
+      {{- $ctx := 0 -}}
+      {{- if and (hasKey $m "limit") (hasKey $m.limit "context") -}}{{- $ctx = $m.limit.context -}}{{- end -}}
+      {{- $tools := false -}}
+      {{- if hasKey $m "tool_call" -}}{{- $tools = $m.tool_call -}}{{- end -}}
+      {{- $candidates = append $candidates (dict
+        "id" $id
+        "name" (default $id (index $m "name"))
+        "description" (default "" (index $m "description"))
+        "context" $ctx
+        "efforts" $efforts
+        "tools" $tools
+      ) -}}
+    {{- end -}}
+  {{- else if hasKey $ep "cache_file" -}}
+    {{- $cacheFile := $ep.cache_file -}}
+    {{- $raw := output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $cacheFile $cacheFile) | trim | fromJson -}}
+    {{- if hasKey $raw "data" -}}
+      {{- /* OpenAI-style list: openrouter, etc. */ -}}
+      {{- range $m := $raw.data }}
+        {{- $efforts := list -}}
+        {{- if and (hasKey $m "reasoning") $m.reasoning -}}
+          {{- if hasKey $m.reasoning "supported_efforts" -}}
+            {{- $efforts = $m.reasoning.supported_efforts -}}
+          {{- else -}}
+            {{- $efforts = list "low" "medium" "high" -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $ctx := 0 -}}
+        {{- if hasKey $m "context_length" -}}{{- $ctx = $m.context_length -}}{{- end -}}
+        {{- $tools := false -}}
+        {{- if and (hasKey $m "supported_parameters") (has "tools" $m.supported_parameters) -}}{{- $tools = true -}}{{- end -}}
+        {{- $candidates = append $candidates (dict
+          "id" $m.id
+          "name" (default $m.id (index $m "name"))
+          "description" (default "" (index $m "description"))
+          "context" $ctx
+          "efforts" $efforts
+          "tools" $tools
+        ) -}}
+      {{- end -}}
+    {{- else if hasKey $raw "models" -}}
+      {{- /* Ollama-style list */ -}}
+      {{- range $m := $raw.models }}
+        {{- $candidates = append $candidates (dict
+          "id" $m.name
+          "name" $m.name
+          "description" ""
+          "context" 0
+          "efforts" (list)
+          "tools" true
+        ) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- range $c := $candidates }}
+    {{- $levels := list -}}
+    {{- range $e := $c.efforts -}}
+      {{- if ne $e "none" -}}
+        {{- $levels = append $levels (dict "effort" $e "description" (default (printf "Reasoning effort %s" $e) (index $levelDesc $e))) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $ctx := $c.context -}}
+    {{- if lt $ctx 1 -}}{{- $ctx = 32768 -}}{{- end -}}
+    {{- $entry := dict
+      "slug" (printf "%s/%s" $alias $c.id)
+      "display_name" $c.name
+      "name" $c.id
+      "model" $c.id
+      "provider" $alias
+      "base_instructions" "You are Codex, an AI coding assistant. You and the user share one workspace; collaborate until their goal is genuinely handled. Follow the user's instructions, use the provided tools, and work autonomously where possible."
+      "context_window" $ctx
+      "max_context_window" $ctx
+      "effective_context_window_percent" 95
+      "truncation_policy" (dict "mode" "tokens" "limit" $ctx)
+      "shell_type" "shell_command"
+      "visibility" "list"
+      "supported_in_api" true
+      "priority" 0
+      "support_verbosity" false
+      "default_verbosity" "low"
+      "default_reasoning_summary" "none"
+      "supports_tools" $c.tools
+      "supports_parallel_tool_calls" $c.tools
+      "supported_reasoning_levels" $levels
+      "experimental_supported_tools" (list)
+      "additional_speed_tiers" (list)
+      "apply_patch_tool_type" "freeform"
+      "web_search_tool_type" "text"
+      "input_modalities" (list "text")
+      "supports_image_detail_original" false
+      "supports_search_tool" $c.tools
+      "use_responses_lite" false
+      "include_skills_usage_instructions" false
+      "include_plugin_usage_instructions" true
+      "include_apps_usage_instructions" true
+    -}}
+    {{- if $c.description -}}
+      {{- $_ := set $entry "description" $c.description -}}
+    {{- end -}}
+    {{- if gt (len $levels) 0 -}}
+      {{- $_ := set $entry "default_reasoning_level" (index $levels 0).effort -}}
+    {{- end -}}
+    {{- $models = append $models $entry -}}
+  {{- end -}}
+{{- end -}}
+
+{{- dict "models" $models | toPrettyJson -}}

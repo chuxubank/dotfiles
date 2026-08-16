@@ -76,6 +76,7 @@
 {{- $managed := dict
   "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
+  "model_catalog_json" (joinPath $.chezmoi.homeDir ".codex" "model-catalog.json")
   "mcp_servers" $servers
   "marketplaces" $marketplaces
   "personality" "pragmatic"

@@ -12,5 +12,21 @@ llm:
           auth_field: codex-auth-token
         openai:
           provider: openai
+        google-openai:
+          provider: google-openai
+        huggingface:
+          provider: huggingface
+        nvidia:
+          provider: nvidia
+        siliconflow-cn:
+          provider: siliconflow-cn
         openrouter:
           provider: openrouter
+        llama:
+          provider: llama
+        mlx:
+          provider: mlx
+        opencode:
+          provider: opencode
+        opencode-go:
+          provider: opencode-go
