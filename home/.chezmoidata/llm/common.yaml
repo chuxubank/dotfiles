@@ -100,6 +100,8 @@ llm:
       data_set: models-dev
       provider: opencode
       base_url: "https://opencode.ai/zen"
+      model_caches:
+        opencode-models-api: {}
 
     # Pi/OpenAI SDK requires a non-empty key even though Zen permits anonymous
     # access to free models. `Bearer` overrides its generated `Bearer unused`;
@@ -109,6 +111,7 @@ llm:
       data_set: models-dev
       provider: opencode
       base_url: "https://opencode.ai/zen"
+      models_cache: opencode-models-api
       headers:
         Authorization: Bearer
       filter:
@@ -122,3 +125,5 @@ llm:
       data_set: models-dev
       provider: opencode-go
       base_url: "https://opencode.ai/zen/go"
+      model_caches:
+        opencode-go-models-api: {}

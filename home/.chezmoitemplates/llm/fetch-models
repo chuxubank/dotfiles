@@ -27,14 +27,12 @@
   {{- end }}
   {{- $raw := "" -}}
   {{- $cacheFile := default "" (index . "cache_file") -}}
-  {{- if $cacheFile -}}
-    {{- /* Read cached response (chezmoi external), fall back to "{}" if missing. */ -}}
-    {{- if exec "test" "-r" $cacheFile -}}
-      {{- $raw = output "cat" $cacheFile | trim -}}
-    {{- else -}}
-      {{- $raw = "{}" -}}
-    {{- end -}}
-  {{- else -}}
+  {{- if and $cacheFile (exec "test" "-r" $cacheFile) -}}
+    {{- $raw = output "cat" $cacheFile | trim -}}
+  {{- end -}}
+  {{- /* A missing first-run cache must not suppress the provider catalog. The
+         refresh script persists the same response for subsequent renders. */ -}}
+  {{- if not $raw -}}
     {{- $raw = includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-models:%s:%s" .name .type) "headers" $headers "timeout" $timeout) -}}
   {{- end -}}
   {{- $resp := $raw | fromJson -}}
