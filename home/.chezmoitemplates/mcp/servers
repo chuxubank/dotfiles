@@ -43,7 +43,7 @@
   {{- /* http / sse fields */ -}}
   {{- if or (eq $exec.type "http") (eq $exec.type "sse") }}
     {{- $_ := set $s "uri" $exec.uri -}}
-    {{- if hasKey $exec "headers" }}
+    {{- if and $enabled (hasKey $exec "headers") }}
       {{- $_ := set $s "headers" (includeTemplate "mcp/envs" (dict "envs" $exec.headers "host_env" $.host_env) | fromJson) -}}
     {{- end }}
     {{- if hasKey $exec "bearer_token_env_var" }}
@@ -54,8 +54,9 @@
     {{- end }}
   {{- end }}
 
-  {{- /* resolved envs */ -}}
-  {{- if hasKey $exec "envs" }}
+  {{- /* resolved envs — skip secrets for disabled servers so CI/unauth
+         hosts do not run `gh auth token` (or pass) for unused providers. */ -}}
+  {{- if and $enabled (hasKey $exec "envs") }}
     {{- $_ := set $s "envs" (includeTemplate "mcp/envs" (dict "envs" $exec.envs "host_env" $.host_env) | fromJson) -}}
   {{- else }}
     {{- $_ := set $s "envs" dict -}}
