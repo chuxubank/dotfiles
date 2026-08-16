@@ -164,28 +164,29 @@
         {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath $ctx.chezmoi.homeDir $dsFile -}}{{- end -}}
         {{- $_ := set $dsFetchArgs "file" $dsFile -}}
       {{- end -}}
-      {{- $allModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
-      {{- $metadataModels := $allModels -}}
       {{- $flt := dict -}}
       {{- if hasKey $ref "filter" -}}{{- $flt = $ref.filter -}}{{- else if hasKey $prov "filter" -}}{{- $flt = $prov.filter -}}{{- end -}}
       {{- if gt (len $flt) 0 -}}{{- $_ := set $resolved "model_filter" $flt -}}{{- end -}}
+      {{- /* Canonical API mapping is relatively expensive, so request it only
+             for filters that consume it rather than enriching every catalog model. */ -}}
+      {{- if hasKey $flt "api" -}}{{- $_ := set $dsFetchArgs "map_api" true -}}{{- end -}}
+      {{- $metadataModels := dict -}}
       {{- if hasKey $prov "provider" -}}
+        {{- /* A provider-scoped catalog is authoritative; do not first flatten
+               the entire data set only to discard it. */ -}}
         {{- $_ := set $dsFetchArgs "provider" $prov.provider -}}
-        {{- $sourceModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
-        {{- if gt (len $sourceModels) 0 -}}
-          {{- /* Provider-scoped catalogs carry endpoint-specific metadata,
-                 especially the per-model protocol used by OpenCode Zen/Go. */ -}}
-          {{- $metadataModels = $sourceModels -}}
-        {{- end -}}
-        {{- if and (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $sourceModels) 0) -}}
+        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+        {{- if and (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $metadataModels) 0) -}}
           {{- $sourceNames := dict -}}
-          {{- range $id, $m := $sourceModels -}}
+          {{- range $id, $m := $metadataModels -}}
             {{- $name := $m.name -}}
             {{- if not $name -}}{{- $name = $id -}}{{- end -}}
             {{- $_ := set $sourceNames $id $name -}}
           {{- end -}}
           {{- $_ := set $resolved "models" $sourceNames -}}
         {{- end -}}
+      {{- else -}}
+        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
       {{- end -}}
       {{- if gt (len $metadataModels) 0 -}}
         {{- $_ := set $resolved "model_metadata" $metadataModels -}}

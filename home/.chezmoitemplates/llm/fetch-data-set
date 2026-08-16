@@ -2,6 +2,7 @@
    Works like fetch-models but returns full model metadata from a data catalog.
    Input: dict with "type", "file" or "base_url" (from llm.data_sets.<name>)
           Optional "provider" — only return models from this source provider
+                   "map_api" — enrich models with canonical API metadata
    Output: flat JSON dict of { model_id: { name, cost, modalities, api, ... } }.
            `api` is canonical metadata produced by llm/model-api; source-specific
            transport fields remain available for adapters that need them.
@@ -30,10 +31,14 @@
       {{- if or (not $targetProv) (eq $pid $targetProv) -}}
         {{- if hasKey $p "models" -}}
           {{- range $mid, $m := $p.models -}}
-            {{- $model := deepCopy $m -}}
-            {{- $api := includeTemplate "llm/model-api" (dict "type" $type "provider" $p "model" $m) | trim -}}
-            {{- if $api -}}{{- $_ := set $model "api" $api -}}{{- end -}}
-            {{- $_ := set $models $mid $model -}}
+            {{- if and (hasKey $ "map_api") $.map_api -}}
+              {{- $model := deepCopy $m -}}
+              {{- $api := includeTemplate "llm/model-api" (dict "type" $type "provider" $p "model" $m) | trim -}}
+              {{- if $api -}}{{- $_ := set $model "api" $api -}}{{- end -}}
+              {{- $_ := set $models $mid $model -}}
+            {{- else -}}
+              {{- $_ := set $models $mid $m -}}
+            {{- end -}}
           {{- end -}}
         {{- end -}}
       {{- end -}}
