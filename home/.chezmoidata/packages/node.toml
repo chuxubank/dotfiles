@@ -18,7 +18,6 @@ global = [
   "clawhub",
   "ctx7",
   "graphql-language-service-cli",
-  "ocx",
   "opencode-ai",
   "pi-acp",
   "prettier",
