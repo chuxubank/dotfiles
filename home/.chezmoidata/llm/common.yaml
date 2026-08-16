@@ -58,6 +58,52 @@ llm:
         path: Personal/Tech/Google
         field: gemini-api-key
 
+    google-openai:
+      name: Google (OpenAI Compatible)
+      data_set: models-dev
+      provider: google
+      base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
+      model_caches:
+        google-openai-models-api:
+          auth_field: gemini-api-key
+      auth:
+        path: Personal/Tech/Google
+        field: gemini-api-key
+
+    huggingface:
+      name: Hugging Face
+      data_set: models-dev
+      provider: huggingface
+      base_url: "https://router.huggingface.co/v1"
+      model_caches:
+        huggingface-models-api: {}
+      auth:
+        path: Personal/Tech/AI/HuggingFace
+
+    nvidia:
+      name: NVIDIA
+      data_set: models-dev
+      provider: nvidia
+      base_url: "https://integrate.api.nvidia.com/v1"
+      model_caches:
+        nvidia-models-api:
+          auth_field: api-key
+      auth:
+        path: Personal/Tech/Nvidia
+        field: api-key
+
+    siliconflow-cn:
+      name: SiliconFlow (China)
+      data_set: models-dev
+      provider: siliconflow-cn
+      base_url: "https://api.siliconflow.cn/v1"
+      model_caches:
+        siliconflow-cn-models-api:
+          auth_field: api-key
+      auth:
+        path: Personal/Tech/AI/SiliconFlow
+        field: api-key
+
     openrouter:
       name: OpenRouter
       base_url: "https://openrouter.ai/api"
@@ -102,23 +148,6 @@ llm:
       base_url: "https://opencode.ai/zen"
       model_caches:
         opencode-models-api: {}
-
-    # Pi/OpenAI SDK requires a non-empty key even though Zen permits anonymous
-    # access to free models. `Bearer` overrides its generated `Bearer unused`;
-    # Zen sees no token after the scheme and takes the anonymous path.
-    opencode-anonymous:
-      name: OpenCode Zen (Anonymous)
-      data_set: models-dev
-      provider: opencode
-      base_url: "https://opencode.ai/zen"
-      models_cache: opencode-models-api
-      headers:
-        Authorization: Bearer
-      filter:
-        cost:
-          input: 0
-          output: 0
-        api: openai-completions
 
     opencode-go:
       name: OpenCode Go

@@ -32,7 +32,9 @@
   {{- end -}}
   {{- $url = printf "%s/models" $listBaseURL -}}
 {{- else -}}
-  {{- if and $apiBaseURL (not (hasSuffix "/v1" $apiBaseURL)) -}}
+  {{- /* Preserve API bases that already contain a version path, including
+         Google's OpenAI-compatible /v1beta/openai endpoint. */ -}}
+  {{- if and $apiBaseURL (not (regexMatch "/v[0-9][^/]*(/|$)" $apiBaseURL)) -}}
     {{- $apiBaseURL = printf "%s/v1" $apiBaseURL -}}
   {{- end -}}
   {{- $url = printf "%s/models" $apiBaseURL -}}
