@@ -1,3 +1,5 @@
+{{- /* chezmoi:modify-template */ -}}
+
 {{- $config := dict
   "appearance" (dict
     "themes" (dict
@@ -57,8 +59,18 @@
   )
 -}}
 
-{{ includeTemplate "toml/with-preserved-paths" (dict
-  "config" $config
-  "path" (joinPath .chezmoi.homeDir ".warp" "settings.toml")
-  "preserve" (list "privacy")
-) }}
+{{- /* Warp writes settings such as execution profiles into this file. Merge
+       managed values into stdin so those runtime-owned settings survive apply.
+       Privacy is only seeded for a new config and remains user-controlled. */ -}}
+{{- $input := dig "stdin" "" .chezmoi -}}
+{{- if gt (len (trim $input)) 0 -}}
+  {{- $existing := fromToml $input -}}
+  {{- if hasKey $existing "privacy" -}}
+    {{- $config = omit $config "privacy" -}}
+  {{- end -}}
+{{- end -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "toml"
+  "input" $input
+  "managed" $config
+) -}}
