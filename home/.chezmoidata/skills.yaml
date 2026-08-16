@@ -24,6 +24,9 @@ skills:
       when:
         enabled: false
 
+    - name: herdr
+      source: herdrdev/herdr
+
     - name: "*"
       source: mattpocock/skills/skills/productivity
       when:

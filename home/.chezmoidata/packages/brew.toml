@@ -58,6 +58,7 @@ brews = [
   "graphviz",
   "grep",
   "helix",
+  "herdr",
   "hidapi",
   "htop",
   "hugo",
