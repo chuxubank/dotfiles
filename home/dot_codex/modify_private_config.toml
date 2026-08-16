@@ -44,6 +44,7 @@
   {{- $provider := dict
     "name" $alias
     "base_url" $endpoint.api_base_url
+    "wire_api" "responses"
   -}}
   {{- if $ep.auth_path }}
     {{- $args := list $ep.auth_path -}}

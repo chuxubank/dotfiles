@@ -1,21 +1,21 @@
 {{- /* llm/codex-model-catalog — Build a static model catalog for Codex.
    Produces the model_catalog_json format: { "models": [ ModelInfo, ... ] }.
 
-   model_catalog_json REPLACES the bundled catalog, so this template starts from
-   the built-in OpenAI catalog (models_cache.json) and appends every model from
-   the resolved codex tool-config providers (data-set metadata for data-set
-   backed providers, cache responses for cache-only providers such as openrouter).
+   model_catalog_json REPLACES the bundled catalog. A Codex session has one
+   model_provider, so the catalog must contain models for that active provider
+   only; catalog entries cannot override routing per model. Provider caches
+   determine which models are available, while data-set metadata enriches those
+   entries and is a fallback when no cache has been populated yet.
 
    Each ModelInfo carries both:
      - codex-rs required fields: slug, display_name, supported_reasoning_levels,
        shell_type, visibility, supported_in_api, priority, support_verbosity,
        truncation_policy
-     - desktop-app routing fields (ignored by codex-rs): provider (= a
-       model_providers.<id> alias), name, model (the real API model id),
-       supports_tools, supports_parallel_tool_calls
+     - supplemental fields for diagnostics and future clients: provider, name,
+       model, supports_tools, supports_parallel_tool_calls
 
-   Custom-provider slugs are namespaced as "<alias>/<model-id>" so the catalog
-   stays collision-free even when the same model id exists on several providers.
+   slug remains the real API model id. Because the catalog contains only the
+   active provider, display_name stays concise and does not repeat the provider.
 */ -}}
 
 {{- $levelDesc := dict
@@ -29,113 +29,234 @@
 -}}
 
 {{- $models := list -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $activeProvider := "openai" -}}
+{{- $configuredModel := $cfg.model -}}
+{{- $modelParts := splitList "/" $configuredModel -}}
+{{- if and (gt (len $modelParts) 1) (hasKey $cfg.providers (index $modelParts 0)) -}}
+  {{- $activeProvider = index $modelParts 0 -}}
+{{- end -}}
 
-{{- /* 1. Built-in OpenAI catalog — required so the default model (gpt-5.6-sol)
-        still resolves when model_catalog_json replaces the bundled catalog. */ -}}
+{{- /* 1. Built-in OpenAI catalog. The on-disk cache tracks server updates;
+        codex's bundled catalog is a fallback for a fresh installation. */ -}}
+{{- if eq $activeProvider "openai" -}}
 {{- $builtinCache := joinPath $.chezmoi.homeDir ".codex" "models_cache.json" -}}
+{{- $builtinModels := list -}}
 {{- if exec "test" "-r" $builtinCache -}}
   {{- $builtin := output "cat" $builtinCache | fromJson -}}
-  {{- if hasKey $builtin "models" -}}
-    {{- range $m := $builtin.models -}}
-      {{- $models = append $models $m -}}
+  {{- if and (eq (kindOf $builtin) "map") (hasKey $builtin "models") (eq (kindOf $builtin.models) "slice") -}}
+    {{- $builtinModels = $builtin.models -}}
+  {{- end -}}
+{{- end -}}
+{{- if eq (len $builtinModels) 0 -}}
+  {{- $codex := lookPath "codex" -}}
+  {{- if $codex -}}
+    {{- $builtin := output $codex "debug" "models" "--bundled" | fromJson -}}
+    {{- if and (eq (kindOf $builtin) "map") (hasKey $builtin "models") (eq (kindOf $builtin.models) "slice") -}}
+      {{- $builtinModels = $builtin.models -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
-
-{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- range $builtinModel := $builtinModels -}}
+  {{- if eq (kindOf $builtinModel) "map" -}}
+    {{- $modelID := index $builtinModel "slug" -}}
+    {{- if eq (kindOf $modelID) "string" -}}
+      {{- $modelID = trimPrefix "openai/" (trim $modelID) -}}
+      {{- if $modelID -}}
+        {{- $entry := deepCopy $builtinModel -}}
+        {{- $displayName := index $entry "display_name" -}}
+        {{- if or (ne (kindOf $displayName) "string") (not (trim $displayName)) -}}{{- $displayName = $modelID -}}{{- end -}}
+        {{- $_ := set $entry "slug" $modelID -}}
+        {{- $_ := set $entry "display_name" (trim $displayName) -}}
+        {{- $_ := set $entry "provider" "openai" -}}
+        {{- $_ := set $entry "name" $modelID -}}
+        {{- $_ := set $entry "model" $modelID -}}
+        {{- $_ := set $entry "supports_tools" true -}}
+        {{- $models = append $models $entry -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
 
 {{- range $alias, $ep := $cfg.providers }}
-  {{- if eq $alias "openai" }}{{ continue }}{{ end }}
+  {{- if or (eq $alias "openai") (ne $alias $activeProvider) }}{{ continue }}{{ end }}
 
-  {{- /* Collect candidate entries: (id, name, context, reasoning_efforts, tools) */ -}}
-  {{- $candidates := list -}}
-
-  {{- $meta := dict -}}
-  {{- if hasKey $ep "model_metadata" -}}{{- $meta = $ep.model_metadata -}}{{- end -}}
-  {{- if and $meta (gt (len $meta) 0) }}
-    {{- range $id, $m := $meta }}
-      {{- $efforts := list -}}
-      {{- if $m.reasoning -}}
-        {{- range $o := $m.reasoning_options }}
-          {{- if eq $o.type "effort" -}}{{- $efforts = concat $efforts $o.values -}}{{- end -}}
-        {{- end -}}
-        {{- if lt (len $efforts) 1 -}}{{- $efforts = list "low" "medium" "high" -}}{{- end -}}
-      {{- end -}}
-      {{- $ctx := 0 -}}
-      {{- if and (hasKey $m "limit") (hasKey $m.limit "context") -}}{{- $ctx = $m.limit.context -}}{{- end -}}
-      {{- $tools := false -}}
-      {{- if hasKey $m "tool_call" -}}{{- $tools = $m.tool_call -}}{{- end -}}
-      {{- $candidates = append $candidates (dict
-        "id" $id
-        "name" (default $id (index $m "name"))
-        "description" (default "" (index $m "description"))
-        "context" $ctx
-        "efforts" $efforts
-        "tools" $tools
-      ) -}}
-    {{- end -}}
-  {{- else if hasKey $ep "cache_file" -}}
+  {{- /* Cache entries are authoritative for availability. A map keyed by id
+         also removes duplicate records returned by some OpenAI-compatible APIs. */ -}}
+  {{- $metadata := default (dict) (index $ep "model_metadata") -}}
+  {{- if ne (kindOf $metadata) "map" -}}{{- $metadata = dict -}}{{- end -}}
+  {{- $sourceModels := dict -}}
+  {{- $ollamaModels := dict -}}
+  {{- $loadedCache := false -}}
+  {{- if hasKey $ep "cache_file" -}}
     {{- $cacheFile := $ep.cache_file -}}
-    {{- $raw := output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $cacheFile $cacheFile) | trim | fromJson -}}
-    {{- if hasKey $raw "data" -}}
-      {{- /* OpenAI-style list: openrouter, etc. */ -}}
-      {{- range $m := $raw.data }}
-        {{- $efforts := list -}}
-        {{- if and (hasKey $m "reasoning") $m.reasoning -}}
-          {{- if hasKey $m.reasoning "supported_efforts" -}}
-            {{- $efforts = $m.reasoning.supported_efforts -}}
-          {{- else -}}
-            {{- $efforts = list "low" "medium" "high" -}}
+    {{- if exec "test" "-r" $cacheFile -}}
+      {{- $raw := output "cat" $cacheFile | fromJson -}}
+      {{- if and (eq (kindOf $raw) "map") (hasKey $raw "data") (eq (kindOf $raw.data) "slice") -}}
+        {{- $loadedCache = true -}}
+        {{- range $model := $raw.data -}}
+          {{- if eq (kindOf $model) "map" -}}
+            {{- $id := index $model "id" -}}
+            {{- if eq (kindOf $id) "string" -}}
+              {{- $id = trim $id -}}
+              {{- if $id -}}{{- $_ := set $sourceModels $id $model -}}{{- end -}}
+            {{- end -}}
           {{- end -}}
         {{- end -}}
-        {{- $ctx := 0 -}}
-        {{- if hasKey $m "context_length" -}}{{- $ctx = $m.context_length -}}{{- end -}}
-        {{- $tools := false -}}
-        {{- if and (hasKey $m "supported_parameters") (has "tools" $m.supported_parameters) -}}{{- $tools = true -}}{{- end -}}
-        {{- $candidates = append $candidates (dict
-          "id" $m.id
-          "name" (default $m.id (index $m "name"))
-          "description" (default "" (index $m "description"))
-          "context" $ctx
-          "efforts" $efforts
-          "tools" $tools
-        ) -}}
-      {{- end -}}
-    {{- else if hasKey $raw "models" -}}
-      {{- /* Ollama-style list */ -}}
-      {{- range $m := $raw.models }}
-        {{- $candidates = append $candidates (dict
-          "id" $m.name
-          "name" $m.name
-          "description" ""
-          "context" 0
-          "efforts" (list)
-          "tools" true
-        ) -}}
+      {{- else if and (eq (kindOf $raw) "map") (hasKey $raw "models") (eq (kindOf $raw.models) "slice") -}}
+        {{- $loadedCache = true -}}
+        {{- range $model := $raw.models -}}
+          {{- if eq (kindOf $model) "map" -}}
+            {{- $id := index $model "name" -}}
+            {{- if eq (kindOf $id) "string" -}}
+              {{- $id = trim $id -}}
+              {{- if $id -}}
+                {{- $_ := set $sourceModels $id $model -}}
+                {{- $_ := set $ollamaModels $id true -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
 
-  {{- range $c := $candidates }}
-    {{- $levels := list -}}
-    {{- range $e := $c.efforts -}}
-      {{- if ne $e "none" -}}
-        {{- $levels = append $levels (dict "effort" $e "description" (default (printf "Reasoning effort %s" $e) (index $levelDesc $e))) -}}
+  {{- /* A missing cache must not make a configured provider disappear. */ -}}
+  {{- if not $loadedCache -}}
+    {{- range $id, $model := $metadata -}}
+      {{- if and (eq (kindOf $id) "string") (trim $id) (eq (kindOf $model) "map") -}}
+        {{- $_ := set $sourceModels (trim $id) $model -}}
       {{- end -}}
     {{- end -}}
-    {{- $ctx := $c.context -}}
-    {{- if lt $ctx 1 -}}{{- $ctx = 32768 -}}{{- end -}}
+  {{- end -}}
+
+  {{- range $id, $sourceModel := $sourceModels -}}
+    {{- $model := $sourceModel -}}
+    {{- if and (hasKey $metadata $id) (eq (kindOf (index $metadata $id)) "map") -}}
+      {{- $model = mergeOverwrite (deepCopy $sourceModel) (deepCopy (index $metadata $id)) -}}
+    {{- end -}}
+
+    {{- $name := $id -}}
+    {{- $modelName := index $model "name" -}}
+    {{- if and (eq (kindOf $modelName) "string") (trim $modelName) -}}
+      {{- $name = trim $modelName -}}
+    {{- else -}}
+      {{- $displayName := index $model "display_name" -}}
+      {{- if and (eq (kindOf $displayName) "string") (trim $displayName) -}}
+        {{- $name = trim $displayName -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $description := "" -}}
+    {{- $modelDescription := index $model "description" -}}
+    {{- if eq (kindOf $modelDescription) "string" -}}{{- $description = $modelDescription -}}{{- end -}}
+
+    {{- $ctx := 32768 -}}
+    {{- $limit := index $model "limit" -}}
+    {{- if eq (kindOf $limit) "map" -}}
+      {{- $context := index $limit "context" -}}
+      {{- if and (or (eq (kindOf $context) "int") (eq (kindOf $context) "int64")) (gt $context 0) -}}
+        {{- $ctx = $context -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $context := index $model "context_length" -}}
+      {{- if and (or (eq (kindOf $context) "int") (eq (kindOf $context) "int64")) (gt $context 0) -}}
+        {{- $ctx = $context -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $tools := false -}}
+    {{- $toolCall := index $model "tool_call" -}}
+    {{- if eq (kindOf $toolCall) "bool" -}}
+      {{- $tools = $toolCall -}}
+    {{- else -}}
+      {{- $supportedParameters := index $model "supported_parameters" -}}
+      {{- if and (eq (kindOf $supportedParameters) "slice") (has "tools" $supportedParameters) -}}
+        {{- $tools = true -}}
+      {{- else if hasKey $ollamaModels $id -}}
+        {{- /* Ollama cache entries do not advertise supported parameters. */ -}}
+        {{- $tools = true -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $reasoningEnabled := false -}}
+    {{- $rawEfforts := list -}}
+    {{- $reasoning := index $model "reasoning" -}}
+    {{- if eq (kindOf $reasoning) "bool" -}}
+      {{- $reasoningEnabled = $reasoning -}}
+      {{- if $reasoningEnabled -}}
+        {{- $options := default (list) (index $model "reasoning_options") -}}
+        {{- if eq (kindOf $options) "slice" -}}
+          {{- range $option := $options -}}
+            {{- if eq (kindOf $option) "map" -}}
+              {{- $optionType := index $option "type" -}}
+              {{- if and (eq (kindOf $optionType) "string") (eq $optionType "effort") -}}
+                {{- $values := index $option "values" -}}
+                {{- if eq (kindOf $values) "slice" -}}
+                  {{- range $effort := $values -}}{{- $rawEfforts = append $rawEfforts $effort -}}{{- end -}}
+                {{- end -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else if eq (kindOf $reasoning) "map" -}}
+      {{- $reasoningEnabled = true -}}
+      {{- $supportedEfforts := index $reasoning "supported_efforts" -}}
+      {{- if eq (kindOf $supportedEfforts) "slice" -}}
+        {{- range $effort := $supportedEfforts -}}{{- $rawEfforts = append $rawEfforts $effort -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $levels := list -}}
+    {{- $seenLevels := dict -}}
+    {{- range $effort := $rawEfforts -}}
+      {{- if eq (kindOf $effort) "string" -}}
+        {{- $effort = trim $effort -}}
+        {{- if and (hasKey $levelDesc $effort) (not (hasKey $seenLevels $effort)) -}}
+          {{- $levels = append $levels (dict "effort" $effort "description" (index $levelDesc $effort)) -}}
+          {{- $_ := set $seenLevels $effort true -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if and $reasoningEnabled (eq (len $levels) 0) -}}
+      {{- range $effort := list "low" "medium" "high" -}}
+        {{- $levels = append $levels (dict "effort" $effort "description" (index $levelDesc $effort)) -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- $inputModalities := list "text" -}}
+    {{- $declaredModalities := list -}}
+    {{- $modalities := index $model "modalities" -}}
+    {{- if eq (kindOf $modalities) "map" -}}
+      {{- $inputs := index $modalities "input" -}}
+      {{- if eq (kindOf $inputs) "slice" -}}{{- $declaredModalities = $inputs -}}{{- end -}}
+    {{- else -}}
+      {{- $inputs := index $model "input_modalities" -}}
+      {{- if eq (kindOf $inputs) "slice" -}}
+        {{- $declaredModalities = $inputs -}}
+      {{- else -}}
+        {{- $architecture := index $model "architecture" -}}
+        {{- if eq (kindOf $architecture) "map" -}}
+          {{- $inputs = index $architecture "input_modalities" -}}
+          {{- if eq (kindOf $inputs) "slice" -}}{{- $declaredModalities = $inputs -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if has "image" $declaredModalities -}}{{- $inputModalities = append $inputModalities "image" -}}{{- end -}}
+
     {{- $entry := dict
-      "slug" (printf "%s/%s" $alias $c.id)
-      "display_name" $c.name
-      "name" $c.id
-      "model" $c.id
+      "slug" $id
+      "display_name" $name
+      "name" $id
+      "model" $id
       "provider" $alias
       "base_instructions" "You are Codex, an AI coding assistant. You and the user share one workspace; collaborate until their goal is genuinely handled. Follow the user's instructions, use the provided tools, and work autonomously where possible."
       "context_window" $ctx
       "max_context_window" $ctx
       "effective_context_window_percent" 95
-      "truncation_policy" (dict "mode" "tokens" "limit" $ctx)
+      "truncation_policy" (dict "mode" "tokens" "limit" 10000)
       "shell_type" "shell_command"
       "visibility" "list"
       "supported_in_api" true
@@ -143,23 +264,23 @@
       "support_verbosity" false
       "default_verbosity" "low"
       "default_reasoning_summary" "none"
-      "supports_tools" $c.tools
-      "supports_parallel_tool_calls" $c.tools
+      "supports_tools" $tools
+      "supports_parallel_tool_calls" $tools
       "supported_reasoning_levels" $levels
       "experimental_supported_tools" (list)
       "additional_speed_tiers" (list)
       "apply_patch_tool_type" "freeform"
       "web_search_tool_type" "text"
-      "input_modalities" (list "text")
+      "input_modalities" $inputModalities
       "supports_image_detail_original" false
-      "supports_search_tool" $c.tools
+      "supports_search_tool" false
       "use_responses_lite" false
       "include_skills_usage_instructions" false
       "include_plugin_usage_instructions" true
       "include_apps_usage_instructions" true
     -}}
-    {{- if $c.description -}}
-      {{- $_ := set $entry "description" $c.description -}}
+    {{- if $description -}}
+      {{- $_ := set $entry "description" $description -}}
     {{- end -}}
     {{- if gt (len $levels) 0 -}}
       {{- $_ := set $entry "default_reasoning_level" (index $levels 0).effort -}}
@@ -168,4 +289,4 @@
   {{- end -}}
 {{- end -}}
 
-{{- dict "models" $models | toPrettyJson -}}
+{{- dict "models" $models | toJson -}}
