@@ -53,7 +53,7 @@ llm:
       base_url: "https://generativelanguage.googleapis.com"
       model_caches:
         google-models-api:
-          auth_field: aider-gemini-api-key
+          auth_field: gemini-api-key
       auth:
         path: Personal/Tech/Google
         field: gemini-api-key
