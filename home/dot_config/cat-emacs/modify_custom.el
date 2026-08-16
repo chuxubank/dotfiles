@@ -49,7 +49,8 @@
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
          #'org-roam-unlinked-references-section) nil nil "Customized with use-package org-roam")
  '(safe-local-variable-values
-   '((org-highlight-latex-and-related) (org-blank-before-new-entry))))
+   '((eval valign-mode nil) (org-highlight-latex-and-related)
+     (org-blank-before-new-entry))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
