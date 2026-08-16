@@ -47,9 +47,15 @@ skill_name_matches() {
 
 list_source_skills() {
   local source="$1"
+  local full_depth="$2"
+  local -a depth_args=()
   local output clean_output listing
 
-  if ! output=$(NO_COLOR=1 skills add "$source" --list 2>&1); then
+  if [[ "$full_depth" == true ]]; then
+    depth_args+=(--full-depth)
+  fi
+
+  if ! output=$(NO_COLOR=1 skills add "$source" --list "${depth_args[@]}" 2>&1); then
     print -u2 -r -- "$output"
     return 1
   fi
@@ -69,7 +75,8 @@ list_source_skills() {
 
 resolve_skill_names() {
   local source="$1"
-  shift
+  local full_depth="$2"
+  shift 2
   local -a patterns=("$@")
   local -a available=()
   local -a resolved=()
@@ -78,7 +85,7 @@ resolve_skill_names() {
   for pattern in "${patterns[@]}"; do
     if skill_name_is_pattern "$pattern"; then
       if (( ! ${#available[@]} )); then
-        listing=$(list_source_skills "$source") || return 1
+        listing=$(list_source_skills "$source" "$full_depth") || return 1
         available=("${(@f)listing}")
       fi
       for skill_name in "${available[@]}"; do
@@ -128,7 +135,8 @@ skill_has_agent() {
 
 # {{ $skill.source }}
 patterns=({{- if kindIs "slice" $skill.name }}{{ range $i, $name := $skill.name }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }}{{ else }}{{ $skill.name | quote }}{{ end }})
-if ! resolved_output=$(resolve_skill_names {{ $skill.source | quote }} "${patterns[@]}"); then
+full_depth={{ if and (hasKey $skill "full_depth") $skill.full_depth }}true{{ else }}false{{ end }}
+if ! resolved_output=$(resolve_skill_names {{ $skill.source | quote }} "$full_depth" "${patterns[@]}"); then
   cleanup_enabled=false
   had_errors=true
   print -u2 -- "Could not resolve ${patterns[*]} in {{ $skill.source }}; skipping undeclared-skill cleanup"
@@ -153,6 +161,9 @@ else
     needs_install=false
     state_ok=true
     skill_args=()
+    if $full_depth; then
+      skill_args+=(--full-depth)
+    fi
     if (( ${#patterns[@]} == 1 )) && [[ ${patterns[1]} == '*' ]]; then
       skill_args+=(--skill '*')
     else

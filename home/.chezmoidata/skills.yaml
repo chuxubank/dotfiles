@@ -76,6 +76,10 @@ skills:
         - r8-analyzer
       source: android/skills
 
+    - name: "*"
+      source: android/skills/jetpack-compose
+      full_depth: true
+
     - name:
         - kotlin-tooling-agp9-migration
         - kotlin-tooling-cocoapods-spm-migration
