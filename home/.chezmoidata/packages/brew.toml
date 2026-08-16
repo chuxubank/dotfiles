@@ -215,6 +215,8 @@ casks = [
   "font-zhuque-fangsong",
   "fontgoggles",
   "ghostty",
+  "grok-bot",
+  "grok-build",
   "iina",
   "inkscape",
   "itsycal",
