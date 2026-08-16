@@ -22,6 +22,10 @@ config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = true
 
+-- Keyboard
+-- Kitty keyboard protocol lets apps distinguish Shift+Enter from Enter.
+config.enable_kitty_keyboard = true
+
 -- Modules
 config.launch_menu = launch.launch_menu
 config.default_prog = launch.default_prog
