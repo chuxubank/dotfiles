@@ -84,6 +84,7 @@ skills:
         - kotlin-tooling-agp9-migration
         - kotlin-tooling-cocoapods-spm-migration
         - kotlin-tooling-java-to-kotlin
+        - kotlin-tooling-native-build-performance
       source: Kotlin/kotlin-agent-skills
 
     - name: "*"
