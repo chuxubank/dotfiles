@@ -11,7 +11,7 @@ llm:
         - anthropic/claude-opus-5
         - openai/gpt-5.6-sol
         - openai-codex/gpt-5.6-sol
-        - opencode/free
+        - opencode-anonymous/big-pickle
       reasoning_effort: high
       providers:
         openai:
@@ -38,3 +38,6 @@ llm:
         opencode:
           provider: opencode
           models: false
+        # Free Chat Completions models exposed through Zen's anonymous API.
+        opencode-anonymous:
+          provider: opencode-anonymous

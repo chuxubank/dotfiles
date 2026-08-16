@@ -1,0 +1,29 @@
+{{- /* llm/model-api — Map data-set-specific transport metadata to the
+       canonical API names used by tool adapters.
+
+       Input: type     — data set adapter type
+              provider — source provider metadata
+              model    — source model metadata
+       Output: openai-completions | openai-responses | anthropic-messages |
+               google-generative-ai, or empty when the adapter cannot map it.
+
+       Keep source-specific fields behind this seam. Callers filter on the
+       canonical API and do not need to know how each catalog represents it.
+*/ -}}
+{{- $api := "" -}}
+{{- if eq .type "models-dev" -}}
+  {{- $npm := default "" (index .provider "npm") -}}
+  {{- if and (hasKey .model "provider") (hasKey .model.provider "npm") -}}
+    {{- $npm = .model.provider.npm -}}
+  {{- end -}}
+  {{- $apiByNpm := dict
+    "@ai-sdk/openai-compatible" "openai-completions"
+    "@ai-sdk/openai"            "openai-responses"
+    "@ai-sdk/anthropic"         "anthropic-messages"
+    "@ai-sdk/google"            "google-generative-ai"
+  -}}
+  {{- if hasKey $apiByNpm $npm -}}
+    {{- $api = index $apiByNpm $npm -}}
+  {{- end -}}
+{{- end -}}
+{{- $api -}}

@@ -1,8 +1,9 @@
 {{- /* llm/filter-models — Apply filter criteria to a model dict.
-   Input: dict with "models" { id: { name, cost, open_weights, modalities } },
+   Input: dict with "models" { id: { name, cost, open_weights, modalities, api } },
                    "filter" { cost: { input, output, cache_read },
                               open_weights: bool,
-                              modalities: { input: [str], output: [str] } }
+                              modalities: { input: [str], output: [str] },
+                              api: canonical API string }
    Output: JSON dict of { model_id: name_string } for matching models.
 
    Cost comparison uses 'not' for zero-check (handles int/float64 mismatch).
@@ -47,6 +48,16 @@
     {{- if hasKey $m "open_weights" -}}
       {{- if ne $filter.open_weights $m.open_weights -}}{{- $keep = false -}}{{- end -}}
     {{- else -}}
+      {{- $keep = false -}}
+    {{- end -}}
+  {{- end -}}
+  {{- end -}}
+
+  {{- /* Canonical API filter — source-specific transport metadata is mapped by
+         the data-set adapter before models reach this module. */ -}}
+  {{- if $keep -}}
+  {{- if hasKey $filter "api" -}}
+    {{- if or (not (hasKey $m "api")) (ne $filter.api $m.api) -}}
       {{- $keep = false -}}
     {{- end -}}
   {{- end -}}

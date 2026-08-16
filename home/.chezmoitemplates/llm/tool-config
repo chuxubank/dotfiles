@@ -12,6 +12,7 @@
            auth_path — pass path used for auth (if set)
            auth_field — pass field used for auth (if set)
            timeout   — model fetch timeout in seconds (if set)
+           headers   — static request headers (if set)
            model_metadata — map of model id -> data set metadata (if resolved)
            model_filter — model metadata filter (if set)
 
@@ -126,6 +127,10 @@
   -}}
   {{- if hasKey $prov "timeout" -}}{{- $_ := set $resolved "timeout" $prov.timeout -}}{{- end -}}
   {{- if hasKey $ref "timeout" -}}{{- $_ := set $resolved "timeout" $ref.timeout -}}{{- end -}}
+  {{- $headers := dict -}}
+  {{- if hasKey $prov "headers" -}}{{- $headers = deepCopy $prov.headers -}}{{- end -}}
+  {{- if hasKey $ref "headers" -}}{{- $headers = mergeOverwrite $headers (deepCopy $ref.headers) -}}{{- end -}}
+  {{- if gt (len $headers) 0 -}}{{- $_ := set $resolved "headers" $headers -}}{{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
@@ -186,9 +191,13 @@
         {{- $_ := set $resolved "model_metadata" $metadataModels -}}
       {{- end -}}
     {{- end -}}
-  {{- else if hasKey $ref "models" }}
-    {{- $_ := set $resolved "models" $ref.models -}}
   {{- end }}
+
+  {{- /* Explicit tool-level model declarations always win, including
+         `models: false` for data-set-backed providers. */ -}}
+  {{- if hasKey $ref "models" -}}
+    {{- $_ := set $resolved "models" $ref.models -}}
+  {{- end -}}
 
   {{- $_ := set $providers $alias $resolved -}}
   {{- end -}}

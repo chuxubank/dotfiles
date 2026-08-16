@@ -101,6 +101,22 @@ llm:
       provider: opencode
       base_url: "https://opencode.ai/zen"
 
+    # Pi/OpenAI SDK requires a non-empty key even though Zen permits anonymous
+    # access to free models. `Bearer` overrides its generated `Bearer unused`;
+    # Zen sees no token after the scheme and takes the anonymous path.
+    opencode-anonymous:
+      name: OpenCode Zen (Anonymous)
+      data_set: models-dev
+      provider: opencode
+      base_url: "https://opencode.ai/zen"
+      headers:
+        Authorization: Bearer
+      filter:
+        cost:
+          input: 0
+          output: 0
+        api: openai-completions
+
     opencode-go:
       name: OpenCode Go
       data_set: models-dev

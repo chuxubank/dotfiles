@@ -56,6 +56,7 @@
   {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) -}}
     {{- $p := dict -}}
     {{- if $baseURL -}}{{- $_ := set $p "baseUrl" $baseURL -}}{{- end -}}
+    {{- if hasKey $ep "headers" -}}{{- $_ := set $p "headers" $ep.headers -}}{{- end -}}
     {{- if $ep.auth_path -}}
       {{- $args := $ep.auth_path -}}
       {{- if $ep.auth_field -}}
