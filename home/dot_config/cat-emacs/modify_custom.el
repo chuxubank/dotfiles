@@ -45,6 +45,8 @@
      "IV:deepseek-v4-pro"
      "OpenRouter:auto"))
  '(mouse-wheel-progressive-speed nil)
+ '(cat-org-cliplink-title-replacements
+   '(("_哔哩哔哩_bilibili\\'" "")))
  '(org-roam-mode-sections
    (list #'org-roam-backlinks-section #'org-roam-reflinks-section
          #'org-roam-unlinked-references-section) nil nil "Customized with use-package org-roam")
