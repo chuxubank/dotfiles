@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cache/chezmoi
-          key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoiexternals/**/*.toml.tmpl') }}
+          key: ${{ runner.os }}-chezmoi-${{ hashFiles('home/.chezmoi.toml.tmpl', 'home/.chezmoiexternals/**/*.toml.tmpl', 'home/**/.chezmoiexternal.toml.tmpl') }}
           restore-keys: |
             ${{ runner.os }}-chezmoi-
 

@@ -12,28 +12,3 @@
     type = "git-repo"
     url = "https://github.com/rime/plum"
     refreshPeriod = "168h"
-
-[{{ joinPath ".config" "cat-emacs" "library-of-babel.org" | quote }}]
-    type = "file"
-    url = "https://orgmode.org/worg/library-of-babel.org"
-
-["bin/jar/pdf-unstamper.jar"]
-    type = "file"
-    url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
-
-[{{ index .path.cache "models-dev-api" | quote }}]
-    type = "file"
-    url = "https://models.dev/api.json"
-    refreshPeriod = "24h"
-
-[{{ index .path.cache "openrouter-models-api" | quote }}]
-    type = "file"
-    url = "https://openrouter.ai/api/v1/models"
-    refreshPeriod = "24h"
-
-{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
-["bin/android"]
-    type = "file"
-	executable = true
-	url = "https://dl.google.com/android/cli/latest/{{ if eq .chezmoi.os "linux" }}linux_x86_64{{ else if eq .chezmoi.os "windows" }}windows_x86_64{{ else }}darwin_arm64{{ end }}/android{{ if eq .chezmoi.os "windows" }}.exe{{ end }}"
-{{- end }}

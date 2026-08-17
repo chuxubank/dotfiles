@@ -1,0 +1,10 @@
+{{- $llm := ".cache/llm/" -}}
+[{{ trimPrefix $llm (index .path.cache "models-dev-api") | quote }}]
+    type = "file"
+    url = "https://models.dev/api.json"
+    refreshPeriod = "24h"
+
+[{{ trimPrefix $llm (index .path.cache "openrouter-models-api") | quote }}]
+    type = "file"
+    url = "https://openrouter.ai/api/v1/models"
+    refreshPeriod = "24h"

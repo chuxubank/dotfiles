@@ -1,9 +1,4 @@
 {{- if eq .host_env "aa" }}
-["bin/fly"]
-    type = "file"
-	url = "https://concourse-prod.aaecosystem.com/api/v1/cli?arch=amd64&platform={{ .chezmoi.os }}"
-	executable = true
-
 ["Developer/Example/Concourse/ci"]
     type = "git-repo"
 	url = "https://github.com/concourse/ci"
