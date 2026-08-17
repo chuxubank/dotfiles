@@ -1,0 +1,6 @@
+{{- /* Encode an absolute path the way cursor-agent names
+       ~/.cursor/projects/<slug> (replace non-alnum with -, collapse,
+       trim). */ -}}
+{{- $id := regexReplaceAll "[^a-zA-Z0-9]" . "-" -}}
+{{- $id = regexReplaceAll "-+" $id "-" -}}
+{{- regexReplaceAll "^-+|-+$" $id "" -}}

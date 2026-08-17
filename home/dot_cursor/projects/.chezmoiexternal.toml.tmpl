@@ -1,0 +1,16 @@
+{{- /* Cursor folder-trust — schema: ~/.cursor/projects/<slug>/.workspace-trusted
+       { trustedAt, workspacePath }. Presence is the decision. Trust
+       cascades to child workspaces unless the parent is $HOME or
+       shallower.
+
+       Path set comes from trust/paths. Slugs are host-specific, so the
+       files are declared here instead of as source directories. */ -}}
+{{- $marker := joinPath .chezmoi.sourceDir ".chezmoitemplates" "trust" "cursor-marker.json" -}}
+{{- range $path := includeTemplate "trust/paths" . | fromJson -}}
+{{- $id := includeTemplate "trust/cursor-slug" $path -}}
+[{{ printf "%s/.workspace-trusted" $id | quote }}]
+    type = "file"
+    url = {{ printf "file://%s" $marker | quote }}
+    filter.command = "jq"
+    filter.args = ["--arg", "p", {{ $path | quote }}, ".workspacePath = $p"]
+{{ end -}}
