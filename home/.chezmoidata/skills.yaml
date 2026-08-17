@@ -63,6 +63,12 @@ skills:
         disabled:
           tool: codex
 
+    - name: sentry-cli
+      source: https://cli.sentry.dev
+      when:
+        enabled:
+          host_env: iv
+
     - name: feishu-projects
       source: chuxubank/skills
       when:
