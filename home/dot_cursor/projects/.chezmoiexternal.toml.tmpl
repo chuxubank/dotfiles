@@ -4,13 +4,16 @@
        shallower.
 
        Path set comes from trust/paths. Slugs are host-specific, so the
-       files are declared here instead of as source directories. */ -}}
-{{- $marker := joinPath .chezmoi.sourceDir ".chezmoitemplates" "trust" "cursor-marker.json" -}}
+       files are declared here instead of as source directories. jq -n
+       builds the marker; trustedAt is stamped when chezmoi materializes
+       the external, not baked into this template (or every apply would
+       rewrite every file). */ -}}
+{{- $empty := eq .chezmoi.os "windows" | ternary "file://NUL" "file:///dev/null" -}}
 {{- range $path := includeTemplate "trust/paths" . | fromJson -}}
 {{- $id := includeTemplate "trust/cursor-slug" $path -}}
 [{{ printf "%s/.workspace-trusted" $id | quote }}]
     type = "file"
-    url = {{ printf "file://%s" $marker | quote }}
+    url = {{ $empty | quote }}
     filter.command = "jq"
-    filter.args = ["--arg", "p", {{ $path | quote }}, ".workspacePath = $p"]
+    filter.args = ["-n", "--arg", "p", {{ $path | quote }}, "{trustedAt: (now | todateiso8601), workspacePath: $p}"]
 {{ end -}}
