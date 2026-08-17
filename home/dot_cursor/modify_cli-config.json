@@ -1,0 +1,17 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* https://cursor.com/docs/cli/reference/configuration
+       attribution.attributeCommitsToAgent / attributePRsToAgent default on
+       and add a Co-authored-by / Made with Cursor trailer. A modify-template
+       so CLI-owned keys (model, permissions, authInfo) survive apply. */ -}}
+
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "attribution" (dict
+      "attributeCommitsToAgent" false
+      "attributePRsToAgent" false
+    )
+  )
+) -}}
