@@ -1,0 +1,10 @@
+{{- if eq .chezmoi.os "darwin" }}
+["Symbola.ttf"]
+    type = "archive-file"
+    url = "https://fontlibrary.org/assets/downloads/symbola/cf81aeb303c13ce765877d31571dc5c7/symbola.zip"
+    path = "Symbola.ttf"
+
+["PengliWenKai-Regular.ttf"]
+    type = "file"
+    url = "{{ (gitHubLatestReleaseAssetURL "lxgw/Pengli" "PengliWenKai-Regular.ttf") }}"
+{{- end }}

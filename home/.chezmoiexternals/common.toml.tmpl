@@ -1,14 +1,14 @@
-["Developer/Example/Android/nowinandroid"]
-    type = "git-repo"
-    url = "https://github.com/android/nowinandroid.git"
-    refreshPeriod = "168h"
-
-["Developer/Example/KMP/compose-multiplatform"]
-    type = "git-repo"
-	url = "https://github.com/JetBrains/compose-multiplatform.git"
-	refreshPeriod = "168h"
-
 ["{{ .path.tool.plum }}"]
     type = "git-repo"
     url = "https://github.com/rime/plum"
     refreshPeriod = "168h"
+
+[{{ index .path.cache "models-dev-api" | quote }}]
+    type = "file"
+    url = "https://models.dev/api.json"
+    refreshPeriod = "24h"
+
+[{{ index .path.cache "openrouter-models-api" | quote }}]
+    type = "file"
+    url = "https://openrouter.ai/api/v1/models"
+    refreshPeriod = "24h"

@@ -1,32 +1,7 @@
 {{- if eq .chezmoi.os "darwin" }}
-["Developer/Example/Raycast/script-commands"]
-    type = "git-repo"
-    url = "https://github.com/raycast/script-commands.git"
-    refreshPeriod = "24h"
-    clone.args = ["--depth=1"]
-
-["Library/Fonts/Symbola.ttf"]
-    type = "archive-file"
-	url = "https://fontlibrary.org/assets/downloads/symbola/cf81aeb303c13ce765877d31571dc5c7/symbola.zip"
-    path = "Symbola.ttf"
-
-["Library/Fonts/PengliWenKai-Regular.ttf"]
-    type = "file"
-    url = "{{ (gitHubLatestReleaseAssetURL "lxgw/Pengli" "PengliWenKai-Regular.ttf") }}"
-
 ["Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/scripts/kiss-translator.user.js"]
     type = "archive-file"
     url = "{{ (gitHubLatestReleaseAssetURL "fishjar/kiss-translator" "kiss-translator_*_userscript.zip") }}"
     path = "userscript/kiss-translator-ios-safari.user.js"
     refreshPeriod = "24h"
-
-["Applications/iloader.app"]
-    type = "archive"
-    url = "{{ (gitHubLatestReleaseAssetURL "nab138/iloader" "iloader-darwin-universal.app.tar.gz") }}"
-	stripComponents = 1
-
-["Applications/TuxGuitar.app"]
-    type = "archive"
-    url = "{{ (gitHubLatestReleaseAssetURL "helge17/tuxguitar" "tuxguitar-*-macosx-swt-cocoa-x86_64.app.tar.gz") }}"
-    stripComponents = 1
 {{- end }}

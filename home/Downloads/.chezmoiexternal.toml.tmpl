@@ -1,0 +1,5 @@
+{{- if eq .chezmoi.os "android" }}
+["termux-x11.apk"]
+    type = "file"
+    url = "{{ (gitHubLatestReleaseAssetURL "termux/termux-x11" "app-arm64-v8a-debug.apk") }}"
+{{- end }}
