@@ -31,5 +31,10 @@ export HOST_ROLES=({{ join " " .roles }})
 export OPENAI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenAI" "field" "api-key") .) }}"
 export GEMINI_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Google" "field" "gemini-api-key") .) }}"
 export OPENROUTER_API_KEY="{{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key") .) }}"
+{{- if eq .host_env "iv" }}
+export SENTRY_HOST="{{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "url") .) }}"
+export SENTRY_ORG="sentry"
+export SENTRY_AUTH_TOKEN="{{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "api-token") .) }}"
+{{- end }}
 
 {{ template "environment/zsh-static" . }}
