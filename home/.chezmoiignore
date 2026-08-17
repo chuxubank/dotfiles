@@ -16,21 +16,12 @@ Documents/WindowsPowerShell
 .wakeup
 Library
 .config/immersive-translate
-bin/immersive-translate-config
 {{- else if ne .host_env "personal" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") }}
 .config/rtk
-{{- end }}
-
-{{- if ne .host_env "aa" }}
-.ssh/aa
-{{- else if ne .host_env "iv" }}
-.ssh/iv
-{{- else }}
-.ssh/personal/id_ed25519
 {{- end }}
 
 {{- if eq .host_env "ci" }}

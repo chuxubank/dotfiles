@@ -1,0 +1,7 @@
+{{- if ne .host_env "aa" }}
+aa
+{{- else if ne .host_env "iv" }}
+iv
+{{- else }}
+personal/id_ed25519
+{{- end }}
