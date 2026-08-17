@@ -1,0 +1,22 @@
+{{- /* Trusted project roots for agents that inherit or cascade
+       (Grok folder-trust, Cursor .workspace-trusted, pi /trust).
+
+       Mirrors the set pi documents against
+       dot_codex/modify_private_config.toml, with the cascade-safe
+       differences:
+
+       1. No home directory. A parent-or-self match would blanket-trust
+          every repo on the machine.
+       2. Workspace trees are listed as roots, not enumerated per child.
+          Inheritance covers their subprojects, so Codex's depth-1 `fd`
+          expansion is unnecessary here.
+
+       Paths are written whether or not they exist yet. */ -}}
+{{- $trusted := list .chezmoi.workingTree -}}
+{{- range $path := values (omit .path.personal "pass") -}}
+  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
+{{- end -}}
+{{- range $path := values .path.workspace -}}
+  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
+{{- end -}}
+{{- sortAlpha (uniq $trusted) | toJson -}}

@@ -8,28 +8,12 @@
        A modify-template, not a plain template, so decisions saved by /trust
        survive an apply.
 
-       Mirrors the set codex trusts in dot_codex/modify_private_config.toml
-       (chezmoi working tree, path.personal minus pass, path.workspace roots),
-       with two deliberate differences:
+       Path set comes from trust/paths (cascade-safe: no $HOME, workspace
+       roots not expanded). Paths are written whether or not they exist
+       yet, keeping output identical across hosts and pre-approving a
+       repo for whenever it gets cloned. */ -}}
 
-       1. No home directory entry. pi applies the closest decision on the
-          current *or parent* path, so "$HOME": true would blanket-trust every
-          repo on the machine and defeat the prompt entirely. codex can list
-          $HOME safely because it matches exact directories only.
-       2. Workspace roots are listed as roots, not enumerated per child. The
-          same parent cascade covers their subprojects, so codex's depth-1 `fd`
-          expansion is unnecessary here.
-
-       Paths are written whether or not they exist yet, keeping output identical
-       across hosts and pre-approving a repo for whenever it gets cloned. */ -}}
-
-{{- $trusted := list .chezmoi.workingTree -}}
-{{- range $path := values (omit .path.personal "pass") -}}
-  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
-{{- end -}}
-{{- range $path := values .path.workspace -}}
-  {{- $trusted = append $trusted (joinPath $.chezmoi.homeDir $path) -}}
-{{- end -}}
+{{- $trusted := includeTemplate "trust/paths" . | fromJson -}}
 
 {{- $in := trim .chezmoi.stdin -}}
 {{- $decisions := dict -}}

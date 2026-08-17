@@ -1,0 +1,27 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Grok folder-trust — schema: ~/.grok/trusted_folders.toml
+       [folders."<abs-path>"] trusted = bool, decided_at = unix seconds.
+
+       Gates project hooks, repo-local MCP, and LSP. Trust cascades to
+       subdirectories (/hooks-trust, --trust). A modify-template so
+       /hooks-untrust survives an apply.
+
+       Path set comes from trust/paths (cascade-safe: no $HOME, workspace
+       roots not expanded). Only add. An explicit trusted = false stays. */ -}}
+
+{{- $trusted := includeTemplate "trust/paths" . | fromJson -}}
+{{- $in := trim (dig "stdin" "" .chezmoi) -}}
+{{- $doc := dict -}}
+{{- if gt (len $in) 0 -}}
+  {{- $doc = fromToml $in -}}
+{{- end -}}
+{{- $folders := dig "folders" (dict) $doc -}}
+{{- $now := int (unixEpoch now) -}}
+{{- range $path := $trusted -}}
+  {{- if not (hasKey $folders $path) -}}
+    {{- $_ := set $folders $path (dict "trusted" true "decided_at" $now) -}}
+  {{- end -}}
+{{- end -}}
+{{- $_ := set $doc "folders" $folders -}}
+{{- $doc | toToml -}}
