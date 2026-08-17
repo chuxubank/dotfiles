@@ -253,3 +253,16 @@ mcp:
           TAVILY_API_KEY:
             path: Personal/Tech/AI/Tavily
             field: api-key
+    - name: Zotero
+      description: Search, read, annotate, and add to your Zotero research library via the local desktop API.
+      execution:
+        type: stdio
+        cmd: uvx
+        args:
+          - zotero-mcp-server
+          - serve
+        timeout: 30
+        tool_timeout: 60
+        envs:
+          ZOTERO_LOCAL: "true"
+          ZOTERO_MCP_TOOLSETS: none

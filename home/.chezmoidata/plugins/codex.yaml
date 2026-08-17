@@ -25,6 +25,12 @@ plugins:
         description: Android emulator QA workflows
         source: test-android-apps@openai-curated
 
+      - name: zotero
+        description: Search the local Zotero library, export BibTeX, and insert citations
+        source: zotero@openai-curated
+        when:
+          enabled: false
+
       - name: browser
         source: browser@openai-bundled
 
