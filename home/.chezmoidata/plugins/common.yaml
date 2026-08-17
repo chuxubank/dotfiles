@@ -3,6 +3,18 @@ plugins:
   # a tool absent from `sources` simply does not get the plugin.
   # Tool-specific plugins live in plugins/<tool>.yaml instead.
   providers:
+    - name: sentry
+      description: >-
+        Teach coding agents Sentry — SDK setup, production issue debugging via
+        Sentry MCP, and monitoring alerts. Built from getsentry/sentry-for-ai.
+      sources:
+        claude-code: sentry@claude-plugins-official
+        codex: sentry@sentry-plugin-marketplace
+        grok: getsentry/plugin-grok
+      when:
+        enabled:
+          host_env: iv
+
     - name: superpowers
       description: Superpowers skills and workflows
       sources:

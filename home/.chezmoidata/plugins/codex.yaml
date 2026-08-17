@@ -8,6 +8,10 @@ plugins:
         source: https://github.com/MindReset/dot_skill.git
         source_type: git
 
+      - name: sentry-plugin-marketplace
+        source: https://github.com/getsentry/plugin-codex.git
+        source_type: git
+
     providers:
       - name: github
         description: GitHub repository and PR workflows
