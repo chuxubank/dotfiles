@@ -17,7 +17,13 @@
   {{- $sources = append $sources $entry -}}
 {{- end }}
 
-{{- $managed := dict -}}
+{{- /* "auto" follows the OS light/dark appearance at runtime (polled every
+       5s). Deliberately not `ternary ... .isDarkMode` — that is captured once
+       when chezmoi init probes AppleInterfaceStyle, so it would freeze the
+       theme and not even follow a later apply. */ -}}
+{{- $managed := dict
+  "ui" (dict "theme" "auto")
+-}}
 {{- $replace := dict
   "mcp_servers" $servers
   "plugins.enabled" $enabledPlugins
