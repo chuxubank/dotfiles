@@ -27,6 +27,12 @@ skills:
     - name: herdr
       source: herdrdev/herdr
 
+    - name:
+        - computer-use
+        - orca-cli
+        - orchestration
+      source: stablyai/orca
+
     - name: "*"
       source: mattpocock/skills/skills/productivity
       when:
