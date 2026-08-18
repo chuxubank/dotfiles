@@ -29,6 +29,7 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- if eq .host_env "ci" }}
 ./**/opencode
 .aider.conf.yml
+.authinfo.gpg
 .codex
 .config/goose
 .config/rclone
@@ -38,6 +39,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .gradle
 .pi
 .ssh
+Library
 {{ .path.personal.pass }}
 
 {{ .path.workspace.asahiart }}/*

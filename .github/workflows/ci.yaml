@@ -75,3 +75,62 @@ jobs:
 
       - name: Chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
+
+  smoke:
+    name: Smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install chezmoi (macOS)
+        if: runner.os == 'macOS'
+        run: brew install chezmoi
+
+      - name: Install chezmoi (Windows)
+        if: runner.os == 'Windows'
+        run: choco install chezmoi -y
+
+      - name: Init chezmoi
+        run: chezmoi init --source "${{ github.workspace }}"
+
+      - name: Chezmoi data
+        run: chezmoi data
+
+      - name: Dry-run apply
+        run: chezmoi apply --dry-run --exclude=encrypted,scripts,externals
+
+      - name: Syntax-check rendered scripts
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          tmpdir=$(mktemp -d)
+          trap 'rm -rf "$tmpdir"' EXIT
+          failed=0
+          while IFS= read -r tmpl; do
+            if ! rendered=$(chezmoi execute-template <"$tmpl"); then
+              echo "template failed: $tmpl" >&2
+              failed=1
+              continue
+            fi
+            if [ -z "$(printf '%s' "$rendered" | tr -d '[:space:]')" ]; then
+              continue
+            fi
+            out="$tmpdir/script"
+            printf '%s\n' "$rendered" >"$out"
+            first=$(printf '%s\n' "$rendered" | sed -n '/[^[:space:]]/{p;q;}')
+            case $first in
+              '#!'*zsh*)
+                zsh -n "$out" || { echo "zsh -n failed: $tmpl" >&2; failed=1; }
+                ;;
+              '#!'*'/bin/sh'* | '#!'*'/usr/bin/env sh'* | '#!/bin/sh')
+                sh -n "$out" || { echo "sh -n failed: $tmpl" >&2; failed=1; }
+                ;;
+            esac
+          done < <(find home/.chezmoiscripts -type f -name '*.tmpl' | sort)
+          exit "$failed"
