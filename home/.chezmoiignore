@@ -9,6 +9,10 @@ Documents/PowerShell
 Documents/WindowsPowerShell
 {{- else }}
 .config/powershell
+.zprofile
+.zshenv
+.zshrc
+.config/zellij
 {{- end }}
 
 {{- if ne .chezmoi.os "darwin" }}
