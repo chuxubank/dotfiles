@@ -1,0 +1,19 @@
+{{- /* tool/enabled — Is this declared tool wanted on this host?
+       Input: dict "tool" <name> (merged with root context $)
+              optional "require" bool — fail when the name is not in tools.
+       Undeclared names are enabled unless require is set.
+       Output: JSON boolean */ -}}
+{{- $name := .tool -}}
+{{- if not $name -}}
+  {{- fail "tool/enabled: missing tool name" -}}
+{{- end -}}
+{{- $declared := default dict .tools -}}
+{{- if not (hasKey $declared $name) -}}
+  {{- if dig "require" false . -}}
+    {{- fail (printf "unknown tool %q" $name) -}}
+  {{- else -}}
+    {{- toJson true -}}
+  {{- end -}}
+{{- else -}}
+  {{- includeTemplate "when/context" (merge (dict "item" (index $declared $name)) .) -}}
+{{- end -}}

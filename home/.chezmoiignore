@@ -24,9 +24,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .config/rtk
 {{- end }}
 
-{{- if ne .host_env "iv" }}
-.claude*
-{{- end }}
+{{- includeTemplate "tool/disabled-ignore" . }}
 
 {{- if eq .host_env "ci" }}
 ./**/opencode

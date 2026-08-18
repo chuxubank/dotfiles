@@ -3,8 +3,13 @@
 {{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}
 {{- range $package := $list -}}
 {{- $enabled := true -}}
-{{- if and (eq (kindOf $package) "map") (hasKey $package "when") -}}
+{{- if eq (kindOf $package) "map" -}}
+{{- if hasKey $package "tool" -}}
+  {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $package.tool "require" true) $.ctx) | fromJson -}}
+{{- end -}}
+{{- if and $enabled (hasKey $package "when") -}}
   {{- $enabled = includeTemplate "when/context" (merge (dict "item" $package) $.ctx) | fromJson -}}
+{{- end -}}
 {{- end -}}
 {{- if $enabled -}}
   {{- $selected = append $selected $package -}}

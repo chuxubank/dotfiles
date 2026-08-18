@@ -172,7 +172,7 @@ casks = [
   "blackhole-16ch",
   "block-goose",
   "chatgpt",
-  { name = "claude", when.enabled.host_env = ["iv"] },
+  { name = "claude", tool = "claude-code" },
   "cursor",
   "cursor-cli",
   "d12frosted/emacs-plus/emacs-plus-app",

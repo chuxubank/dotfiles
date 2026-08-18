@@ -1,0 +1,15 @@
+{{- /* Source-state ignore for disabled tools. Only the parent of a
+       trailing /** is ignored, so .chezmoiremove can still delete the
+       destination children. */ -}}
+{{- $ctx := . -}}
+{{- range $name, $spec := default dict $ctx.tools -}}
+  {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
+    {{- range $pattern := dig "remove" (list) $spec -}}
+      {{- if hasSuffix "/**" $pattern }}
+{{ trimSuffix "/**" $pattern }}
+      {{- else if contains "/" $pattern }}
+{{ index (splitList "/" $pattern) 0 }}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

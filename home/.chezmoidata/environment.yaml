@@ -94,9 +94,6 @@ environment:
           literal: "8888"
 
     - tool: claude-code
-      when:
-        enabled:
-          host_env: [iv]
       variables:
         CLAUDE_CODE_NO_FLICKER:
           literal: "1"

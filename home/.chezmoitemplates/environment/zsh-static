@@ -4,8 +4,11 @@
 {{- $variables := dict -}}
 {{- range $tool := .environment.static -}}
   {{- $enabled := true -}}
-  {{- if hasKey $tool "when" -}}
-    {{- $enabled = eq "true" (includeTemplate "when/context" (merge (dict "item" $tool) $ctx)) -}}
+  {{- if hasKey (default dict $ctx.tools) $tool.tool -}}
+    {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $tool.tool) $ctx) | fromJson -}}
+  {{- end -}}
+  {{- if and $enabled (hasKey $tool "when") -}}
+    {{- $enabled = includeTemplate "when/context" (merge (dict "item" $tool) $ctx) | fromJson -}}
   {{- end -}}
   {{- if $enabled -}}
     {{- $lines = append $lines (printf "# %s" $tool.tool) -}}

@@ -18,10 +18,16 @@
         "mem_gb" (dig "mem_gb" 0 $)
         "disk_gb" (dig "disk_gb" 0 $)
         "tool" $agent -}}
-  {{- $agentEnabled := includeTemplate "when/evaluate" (dict
-        "item" $agentSpec
-        "values" $agentValues
-        "os_version" (dig "os_version" "" $)) | fromJson -}}
+  {{- $agentEnabled := true -}}
+  {{- if hasKey (default dict $.tools) $agent -}}
+    {{- $agentEnabled = includeTemplate "tool/enabled" (merge (dict "tool" $agent) $) | fromJson -}}
+  {{- end -}}
+  {{- if $agentEnabled -}}
+    {{- $agentEnabled = includeTemplate "when/evaluate" (dict
+          "item" $agentSpec
+          "values" $agentValues
+          "os_version" (dig "os_version" "" $)) | fromJson -}}
+  {{- end -}}
   {{- if $agentEnabled -}}
     {{- $enabled := includeTemplate "when/evaluate" (dict
           "item" $skill

@@ -1,0 +1,19 @@
+# Declared tools. A name listed here is the single enablement switch for
+# packages (`tool = "..."`), environment.static entries of the same name,
+# skills agents of the same name, and destination cleanup below.
+# Names that are not listed stay enabled.
+#
+# remove: destination paths deleted via .chezmoiremove when the tool is off.
+# A trailing /** wipes directory contents. The directory itself is ignored
+# in the source state so apply does not recreate it (ignore of that exact
+# path would also block .chezmoiremove). Managed files at the dest root
+# (e.g. .claude.json) are emptied in their templates instead.
+tools:
+  claude-code:
+    when:
+      enabled:
+        host_env: [iv]
+    remove:
+      - ".claude.json.backup"
+      - ".claude/**"
+

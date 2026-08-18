@@ -1,0 +1,9 @@
+{{- /* Emit .chezmoiremove patterns for disabled tools, one per line. */ -}}
+{{- $ctx := . -}}
+{{- range $name, $spec := default dict $ctx.tools -}}
+  {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
+    {{- range $pattern := dig "remove" (list) $spec }}
+{{ $pattern }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

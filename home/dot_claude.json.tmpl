@@ -1,14 +1,15 @@
-{{- /* chezmoi:modify-template */ -}}
-
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "claude-code") .) | fromJson -}}
+{{- $path := joinPath .chezmoi.homeDir ".claude.json" -}}
+{{- $in := "" -}}
+{{- if stat $path -}}
+{{- $in = output "cat" $path | trim -}}
+{{- end -}}
 {{- $servers := includeTemplate "mcp/anthropic" (merge (dict "tool" "claude-code") .) | fromJson -}}
 {{- $theme := ternary "dark" "light" .isDarkMode -}}
-
-{{- $in := trim .chezmoi.stdin -}}
 {{- if gt (len $in) 0 -}}
 {{- fromJson $in
 	| setValueAtPath "mcpServers" $servers
 	| setValueAtPath "theme" $theme
 	| toPrettyJson -}}
-{{- else -}}
-
+{{- end -}}
 {{- end -}}
