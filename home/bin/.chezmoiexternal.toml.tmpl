@@ -1,6 +1,8 @@
+{{- if ne .host_env "ci" -}}
 ["jar/pdf-unstamper.jar"]
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "hwding/pdf-unstamper" "pdf-unstamper.jar") }}"
+{{- end }}
 
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
 ["android"]
@@ -9,7 +11,7 @@
     url = "https://dl.google.com/android/cli/latest/{{ if eq .chezmoi.os "linux" }}linux_x86_64{{ else if eq .chezmoi.os "windows" }}windows_x86_64{{ else }}darwin_arm64{{ end }}/android{{ if eq .chezmoi.os "windows" }}.exe{{ end }}"
 {{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") }}
 ["md-babel"]
     type = "archive-file"
     url = "{{ (gitHubLatestReleaseAssetURL "md-babel/swift-markdown-babel" "md-babel_macos-universal-*.tar.bz2") }}"

@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") }}
 ["Library/Containers/com.userscripts.macos.Userscripts-Extension/Data/Documents/scripts/kiss-translator.user.js"]
     type = "archive-file"
     url = "{{ (gitHubLatestReleaseAssetURL "fishjar/kiss-translator" "kiss-translator_*_userscript.zip") }}"

@@ -1,3 +1,4 @@
+{{- if ne .host_env "ci" -}}
 [{{ joinPath .path.zotero (index .path.data "zotero-ext") "better-bibtex@iris-advies.com.xpi" | quote }}]
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "retorquere/zotero-better-bibtex" "zotero-better-bibtex-*.xpi") }}"
@@ -9,3 +10,4 @@
 [{{ joinPath .path.zotero (index .path.data "zotero-ext") "jasminum@linxzh.com.xpi" | quote }}]
     type = "file"
     url = "{{ (gitHubLatestReleaseAssetURL "l0o0/jasminum" "jasminum_*.xpi") }}"
+{{- end -}}
