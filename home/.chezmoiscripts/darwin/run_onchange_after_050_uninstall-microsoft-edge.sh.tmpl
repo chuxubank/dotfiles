@@ -1,0 +1,175 @@
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "aa") (ne .host_env "ci") -}}
+#!/bin/zsh
+# Edge / AutoUpdate / RDC leftovers. Skipped on aa (Brewfile installs those casks).
+set -eu
+
+echo "󰯁 Uninstall Microsoft Edge and AutoUpdate leftovers"
+
+quit_exact() {
+	pkill -x "$1" >/dev/null 2>&1 || true
+}
+
+remove_paths() {
+	local p
+	for p in "$@"; do
+		[[ -e "$p" || -L "$p" ]] || continue
+		if rm -rf -- "$p" >/dev/null 2>&1; then
+			echo "  removed $p"
+		else
+			echo "  leftover $p"
+		fi
+	done
+}
+
+app_exists() {
+	[[ -d "/Applications/$1" || -d "$HOME/Applications/$1" ]]
+}
+
+microsoft_apps_present() {
+	app_exists "Microsoft Edge.app" \
+		|| app_exists "Microsoft Edge Beta.app" \
+		|| app_exists "Microsoft Edge Dev.app" \
+		|| app_exists "Microsoft Edge Canary.app" \
+		|| app_exists "Microsoft Word.app" \
+		|| app_exists "Microsoft Excel.app" \
+		|| app_exists "Microsoft PowerPoint.app" \
+		|| app_exists "Microsoft Outlook.app" \
+		|| app_exists "Microsoft OneNote.app" \
+		|| app_exists "Microsoft Teams.app" \
+		|| app_exists "Microsoft Teams classic.app" \
+		|| app_exists "OneDrive.app" \
+		|| app_exists "Microsoft OneDrive.app" \
+		|| app_exists "Microsoft Remote Desktop.app" \
+		|| app_exists "Windows App.app" \
+		|| app_exists "Company Portal.app" \
+		|| app_exists "Microsoft Defender.app" \
+		|| app_exists "Microsoft AutoUpdate.app"
+}
+
+rdc_present() {
+	app_exists "Microsoft Remote Desktop.app" || app_exists "Windows App.app"
+}
+
+quit_exact "Microsoft Edge"
+quit_exact "Microsoft Edge Beta"
+quit_exact "Microsoft Edge Dev"
+quit_exact "Microsoft Edge Canary"
+quit_exact "msedge"
+quit_exact "msedge_crashpad_handler"
+quit_exact "Microsoft AutoUpdate"
+quit_exact "Microsoft Update Assistant"
+
+if command -v brew >/dev/null 2>&1; then
+	for cask in microsoft-edge microsoft-edge-beta microsoft-edge-dev microsoft-edge-canary; do
+		if brew list --cask "$cask" >/dev/null 2>&1; then
+			brew uninstall --cask --zap --force "$cask"
+			echo "  uninstalled cask $cask"
+		fi
+	done
+fi
+
+remove_paths \
+	"/Applications/Microsoft Edge.app" \
+	"/Applications/Microsoft Edge Beta.app" \
+	"/Applications/Microsoft Edge Dev.app" \
+	"/Applications/Microsoft Edge Canary.app" \
+	"$HOME/Applications/Microsoft Edge.app" \
+	"$HOME/Applications/Edge Apps.localized" \
+	"$HOME/Library/Application Support/Microsoft Edge" \
+	"$HOME/Library/Application Support/Microsoft Edge Beta" \
+	"$HOME/Library/Application Support/Microsoft Edge Dev" \
+	"$HOME/Library/Application Support/Microsoft Edge Canary" \
+	"$HOME/Library/Application Support/Microsoft/EdgeUpdater" \
+	"$HOME/Library/Caches/Microsoft Edge" \
+	"$HOME/Library/Caches/com.microsoft.edgemac" \
+	"$HOME/Library/Caches/com.microsoft.EdgeUpdater" \
+	"$HOME/Library/Preferences/com.microsoft.edgemac.plist" \
+	"$HOME/Library/HTTPStorages/com.microsoft.edgemac" \
+	"$HOME/Library/HTTPStorages/com.microsoft.edgemac.binarycookies" \
+	"$HOME/Library/HTTPStorages/com.microsoft.EdgeUpdater" \
+	"$HOME/Library/WebKit/com.microsoft.edgemac" \
+	"$HOME/Library/Saved Application State/com.microsoft.edgemac.savedState" \
+	"$HOME/Library/Application Scripts/com.microsoft.edgemac.wdgExtension" \
+	"$HOME/Library/Microsoft/MicrosoftSoftwareUpdate/Actives/com.microsoft.edgemac" \
+	"$HOME/Library/Containers/com.microsoft.edgemac.wdgExtension"
+
+security delete-generic-password -s "Microsoft Edge Safe Storage" >/dev/null 2>&1 || true
+defaults delete com.microsoft.edgemac >/dev/null 2>&1 || true
+
+python3 - <<'PY'
+import plistlib
+from pathlib import Path
+
+p = Path.home() / "Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist"
+if not p.exists():
+    raise SystemExit
+d = plistlib.loads(p.read_bytes())
+handlers = d.get("LSHandlers", [])
+kept = [
+    h
+    for h in handlers
+    if "edgemac" not in str(h.get("LSHandlerRoleAll") or h.get("LSHandlerRoleViewer") or "").lower()
+    and h.get("LSHandlerURLScheme") != "microsoft-edge"
+]
+if len(kept) != len(handlers):
+    d["LSHandlers"] = kept
+    p.write_bytes(plistlib.dumps(d, fmt=plistlib.FMT_BINARY))
+    print("  removed microsoft-edge Launch Services handler")
+PY
+killall cfprefsd >/dev/null 2>&1 || true
+
+if microsoft_apps_present; then
+	echo "  keep AutoUpdate: another Microsoft app is installed"
+else
+	if command -v brew >/dev/null 2>&1 && brew list --cask microsoft-auto-update >/dev/null 2>&1; then
+		brew uninstall --cask --zap --force microsoft-auto-update
+		echo "  uninstalled cask microsoft-auto-update"
+	fi
+	remove_paths \
+		"$HOME/Library/Preferences/com.microsoft.autoupdate.fba.plist" \
+		"$HOME/Library/Preferences/com.microsoft.autoupdate2.plist" \
+		"$HOME/Library/Preferences/com.microsoft.shared.plist" \
+		"$HOME/Library/Caches/com.microsoft.autoupdate.fba" \
+		"$HOME/Library/HTTPStorages/com.microsoft.autoupdate.fba" \
+		"$HOME/Library/Application Support/Microsoft" \
+		"$HOME/Library/Microsoft"
+	defaults delete com.microsoft.autoupdate.fba >/dev/null 2>&1 || true
+	defaults delete com.microsoft.autoupdate2 >/dev/null 2>&1 || true
+	defaults delete com.microsoft.shared >/dev/null 2>&1 || true
+	if sudo -n true >/dev/null 2>&1; then
+		sudo -n rm -f \
+			/Library/PrivilegedHelperTools/com.microsoft.autoupdate.helper \
+			/Library/Preferences/com.microsoft.autoupdate2.plist
+		sudo -n rmdir /Library/Application\ Support/Microsoft >/dev/null 2>&1 || true
+		echo "  removed system AutoUpdate helper"
+	elif [[ -e /Library/PrivilegedHelperTools/com.microsoft.autoupdate.helper || -e /Library/Preferences/com.microsoft.autoupdate2.plist ]]; then
+		echo "  leftover system AutoUpdate helper (needs sudo)"
+	fi
+fi
+
+if rdc_present; then
+	echo "  keep Remote Desktop leftovers: app is installed"
+else
+	remove_paths \
+		"$HOME/Library/Application Scripts/com.microsoft.rdc.macos" \
+		"$HOME/Library/Application Scripts/com.microsoft.rdc.macos.qlx" \
+		"$HOME/Library/Containers/com.microsoft.rdc.macos" \
+		"$HOME/Library/Containers/com.microsoft.rdc.macos.qlx" \
+		"$HOME/Library/Preferences/com.microsoft.rdc.macos.plist" \
+		"$HOME/Library/Saved Application State/com.microsoft.rdc.macos.savedState"
+fi
+
+if microsoft_apps_present; then
+	echo "  keep OneAuth: another Microsoft app is installed"
+else
+	remove_paths \
+		"$HOME/Library/Group Containers/UBF8T346G9.com.microsoft.oneauth" \
+		"$HOME/Library/Application Scripts/UBF8T346G9.com.microsoft.oneauth"
+fi
+
+if [[ -d "$HOME/Library/Microsoft/MicrosoftSoftwareUpdate/Actives" ]] && [[ -z "$(ls -A "$HOME/Library/Microsoft/MicrosoftSoftwareUpdate/Actives" 2>/dev/null || true)" ]]; then
+	rmdir "$HOME/Library/Microsoft/MicrosoftSoftwareUpdate/Actives" 2>/dev/null || true
+	rmdir "$HOME/Library/Microsoft/MicrosoftSoftwareUpdate" 2>/dev/null || true
+	rmdir "$HOME/Library/Microsoft" 2>/dev/null || true
+fi
+{{- end }}
