@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Setup herdr plugins"
+
+if ! command -v herdr >/dev/null; then
+  print -u2 -- "herdr is not installed; skipping plugin setup"
+  exit 0
+fi
+
+{{ includeTemplate "script/reconcile" }}
+
+{{- $plugins := includeTemplate "plugins/resolve" (merge (dict "tool" "herdr") .) | fromJson }}
+
+declared_plugins=({{- range $p := $plugins }}{{- if $p.enabled }} {{ $p.name | quote }}{{- end }}{{- end }})
+installed_plugins=()
+cleanup_enabled=true
+had_errors=false
+
+json_names_load installed_plugins \
+  'herdr plugin list --json' \
+  '.result.plugins | type == "array"' \
+  '.result.plugins[].plugin_id' \
+  cleanup_enabled \
+  'herdr plugins'
+
+{{- range $p := $plugins }}
+{{- if $p.enabled }}
+
+name={{ $p.name | quote }}
+if (( ! ${installed_plugins[(Ie)$name]} )); then
+  echo "Install herdr plugin: $name"
+  if herdr plugin install {{ $p.source | quote }}{{ if hasKey $p "ref" }} --ref {{ $p.ref | quote }}{{ end }} --yes; then
+    installed_plugins+=("$name")
+  else
+    print -u2 -- "Could not install herdr plugin $name"
+    cleanup_enabled=false
+    had_errors=true
+  fi
+fi
+herdr plugin enable "$name" >/dev/null 2>&1 || true
+{{- end }}
+{{- end }}
+
+remove_undeclared cleanup_enabled installed_plugins declared_plugins \
+  'herdr plugin' herdr plugin uninstall
+
+if $had_errors; then
+  exit 1
+fi

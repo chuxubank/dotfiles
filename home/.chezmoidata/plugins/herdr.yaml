@@ -1,0 +1,18 @@
+plugins:
+  # herdr-only plugins (plugins/herdr.yaml). The tool is implied by the
+  # filename, so a plain `source` string is enough. `when` conditions work
+  # the same as elsewhere.
+  #
+  # Source is herdr's GitHub spec: OWNER/REPO[/SUBDIR]. Optional `ref` is
+  # passed through to `herdr plugin install --ref`.
+  herdr:
+    providers:
+      - name: heeler
+        description: >-
+          Pair the Heeler iOS app with a QR Pairing Code and push encrypted
+          Blocked/Done agent notifications.
+        source: ZingerLittleBee/Heeler/plugin
+        ref: main
+        when:
+          enabled:
+            os: [darwin, linux]

@@ -1,0 +1,109 @@
+{{- /* script/reconcile — Shared name-inventory helpers for on-change
+       setup scripts. Emit once per script, then call:
+
+         json_names_load DEST CMD CHECK NAMES CLEANUP LABEL [JSON_DEST]
+           DEST     array to fill with one name per line
+           CMD      command string that prints JSON on stdout
+           CHECK    jq expression that must be truthy
+           NAMES    jq expression that prints one name per line
+           CLEANUP  boolean var; set false if the listing cannot be trusted
+           LABEL    phrase used in error messages ("herdr plugins")
+           JSON_DEST optional; raw JSON stored here on success
+
+         remove_undeclared CLEANUP INSTALLED DECLARED LABEL CMD...
+           Removes INSTALLED names absent from DECLARED.
+           A CMD word of {} is replaced by the name; otherwise the name is
+           appended. No-ops when CLEANUP is false.
+
+       Callers initialize `had_errors` and the CLEANUP boolean first.
+       A failed load sets CLEANUP=false and had_errors=true so undeclared
+       names are not deleted from a bad inventory. */ -}}
+json_names_load() {
+  local _dest_name=$1
+  local _cmd=$2
+  local _check=$3
+  local _names_jq=$4
+  local _cleanup_name=$5
+  local _label=$6
+  local _json_name=${7:-}
+  local _json _output
+
+  eval "${_dest_name}=()"
+
+  if ! _json=$(eval "$_cmd"); then
+    print -u2 -- "Could not list installed $_label; skipping undeclared cleanup"
+    eval "${_cleanup_name}=false"
+    had_errors=true
+    return 1
+  fi
+
+  if ! jq -e "$_check" >/dev/null <<<"$_json"; then
+    print -u2 -- "$_label listing is not a JSON array; skipping undeclared cleanup"
+    eval "${_cleanup_name}=false"
+    had_errors=true
+    return 1
+  fi
+
+  if ! _output=$(jq -r "$_names_jq" <<<"$_json"); then
+    print -u2 -- "Could not parse installed $_label; skipping undeclared cleanup"
+    eval "${_cleanup_name}=false"
+    had_errors=true
+    return 1
+  fi
+
+  if [[ -n $_output ]]; then
+    eval "${_dest_name}=( \"\${(f)_output}\" )"
+  else
+    eval "${_dest_name}=()"
+  fi
+  if [[ -n $_json_name ]]; then
+    eval "${_json_name}=\$_json"
+  fi
+  return 0
+}
+
+remove_undeclared() {
+  local _cleanup_name=$1
+  local _installed_name=$2
+  local _declared_name=$3
+  local _label=$4
+  shift 4
+  local _cleanup _name _arg
+  local -a _installed _declared _cmd
+  local _has_placeholder=false
+
+  eval "_cleanup=\${${_cleanup_name}}"
+  if ! $_cleanup; then
+    return 0
+  fi
+  eval "_installed=( \"\${${_installed_name}[@]}\" )"
+  eval "_declared=( \"\${${_declared_name}[@]}\" )"
+
+  for _arg in "$@"; do
+    if [[ $_arg == '{}' ]]; then
+      _has_placeholder=true
+      break
+    fi
+  done
+
+  for _name in "${_installed[@]}"; do
+    if (( ! ${_declared[(Ie)$_name]} )); then
+      echo "Removing undeclared $_label: $_name"
+      _cmd=()
+      if $_has_placeholder; then
+        for _arg in "$@"; do
+          if [[ $_arg == '{}' ]]; then
+            _cmd+=("$_name")
+          else
+            _cmd+=("$_arg")
+          fi
+        done
+      else
+        _cmd=("$@" "$_name")
+      fi
+      if ! "${_cmd[@]}"; then
+        had_errors=true
+      fi
+    fi
+  done
+}

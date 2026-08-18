@@ -5,31 +5,20 @@ echo "{{ template "week" . }} 󰯁 Setup skills"
 export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+{{ includeTemplate "script/reconcile" }}
+
 declared=()
 updateable=()
 installed=()
 cleanup_enabled=true
 had_errors=false
 
-if installed_json=$(skills list -g --json); then
-  if jq -e 'type == "array"' >/dev/null <<<"$installed_json"; then
-    if installed_output=$(jq -r '.[].path | split("/")[-1]' <<<"$installed_json"); then
-      installed=(${(f)installed_output})
-    else
-      print -u2 -- "Could not parse installed skills; skipping undeclared-skill cleanup"
-      cleanup_enabled=false
-      had_errors=true
-    fi
-  else
-    print -u2 -- "skills list returned invalid JSON; skipping undeclared-skill cleanup"
-    cleanup_enabled=false
-    had_errors=true
-  fi
-else
-  print -u2 -- "Could not list installed skills; skipping undeclared-skill cleanup"
-  cleanup_enabled=false
-  had_errors=true
-fi
+json_names_load installed \
+  'skills list -g --json' \
+  'type == "array"' \
+  '.[].path | split("/")[-1]' \
+  cleanup_enabled \
+  'skills'
 
 skills_state_dir=$(mktemp -d) || exit 1
 trap 'rm -rf "$skills_state_dir"' EXIT
@@ -205,16 +194,9 @@ fi
   {{ end }}
 {{- end }}
 
-if $cleanup_enabled; then
-  for name in "${installed[@]}"; do
-    if (( ! ${declared[(Ie)$name]} )); then
-      echo "Removing undeclared skill: $name"
-      if ! skills remove "$name" -g --yes; then
-        had_errors=true
-      fi
-    fi
-  done
-fi
+remove_undeclared cleanup_enabled installed declared \
+  'skill' skills remove {} -g --yes
+
 
 if (( ${#updateable[@]} )); then
   if ! skills update -g "${updateable[@]}"; then
