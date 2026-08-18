@@ -24,10 +24,13 @@ Library/LaunchAgents/rclone.rpi.plist
 .config/rtk
 {{- end }}
 
+{{- if ne .host_env "iv" }}
+.claude*
+{{- end }}
+
 {{- if eq .host_env "ci" }}
 ./**/opencode
 .aider.conf.yml
-.claude*
 .codex
 .config/goose
 .config/rclone

@@ -1,9 +1,7 @@
 [packages.node]
 global = [
   "@actions/languageserver",
-  "@agentclientprotocol/claude-agent-acp",
   "@ansible/ansible-language-server",
-  "@anthropic-ai/claude-code",
   "@blowmage/cursor-agent-acp",
   "@earendil-works/pi-coding-agent",
   "@github/copilot",
@@ -27,6 +25,8 @@ global = [
   "typescript-language-server",
   "vscode-json-languageserver",
   "yaml-language-server",
+  { name = "@agentclientprotocol/claude-agent-acp", when.enabled.host_env = ["iv"] },
+  { name = "@anthropic-ai/claude-code", when.enabled.host_env = ["iv"] },
   { name = "@figma/code-connect", when.enabled.host_env = ["iv"] },
   { name = "@fission-ai/openspec", when.enabled.host_env = ["iv"] },
   { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },

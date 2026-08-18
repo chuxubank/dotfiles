@@ -1,7 +1,10 @@
 skills:
   agents:
     - amp
-    - claude-code
+    - name: claude-code
+      when:
+        enabled:
+          host_env: iv
     - codex
     - droid
     - gemini-cli

@@ -1,21 +1,35 @@
-{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions. */ -}}
+{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions.
+       Agents may be a plain name or a map with `name` plus optional `when`. */ -}}
 {{- $skill := .skill -}}
 {{- $allAgents := .skills.agents -}}
 {{- $agents := list -}}
-{{- range $agent := $allAgents -}}
-  {{- $enabled := includeTemplate "when/evaluate" (dict
-        "item" $skill
-        "values" (dict
-          "device_type" $.device_type
-          "host_env" $.host_env
-          "os" $.chezmoi.os
-          "roles" $.roles
-          "mem_gb" (dig "mem_gb" 0 $)
-          "disk_gb" (dig "disk_gb" 0 $)
-          "tool" $agent)
+{{- range $agentEntry := $allAgents -}}
+  {{- $agent := $agentEntry -}}
+  {{- $agentSpec := dict -}}
+  {{- if eq (kindOf $agentEntry) "map" -}}
+    {{- $agent = $agentEntry.name -}}
+    {{- $agentSpec = $agentEntry -}}
+  {{- end -}}
+  {{- $agentValues := dict
+        "device_type" $.device_type
+        "host_env" $.host_env
+        "os" $.chezmoi.os
+        "roles" $.roles
+        "mem_gb" (dig "mem_gb" 0 $)
+        "disk_gb" (dig "disk_gb" 0 $)
+        "tool" $agent -}}
+  {{- $agentEnabled := includeTemplate "when/evaluate" (dict
+        "item" $agentSpec
+        "values" $agentValues
         "os_version" (dig "os_version" "" $)) | fromJson -}}
-  {{- if $enabled -}}
-    {{- $agents = append $agents $agent -}}
+  {{- if $agentEnabled -}}
+    {{- $enabled := includeTemplate "when/evaluate" (dict
+          "item" $skill
+          "values" $agentValues
+          "os_version" (dig "os_version" "" $)) | fromJson -}}
+    {{- if $enabled -}}
+      {{- $agents = append $agents $agent -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- toJson $agents -}}
