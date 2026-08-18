@@ -1,16 +1,54 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup go"
 
 source "$HOME/.zshenv"
 export PATH="$GOBIN:$PATH"
 
+{{ includeTemplate "script/reconcile" }}
+
 GO_PACKAGES=(
 {{- template "package/list" (dict "ctx" . "path" (list "go")) }}
 )
+declared_go=()
+installed_go=()
+gup_json='[]'
+cleanup_enabled=true
+had_errors=false
 
 for pkg in "${GO_PACKAGES[@]}"; do
+  declared_go+=("${pkg%%@*}")
   go install "$pkg"
 done
 
-gup update
+gup_remove_import() {
+  local import_path=$1
+  local name
+  name=$(jq -r --arg p "$import_path" \
+    '.[] | select(.import_path == $p) | .name' <<<"$gup_json")
+  if [[ -z $name ]]; then
+    print -u2 -- "Could not resolve gup binary for $import_path"
+    return 1
+  fi
+  gup remove --force "$name"
+}
+
+if command -v gup >/dev/null; then
+  json_names_load installed_go \
+    'gup list --json' \
+    'type == "array"' \
+    '.[].import_path' \
+    cleanup_enabled \
+    'go binaries' \
+    gup_json
+  remove_undeclared cleanup_enabled installed_go declared_go \
+    'go binary' gup_remove_import
+  gup update
+else
+  print -u2 -- "gup is not installed; skipping undeclared go cleanup"
+  had_errors=true
+fi
+
+if $had_errors; then
+  exit 1
+fi

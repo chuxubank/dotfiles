@@ -1,0 +1,6 @@
+{{- /* package/lines — Unquoted package names, one per line.
+       Input: dict "ctx" $ "path" (list ...)
+       For POSIX scripts that cannot use %q array literals. */ -}}
+{{- range $name := includeTemplate "package/select" . | fromJson }}
+{{ $name }}
+{{- end -}}

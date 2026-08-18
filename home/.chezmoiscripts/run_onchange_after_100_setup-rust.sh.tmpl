@@ -1,6 +1,8 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup rust"
+
+{{ includeTemplate "script/reconcile" }}
 
 rustup default stable
 
@@ -9,6 +11,13 @@ rustup update stable
 rustup component add rust-analyzer
 
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "rust" "cargo")) | fromJson }}
+declared_cargo=(
+{{- template "package/list" (dict "ctx" . "path" (list "rust" "cargo")) }}
+)
+installed_cargo=()
+cleanup_enabled=true
+had_errors=false
+
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
 cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }} {{ $tool.name }}
@@ -17,4 +26,28 @@ cargo install {{ $tool }}
 {{- end }}
 {{- end }}
 
-cargo install-update -a -g
+if command -v cargo >/dev/null; then
+  if listing=$(cargo install --list); then
+    installed_cargo=(${(f)$(awk '/^[^[:space:]]/ { print $1 }' <<<"$listing")})
+    installed_cargo=(${installed_cargo:#})
+  else
+    print -u2 -- "Could not list installed cargo crates; skipping undeclared cleanup"
+    cleanup_enabled=false
+    had_errors=true
+  fi
+else
+  print -u2 -- "cargo is not installed; skipping undeclared cleanup"
+  cleanup_enabled=false
+  had_errors=true
+fi
+
+remove_undeclared cleanup_enabled installed_cargo declared_cargo \
+  'cargo crate' cargo uninstall
+
+if command -v cargo-install-update >/dev/null; then
+  cargo install-update -a -g
+fi
+
+if $had_errors; then
+  exit 1
+fi

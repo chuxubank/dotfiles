@@ -2,11 +2,42 @@
 
 echo "{{ template "week" . }} 󰯁 Install packages"
 
+{{ includeTemplate "script/reconcile-sh" }}
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi"
+had_errors=false
+
+sync_open_packages() {
+	_state=$1
+	_label=$2
+	_remove=$3
+	_stale=$(printf '%s\n' "$_desired" | stale_managed "$_state")
+	if [ -n "$_stale" ]; then
+		while IFS= read -r _pkg || [ -n "$_pkg" ]; do
+			[ -z "$_pkg" ] && continue
+			echo "Removing undeclared $_label: $_pkg"
+			if ! $_remove "$_pkg"; then
+				echo "Could not remove $_label $_pkg" >&2
+				had_errors=true
+			fi
+		done <<STALE
+$_stale
+STALE
+	fi
+	if [ "$had_errors" = false ]; then
+		printf '%s\n' "$_desired" | write_managed_state "$_state"
+	fi
+}
+
 {{ if eq .chezmoi.os "android" -}}
+_desired='{{ template "package/lines" (dict "ctx" . "path" (list "termux" "repo")) }}
+{{ template "package/lines" (dict "ctx" . "path" (list "termux" "pkg")) }}'
 pkg install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "termux" "repo")) }}
 pkg install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "termux" "pkg")) }}
+termux_remove() { pkg uninstall -y "$1"; }
+sync_open_packages "$STATE_DIR/packages.termux" "termux package" termux_remove
 
 {{ else if eq .chezmoi.os "darwin" -}}
 brew bundle --quiet --force-cleanup --file=- <<EOF
@@ -15,15 +46,27 @@ EOF
 
 {{ else if eq .chezmoi.os "linux" }}
 {{ if lookPath "apt-get" }}
+_desired='{{ template "package/lines" (dict "ctx" . "path" (list "apt" "pkg")) }}'
 sudo apt-get update -y
 sudo apt-get install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "apt" "pkg")) }}
+apt_remove() { sudo apt-get remove -y "$1"; }
+sync_open_packages "$STATE_DIR/packages.apt" "apt package" apt_remove
 
 {{ else if lookPath "pacman" }}
+_desired='{{ template "package/lines" (dict "ctx" . "path" (list "pacman" "core")) }}
+{{ template "package/lines" (dict "ctx" . "path" (list "pacman" "extra")) }}'
 sudo pacman -Syu --noconfirm \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "core")) }} \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "extra")) }}
+pacman_remove() { sudo pacman -Rns --noconfirm "$1"; }
+sync_open_packages "$STATE_DIR/packages.pacman" "pacman package" pacman_remove
 {{ end -}}
 
 {{ else if eq .chezmoi.os "windows" }}
 {{ end -}}
+
+if [ "$had_errors" = true ]; then
+	exit 1
+fi
+

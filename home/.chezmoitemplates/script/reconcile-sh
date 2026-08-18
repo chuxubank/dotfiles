@@ -1,0 +1,33 @@
+{{- /* script/reconcile-sh — POSIX helpers for open-world package managers
+       (apt, pacman, termux). Brew already owns cleanup via brew bundle.
+
+       The live dpkg/pacman inventory is the whole OS, so undeclared cleanup
+       can only see names this script previously wrote to a state file.
+
+         stale_managed STATE_FILE
+           Desired names on stdin (one per line). Prints names that were in
+           STATE_FILE last time and are no longer desired.
+
+         write_managed_state STATE_FILE
+           Writes stdin (desired names) to STATE_FILE. */ -}}
+stale_managed() {
+	_state=$1
+	_desired=$(cat)
+	if [ ! -f "$_state" ]; then
+		return 0
+	fi
+	while IFS= read -r _pkg || [ -n "$_pkg" ]; do
+		[ -z "$_pkg" ] && continue
+		if printf '%s\n' "$_desired" | grep -Fxq "$_pkg"; then
+			continue
+		fi
+		printf '%s\n' "$_pkg"
+	done <"$_state"
+}
+
+write_managed_state() {
+	_state=$1
+	_dir=$(dirname "$_state")
+	mkdir -p "$_dir"
+	cat >"$_state"
+}

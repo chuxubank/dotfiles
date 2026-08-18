@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup uv"
 
@@ -11,31 +11,37 @@ if ! brew list uv &>/dev/null; then
 fi
 {{- end }}
 
-UV_TOOL_LIST="$(uv tool list --show-with --show-extras --show-python 2>/dev/null || true)"
+{{ includeTemplate "script/reconcile" }}
+
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
-DESIRED_UV_TOOLS=(
+declared_uv=(
 {{- template "package/list" (dict "ctx" . "path" (list "python" "tools")) }}
 )
+installed_uv=()
+cleanup_enabled=true
+had_errors=false
 
-installed_uv_tools() {
-    awk 'NF && $1 != "-" { print $1 }' <<<"$UV_TOOL_LIST"
+load_installed_uv() {
+    local listing
+    if ! listing=$(uv tool list --show-with --show-extras --show-python); then
+        print -u2 -- "Could not list installed uv tools; skipping undeclared cleanup"
+        cleanup_enabled=false
+        had_errors=true
+        installed_uv=()
+        UV_TOOL_LIST=""
+        return 1
+    fi
+    UV_TOOL_LIST=$listing
+    installed_uv=(${(f)$(awk 'NF && $1 != "-" { print $1 }' <<<"$listing")})
+    installed_uv=(${installed_uv:#})
 }
 
 uv_tool_installed() {
     local tool_name="$1"
-    installed_uv_tools | grep -Fqx "$tool_name"
+    (( ${installed_uv[(Ie)$tool_name]} ))
 }
 
-uv_tool_desired() {
-    local tool_name="$1"
-    local desired_tool
-    for desired_tool in "${DESIRED_UV_TOOLS[@]}"; do
-        if [[ "$desired_tool" == "$tool_name" ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
+load_installed_uv || true
 
 uv_tool_header() {
     local tool_name="$1"
@@ -130,13 +136,6 @@ print_uv_tool_config_changes() {
     fi
 }
 
-while IFS= read -r installed_tool; do
-    if [[ -n "$installed_tool" ]] && ! uv_tool_desired "$installed_tool"; then
-        echo "Uninstall uv tool: $installed_tool"
-        uv tool uninstall "$installed_tool"
-    fi
-done < <(installed_uv_tools)
-
 {{ range $tool := $tools }}
   {{ if eq (kindOf $tool) "map" -}}
 {{- $withDeps := "" -}}
@@ -185,4 +184,12 @@ fi
   {{ end }}
 {{- end }}
 
+load_installed_uv || true
+remove_undeclared cleanup_enabled installed_uv declared_uv \
+  'uv tool' uv tool uninstall
+
 uv tool upgrade --all
+
+if $had_errors; then
+  exit 1
+fi

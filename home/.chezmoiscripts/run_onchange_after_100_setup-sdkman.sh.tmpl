@@ -1,6 +1,8 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup sdkman"
+
+{{ includeTemplate "script/reconcile" }}
 
 SDKMAN_INIT="$SDKMAN_DIR/bin/sdkman-init.sh"
 
@@ -14,6 +16,13 @@ source "$SDKMAN_INIT"
 sdk selfupdate
 
 {{- $items := includeTemplate "package/items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
+declared_sdk=(
+{{- template "package/list" (dict "ctx" . "path" (list "sdkman")) }}
+)
+installed_sdk=()
+cleanup_enabled=true
+had_errors=false
+
 {{- range $sdk := $items }}
 {{- if eq (kindOf $sdk) "map" }}
 sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
@@ -22,4 +31,48 @@ sdk install {{ $sdk }}
 {{- end }}
 {{- end }}
 
+sdk_uninstall_candidate() {
+  local cand=$1
+  local dir="$SDKMAN_DIR/candidates/$cand"
+  local ver
+  if [[ ! -d $dir ]]; then
+    return 0
+  fi
+  for ver in "$dir"/*(N); do
+    [[ ${ver:t} == current ]] && continue
+    [[ -d $ver ]] || continue
+    echo "Uninstall sdk $cand ${ver:t}"
+    sdk uninstall "$cand" "${ver:t}" || return 1
+  done
+}
+
+if [[ -d $SDKMAN_DIR/candidates ]]; then
+  installed_sdk=("$SDKMAN_DIR"/candidates/*(N:t))
+else
+  print -u2 -- "Could not list installed sdkman candidates; skipping undeclared cleanup"
+  cleanup_enabled=false
+  had_errors=true
+fi
+
+remove_undeclared cleanup_enabled installed_sdk declared_sdk \
+  'sdkman candidate' sdk_uninstall_candidate
+
+if $cleanup_enabled; then
+  for cand in "${declared_sdk[@]}"; do
+    current=$(readlink "$SDKMAN_DIR/candidates/$cand/current" 2>/dev/null) || continue
+    for ver in "$SDKMAN_DIR/candidates/$cand"/*(N); do
+      [[ ${ver:t} == current || ${ver:t} == $current ]] && continue
+      [[ -d $ver ]] || continue
+      echo "Uninstall extra sdk $cand ${ver:t}"
+      if ! sdk uninstall "$cand" "${ver:t}"; then
+        had_errors=true
+      fi
+    done
+  done
+fi
+
 sdk flush
+
+if $had_errors; then
+  exit 1
+fi

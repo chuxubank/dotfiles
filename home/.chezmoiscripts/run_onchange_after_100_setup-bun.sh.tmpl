@@ -9,13 +9,17 @@ PATH="$BUN_INSTALL/bin:$PATH"
 curl -fsSL https://bun.sh/install | bash
 {{- end }}
 
-BUN_GLOBAL_LIST="$(bun pm ls -g 2>/dev/null || true)"
+{{ includeTemplate "script/reconcile" }}
+
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "node" "global")) | fromJson }}
-DESIRED_BUN_TOOLS=(
+declared_bun=(
 {{- template "package/list" (dict "ctx" . "path" (list "node" "global")) }}
 )
+installed_bun=()
+cleanup_enabled=true
+had_errors=false
 
-installed_bun_tools() {
+parse_bun_globals() {
     awk '
         /^[[:space:]]*[├└]── / {
             line = $0
@@ -31,24 +35,28 @@ installed_bun_tools() {
             }
             print line
         }
-    ' <<<"$BUN_GLOBAL_LIST"
+    '
+}
+
+load_installed_bun() {
+    local listing
+    if ! listing=$(bun pm ls -g); then
+        print -u2 -- "Could not list installed bun tools; skipping undeclared cleanup"
+        cleanup_enabled=false
+        had_errors=true
+        installed_bun=()
+        return 1
+    fi
+    installed_bun=(${(f)$(parse_bun_globals <<<"$listing")})
+    installed_bun=(${installed_bun:#})
 }
 
 bun_tool_installed() {
     local tool_name="$1"
-    installed_bun_tools | grep -Fqx "$tool_name"
+    (( ${installed_bun[(Ie)$tool_name]} ))
 }
 
-bun_tool_desired() {
-    local tool_name="$1"
-    local desired_tool
-    for desired_tool in "${DESIRED_BUN_TOOLS[@]}"; do
-        if [[ "$desired_tool" == "$tool_name" ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
+load_installed_bun || true
 
 bun upgrade
 
@@ -70,14 +78,9 @@ fi
 {{- end }}
 {{- end }}
 
-BUN_GLOBAL_LIST="$(bun pm ls -g 2>/dev/null || true)"
-
-while IFS= read -r installed_tool; do
-    if [[ -n "$installed_tool" ]] && ! bun_tool_desired "$installed_tool"; then
-        echo "Uninstall bun tool: $installed_tool"
-        bun remove -g "$installed_tool"
-    fi
-done < <(installed_bun_tools)
+load_installed_bun || true
+remove_undeclared cleanup_enabled installed_bun declared_bun \
+  'bun tool' bun remove -g
 
 bun update -g --latest
 
@@ -86,3 +89,7 @@ bunx playwright install chromium
 {{- if lookPath "openspec" }}
 openspec completion install
 {{- end }}
+
+if $had_errors; then
+  exit 1
+fi
