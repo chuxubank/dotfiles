@@ -1,0 +1,10 @@
+{{- /* Emit defaults write commands (and optional app launches) for this host. */ -}}
+{{- range $item := includeTemplate "defaults/items" . | fromJson }}
+# {{ $item.name }} ({{ $item.domain }})
+{{- range $key := keys $item.keys | sortAlpha }}
+defaults write {{ $item.domain | quote }} {{ $key | quote }} {{ includeTemplate "defaults/value" (index $item.keys $key) }}
+{{- end }}
+{{- if $item.open }}
+pgrep -qx {{ $item.open | quote }} || open -a {{ $item.open | quote }}
+{{- end }}
+{{ end -}}

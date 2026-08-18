@@ -1,0 +1,37 @@
+{{- /* Filter declared defaults by tool/when and unwrap per-key when specs.
+       Input: root context. Output: JSON list of {name,domain,keys,open}. */ -}}
+{{- $ctx := . -}}
+{{- $selected := list -}}
+{{- range $name := keys (default dict .defaults) | sortAlpha -}}
+  {{- $item := index $ctx.defaults $name -}}
+  {{- $enabled := true -}}
+  {{- if hasKey $item "tool" -}}
+    {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $item.tool "require" true) $ctx) | fromJson -}}
+  {{- end -}}
+  {{- if and $enabled (hasKey $item "when") -}}
+    {{- $enabled = includeTemplate "when/context" (merge (dict "item" $item) $ctx) | fromJson -}}
+  {{- end -}}
+  {{- if $enabled -}}
+    {{- $keys := dict -}}
+    {{- range $key, $val := dig "keys" (dict) $item -}}
+      {{- $keyEnabled := true -}}
+      {{- $value := $val -}}
+      {{- if and (eq (kindOf $val) "map") (hasKey $val "when") -}}
+        {{- $keyEnabled = includeTemplate "when/context" (merge (dict "item" $val) $ctx) | fromJson -}}
+        {{- if not (hasKey $val "value") -}}
+          {{- fail (printf "defaults %s.%s: when spec missing value" $name $key) -}}
+        {{- end -}}
+        {{- $value = index $val "value" -}}
+      {{- end -}}
+      {{- if $keyEnabled -}}
+        {{- $_ := set $keys $key $value -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $selected = append $selected (dict
+          "name" $name
+          "domain" $item.domain
+          "keys" $keys
+          "open" (dig "open" "" $item)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $selected | toJson -}}

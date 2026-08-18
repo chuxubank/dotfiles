@@ -1,0 +1,7 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+set -eu
+
+echo "󰯁 Apply macOS defaults"
+{{ includeTemplate "defaults/apply" . -}}
+{{ end -}}

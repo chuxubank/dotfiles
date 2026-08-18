@@ -1,0 +1,21 @@
+{{- /* Emit a `defaults write` type flag and arguments for one YAML value. */ -}}
+{{- $kind := kindOf . -}}
+{{- if eq $kind "bool" -}}
+-bool {{ . }}
+{{- else if or (eq $kind "int") (eq $kind "int64") -}}
+-int {{ . }}
+{{- else if or (eq $kind "float64") (eq $kind "float32") -}}
+{{- if eq (float64 (int .)) . -}}
+-int {{ . | int }}
+{{- else -}}
+-float {{ . }}
+{{- end -}}
+{{- else if eq $kind "string" -}}
+-string {{ . | quote }}
+{{- else if eq $kind "slice" -}}
+-array{{- range . }} {{ . | quote }}{{ end }}
+{{- else if eq $kind "map" -}}
+-dict{{- range $key, $val := . }} {{ $key | quote }} {{ $val | quote }}{{ end }}
+{{- else -}}
+  {{- fail (printf "defaults/value: unsupported kind %s" $kind) -}}
+{{- end -}}

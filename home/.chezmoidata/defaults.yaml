@@ -1,0 +1,88 @@
+# Managed macOS defaults. Applied via defaults write (cfprefsd), not by
+# templating ~/Library/Preferences/*.plist — those files are binary and the
+# daemon overwrites them if you write the dest directly.
+#
+# A key whose value is a map with `when` + `value` is gated like packages.
+# `open` launches the app if it is not already running.
+defaults:
+  finder:
+    domain: com.apple.finder
+    keys:
+      RelativeDates: false
+
+  maps:
+    domain: com.apple.Maps
+    keys:
+      AppleLanguages: [zh_CN]
+
+  itsycal:
+    domain: com.mowglii.ItsycalApp
+    keys:
+      ShowDayOfWeekInIcon: true
+      ShowEventDays: 7
+      ShowEventPopoverOnHover: true
+      ShowLocation: true
+      ShowMonthInIcon: true
+      ShowWeeks: true
+
+  stats:
+    domain: eu.exelban.Stats.plist
+    keys:
+      Battery_state: false
+      CPU_line_chart_label: true
+      CPU_widget: line_chart
+      Disk_removable: true
+      Disk_widget: bar_chart
+      GPU_line_chart_label: true
+      GPU_state:
+        when:
+          enabled:
+            roles: [llm]
+        value: true
+      GPU_widget: line_chart
+      LaunchAtLoginNext: true
+      Network_widget: speed
+      RAM_bar_chart_label: true
+      RAM_combinedProcesses: true
+      RAM_processes: 15
+      RAM_splitValue: true
+      RAM_widget: bar_chart
+      SSD_bar_chart_label: true
+
+  raycast:
+    domain: com.raycast.macos
+    keys:
+      raycastGlobalHotkey: Command-49
+      raycastPreferredWindowMode: default
+      raycastShouldFollowSystemAppearance: true
+      raycastWindowEscapeKeyBehavior: 0
+      raycastWindowPresentationMode: 0
+      popToRootTimeout: 90
+      useHyperKeyIcon: false
+      showFavoritesInCompactMode: true
+      keepWindowVisibleOnResignKey: false
+      raycastAlternativeEscape: false
+      mainWindow_isMonitoringGlobalHotkeys: true
+      navigationCommandStyleIdentifierKey: macos
+      enforcedInputSourceIDOnOpen: com.apple.keylayout.ABC
+      quicklinks_enableQuickSearch: true
+      quicklinks_enableAutoFillLink: false
+      mainWindowCaptureCopyToClipboard: true
+      mainWindowCaptureOpenQuickAccessOverlay: false
+      mainWindowCaptureShowInFinder: false
+      faviconProvider: legacy
+      showGettingStartedLink: false
+      commandsPreferencesExpandedItemIds:
+        - builtin_package_windowManagement
+        - builtin_package_scriptCommands
+
+  talkify:
+    domain: com.tgomareli.Talkify
+    tool: talkify
+    open: Talkify
+    keys:
+      recognitionLocale: zh_CN
+      recognitionLocaleSecondary: en_US
+      dictationInsertionDestination: insert
+      dictationHistoryEnabled: false
+      dictationSoundsEnabled: true
