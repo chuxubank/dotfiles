@@ -5,11 +5,14 @@
 */ -}}
 {{- $platforms := default (list "android" "ios") (index . "platforms") -}}
 {{- $types := default (list "simulator" "usb" "wifi") (index . "types") -}}
+{{- $devices := list -}}
+{{- if eq .chezmoi.os "darwin" -}}
 {{- $helper := joinPath .chezmoi.sourceDir "bin/executable_mobile-device-list" -}}
-{{- $devices := output "zsh" "-f" $helper
+{{- $devices = output "zsh" "-f" $helper
       "--platforms" (join "," $platforms)
       "--types" (join "," $types)
       "--format" "json" | fromJson -}}
+{{- end -}}
 {{- $platformNames := dict "android" "Android" "ios" "iOS" -}}
 {{- if $devices -}}
 # @raycast.argument{{ .argument }} { "type": "dropdown", "placeholder": "Device", "optional": true, "data": [{{ range $index, $device := $devices }}{{ if $index }}, {{ end }}{"title": {{ printf "%s: %s" (index $platformNames $device.platform) $device.title | toJson }}, "value": {{ printf "%s:%s" $device.kind $device.id | toJson }}}{{ end }}] }
