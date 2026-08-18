@@ -13,6 +13,7 @@ taps = [
   "theseal/ssh-askpass",
   "vjeantet/tap",
   { name = "atlassian/acli", when.enabled.host_env = ["aa"] },
+  { name = "tornikegomareli/talkify", url = "https://github.com/tornikegomareli/Talkify", trusted = { cask = "talkify" }, tool = "talkify" },
 ]
 brews = [
   "achannarasappa/tap/ticker",
@@ -288,6 +289,7 @@ casks = [
   { name = "slack", when.enabled.host_env = ["aa"] },
   { name = "spotify", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "steam", when.enabled = { host_env = ["personal"], roles = ["game"] } },
+  { name = "tornikegomareli/talkify/talkify", tool = "talkify" },
   { name = "warp", when.enabled.disk_gb.min = 256 },
   { name = "wechat", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "wechatwork", when.enabled.host_env = ["aa"] },

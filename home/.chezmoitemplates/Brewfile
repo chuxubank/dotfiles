@@ -1,7 +1,7 @@
 {{- $taps := includeTemplate "package/items" (dict "ctx" . "path" (list "darwin" "taps")) | fromJson -}}
 {{ range $tap := $taps -}}
 {{ if eq (kindOf $tap) "map" -}}
-tap {{ $tap.name | quote }}
+tap {{ $tap.name | quote }}{{ if hasKey $tap "url" }}, {{ $tap.url | quote }}{{ end }}{{ if hasKey $tap "trusted" }}, trusted: {{ if eq (kindOf $tap.trusted) "bool" }}{{ $tap.trusted }}{{ else }}{{ $tap.trusted | toJson }}{{ end }}{{ end }}
 {{ else -}}
 tap {{ $tap | quote }}
 {{ end -}}
@@ -25,6 +25,7 @@ brew {{ $brew | quote }}
 cask {{ $cask.name | quote }}
 {{- range $key, $value := $cask -}}
 {{- if eq $key "args" }}, args: {{ $value | toJson }}{{ end -}}
+{{- if eq $key "trusted" }}, trusted: {{ if eq (kindOf $value) "bool" }}{{ $value }}{{ else }}{{ $value | toJson }}{{ end }}{{ end -}}
 {{- end }}
 {{ else -}}
 cask {{ $cask | quote }}

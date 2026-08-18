@@ -1,0 +1,11 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "talkify") .) | fromJson -}}
+#!/bin/zsh
+# ~/Library/Preferences/com.tgomareli.Talkify.plist
+defaults write com.tgomareli.Talkify recognitionLocale -string "zh_CN"
+defaults write com.tgomareli.Talkify recognitionLocaleSecondary -string "en_US"
+defaults write com.tgomareli.Talkify dictationInsertionDestination -string "insert"
+defaults write com.tgomareli.Talkify dictationHistoryEnabled -bool false
+defaults write com.tgomareli.Talkify dictationSoundsEnabled -bool true
+
+open -a Talkify
+{{- end }}

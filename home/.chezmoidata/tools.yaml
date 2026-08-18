@@ -17,3 +17,13 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
+  talkify:
+    when:
+      enabled:
+        host_env: [personal]
+        os:
+          type: darwin
+          version: ">=26"
+    remove:
+      - "Library/Application Support/Talkify/**"
+
