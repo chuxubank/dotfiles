@@ -4,8 +4,8 @@
 set -eu
 
 if ! command -v rtk >/dev/null 2>&1; then
-  echo "󰯁 Skip RTK agent integrations: rtk is not installed"
-  exit 0
+        echo "󰯁 Skip RTK agent integrations: rtk is not installed"
+        exit 0
 fi
 
 echo "󰯁 Setup RTK agent integrations"
@@ -15,7 +15,5 @@ rtk init --global --codex
 rtk init --global --gemini --auto-patch
 rtk init --global --opencode
 rtk init --global --agent pi
-{{- if eq .host_env "aa" }}
 rtk init --global --agent cursor
-{{- end }}
 {{- end }}
