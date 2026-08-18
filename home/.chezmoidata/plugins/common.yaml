@@ -12,8 +12,7 @@ plugins:
         codex: sentry@sentry-plugin-marketplace
         grok: getsentry/plugin-grok
       when:
-        enabled:
-          host_env: iv
+        enabled: false
 
     - name: superpowers
       description: Superpowers skills and workflows
