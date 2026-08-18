@@ -14,6 +14,7 @@ global = [
   "@sourcegraph/amp",
   "@usebruno/cli",
   "@zed-industries/codex-acp",
+  "agent-device",
   "bash-language-server",
   "clawhub",
   "ctx7",

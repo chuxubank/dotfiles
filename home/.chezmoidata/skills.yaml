@@ -48,6 +48,9 @@ skills:
     - name: sim-use
       source: lycorp-jp/sim-use/skills
 
+    - name: agent-device
+      source: callstack/agent-device
+
     - name: ["cli-creator", "figma-implement-design"]
       source: openai/skills
       when:
