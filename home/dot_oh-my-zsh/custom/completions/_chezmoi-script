@@ -1,0 +1,44 @@
+#compdef chezmoi-script czs
+
+_chezmoi-script() {
+	local -a scripts
+	local source_dir scripts_dir rel short
+
+	source_dir=${$(chezmoi source-path 2>/dev/null)} || return 1
+	scripts_dir=$source_dir/.chezmoiscripts
+	[[ -d $scripts_dir ]] || return 1
+
+	scripts=()
+	for rel in $scripts_dir/**/run_*(N.); do
+		rel=${rel#$scripts_dir/}
+		short=${rel##*/}
+		short=${short%.tmpl}
+		short=${short%.sh}
+		short=${short#run_once_}
+		short=${short#run_onchange_}
+		short=${short#before_}
+		short=${short#after_}
+		short=${short##[0-9]#_}
+		scripts+=("$short:$rel" "$rel")
+	done
+
+	if (( CURRENT == 2 )); then
+		if [[ $PREFIX == -* ]]; then
+			_values 'option' \
+				'-l[list scripts]' \
+				'--list[list scripts]' \
+				'-n[print the matched source path]' \
+				'--dry-run[print the matched source path]' \
+				'-p[print the rendered script]' \
+				'--print[print the rendered script]' \
+				'-h[show help]' \
+				'--help[show help]'
+		else
+			_describe -t scripts 'chezmoi script' scripts
+		fi
+	elif (( CURRENT == 3 )) && [[ ${words[2]} == -* ]]; then
+		_describe -t scripts 'chezmoi script' scripts
+	fi
+}
+
+_chezmoi-script "$@"

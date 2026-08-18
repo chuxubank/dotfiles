@@ -1,0 +1,240 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'EOF'
+usage: chezmoi-script [option] [SCRIPT]
+       czs [option] [SCRIPT]
+
+Render and run one chezmoi script from .chezmoiscripts.
+
+SCRIPT may be a short name (setup-skills), a numbered stem
+(200_setup-skills), a basename, or a path relative to .chezmoiscripts.
+
+Options:
+  -l, --list    list scripts (default when SCRIPT is omitted)
+  -n, --dry-run print the matched source path and exit
+  -p, --print   print the rendered script instead of running it
+  -h, --help    show this help
+EOF
+}
+
+die() {
+  printf '%s\n' "$*" >&2
+  exit 1
+}
+
+scripts_dir=
+script_rel() {
+  printf '%s\n' "${1#"$scripts_dir"/}"
+}
+
+script_stem() {
+  _base=${1##*/}
+  _base=${_base%.tmpl}
+  _base=${_base%.sh}
+  case $_base in
+    run_once_*) _base=${_base#run_once_} ;;
+    run_onchange_*) _base=${_base#run_onchange_} ;;
+  esac
+  case $_base in
+    before_*) _base=${_base#before_} ;;
+    after_*) _base=${_base#after_} ;;
+  esac
+  printf '%s\n' "$_base"
+}
+
+script_short() {
+  _stem=$(script_stem "$1")
+  while :
+  do
+    case $_stem in
+      [0-9]*) _stem=${_stem#?} ;;
+      *) break ;;
+    esac
+  done
+  case $_stem in
+    _*) _stem=${_stem#_} ;;
+  esac
+  printf '%s\n' "$_stem"
+}
+
+list_scripts() {
+  find "$scripts_dir" -type f -name 'run_*' | sort
+}
+
+score_script() {
+  _rel=$1
+  _query=$2
+  _base=${_rel##*/}
+  _stem=$(script_stem "$_rel")
+  _short=$(script_short "$_rel")
+
+  if [ "$_rel" = "$_query" ] ||
+    [ "$_base" = "$_query" ] ||
+    [ "${_base%.tmpl}" = "$_query" ]; then
+    printf '%s\n' 1
+    return
+  fi
+  if [ "$_stem" = "$_query" ] || [ "$_short" = "$_query" ]; then
+    printf '%s\n' 2
+    return
+  fi
+  case $_rel in
+    */"$_query")
+      printf '%s\n' 3
+      return
+      ;;
+  esac
+  case $_rel in
+    *"$_query"*)
+      printf '%s\n' 4
+      return
+      ;;
+  esac
+  case $_short in
+    *"$_query"*)
+      printf '%s\n' 4
+      return
+      ;;
+  esac
+  printf '%s\n' 0
+}
+
+print_script_line() {
+  printf '%-28s  %s\n' "$(script_short "$1")" "$1"
+}
+
+mode=run
+query=
+
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    -l | --list)
+      mode=list
+      ;;
+    -n | --dry-run)
+      mode=dry-run
+      ;;
+    -p | --print)
+      mode=print
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      die "unknown option: $1"
+      ;;
+    *)
+      if [ -n "$query" ]; then
+        die "unexpected argument: $1"
+      fi
+      query=$1
+      ;;
+  esac
+  shift
+done
+
+if [ "$#" -gt 0 ]; then
+  if [ -n "$query" ]; then
+    die "unexpected argument: $1"
+  fi
+  query=$1
+  shift
+fi
+[ "$#" -eq 0 ] || die "unexpected argument: $1"
+
+command -v chezmoi >/dev/null || die "chezmoi is not on PATH"
+
+source_dir=$(chezmoi source-path) || die "could not resolve chezmoi source-path"
+scripts_dir=$source_dir/.chezmoiscripts
+[ -d "$scripts_dir" ] || die "missing $scripts_dir"
+
+if [ "$mode" = list ] || [ -z "$query" ]; then
+  list_scripts | while IFS= read -r abs; do
+    print_script_line "$(script_rel "$abs")"
+  done
+  exit 0
+fi
+
+if [ -f "$query" ]; then
+  case $query in
+    /*) abs=$query ;;
+    *) abs=$(pwd)/$query ;;
+  esac
+  rel=$(script_rel "$abs")
+else
+  best_rank=99
+  matches=
+  match_count=0
+  while IFS= read -r abs; do
+    rel=$(script_rel "$abs")
+    rank=$(score_script "$rel" "$query")
+    [ "$rank" -gt 0 ] || continue
+    if [ "$rank" -lt "$best_rank" ]; then
+      best_rank=$rank
+      matches=$rel
+      match_count=1
+    elif [ "$rank" -eq "$best_rank" ]; then
+      matches="$matches
+$rel"
+      match_count=$((match_count + 1))
+    fi
+  done <<EOF
+$(list_scripts)
+EOF
+
+  if [ "$match_count" -eq 0 ]; then
+    die "no chezmoi script matched: $query"
+  fi
+  if [ "$match_count" -gt 1 ]; then
+    printf 'ambiguous script %s:\n' "$query" >&2
+    printf '%s\n' "$matches" | while IFS= read -r rel; do
+      print_script_line "$rel" >&2
+    done
+    exit 1
+  fi
+  rel=$matches
+  abs=$scripts_dir/$rel
+fi
+
+if [ "$mode" = dry-run ]; then
+  printf '%s\n' "$rel"
+  exit 0
+fi
+
+if [ "${abs%.tmpl}" != "$abs" ]; then
+  rendered=$(chezmoi execute-template <"$abs") ||
+    die "failed to render $rel"
+else
+  rendered=$(cat "$abs")
+fi
+
+if [ "$mode" = print ]; then
+  printf '%s\n' "$rendered"
+  exit 0
+fi
+
+if [ -z "$(printf '%s' "$rendered" | tr -d '[:space:]')" ]; then
+  die "$rel rendered empty; it is probably not for this OS"
+fi
+
+first_line=$(printf '%s\n' "$rendered" | sed -n '/[^[:space:]]/ {p;q;}')
+case $first_line in
+  '#!'*)
+    ;;
+  *)
+    die "$rel has no shebang after rendering"
+    ;;
+esac
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$rendered" >"$tmp"
+chmod +x "$tmp"
+"$tmp"
