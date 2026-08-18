@@ -107,3 +107,9 @@ skills:
       when:
         enabled:
           host_env: iv
+
+    - name: ip-as-logo
+      source: s1dashu/ip-as-logo-skill
+
+    - name: photo-abstract-editorial
+      source: ZzzLc0405/photo-abstract-editorial
