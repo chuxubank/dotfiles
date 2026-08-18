@@ -51,8 +51,11 @@ load_installed_bun() {
         installed_bun=()
         return 1
     fi
-    installed_bun=(${(f)$(parse_bun_globals <<<"$listing")})
-    installed_bun=(${installed_bun:#})
+    installed_bun=()
+    local line
+    while IFS= read -r line || [[ -n $line ]]; do
+        [[ -n $line ]] && installed_bun+=("$line")
+    done < <(parse_bun_globals <<<"$listing")
 }
 
 bun_tool_installed() {

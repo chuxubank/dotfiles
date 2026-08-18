@@ -28,8 +28,11 @@ cargo install {{ $tool }}
 
 if command -v cargo >/dev/null; then
   if listing=$(cargo install --list); then
-    installed_cargo=(${(f)$(awk '/^[^[:space:]]/ { print $1 }' <<<"$listing")})
-    installed_cargo=(${installed_cargo:#})
+    installed_cargo=()
+    while IFS= read -r line || [[ -n $line ]]; do
+      [[ $line == [[:space:]]* || -z $line ]] && continue
+      installed_cargo+=("${line%% *}")
+    done <<<"$listing"
   else
     print -u2 -- "Could not list installed cargo crates; skipping undeclared cleanup"
     cleanup_enabled=false

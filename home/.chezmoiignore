@@ -16,6 +16,7 @@ Documents/WindowsPowerShell
 .wakeup
 Library
 .config/immersive-translate
+.config/raycast
 {{- else if ne .host_env "personal" }}
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}

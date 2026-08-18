@@ -32,8 +32,13 @@ load_installed_uv() {
         return 1
     fi
     UV_TOOL_LIST=$listing
-    installed_uv=(${(f)$(awk 'NF && $1 != "-" { print $1 }' <<<"$listing")})
-    installed_uv=(${installed_uv:#})
+    installed_uv=()
+    local line name
+    while IFS= read -r line || [[ -n $line ]]; do
+        [[ -z $line || $line == -* ]] && continue
+        name=${line%% *}
+        [[ -n $name ]] && installed_uv+=("$name")
+    done <<<"$listing"
 }
 
 uv_tool_installed() {
