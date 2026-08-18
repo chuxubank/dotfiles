@@ -1,0 +1,4 @@
+{{- /* package/lines-all — Unquoted unique names, one per line, unfiltered. */ -}}
+{{- range $name := includeTemplate "package/names-all" . | fromJson }}
+{{ $name }}
+{{- end -}}

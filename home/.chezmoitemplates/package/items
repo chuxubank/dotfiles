@@ -1,10 +1,16 @@
+{{- /* package/items — Enabled package entries for one path.
+       Maps with `ensure = "absent"` are omitted here and collected as
+       tombstones via package/names-all (open-world uninstall). */ -}}
 {{- $selected := list -}}
 {{- $list := .ctx -}}
 {{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}
 {{- range $package := $list -}}
 {{- $enabled := true -}}
 {{- if eq (kindOf $package) "map" -}}
-{{- if hasKey $package "tool" -}}
+{{- if eq (dig "ensure" "" $package) "absent" -}}
+  {{- $enabled = false -}}
+{{- end -}}
+{{- if and $enabled (hasKey $package "tool") -}}
   {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $package.tool "require" true) $.ctx) | fromJson -}}
 {{- end -}}
 {{- if and $enabled (hasKey $package "when") -}}
@@ -16,3 +22,4 @@
 {{- end -}}
 {{- end -}}
 {{- $selected | toJson -}}
+
