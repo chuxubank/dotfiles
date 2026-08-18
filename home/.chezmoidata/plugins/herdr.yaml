@@ -16,3 +16,11 @@ plugins:
         when:
           enabled:
             os: [darwin, linux]
+
+      - name: herdr-spreader
+        description: >-
+          Apply workspace layouts from YAML (tmuxp-style tabs and panes).
+        source: yuk1ty/herdr-spreader
+        when:
+          enabled:
+            os: [darwin, linux]

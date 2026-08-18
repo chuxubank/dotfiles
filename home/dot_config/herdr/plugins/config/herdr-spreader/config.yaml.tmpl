@@ -1,0 +1,28 @@
+{{- /* herdr-spreader layout. Source of truth: .chezmoidata/workspaces.yaml */ -}}
+workspaces:
+{{- range .workspaces }}
+  - name: {{ .name | quote }}
+{{- if and (hasKey . "focus") .focus }}
+    focus: true
+{{- end }}
+{{- if hasKey . "root" }}
+    root: {{ .root | quote }}
+{{- end }}
+{{- if hasKey . "env" }}
+    env:
+{{- range $k, $v := .env }}
+      {{ $k }}: {{ $v | quote }}
+{{- end }}
+{{- end }}
+    tabs:
+{{- range .tabs }}
+      - label: {{ .label | quote }}
+        cwd: {{ .cwd | quote }}
+        panes:
+{{- if and (hasKey . "focus") .focus }}
+          - focus: true
+{{- else }}
+          - {}
+{{- end }}
+{{- end }}
+{{- end }}

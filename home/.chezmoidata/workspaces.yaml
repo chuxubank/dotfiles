@@ -1,0 +1,14 @@
+# Declared workspaces. One entry is one Herdr workspace (and later one
+# Emacs activity). Tabs are project roots inside that workspace.
+#
+# cwd accepts ~ and absolute paths. relative paths resolve from the
+# workspace root when one is set.
+workspaces:
+  - name: emacs
+    focus: true
+    tabs:
+      - label: cat-emacs
+        cwd: ~/.config/cat-emacs
+        focus: true
+      - label: chezmoi
+        cwd: ~/.local/share/chezmoi
