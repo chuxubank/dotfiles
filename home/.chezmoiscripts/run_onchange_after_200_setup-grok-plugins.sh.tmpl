@@ -7,29 +7,147 @@ if ! command -v grok >/dev/null; then
   exit 0
 fi
 
+{{- $markets := dig "marketplaces" (list) (dig "grok" (dict) .plugins) }}
+{{- $plugins := includeTemplate "plugins/resolve" (merge (dict "tool" "grok") .) | fromJson }}
+
+declared_markets=({{- range $i, $m := $markets }}{{ if $i }} {{ end }}{{ $m.name | quote }}{{ end }})
+declared_plugins=({{- range $p := $plugins }}{{- if $p.enabled }} {{ $p.name | quote }}{{- end }}{{- end }})
+installed_markets=()
+installed_plugins=()
+market_json='[]'
+market_cleanup_enabled=true
+plugin_cleanup_enabled=true
 had_errors=false
-installed_json='[]'
-if list_json=$(grok plugin list --json); then
-  if jq -e 'type == "array"' >/dev/null <<<"$list_json"; then
-    installed_json=$list_json
+
+if installed_json=$(grok plugin list --json); then
+  if jq -e 'type == "array"' >/dev/null <<<"$installed_json"; then
+    if installed_output=$(jq -r '.[].name' <<<"$installed_json"); then
+      installed_plugins=(${(f)installed_output})
+    else
+      print -u2 -- "Could not parse installed grok plugins; skipping undeclared-plugin cleanup"
+      plugin_cleanup_enabled=false
+      had_errors=true
+    fi
+  else
+    print -u2 -- "grok plugin list returned invalid JSON; skipping undeclared-plugin cleanup"
+    plugin_cleanup_enabled=false
+    had_errors=true
   fi
+else
+  print -u2 -- "Could not list installed grok plugins; skipping undeclared-plugin cleanup"
+  plugin_cleanup_enabled=false
+  had_errors=true
 fi
 
-{{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "grok") .) | fromJson }}
+if list_json=$(grok plugin marketplace list --json); then
+  if jq -e 'type == "array"' >/dev/null <<<"$list_json"; then
+    market_json=$list_json
+    if market_output=$(jq -r '.[].name' <<<"$market_json"); then
+      installed_markets=(${(f)market_output})
+    else
+      print -u2 -- "Could not parse grok marketplaces; skipping undeclared-marketplace cleanup"
+      market_cleanup_enabled=false
+      had_errors=true
+    fi
+  else
+    print -u2 -- "grok plugin marketplace list returned invalid JSON; skipping undeclared-marketplace cleanup"
+    market_cleanup_enabled=false
+    had_errors=true
+  fi
+else
+  print -u2 -- "Could not list grok marketplaces; skipping undeclared-marketplace cleanup"
+  market_cleanup_enabled=false
+  had_errors=true
+fi
+
+# grok plugin marketplace remove rewrites ~/.claude/settings.json and
+# known_marketplaces.json when the source lives there. Leave those alone.
+marketplace_is_claude_owned() {
+  local name="$1"
+
+  if [[ -f "$HOME/.claude/settings.json" ]] &&
+    jq -e --arg name "$name" '.extraKnownMarketplaces[$name] != null' \
+      >/dev/null "$HOME/.claude/settings.json"; then
+    return 0
+  fi
+  if [[ -f "$HOME/.claude/plugins/known_marketplaces.json" ]] &&
+    jq -e --arg name "$name" 'has($name)' \
+      >/dev/null "$HOME/.claude/plugins/known_marketplaces.json"; then
+    return 0
+  fi
+  return 1
+}
+
+marketplace_is_present() {
+  local name="$1"
+  local source="$2"
+
+  if (( ${installed_markets[(Ie)$name]} )); then
+    return 0
+  fi
+  [[ -n "$source" ]] && jq -e --arg source "$source" \
+    'any(.[]; (.source.url // .source.path // "") == $source)' \
+    >/dev/null <<<"$market_json"
+}
+
+if $market_cleanup_enabled; then
+{{- range $m := $markets }}
+  name={{ $m.name | quote }}
+  source={{ $m.source | quote }}
+  if ! marketplace_is_present "$name" "$source"; then
+    echo "Add grok marketplace: $name"
+    if grok plugin marketplace add "$source"; then
+      installed_markets+=("$name")
+    else
+      print -u2 -- "Could not add grok marketplace $name"
+      had_errors=true
+    fi
+  fi
+{{- end }}
+fi
+
+{{- range $p := $plugins }}
 {{- if $p.enabled }}
 
-if ! jq -e --arg name {{ $p.name | quote }} 'any(.[]; .name == $name)' >/dev/null <<<"$installed_json"; then
-  echo "Install grok plugin: {{ $p.name }}"
+name={{ $p.name | quote }}
+if (( ! ${installed_plugins[(Ie)$name]} )); then
+  echo "Install grok plugin: $name"
   if grok plugin install {{ $p.source | quote }} --trust; then
-    installed_json=$(grok plugin list --json 2>/dev/null || print -r -- "$installed_json")
+    installed_plugins+=("$name")
   else
-    print -u2 -- "Could not install grok plugin {{ $p.name }}"
+    print -u2 -- "Could not install grok plugin $name"
+    plugin_cleanup_enabled=false
     had_errors=true
   fi
 fi
-grok plugin enable {{ $p.name | quote }} >/dev/null 2>&1 || true
+grok plugin enable "$name" >/dev/null 2>&1 || true
 {{- end }}
 {{- end }}
+
+if $plugin_cleanup_enabled; then
+  for name in "${installed_plugins[@]}"; do
+    if (( ! ${declared_plugins[(Ie)$name]} )); then
+      echo "Removing undeclared grok plugin: $name"
+      if ! grok plugin uninstall "$name" --confirm; then
+        had_errors=true
+      fi
+    fi
+  done
+fi
+
+if $market_cleanup_enabled; then
+  for name in "${installed_markets[@]}"; do
+    if (( ! ${declared_markets[(Ie)$name]} )); then
+      if marketplace_is_claude_owned "$name"; then
+        continue
+      fi
+      echo "Removing undeclared grok marketplace: $name"
+      if ! grok plugin marketplace remove "$name"; then
+        had_errors=true
+      fi
+    fi
+  done
+fi
 
 if $had_errors; then
   exit 1

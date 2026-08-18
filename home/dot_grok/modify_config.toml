@@ -27,10 +27,8 @@
 {{- $replace := dict
   "mcp_servers" $servers
   "plugins.enabled" $enabledPlugins
+  "marketplace.sources" $sources
 -}}
-{{- if gt (len $sources) 0 -}}
-  {{- $_ := set $replace "marketplace.sources" $sources -}}
-{{- end -}}
 
 {{ includeTemplate "config/merge" (dict
   "format" "toml"
