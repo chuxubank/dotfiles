@@ -39,6 +39,7 @@ Library/LaunchAgents/rclone.rpi.plist
 .gradle
 .pi
 .ssh
+AppData/Roaming/Zotero
 Library
 {{ .path.personal.pass }}
 

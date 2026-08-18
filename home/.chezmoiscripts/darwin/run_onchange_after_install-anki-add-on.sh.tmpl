@@ -2,9 +2,14 @@
 #!/bin/zsh
 
 {{ $scriptFile := joinPath .chezmoi.homeDir .path.tool.raycast "scripts/install-anki-add-on" -}}
+{{- if stat $scriptFile }}
 
 echo "󰯁 Install Anki add-on with {{ include $scriptFile | sha256sum }}"
 
 osascript {{ $scriptFile | quote }} "111623432,1771074083,2055492159"
+{{- else }}
+
+echo "󰯁 Skip Anki add-on: {{ $scriptFile }} is not installed yet"
+{{- end }}
 
 {{ end -}}

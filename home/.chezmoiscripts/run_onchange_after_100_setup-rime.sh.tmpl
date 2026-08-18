@@ -1,6 +1,10 @@
 #!/bin/sh
 
 {{- $plum_dir :=  joinPath .chezmoi.homeDir .path.tool.plum }}
+{{- if not (stat $plum_dir) }}
+
+echo "󰯁 Skip rime: {{ $plum_dir }} is not installed yet"
+{{- else }}
 
 {{- if eq .chezmoi.os "darwin" }}
 echo "󰯁 Update librime for Emacs usage"
@@ -14,3 +18,4 @@ echo "󰯁 Update rime with {{ output "git" "-C" $plum_dir "rev-parse" "HEAD" }}
 export rime_dir=""
 bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/full
 bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/config:schema=flypy
+{{- end }}

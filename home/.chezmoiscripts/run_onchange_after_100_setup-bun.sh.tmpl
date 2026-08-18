@@ -40,6 +40,10 @@ parse_bun_globals() {
 
 load_installed_bun() {
     local listing
+    if [[ ! -f $BUN_INSTALL/install/global/package.json ]]; then
+        installed_bun=()
+        return 0
+    fi
     if ! listing=$(bun pm ls -g); then
         print -u2 -- "Could not list installed bun tools; skipping undeclared cleanup"
         cleanup_enabled=false

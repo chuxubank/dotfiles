@@ -119,7 +119,7 @@ encryption = "gpg"
 {{- else if eq $os "windows" }}
 # windows
     gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
-	zotero = {{- joinPath (env "APPDATA") "Zotero" "Zotero" | quote }}
+	zotero = {{- joinPath "AppData" "Roaming" "Zotero" "Zotero" | quote }}
 {{- else if eq $os "android" }}
 # android
     usr = "/data/data/com.termux/files/usr"
