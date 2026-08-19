@@ -3,3 +3,10 @@ onboarding = false
 [theme]
 name = "gruvbox"
 auto_switch = true
+
+[[keys.command]]
+key = "prefix+shift+h"
+type = "plugin_action"
+command = "heeler.pair"
+description = "Pair Heeler"
+

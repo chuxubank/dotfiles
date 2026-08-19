@@ -1,0 +1,17 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+
+echo "{{ template "week" . }} Enable Remote Login for Heeler"
+
+# Heeler reaches herdr over SSH. macOS Remote Login is the OpenSSH server.
+if launchctl print system/com.openssh.sshd 2>/dev/null | grep -q 'state = running'; then
+  exit 0
+fi
+
+if sudo -n systemsetup -setremotelogin on >/dev/null 2>&1; then
+  echo "Remote Login enabled"
+  exit 0
+fi
+
+print -u2 -- "Heeler needs Remote Login. Enable System Settings > General > Sharing > Remote Login, or: sudo systemsetup -setremotelogin on"
+{{ end -}}
