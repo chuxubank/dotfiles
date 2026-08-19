@@ -3,10 +3,12 @@ skills:
     - amp
     - claude-code
     - codex
+    - cursor
     - droid
     - gemini-cli
     - goose
     - github-copilot
+    - grok
     - kimi-code-cli
     - kiro-cli
     - opencode
@@ -83,6 +85,12 @@ skills:
       when:
         enabled:
           host_env: iv
+
+    - name: grok-build-subagent
+      source: chuxubank/skills
+      when:
+        enabled:
+          tool: [codex, cursor, grok]
 
     - name:
         - agp-9-upgrade
