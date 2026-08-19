@@ -2,10 +2,13 @@ name: CI
 
 on:
   push:
+    branches:
+      - chezmoi
   pull_request:
 
 jobs:
   clone-and-install:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
