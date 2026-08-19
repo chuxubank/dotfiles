@@ -50,6 +50,8 @@ jobs:
         with:
           path: |
             ~/.local/share/cargo/bin/
+            ~/.local/share/cargo/.crates.toml
+            ~/.local/share/cargo/.crates2.json
             ~/.local/share/cargo/registry/index/
             ~/.local/share/cargo/registry/cache/
             ~/.local/share/cargo/git/db/

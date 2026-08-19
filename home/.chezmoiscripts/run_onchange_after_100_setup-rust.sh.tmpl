@@ -39,18 +39,36 @@ cargo_crate_installed() {
   (( ${installed_cargo[(Ie)$crate]} ))
 }
 
+# CI restores CARGO_HOME/bin without .crates.toml, so `cargo install --list`
+# misses crates whose binaries are already on disk. Treat that as installed.
+install_cargo_crate() {
+  local crate="$1"
+  shift
+  local output
+  if output=$(cargo install "$@" "$crate" 2>&1); then
+    print -- "$output"
+    return 0
+  fi
+  print -- "$output"
+  if [[ $output == *"already exists in destination"* ]]; then
+    print -u2 -- "cargo crate $crate binaries already present; treating as installed"
+    return 0
+  fi
+  return 1
+}
+
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
 if ! cargo_crate_installed {{ $tool.name | quote }}; then
 echo "Install cargo crate: {{ $tool.name }}"
-if ! cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }} {{ $tool.name }}; then
+if ! install_cargo_crate {{ $tool.name | quote }}{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }}; then
   had_errors=true
 fi
 fi
 {{- else }}
 if ! cargo_crate_installed {{ $tool | quote }}; then
 echo "Install cargo crate: {{ $tool }}"
-if ! cargo install {{ $tool }}; then
+if ! install_cargo_crate {{ $tool | quote }}; then
   had_errors=true
 fi
 fi

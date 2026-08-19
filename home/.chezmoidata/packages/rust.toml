@@ -2,7 +2,7 @@
 cargo = [
   "cargo-update",
   { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git" },
-  "lukaj",
+  { name = "lukaj", when.enabled.os = "darwin" },
   "mermaid-rs-renderer",
   "rust-script",
 ]
