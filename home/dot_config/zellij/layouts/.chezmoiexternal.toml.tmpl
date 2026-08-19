@@ -1,10 +1,13 @@
 {{- /* One dest per workspaces.yaml entry: ~/.config/zellij/layouts/<name>.kdl
-       Same empty-url + filter trick as cursor project trust files. */ -}}
+       Same empty-url + filter trick as cursor project trust files.
+       Use .chezmoi.executable: CI install.sh execs chezmoi by absolute
+       path, so a bare "chezmoi" is missing from the filter PATH. */ -}}
 {{- $empty := eq .chezmoi.os "windows" | ternary "file://NUL" "file:///dev/null" -}}
+{{- $chezmoi := .chezmoi.executable -}}
 {{- range .workspaces }}
 [{{ printf "%s.kdl" .name | quote }}]
     type = "file"
     url = {{ $empty | quote }}
-    filter.command = "chezmoi"
+    filter.command = {{ $chezmoi | quote }}
     filter.args = ["execute-template", {{ printf "{{ includeTemplate \"zellij/layout-named\" (merge (dict \"workspaceName\" %q) .) }}" .name | quote }}]
 {{ end -}}
