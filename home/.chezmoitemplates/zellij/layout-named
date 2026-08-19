@@ -1,0 +1,9 @@
+{{- /* zellij/layout-named — render the workspace whose name is .workspaceName */ -}}
+{{- $name := .workspaceName -}}
+{{- $selected := list -}}
+{{- range .workspaces }}
+  {{- if eq .name $name }}
+    {{- $selected = append $selected . }}
+  {{- end }}
+{{- end -}}
+{{- includeTemplate "zellij/layout" (dict "workspaces" $selected) -}}

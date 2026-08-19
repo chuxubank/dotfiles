@@ -1,0 +1,22 @@
+{{- /* zellij/layout — dict "workspaces"
+       One Herdr workspace → one Zellij layout; Herdr tabs → Zellij tabs. */ -}}
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+{{- range $ws := .workspaces }}
+{{- range $i, $tab := $ws.tabs }}
+{{- $tabFocus := or (and (hasKey $tab "focus") $tab.focus) (and (hasKey $ws "focus") $ws.focus (eq $i 0)) }}
+
+    tab name={{ $tab.label | quote }}{{ if $tabFocus }} focus=true{{ end }} {
+{{- includeTemplate "zellij/panes" (dict "panes" $tab.panes "indent" "        ") }}
+    }
+{{- end }}
+{{- end }}
+}

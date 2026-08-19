@@ -17,12 +17,24 @@ workspaces:
     tabs:
 {{- range .tabs }}
       - label: {{ .label | quote }}
+{{- if hasKey . "cwd" }}
         cwd: {{ .cwd | quote }}
+{{- end }}
         panes:
+{{- range .panes }}
+          -
+{{- if hasKey . "split" }}
+            split: {{ .split }}
+{{- end }}
+{{- if hasKey . "cwd" }}
+            cwd: {{ .cwd | quote }}
+{{- end }}
+{{- if hasKey . "command" }}
+            command: {{ .command | quote }}
+{{- end }}
 {{- if and (hasKey . "focus") .focus }}
-          - focus: true
-{{- else }}
-          - {}
+            focus: true
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

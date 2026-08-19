@@ -1,0 +1,20 @@
+{{- /* zellij/panes — dict "panes" "indent"
+       One split_direction for the tab: `right` → vertical, `down` → horizontal.
+       Mixed splits in one tab flatten to the first declared split. */ -}}
+{{- $panes := .panes -}}
+{{- $indent := .indent -}}
+{{- $dir := "vertical" -}}
+{{- range $panes }}
+  {{- if and (hasKey . "split") (eq .split "down") }}
+    {{- $dir = "horizontal" }}
+  {{- end }}
+{{- end }}
+{{- if le (len $panes) 1 }}
+{{- includeTemplate "zellij/pane" (dict "pane" (index $panes 0) "indent" $indent) -}}
+{{- else }}
+{{ $indent }}pane split_direction={{ $dir | quote }} {
+{{ range $panes -}}
+{{- includeTemplate "zellij/pane" (dict "pane" . "indent" (print $indent "    ")) -}}
+{{ end -}}
+{{ $indent }}}
+{{- end -}}
