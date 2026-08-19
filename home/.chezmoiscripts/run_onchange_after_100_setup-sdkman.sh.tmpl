@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Setup sdkman"
+echo "󰯁 Setup sdkman"
 
 {{ includeTemplate "script/reconcile" }}
 
@@ -12,8 +12,6 @@ if [ ! -s "$SDKMAN_INIT" ]; then
 fi
 
 source "$SDKMAN_INIT"
-
-sdk selfupdate
 
 {{- $items := includeTemplate "package/items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
 declared_sdk=(

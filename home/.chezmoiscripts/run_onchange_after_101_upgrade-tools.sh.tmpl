@@ -1,0 +1,83 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade tools"
+
+source "$HOME/.zshenv"
+export BUN_INSTALL="${BUN_INSTALL:-$HOME/{{ .path.tool.bun }}}"
+export PATH="$BUN_INSTALL/bin:${GOBIN:+$GOBIN:}${CARGO_HOME:+$CARGO_HOME/bin:}$HOME/.local/bin:$PATH"
+
+had_errors=false
+
+run_upgrade() {
+  local label=$1
+  shift
+  echo "Upgrade $label"
+  if ! "$@"; then
+    print -u2 -- "Could not upgrade $label"
+    had_errors=true
+  fi
+}
+
+if command -v brew >/dev/null; then
+  run_upgrade brew brew upgrade
+fi
+
+{{ if eq .chezmoi.os "android" -}}
+run_upgrade termux pkg upgrade -y
+{{ else if and (eq .chezmoi.os "linux") (lookPath "apt-get") -}}
+echo "Upgrade apt"
+if ! sudo apt-get update -y; then
+  print -u2 -- "Could not update apt"
+  had_errors=true
+elif ! sudo apt-get upgrade -y; then
+  print -u2 -- "Could not upgrade apt"
+  had_errors=true
+fi
+{{ else if and (eq .chezmoi.os "linux") (lookPath "pacman") -}}
+run_upgrade pacman sudo pacman -Syu --noconfirm
+{{ end -}}
+
+if command -v bun >/dev/null; then
+  run_upgrade bun bun upgrade
+  run_upgrade 'bun globals' bun update -g --latest
+  run_upgrade playwright bunx playwright install chromium
+fi
+
+if command -v uv >/dev/null; then
+  if ! command -v brew >/dev/null || ! brew list uv &>/dev/null; then
+    run_upgrade 'uv self' uv self update
+  fi
+  run_upgrade 'uv tools' uv tool upgrade --all
+fi
+
+if command -v gup >/dev/null; then
+  run_upgrade 'go binaries' gup update
+fi
+
+if command -v rustup >/dev/null; then
+  run_upgrade rustup rustup update stable
+fi
+if command -v cargo-install-update >/dev/null; then
+  run_upgrade cargo cargo install-update -a -g
+fi
+
+SDKMAN_DIR="${SDKMAN_DIR:-$HOME/{{ .path.tool.sdkman }}}"
+if [[ -s $SDKMAN_DIR/bin/sdkman-init.sh ]]; then
+  source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  run_upgrade sdkman sdk selfupdate
+fi
+
+echo "Upgrade emacs packages"
+upgrade_emacs() {
+{{ template "emacs/upgrade-packages.sh" . }}
+}
+if ! upgrade_emacs; then
+  print -u2 -- "Could not upgrade emacs packages"
+  had_errors=true
+fi
+
+if $had_errors; then
+  exit 1
+fi
+{{ end -}}

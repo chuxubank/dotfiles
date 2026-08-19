@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "{{ template "week" . }} 󰯁 Install packages"
+echo "󰯁 Install packages"
 
 {{ includeTemplate "script/reconcile-sh" }}
 
@@ -47,7 +47,7 @@ termux_remove() {
 sync_open_packages "$STATE_DIR/packages.termux" "termux package" termux_remove
 
 {{ else if eq .chezmoi.os "darwin" -}}
-brew bundle --quiet --force-cleanup --file=- <<EOF
+brew bundle --quiet --force-cleanup --no-upgrade --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
 
@@ -69,7 +69,7 @@ _desired='{{ template "package/lines" (dict "ctx" . "path" (list "pacman" "core"
 {{ template "package/lines" (dict "ctx" . "path" (list "pacman" "extra")) }}'
 _all='{{ template "package/lines-all" (dict "ctx" . "path" (list "pacman" "core")) }}
 {{ template "package/lines-all" (dict "ctx" . "path" (list "pacman" "extra")) }}'
-sudo pacman -Syu --noconfirm \
+sudo pacman -Sy --needed --noconfirm \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "core")) }} \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "extra")) }}
 pacman_remove() {

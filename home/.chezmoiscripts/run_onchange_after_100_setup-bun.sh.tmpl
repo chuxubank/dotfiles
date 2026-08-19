@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-echo "{{ template "week" . }} 󰯁 Setup bun"
+echo "󰯁 Setup bun"
 
 BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 PATH="$BUN_INSTALL/bin:$PATH"
@@ -65,8 +65,6 @@ bun_tool_installed() {
 
 load_installed_bun || true
 
-bun upgrade
-
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
 {{- $install := $tool.name }}
@@ -88,10 +86,6 @@ fi
 load_installed_bun || true
 remove_undeclared cleanup_enabled installed_bun declared_bun \
   'bun tool' bun remove -g
-
-bun update -g --latest
-
-bunx playwright install chromium
 
 {{- if lookPath "openspec" }}
 openspec completion install

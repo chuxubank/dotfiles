@@ -1,14 +1,10 @@
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Setup uv"
+echo "󰯁 Setup uv"
 
 {{- if not (lookPath "uv") }}
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source $HOME/.local/bin/env
-{{- else }}
-if ! brew list uv &>/dev/null; then
-    uv self update | true
-fi
 {{- end }}
 
 {{ includeTemplate "script/reconcile" }}
@@ -192,8 +188,6 @@ fi
 load_installed_uv || true
 remove_undeclared cleanup_enabled installed_uv declared_uv \
   'uv tool' uv tool uninstall
-
-uv tool upgrade --all
 
 if $had_errors; then
   exit 1

@@ -1,8 +1,0 @@
-{{ if not (eq .host_env "ci") -}}
-#!/bin/sh
-
-echo "{{ template "week" . }} 󰯁 Setup emacs"
-
-{{ template "emacs/upgrade-packages.sh" . }}
-
-{{ end -}}

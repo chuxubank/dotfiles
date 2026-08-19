@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Setup go"
+echo "󰯁 Setup go"
 
 source "$HOME/.zshenv"
 export PATH="$GOBIN:$PATH"
@@ -18,7 +18,6 @@ had_errors=false
 
 for pkg in "${GO_PACKAGES[@]}"; do
   declared_go+=("${pkg%%@*}")
-  go install "$pkg"
 done
 
 gup_remove_import() {
@@ -41,9 +40,30 @@ if command -v gup >/dev/null; then
     cleanup_enabled \
     'go binaries' \
     gup_json
+else
+  cleanup_enabled=false
+fi
+
+for pkg in "${GO_PACKAGES[@]}"; do
+  import_path="${pkg%%@*}"
+  if (( ! ${installed_go[(Ie)$import_path]} )); then
+    echo "Install go package: $pkg"
+    if ! go install "$pkg"; then
+      had_errors=true
+    fi
+  fi
+done
+
+if command -v gup >/dev/null; then
+  json_names_load installed_go \
+    'gup list --json' \
+    'type == "array"' \
+    '.[].import_path' \
+    cleanup_enabled \
+    'go binaries' \
+    gup_json
   remove_undeclared cleanup_enabled installed_go declared_go \
     'go binary' gup_remove_import
-  gup update
 else
   print -u2 -- "gup is not installed; skipping undeclared go cleanup"
   had_errors=true

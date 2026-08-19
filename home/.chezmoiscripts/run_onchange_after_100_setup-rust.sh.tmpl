@@ -1,12 +1,10 @@
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Setup rust"
+echo "󰯁 Setup rust"
 
 {{ includeTemplate "script/reconcile" }}
 
 rustup default stable
-
-rustup update stable
 
 rustup component add rust-analyzer
 
@@ -17,14 +15,6 @@ declared_cargo=(
 installed_cargo=()
 cleanup_enabled=true
 had_errors=false
-
-{{- range $tool := $tools }}
-{{- if eq (kindOf $tool) "map" }}
-cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }} {{ $tool.name }}
-{{- else }}
-cargo install {{ $tool }}
-{{- end }}
-{{- end }}
 
 if command -v cargo >/dev/null; then
   if listing=$(cargo install --list); then
@@ -44,12 +34,31 @@ else
   had_errors=true
 fi
 
+cargo_crate_installed() {
+  local crate="$1"
+  (( ${installed_cargo[(Ie)$crate]} ))
+}
+
+{{- range $tool := $tools }}
+{{- if eq (kindOf $tool) "map" }}
+if ! cargo_crate_installed {{ $tool.name | quote }}; then
+echo "Install cargo crate: {{ $tool.name }}"
+if ! cargo install{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }} {{ $tool.name }}; then
+  had_errors=true
+fi
+fi
+{{- else }}
+if ! cargo_crate_installed {{ $tool | quote }}; then
+echo "Install cargo crate: {{ $tool }}"
+if ! cargo install {{ $tool }}; then
+  had_errors=true
+fi
+fi
+{{- end }}
+{{- end }}
+
 remove_undeclared cleanup_enabled installed_cargo declared_cargo \
   'cargo crate' cargo uninstall
-
-if command -v cargo-install-update >/dev/null; then
-  cargo install-update -a -g
-fi
 
 if $had_errors; then
   exit 1
