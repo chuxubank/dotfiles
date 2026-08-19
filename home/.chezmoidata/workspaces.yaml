@@ -1,15 +1,17 @@
 # Declared workspaces. One entry is one Herdr workspace and one Zellij
 # layout (~/.config/zellij/layouts/<name>.kdl, generated from this list).
+# Zellij dest extras are removed (exact_layouts). Apply in Herdr with
+# `herdr-layout` or prefix+shift+l.
 # Tabs hold panes; panes are the project roots.
 #
 # cwd accepts ~ and absolute paths. relative paths resolve from the
 # workspace root when one is set. command is run in the pane after
 # create (herdr-spreader / Zellij pane command).
 workspaces:
-  - name: emacs
+  - name: Configs
     focus: true
     tabs:
-      - label: emacs
+      - label: Configs
         panes:
           - cwd: ~/.config/cat-emacs
             command: grok

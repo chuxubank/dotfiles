@@ -10,3 +10,9 @@ type = "plugin_action"
 command = "heeler.pair"
 description = "Pair Heeler"
 
+[[keys.command]]
+key = "prefix+shift+l"
+type = "popup"
+command = "$HOME/bin/herdr-layout"
+description = "Apply declared workspaces"
+

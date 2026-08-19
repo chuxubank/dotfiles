@@ -1,0 +1,153 @@
+#!/usr/bin/env zsh
+# Apply declared Herdr workspaces from workspaces.yaml.
+# Existing labels are left in place; missing ones are created.
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+usage: herdr-layout [NAME...]
+
+Create any declared workspace that is not already open, then focus
+the workspace marked focus: true (or the first NAME).
+EOF
+}
+
+die() {
+  print -u2 -- "$*"
+  exit 1
+}
+
+if [[ ${1:-} == -h || ${1:-} == --help ]]; then
+  usage
+  exit 0
+fi
+
+command -v herdr >/dev/null || die "herdr is not installed"
+command -v jq >/dev/null || die "jq is required"
+
+expand_tilde() {
+  case $1 in
+    '~') print -r -- "$HOME" ;;
+    '~/'*) print -r -- "$HOME/${1#\~/}" ;;
+    *) print -r -- "$1" ;;
+  esac
+}
+
+json_field() {
+  jq -er "$1" <<<"$2"
+}
+
+pane_dir() {
+  case ${1:-right} in
+    down | horizontal) print -r -- down ;;
+    *) print -r -- right ;;
+  esac
+}
+
+list_json=$(herdr workspace list) || die "could not list herdr workspaces (is the server running?)"
+
+id_for_label() {
+  jq -r --arg l "$1" '.result.workspaces[] | select(.label == $l) | .workspace_id' <<<"$list_json" | head -n 1
+}
+
+{{- range $ws := .workspaces }}
+
+apply_{{ $ws.name | replace " " "_" }}() {
+  local created ws tab pane prev dir cwd
+{{- $firstTab := index $ws.tabs 0 }}
+{{- $firstPane := index $firstTab.panes 0 }}
+{{- if hasKey $firstPane "cwd" }}
+  cwd=$(expand_tilde {{ $firstPane.cwd | quote }})
+  created=$(herdr workspace create --label {{ $ws.name | quote }} --cwd "$cwd" --no-focus)
+{{- else }}
+  created=$(herdr workspace create --label {{ $ws.name | quote }} --no-focus)
+{{- end }}
+  ws=$(json_field '.result.workspace.workspace_id' "$created")
+  tab=$(json_field '.result.tab.tab_id' "$created")
+  pane=$(json_field '.result.root_pane.pane_id' "$created")
+{{- if and (hasKey $firstTab "label") $firstTab.label }}
+  herdr tab rename "$tab" {{ $firstTab.label | quote }} >/dev/null
+{{- end }}
+  prev=$pane
+{{- range $ti, $tab := $ws.tabs }}
+{{- range $pi, $p := $tab.panes }}
+{{- if and (eq $ti 0) (eq $pi 0) }}
+{{- else if eq $pi 0 }}
+{{- if hasKey $p "cwd" }}
+  cwd=$(expand_tilde {{ $p.cwd | quote }})
+  created=$(herdr tab create --workspace "$ws" --label {{ $tab.label | quote }} --cwd "$cwd" --no-focus)
+{{- else }}
+  created=$(herdr tab create --workspace "$ws" --label {{ $tab.label | quote }} --no-focus)
+{{- end }}
+  pane=$(json_field '.result.root_pane.pane_id' "$created")
+  prev=$pane
+{{- else }}
+  dir=$(pane_dir {{ if hasKey $p "split" }}{{ $p.split | quote }}{{ else }}"right"{{ end }})
+{{- if hasKey $p "cwd" }}
+  cwd=$(expand_tilde {{ $p.cwd | quote }})
+  created=$(herdr pane split --pane "$prev" --direction "$dir" --cwd "$cwd" --no-focus)
+{{- else }}
+  created=$(herdr pane split --pane "$prev" --direction "$dir" --no-focus)
+{{- end }}
+  pane=$(json_field '.result.pane.pane_id' "$created")
+  prev=$pane
+{{- end }}
+{{- if hasKey $p "command" }}
+  herdr pane run "$pane" {{ $p.command | quote }} >/dev/null
+{{- end }}
+{{- end }}
+{{- end }}
+  print -r -- "created {{ $ws.name }} ($ws)"
+}
+{{- end }}
+
+declared=(
+{{- range .workspaces }}
+  {{ .name | quote }}
+{{- end }}
+)
+
+{{- $focus := "" }}
+{{- range .workspaces }}
+  {{- if and (hasKey . "focus") .focus }}
+    {{- $focus = .name }}
+  {{- end }}
+{{- end }}
+focus_name={{ if $focus }}{{ $focus | quote }}{{ else }}{{ (index .workspaces 0).name | quote }}{{ end }}
+
+targets=("$@")
+if (( $#targets == 0 )); then
+  targets=("${declared[@]}")
+fi
+
+had_errors=false
+focus_id=
+
+for name in "${targets[@]}"; do
+  id=$(id_for_label "$name")
+  if [[ -n $id ]]; then
+    print -r -- "present: $name ($id)"
+  else
+    case $name in
+{{- range .workspaces }}
+      {{ .name | quote }}) apply_{{ .name | replace " " "_" }} || { print -u2 -- "failed: $name"; had_errors=true; } ;;
+{{- end }}
+      *) print -u2 -- "unknown workspace: $name"; had_errors=true ;;
+    esac
+    list_json=$(herdr workspace list) || true
+    id=$(id_for_label "$name")
+  fi
+  if [[ $name == "$focus_name" && -n $id ]]; then
+    focus_id=$id
+  fi
+done
+
+if [[ -n $focus_id ]]; then
+  herdr workspace focus "$focus_id" >/dev/null
+  print -r -- "focused $focus_name ($focus_id)"
+fi
+
+if $had_errors; then
+  exit 1
+fi

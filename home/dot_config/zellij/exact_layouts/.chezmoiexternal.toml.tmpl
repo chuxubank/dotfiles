@@ -1,4 +1,6 @@
 {{- /* One dest per workspaces.yaml entry: ~/.config/zellij/layouts/<name>.kdl
+       The parent dir is exact_layouts, so dest files not in source or this
+       list (e.g. a renamed workspace leftover) are removed on apply.
        Same empty-url + filter trick as cursor project trust files.
        Use .chezmoi.executable: CI install.sh execs chezmoi by absolute
        path, so a bare "chezmoi" is missing from the filter PATH. */ -}}
