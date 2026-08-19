@@ -29,6 +29,10 @@ Library/LaunchAgents/rclone.rpi.plist
 .config/rtk
 {{- end }}
 
+{{- if ne .host_env "iv" }}
+.sentryclirc
+{{- end }}
+
 {{- includeTemplate "tool/disabled-ignore" . }}
 
 {{- if eq .host_env "ci" }}

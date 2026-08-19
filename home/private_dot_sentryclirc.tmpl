@@ -1,0 +1,8 @@
+{{- if eq .host_env "iv" -}}
+[defaults]
+url = {{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "url") .) }}
+org = sentry
+
+[auth]
+token = {{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "api-token") .) }}
+{{- end -}}

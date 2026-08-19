@@ -210,6 +210,16 @@ alias czd="cz diff"
 alias czc="cz cat"
 alias czs="chezmoi-script"
 
+load-api-keys() {
+  local key
+  key=$(pass-field Personal/Tech/AI/OpenAI api-key) || return
+  export OPENAI_API_KEY="$key"
+  key=$(pass-field Personal/Tech/Google gemini-api-key) || return
+  export GEMINI_API_KEY="$key"
+  key=$(pass-field Personal/Tech/AI/OpenRouter api-key) || return
+  export OPENROUTER_API_KEY="$key"
+}
+
 function up() {
   {{- if eq .chezmoi.os "darwin" }}
   brew update && brew bundle --quiet --global
