@@ -1,8 +1,14 @@
-{{- /* Resolve agents for a skill based on `when.enabled` / `when.disabled` conditions.
-       Agents may be a plain name or a map with `name` plus optional `when`. */ -}}
+{{- /* Resolve agents for a skill based on its optional tool switch and
+       `when.enabled` / `when.disabled` conditions. Agents may be a plain name
+       or a map with `name` plus optional `when`. */ -}}
 {{- $skill := .skill -}}
 {{- $allAgents := .skills.agents -}}
 {{- $agents := list -}}
+{{- $skillEnabled := true -}}
+{{- if hasKey $skill "tool" -}}
+  {{- $skillEnabled = includeTemplate "tool/enabled" (merge (dict "tool" $skill.tool) .) | fromJson -}}
+{{- end -}}
+{{- if $skillEnabled -}}
 {{- range $agentEntry := $allAgents -}}
   {{- $agent := $agentEntry -}}
   {{- $agentSpec := dict -}}
@@ -37,5 +43,6 @@
       {{- $agents = append $agents $agent -}}
     {{- end -}}
   {{- end -}}
+{{- end -}}
 {{- end -}}
 {{- toJson $agents -}}

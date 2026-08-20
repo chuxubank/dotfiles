@@ -1,6 +1,7 @@
 # Declared tools. A name listed here is the single enablement switch for
-# packages (`tool = "..."`), environment.static entries of the same name,
-# skills agents of the same name, and destination cleanup below.
+# packages (`tool = "..."`), skill providers (`tool: ...`),
+# environment.static entries and skills agents of the same name, and
+# destination cleanup below.
 # Names that are not listed stay enabled.
 #
 # remove: destination paths deleted via .chezmoiremove when the tool is off.
@@ -17,6 +18,13 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
+  termio:
+    when:
+      enabled:
+        os: [darwin]
+    remove:
+      - ".termio/**"
+
   talkify:
     when:
       enabled:
@@ -26,4 +34,3 @@ tools:
           version: ">=26"
     remove:
       - "Library/Application Support/Talkify/**"
-

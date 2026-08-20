@@ -1,0 +1,24 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Termio settings.json uses dotted keys as literals, not nested objects.
+       Only pin choices we care about so Ghostty-inherited font/theme stay unset. */ -}}
+{{- $managed := dict
+  "agents.disabled" (list
+    "hermes"
+    "claudeCode"
+    "kimi"
+    "antigravity"
+    "amp"
+  )
+  "agents.hooksEnabled" true
+  "agents.sessionControlEnabled" true
+  "appearance.fontSize" 16
+  "chats.defaultAgent" "grok"
+  "notifications.sound" true
+  "terminal.copyOnSelect" true
+-}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+) -}}

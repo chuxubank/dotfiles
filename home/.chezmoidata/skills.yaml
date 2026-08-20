@@ -29,6 +29,10 @@ skills:
     - name: herdr
       source: herdrdev/herdr
 
+    - name: termio
+      source: termio-sh/termio
+      tool: termio
+
     - name:
         - computer-use
         - orca-cli

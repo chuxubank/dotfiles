@@ -122,7 +122,7 @@ plugins=(
     z
 )
 
-if [[ "$TERM_PROGRAM" =~ ^(WezTerm|ghostty)$ ]]; then
+if [[ "$TERM_PROGRAM" =~ ^(WezTerm|ghostty|termio)$ ]]; then
     plugins+=(starship)
 else
     plugins+=(
