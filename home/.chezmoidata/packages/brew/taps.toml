@@ -1,0 +1,19 @@
+[packages.darwin]
+taps = [
+  { name = "AnInsomniacy/motrix-next", trusted = { cask = "motrix-next" } },
+  { name = "achannarasappa/tap", trusted = { formula = "ticker" } },
+  { name = "beeftornado/rmtree", trusted = { command = "rmtree" } },
+  { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },
+  { name = "deb-sig/tap", trusted = { formula = "double-entry-generator" } },
+  "jimeh/emacs-builds",
+  { name = "lycorp-jp/tap", trusted = { formula = "sim-use" } },
+  { name = "owo-network/brew", trusted = { cask = "herdrm" }, owner = "herdr" },
+  "railwaycat/emacsmacport",
+  { name = "sikarugir-app/sikarugir", trusted = { cask = "sikarugir" }, when.enabled = { host_env = ["personal"], roles = ["game"] } },
+  { name = "stablyai/orca", trusted = { cask = "orca" } },
+  { name = "termio-sh/tap", trusted = { cask = "termio" }, owner = "termio" },
+  { name = "theseal/ssh-askpass", trusted = { formula = "ssh-askpass" } },
+  { name = "vjeantet/tap", trusted = { formula = "alerter" } },
+  { name = "atlassian/acli", trusted = { formula = "acli" }, when.enabled.host_env = ["aa"] },
+  { name = "tornikegomareli/talkify", url = "https://github.com/tornikegomareli/Talkify", trusted = { cask = "talkify" }, owner = "talkify" },
+]

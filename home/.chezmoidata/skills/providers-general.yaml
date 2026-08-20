@@ -1,0 +1,70 @@
+skills:
+  provider_groups:
+    10-general:
+      - name: find-skills
+        source: vercel-labs/skills
+
+      - name: find-docs
+        source: upstash/context7-mcp
+
+      - name: gstack
+        source: garrytan/gstack
+        when:
+          enabled: false
+
+      - name: herdr
+        source: herdrdev/herdr
+        owner: herdr
+
+      - name: termio
+        source: termio-sh/termio
+        owner: termio
+
+      - name:
+          - computer-use
+          - orca-cli
+          - orchestration
+        source: stablyai/orca
+
+      - name: "*"
+        source: mattpocock/skills/skills/productivity
+        when:
+          disabled:
+            tool: claude-code
+
+      - name: "*"
+        source: mattpocock/skills/skills/engineering
+        when:
+          disabled:
+            tool: claude-code
+
+      - name: sim-use
+        source: lycorp-jp/sim-use/skills
+
+      - name: agent-device
+        source: callstack/agent-device
+
+      - name: ["cli-creator", "figma-implement-design"]
+        source: openai/skills
+        when:
+          enabled:
+            tool: codex
+
+      - name: android-emulator-qa
+        source: openai/plugins/plugins/test-android-apps/skills
+        when:
+          disabled:
+            tool: codex
+
+      - name: conventional-commit
+        source: github/awesome-copilot
+
+      - name: "*"
+        source: MindReset/dot_skill/skills
+        when:
+          disabled:
+            tool: codex
+
+      - name: sentry-cli
+        source: https://cli.sentry.dev
+        owner: sentry

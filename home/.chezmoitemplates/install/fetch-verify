@@ -1,0 +1,63 @@
+{{- /* install/fetch-verify — POSIX helpers for pinned remote installs.
+       Callers must set `set -eu` first. Emits:
+
+         fetch_verify URL SHA256 DEST
+           Download URL to DEST and require SHA256 (hex, lowercase).
+
+         run_verified_script URL SHA256 [interpreter]
+           Download to a temp file, verify, run with interpreter (default sh).
+*/ -}}
+fetch_verify() {
+	_url=$1
+	_sha256=$2
+	_dest=$3
+	_got=
+
+	if [ -z "$_url" ] || [ -z "$_sha256" ] || [ -z "$_dest" ]; then
+		echo "fetch_verify: usage: fetch_verify URL SHA256 DEST" >&2
+		return 2
+	fi
+
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL "$_url" -o "$_dest"
+	elif command -v wget >/dev/null 2>&1; then
+		wget -qO "$_dest" "$_url"
+	else
+		echo "fetch_verify: need curl or wget to download $_url" >&2
+		return 1
+	fi
+
+	if command -v sha256sum >/dev/null 2>&1; then
+		_got=$(sha256sum "$_dest" | awk '{print $1}')
+	elif command -v shasum >/dev/null 2>&1; then
+		_got=$(shasum -a 256 "$_dest" | awk '{print $1}')
+	else
+		echo "fetch_verify: need sha256sum or shasum" >&2
+		return 1
+	fi
+
+	if [ "$_got" != "$_sha256" ]; then
+		echo "fetch_verify: checksum mismatch for $_url" >&2
+		echo "  expected $_sha256" >&2
+		echo "  got      $_got" >&2
+		rm -f "$_dest"
+		return 1
+	fi
+}
+
+run_verified_script() {
+	_url=$1
+	_sha256=$2
+	_interpreter=${3:-sh}
+	_tmp=
+	_status=0
+
+	_tmp=$(mktemp)
+	if ! fetch_verify "$_url" "$_sha256" "$_tmp"; then
+		rm -f "$_tmp"
+		return 1
+	fi
+	"$_interpreter" "$_tmp" || _status=$?
+	rm -f "$_tmp"
+	return "$_status"
+}

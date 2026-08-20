@@ -78,7 +78,7 @@ defaults:
 
   talkify:
     domain: com.tgomareli.Talkify
-    tool: talkify
+    owner: talkify
     open: Talkify
     keys:
       recognitionLocale: zh_CN

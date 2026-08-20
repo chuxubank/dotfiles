@@ -2,6 +2,8 @@
        Input: dict "tool" <name> (merged with root context $)
               optional "require" bool — fail when the name is not in tools.
        Undeclared names are enabled unless require is set.
+       Lifecycle affiliation on data items is `owner`; this template
+       still takes the declared name as `tool`.
        Output: JSON boolean */ -}}
 {{- $name := .tool -}}
 {{- if not $name -}}
@@ -15,5 +17,5 @@
     {{- toJson true -}}
   {{- end -}}
 {{- else -}}
-  {{- includeTemplate "when/context" (merge (dict "item" (index $declared $name)) .) -}}
+  {{- includeTemplate "when/context" (merge (dict) . (dict "item" (index $declared $name))) -}}
 {{- end -}}

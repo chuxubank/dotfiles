@@ -1,0 +1,16 @@
+skills:
+  agents:
+    - amp
+    - claude-code
+    - codex
+    - cursor
+    - droid
+    - gemini-cli
+    - goose
+    - github-copilot
+    - grok
+    - kimi-code-cli
+    - kiro-cli
+    - opencode
+    - pi
+    - warp

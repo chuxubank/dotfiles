@@ -1,0 +1,31 @@
+{{- /* policy/enabled — Is this named policy on for this host?
+       Input: dict "policy" <name> merged with root context
+       policies.<name> may be a bool, or a map with optional `enabled`
+       bool and optional `when`. A missing name is off.
+       Output: JSON boolean */ -}}
+{{- $name := .policy -}}
+{{- if not $name -}}
+  {{- fail "policy/enabled: missing policy name" -}}
+{{- end -}}
+{{- $policies := default dict .policies -}}
+{{- if not (hasKey $policies $name) -}}
+  {{- toJson false -}}
+{{- else -}}
+  {{- $spec := index $policies $name -}}
+  {{- $kind := kindOf $spec -}}
+  {{- if eq $kind "bool" -}}
+    {{- toJson $spec -}}
+  {{- else if eq $kind "map" -}}
+    {{- $enabled := true -}}
+    {{- if hasKey $spec "enabled" -}}
+      {{- $enabled = index $spec "enabled" -}}
+    {{- end -}}
+    {{- if and $enabled (hasKey $spec "when") -}}
+      {{- includeTemplate "when/context" (merge (dict "item" $spec) .) -}}
+    {{- else -}}
+      {{- toJson $enabled -}}
+    {{- end -}}
+  {{- else -}}
+    {{- fail (printf "policy %q: expected bool or map, got %s" $name $kind) -}}
+  {{- end -}}
+{{- end -}}

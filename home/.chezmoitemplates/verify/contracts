@@ -1,0 +1,142 @@
+{{- /* verify/contracts — Self-contained checks for resolver interfaces.
+       fail() aborts chezmoi execute-template on mismatch. */ -}}
+
+{{- /* when/range: ints and JSON float64 */ -}}
+{{- if ne (includeTemplate "when/range" (dict "value" 10 "rule" (dict "min" 8)) | fromJson) true -}}
+  {{- fail "when/range: 10 >= 8" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/range" (dict "value" 4 "rule" (dict "min" 8)) | fromJson) false -}}
+  {{- fail "when/range: 4 >= 8" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/range" (dict "value" 12 "rule" (dict "max" 10)) | fromJson) false -}}
+  {{- fail "when/range: 12 <= 10" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/range" (dict "value" 0 "rule" (dict "min" 8)) | fromJson) true -}}
+  {{- fail "when/range: unknown 0 is lenient" -}}
+{{- end -}}
+{{- $jsonRule := fromJson "{\"min\": 256, \"max\": 1024}" -}}
+{{- if ne (includeTemplate "when/range" (dict "value" (fromJson "512") "rule" $jsonRule) | fromJson) true -}}
+  {{- fail "when/range: JSON float64 512 in [256,1024]" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/range" (dict "value" (fromJson "128") "rule" $jsonRule) | fromJson) false -}}
+  {{- fail "when/range: JSON float64 128 in [256,1024]" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/range" (dict "value" (fromJson "0") "rule" $jsonRule) | fromJson) true -}}
+  {{- fail "when/range: JSON float64 0 is lenient" -}}
+{{- end -}}
+
+{{- /* when/evaluate AND groups */ -}}
+{{- $hostItem := dict "when" (dict "enabled" (dict "host_env" (list "iv" "aa"))) -}}
+{{- if ne (includeTemplate "when/evaluate" (dict "item" $hostItem "values" (dict "host_env" "iv") "os_version" "") | fromJson) true -}}
+  {{- fail "when/evaluate: iv matches enabled.host_env" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/evaluate" (dict "item" $hostItem "values" (dict "host_env" "personal") "os_version" "") | fromJson) false -}}
+  {{- fail "when/evaluate: personal misses enabled.host_env" -}}
+{{- end -}}
+{{- $disabledItem := dict "when" (dict "disabled" (dict "host_env" (list "ci"))) -}}
+{{- if ne (includeTemplate "when/evaluate" (dict "item" $disabledItem "values" (dict "host_env" "ci") "os_version" "") | fromJson) false -}}
+  {{- fail "when/evaluate: ci hits disabled.host_env" -}}
+{{- end -}}
+{{- if ne (includeTemplate "when/evaluate" (dict "item" $disabledItem "values" (dict "host_env" "personal") "os_version" "") | fromJson) true -}}
+  {{- fail "when/evaluate: personal misses disabled.host_env" -}}
+{{- end -}}
+
+{{- /* tool/enabled */ -}}
+{{- $tools := dict
+      "claude-code" (dict "when" (dict "enabled" (dict "host_env" (list "iv"))))
+      "codex" (dict "when" (dict "disabled" (dict "host_env" (list "ci"))))
+-}}
+{{- $base := dict
+      "tools" $tools
+      "device_type" "laptop"
+      "roles" (list)
+      "mem_gb" 16
+      "disk_gb" 512
+      "os_version" "26.0"
+      "chezmoi" (dict "os" "darwin")
+-}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $base (dict "tool" "claude-code" "host_env" "iv")) | fromJson) true -}}
+  {{- fail "tool/enabled: claude-code on iv" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $base (dict "tool" "claude-code" "host_env" "personal")) | fromJson) false -}}
+  {{- fail "tool/enabled: claude-code off personal" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $base (dict "tool" "codex" "host_env" "ci")) | fromJson) false -}}
+  {{- fail "tool/enabled: codex off ci" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $base (dict "tool" "codex" "host_env" "personal")) | fromJson) true -}}
+  {{- fail "tool/enabled: codex on personal" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (dict "tool" "unknown" "tools" $tools) | fromJson) true -}}
+  {{- fail "tool/enabled: undeclared defaults on" -}}
+{{- end -}}
+
+{{- /* tool/item-enabled: owner required, tool is identity unless alias */ -}}
+{{- $owned := dict "owner" "claude-code" -}}
+{{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" $owned "host_env" "iv")) | fromJson) true -}}
+  {{- fail "tool/item-enabled: owner claude-code on iv" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" $owned "host_env" "personal")) | fromJson) false -}}
+  {{- fail "tool/item-enabled: owner claude-code off personal" -}}
+{{- end -}}
+{{- $identity := dict "tool" "claude-code" -}}
+{{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" $identity "host_env" "personal")) | fromJson) true -}}
+  {{- fail "tool/item-enabled: identity tool is not an implicit owner" -}}
+{{- end -}}
+{{- $alias := dict "tool" "claude-code" -}}
+{{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" $alias "alias" true "host_env" "personal")) | fromJson) false -}}
+  {{- fail "tool/item-enabled: alias tool=claude-code off personal" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" (dict "name" "black") "host_env" "personal")) | fromJson) true -}}
+  {{- fail "tool/item-enabled: no owner stays on" -}}
+{{- end -}}
+
+{{- /* package/items */ -}}
+{{- $pkgCtx := merge (dict) $base (dict
+      "host_env" "personal"
+      "packages" (dict "python" (dict "tools" (list
+        "black"
+        (dict "name" "sentry" "owner" "claude-code")
+        (dict "name" "gone" "ensure" "absent"))))) -}}
+{{- $pkgs := includeTemplate "package/items" (dict "ctx" $pkgCtx "path" (list "python" "tools")) | fromJson -}}
+{{- if ne (len $pkgs) 1 -}}
+  {{- fail (printf "package/items: expected 1 item, got %d %s" (len $pkgs) ($pkgs | toJson)) -}}
+{{- end -}}
+{{- if ne (index $pkgs 0) "black" -}}
+  {{- fail "package/items: expected black" -}}
+{{- end -}}
+
+{{- /* skills/when */ -}}
+{{- $skillOn := dict "name" "herdr" "owner" "codex" -}}
+{{- $skillCtx := merge (dict) $base (dict
+      "host_env" "personal"
+      "skill" $skillOn
+      "skills" (dict "agents" (list "codex" "amp"))) -}}
+{{- $agents := includeTemplate "skills/when" $skillCtx | fromJson -}}
+{{- if ne (len $agents) 2 -}}
+  {{- fail (printf "skills/when: expected amp+codex, got %s" ($agents | toJson)) -}}
+{{- end -}}
+{{- $skillOff := dict "name" "herdr" "owner" "claude-code" -}}
+{{- $agentsOff := includeTemplate "skills/when" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skill" $skillOff
+      "skills" (dict "agents" (list "codex" "amp")))) | fromJson -}}
+{{- if ne (len $agentsOff) 0 -}}
+  {{- fail "skills/when: disabled owner should yield no agents" -}}
+{{- end -}}
+
+{{- /* service/services: identity tool does not gate; owner does */ -}}
+{{- $svcCtx := merge (dict) $base (dict
+      "host_env" "personal"
+      "services" (list
+        (dict "tool" "isync" "brew" true)
+        (dict "tool" "rclone" "owner" "claude-code" "target" "nutstore"))) -}}
+{{- $svcs := includeTemplate "service/services" $svcCtx | fromJson -}}
+{{- if ne (len $svcs) 1 -}}
+  {{- fail (printf "service/services: expected only isync, got %s" ($svcs | toJson)) -}}
+{{- end -}}
+{{- if ne (index $svcs 0).tool "isync" -}}
+  {{- fail "service/services: expected isync" -}}
+{{- end -}}
+
+ok

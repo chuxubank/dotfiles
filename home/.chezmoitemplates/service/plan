@@ -1,0 +1,37 @@
+{{- /* service/plan — Normalized service records for the CLI adapter.
+       Register adapters still consume the raw service spec.
+       Output: JSON array of
+         name, tool, label, manager, file, scheduled, stdout_log, stderr_log */ -}}
+{{- $os := .chezmoi.os -}}
+{{- $out := list -}}
+{{- range $service := includeTemplate "service/services" . | fromJson -}}
+  {{- $isBrew := and (hasKey $service "brew") $service.brew -}}
+  {{- $name := $service.tool -}}
+  {{- if not $isBrew -}}
+    {{- $name = printf "%s.%s" $service.tool $service.target -}}
+  {{- end -}}
+  {{- $label := includeTemplate "service/label" (dict "os" $os "service" $service) -}}
+  {{- $scheduled := or (hasKey $service "startInterval") (and (hasKey $service "extra") (contains "<key>Sockets</key>" $service.extra)) -}}
+  {{- $logFiles := includeTemplate "service/log-files" (dict "ctx" $ "service" $service) | fromJson -}}
+  {{- $manager := "" -}}
+  {{- $file := "" -}}
+  {{- if eq $os "darwin" -}}
+    {{- $manager = "launchd" -}}
+    {{- if $isBrew -}}{{- $manager = "brew" -}}{{- end -}}
+    {{- $file = printf "~/Library/LaunchAgents/%s.plist" $label -}}
+  {{- else if eq $os "linux" -}}
+    {{- $manager = "systemd" -}}
+    {{- if and $isBrew (lookPath "brew") -}}{{- $manager = "brew" -}}{{- end -}}
+    {{- $file = printf "~/.config/systemd/user/%s.service" $label -}}
+  {{- end -}}
+  {{- $out = append $out (dict
+        "name" $name
+        "tool" $service.tool
+        "label" $label
+        "manager" $manager
+        "file" $file
+        "scheduled" $scheduled
+        "stdout_log" (index $logFiles 0)
+        "stderr_log" (index $logFiles 1)) -}}
+{{- end -}}
+{{- toJson $out -}}

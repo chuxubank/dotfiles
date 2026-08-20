@@ -116,7 +116,7 @@ skill_has_agent() {
     >/dev/null < "$agent_state"
 }
 
-{{- range $skill := .skills.providers }}
+{{- range $skill := includeTemplate "skills/providers" . | fromJson }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
   {{- /* `skills update` loses repository subpaths and can report nested skills as deleted. */ -}}

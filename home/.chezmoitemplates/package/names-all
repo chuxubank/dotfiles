@@ -1,4 +1,4 @@
-{{- /* package/names-all — Unique package names on a path, ignoring when/tool
+{{- /* package/names-all — Unique package names on a path, ignoring when/owner
        and ensure. Used as the tombstone universe for open-world managers:
        names that are declared but not currently enabled should be removed. */ -}}
 {{- $list := .ctx -}}

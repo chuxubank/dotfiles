@@ -6,17 +6,18 @@
        - {max: N}        -> value <= N
        - {min: A, max: B}-> A <= value <= B
        - missing bound   -> unbounded on that side */ -}}
-{{- $value := .value -}}
+{{- /* JSON numbers decode as float64; sprig comparisons require one kind. */ -}}
+{{- $value := int .value -}}
 {{- $rule := .rule -}}
 {{- $result := true -}}
 {{- if eq $value 0 -}}
   {{- $result = true -}}
 {{- else -}}
   {{- if hasKey $rule "min" -}}
-    {{- if lt $value (index $rule "min") }}{{- $result = false -}}{{- end -}}
+    {{- if lt $value (int (index $rule "min")) }}{{- $result = false -}}{{- end -}}
   {{- end -}}
   {{- if and $result (hasKey $rule "max") -}}
-    {{- if gt $value (index $rule "max") }}{{- $result = false -}}{{- end -}}
+    {{- if gt $value (int (index $rule "max")) }}{{- $result = false -}}{{- end -}}
   {{- end -}}
 {{- end -}}
 {{- toJson $result -}}

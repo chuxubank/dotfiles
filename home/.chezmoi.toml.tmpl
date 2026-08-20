@@ -19,59 +19,22 @@
 {{- $roles := list "automation" -}}
 
 {{- $passDir := ".password-store" }}
-{{- $isDarkMode := false }}
 {{- $os := .chezmoi.os -}}
-
-{{- $memGb := 0 -}}
-{{- $diskGb := 0 -}}
-{{- if eq $os "darwin" -}}
-  {{- $memGb = atoi (output "sh" "-c" "echo $(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))" | trim) -}}
-{{- else if or (eq $os "linux") (eq $os "android") -}}
-  {{- $memGb = atoi (output "sh" "-c" "awk '/MemTotal/{printf \"%d\", int($2/1048576)}' /proc/meminfo 2>/dev/null || echo 0" | trim) -}}
-{{- end -}}
-{{- if or (eq $os "darwin") (eq $os "linux") (eq $os "android") -}}
-  {{- $diskGb = atoi (output "sh" "-c" "df -k / 2>/dev/null | awk 'NR==2{printf \"%d\", int($2/1048576)}' || echo 0" | trim) -}}
-{{- end -}}
-
-{{- $osVersion := "" -}}
-{{- if eq $os "darwin" -}}
-  {{- $osVersion = output "sh" "-c" "sw_vers -productVersion 2>/dev/null || echo" | trim -}}
-{{- else if eq $os "linux" -}}
-  {{- $osVersion = (splitList "-" (output "sh" "-c" "uname -r 2>/dev/null || echo" | trim)) | first -}}
-{{- else if eq $os "android" -}}
-  {{- $osVersion = output "sh" "-c" "getprop ro.build.version.release 2>/dev/null || echo" | trim -}}
-{{- else if eq $os "windows" -}}
-  {{- $osVersion = .chezmoi.windowsVersion | default "" -}}
-{{- end -}}
+{{- $facts := includeTemplate "host/facts" . | fromJson -}}
+{{- $memGb := $facts.mem_gb -}}
+{{- $diskGb := $facts.disk_gb -}}
+{{- $osVersion := $facts.os_version -}}
+{{- $isDarkMode := $facts.isDarkMode -}}
 
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
 {{- $hostEnv = promptChoiceOnce . "host_env" "What environment does this host belong to" $hostEnvChoices -}}
 
-{{- $defaultRoles := list -}}
-{{- if eq $hostEnv "personal" -}}
-  {{- if eq $deviceType "server" -}}
-    {{- $defaultRoles = "llm" -}}
-  {{- else if eq $deviceType "desktop" -}}
-    {{- if eq $os "windows" -}}
-      {{- $defaultRoles = "game" -}}
-	{{- else if eq $os "darwin" -}}
-      {{- $defaultRoles = list "llm" "router" -}}
-    {{- end -}}
-  {{- else -}}
-    {{- $defaultRoles = "daily" -}}
-  {{- end -}}
-{{- else if or (eq $hostEnv "aa") (eq $hostEnv "iv") -}}
-  {{- $defaultRoles = "work" -}}
-{{- end -}}
+{{- $defaultRoles := includeTemplate "host/default-roles" (dict "host_env" $hostEnv "device_type" $deviceType "os" $os) | fromJson -}}
 
 {{- $roles = promptMultichoiceOnce . "roles" "Roles" $roleChoices $defaultRoles }}
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
-{{- end }}
-
-{{- if eq $os "darwin" }}
-{{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) }}
 {{- end }}
 
 sourceDir = {{ .chezmoi.sourceDir | quote }}
@@ -96,41 +59,7 @@ encryption = "gpg"
 
 [data.path]
     pass = {{- $passDir | quote }}
-{{- if eq $os "darwin" }}
-# darwin
-{{- if eq .chezmoi.arch "arm64" }}
-    usr = "/opt/homebrew"
-	etc = "/opt/homebrew/etc"
-    gh = "/opt/homebrew/bin/gh"
-{{- else }}
-    usr = "/usr/local"
-	etc = "/usr/local/etc"
-    gh = "/usr/local/bin/gh"
-{{- end }}
-    log = {{- joinPath .chezmoi.homeDir "Library" "Logs" | quote }}
-	zotero = {{- joinPath "Library" "Application Support" "Zotero" | quote}}
-{{- else if eq $os "linux" }}
-# linux
-    usr = "/usr"
-	etc = "/etc"
-    gh = "/usr/bin/gh"
-    log = "/var/log"
-	zotero = {{- joinPath ".zotero" "zotero" | quote }}
-{{- else if eq $os "windows" }}
-# windows
-    usr = "C:/Program Files"
-	etc = "C:/ProgramData"
-    gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
-    log = {{- joinPath "AppData" "Local" "Temp" | quote }}
-	zotero = {{- joinPath "AppData" "Roaming" "Zotero" "Zotero" | quote }}
-{{- else if eq $os "android" }}
-# android
-    usr = "/data/data/com.termux/files/usr"
-    gh = "/data/data/com.termux/files/usr/bin/gh"
-    log = "/data/data/com.termux/files/var/log"
-{{- else }}
-# unknown
-{{- end }}
+{{- includeTemplate "path/platform" (dict "os" $os "arch" .chezmoi.arch "homeDir" .chezmoi.homeDir) }}
 
 [diff]
     command = "difft"

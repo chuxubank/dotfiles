@@ -1,0 +1,22 @@
+{{- /* tool/item-enabled — Lifecycle gate for a data item.
+       Input: dict "item" <map> merged with root (or pass ctx via $)
+              optional "alias" bool — treat item.tool as owner when
+              item.owner is absent (packages/defaults/skill providers).
+              Services and environment groups use tool as identity, so
+              they must set owner explicitly (alias false).
+       Undeclared owners fail. No owner -> enabled.
+       Output: JSON boolean */ -}}
+{{- $item := .item -}}
+{{- if ne (kindOf $item) "map" -}}
+  {{- toJson true -}}
+{{- else -}}
+  {{- $owner := dig "owner" "" $item -}}
+  {{- if and (not $owner) (dig "alias" false .) -}}
+    {{- $owner = dig "tool" "" $item -}}
+  {{- end -}}
+  {{- if $owner -}}
+    {{- includeTemplate "tool/enabled" (merge (dict) . (dict "tool" $owner "require" true)) -}}
+  {{- else -}}
+    {{- toJson true -}}
+  {{- end -}}
+{{- end -}}

@@ -7,6 +7,25 @@ on:
   pull_request:
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Install pinned chezmoi
+        run: |
+          ./install.sh --install-only
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Init chezmoi
+        run: chezmoi init --source "${{ github.workspace }}"
+
+      - name: Verify
+        run: make verify
+
   clone-and-install:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -114,32 +133,6 @@ jobs:
       - name: Dry-run apply
         run: chezmoi apply --dry-run --exclude=encrypted,scripts,externals
 
-      - name: Syntax-check rendered scripts
+      - name: Verify
         if: runner.os == 'macOS'
-        run: |
-          set -euo pipefail
-          tmpdir=$(mktemp -d)
-          trap 'rm -rf "$tmpdir"' EXIT
-          failed=0
-          while IFS= read -r tmpl; do
-            if ! rendered=$(chezmoi execute-template <"$tmpl"); then
-              echo "template failed: $tmpl" >&2
-              failed=1
-              continue
-            fi
-            if [ -z "$(printf '%s' "$rendered" | tr -d '[:space:]')" ]; then
-              continue
-            fi
-            out="$tmpdir/script"
-            printf '%s\n' "$rendered" >"$out"
-            first=$(printf '%s\n' "$rendered" | sed -n '/[^[:space:]]/{p;q;}')
-            case $first in
-              '#!'*zsh*)
-                zsh -n "$out" || { echo "zsh -n failed: $tmpl" >&2; failed=1; }
-                ;;
-              '#!'*'/bin/sh'* | '#!'*'/usr/bin/env sh'* | '#!/bin/sh')
-                sh -n "$out" || { echo "sh -n failed: $tmpl" >&2; failed=1; }
-                ;;
-            esac
-          done < <(find home/.chezmoiscripts -type f -name '*.tmpl' | sort)
-          exit "$failed"
+        run: make verify

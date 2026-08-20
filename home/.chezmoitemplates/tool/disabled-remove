@@ -1,9 +1,17 @@
-{{- /* Emit .chezmoiremove patterns for disabled tools, one per line. */ -}}
+{{- /* Emit .chezmoiremove patterns for disabled tools, one per line.
+       `remove` is always applied. `purge` is applied only when the
+       purge_disabled_tools policy is on. */ -}}
 {{- $ctx := . -}}
+{{- $purge := includeTemplate "policy/enabled" (merge (dict "policy" "purge_disabled_tools") $ctx) | fromJson -}}
 {{- range $name, $spec := default dict $ctx.tools -}}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
     {{- range $pattern := dig "remove" (list) $spec }}
 {{ $pattern }}
+    {{- end -}}
+    {{- if $purge -}}
+      {{- range $pattern := dig "purge" (list) $spec }}
+{{ $pattern }}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

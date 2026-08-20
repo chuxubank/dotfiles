@@ -10,8 +10,8 @@
 {{- if eq (dig "ensure" "" $package) "absent" -}}
   {{- $enabled = false -}}
 {{- end -}}
-{{- if and $enabled (hasKey $package "tool") -}}
-  {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $package.tool "require" true) $.ctx) | fromJson -}}
+{{- if $enabled -}}
+  {{- $enabled = includeTemplate "tool/item-enabled" (merge (dict "item" $package "alias" true) $.ctx) | fromJson -}}
 {{- end -}}
 {{- if and $enabled (hasKey $package "when") -}}
   {{- $enabled = includeTemplate "when/context" (merge (dict "item" $package) $.ctx) | fromJson -}}

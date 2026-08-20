@@ -1,4 +1,4 @@
-{{- if and (eq .chezmoi.os "darwin") (ne .host_env "aa") (ne .host_env "ci") -}}
+{{- if includeTemplate "policy/enabled" (merge (dict "policy" "uninstall_microsoft_edge") .) | fromJson -}}
 #!/bin/zsh
 # Edge / AutoUpdate / RDC leftovers. Skipped on aa (Brewfile installs those casks).
 set -eu

@@ -3,7 +3,8 @@
 echo "󰯁 Setup uv"
 
 {{- if not (lookPath "uv") }}
-curl -LsSf https://astral.sh/uv/install.sh | sh
+{{ includeTemplate "install/fetch-verify" }}
+run_verified_script {{ .installers.uv.url | quote }} {{ .installers.uv.sha256 | quote }}
 source $HOME/.local/bin/env
 {{- end }}
 

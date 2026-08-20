@@ -61,6 +61,7 @@ services:
           path: usr
 
   - tool: rclone
+    owner: rclone
     target: nutstore
     keepAlive: true
     runAtLoad: true
@@ -87,6 +88,7 @@ services:
       - "--vfs-fast-fingerprint"
 
   - tool: rclone
+    owner: rclone
     target: rpi
     programArguments:
       - usrBin: rclone

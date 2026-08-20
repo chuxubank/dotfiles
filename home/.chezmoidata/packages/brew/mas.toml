@@ -1,0 +1,20 @@
+[packages.darwin]
+mas = [
+  { id = 1284863847, name = "Unsplash Wallpapers", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
+  { id = 1478610778, name = "Juice" },
+  { id = 1496833156, name = "Playgrounds", when.enabled = false },
+  { id = 1463298887, name = "Userscripts" },
+  { id = 1575588022, name = "MenubarX" },
+  { id = 1610744717, name = "RSSHub Radar" },
+  { id = 361285480, name = "Keynote" },
+  { id = 361304891, name = "Numbers" },
+  { id = 361309726, name = "Pages" },
+  { id = 424389933, name = "Final Cut Pro", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
+  { id = 425424353, name = "The Unarchiver" },
+  { id = 497799835, name = "Xcode" },
+  { id = 634148309, name = "Logic Pro", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
+  { id = 634159523, name = "MainStage", when.enabled = { host_env = ["personal"], roles = ["studio"] } },
+  { id = 640199958, name = "Apple Developer" },
+  { id = 6447957425, name = "Immersive Translate" },
+  { id = 937984704, name = "Amphetamine" },
+]

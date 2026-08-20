@@ -1,13 +1,10 @@
-{{- /* Filter declared defaults by tool/when and unwrap per-key when specs.
+{{- /* Filter declared defaults by owner/when and unwrap per-key when specs.
        Input: root context. Output: JSON list of {name,domain,keys,open}. */ -}}
 {{- $ctx := . -}}
 {{- $selected := list -}}
 {{- range $name := keys (default dict .defaults) | sortAlpha -}}
   {{- $item := index $ctx.defaults $name -}}
-  {{- $enabled := true -}}
-  {{- if hasKey $item "tool" -}}
-    {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $item.tool "require" true) $ctx) | fromJson -}}
-  {{- end -}}
+  {{- $enabled := includeTemplate "tool/item-enabled" (merge (dict "item" $item "alias" true) $ctx) | fromJson -}}
   {{- if and $enabled (hasKey $item "when") -}}
     {{- $enabled = includeTemplate "when/context" (merge (dict "item" $item) $ctx) | fromJson -}}
   {{- end -}}

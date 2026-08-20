@@ -1,0 +1,151 @@
+{{- /* verify/model — Checks against the real chezmoidata.
+       Requires .tools / .packages / .skills / .services / .environment / .defaults. */ -}}
+
+{{- $declared := default dict .tools -}}
+{{- if eq (len $declared) 0 -}}
+  {{- fail "verify/model: tools.yaml is empty" -}}
+{{- end -}}
+
+{{- /* Every declared tool evaluates to a boolean on a few host shapes. */ -}}
+{{- $hosts := list
+      (dict "host_env" "personal" "os" "darwin" "disk_gb" 512)
+      (dict "host_env" "iv" "os" "darwin" "disk_gb" 512)
+      (dict "host_env" "ci" "os" "linux" "disk_gb" 20)
+      (dict "host_env" "aa" "os" "windows" "disk_gb" 256)
+-}}
+{{- range $name, $spec := $declared -}}
+  {{- range $host := $hosts -}}
+    {{- $got := includeTemplate "tool/enabled" (dict
+          "tool" $name
+          "tools" $declared
+          "host_env" $host.host_env
+          "device_type" "laptop"
+          "roles" (list "llm")
+          "mem_gb" 16
+          "disk_gb" $host.disk_gb
+          "os_version" "26.0"
+          "chezmoi" (dict "os" $host.os)) | fromJson -}}
+    {{- if ne (kindOf $got) "bool" -}}
+      {{- fail (printf "tool/enabled %s on %s/%s: expected bool" $name $host.host_env $host.os) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Explicit matrix for host_env / os switches. Fresh dicts: sprig merge
+       does not overwrite existing host_env on the root context. */ -}}
+{{- $eval := dict "tools" $declared "device_type" "laptop" "roles" (list) "mem_gb" 16 "disk_gb" 512 "os_version" "26.0" -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "claude-code" "host_env" "iv" "chezmoi" (dict "os" "darwin"))) | fromJson) true -}}
+  {{- fail "matrix: claude-code on iv" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "claude-code" "host_env" "personal" "chezmoi" (dict "os" "darwin"))) | fromJson) false -}}
+  {{- fail "matrix: claude-code off personal" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "codex" "host_env" "ci" "chezmoi" (dict "os" "linux") "os_version" "")) | fromJson) false -}}
+  {{- fail "matrix: codex off ci" -}}
+{{- end -}}
+{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "termio" "host_env" "personal" "chezmoi" (dict "os" "linux"))) | fromJson) false -}}
+  {{- fail "matrix: termio off linux" -}}
+{{- end -}}
+
+{{- /* Path width for remove and purge. */ -}}
+{{- range $name, $spec := $declared -}}
+  {{- $patterns := dig "remove" (list) $spec -}}
+  {{- range $p := dig "purge" (list) $spec -}}
+    {{- $patterns = append $patterns $p -}}
+  {{- end -}}
+  {{- range $pattern := $patterns -}}
+    {{- if not $pattern -}}
+      {{- fail (printf "tool %s: empty remove/purge path" $name) -}}
+    {{- end -}}
+    {{- if or (hasPrefix "/" $pattern) (hasPrefix "~" $pattern) -}}
+      {{- fail (printf "tool %s: absolute remove/purge path %q" $name $pattern) -}}
+    {{- end -}}
+    {{- if or (eq $pattern "*") (eq $pattern "**") (eq $pattern "/**") -}}
+      {{- fail (printf "tool %s: overly broad remove/purge path %q" $name $pattern) -}}
+    {{- end -}}
+    {{- if or (hasPrefix "../" $pattern) (contains "/../" $pattern) (eq $pattern "..") -}}
+      {{- fail (printf "tool %s: parent traversal in %q" $name $pattern) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Every owner reference is declared. Package maps must use owner, not tool. */ -}}
+{{- $pkgPaths := list
+      (list "darwin" "taps")
+      (list "darwin" "brews")
+      (list "darwin" "casks")
+      (list "darwin" "mas")
+      (list "python" "tools")
+      (list "node" "global")
+      (list "apt" "pkg")
+      (list "pacman" "core")
+      (list "pacman" "extra")
+      (list "pacman" "aur")
+      (list "termux" "pkg")
+      (list "sdkman")
+      (list "rust" "cargo")
+      (list "go")
+-}}
+{{- range $path := $pkgPaths -}}
+  {{- $list := $.packages -}}
+  {{- $ok := true -}}
+  {{- range $key := $path -}}
+    {{- if and $ok (hasKey $list $key) -}}
+      {{- $list = index $list $key -}}
+    {{- else -}}
+      {{- $ok = false -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and $ok (eq (kindOf $list) "slice") -}}
+    {{- range $package := $list -}}
+      {{- if eq (kindOf $package) "map" -}}
+        {{- if hasKey $package "tool" -}}
+          {{- fail (printf "package %s: use owner, not tool" (dig "name" "?" $package)) -}}
+        {{- end -}}
+        {{- $owner := dig "owner" "" $package -}}
+        {{- if and $owner (not (hasKey $declared $owner)) -}}
+          {{- fail (printf "package %s: unknown owner %q" (dig "name" "?" $package) $owner) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $groupName := keys (default dict .skills.provider_groups) | sortAlpha -}}
+  {{- range $provider := index $.skills.provider_groups $groupName -}}
+    {{- if hasKey $provider "tool" -}}
+      {{- fail (printf "skill provider in %s: use owner, not tool" $groupName) -}}
+    {{- end -}}
+    {{- $owner := dig "owner" "" $provider -}}
+    {{- if and $owner (not (hasKey $declared $owner)) -}}
+      {{- fail (printf "skill provider %s: unknown owner %q" (dig "name" "?" $provider) $owner) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $service := .services -}}
+  {{- $owner := dig "owner" "" $service -}}
+  {{- if and $owner (not (hasKey $declared $owner)) -}}
+    {{- fail (printf "service %s: unknown owner %q" (dig "tool" "?" $service) $owner) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $entry := .environment.static -}}
+  {{- $owner := dig "owner" "" $entry -}}
+  {{- if and $owner (not (hasKey $declared $owner)) -}}
+    {{- fail (printf "environment %s: unknown owner %q" (dig "tool" "?" $entry) $owner) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- range $name := keys (default dict .defaults) -}}
+  {{- $item := index $.defaults $name -}}
+  {{- if hasKey $item "tool" -}}
+    {{- fail (printf "defaults %s: use owner, not tool" $name) -}}
+  {{- end -}}
+  {{- $owner := dig "owner" "" $item -}}
+  {{- if and $owner (not (hasKey $declared $owner)) -}}
+    {{- fail (printf "defaults %s: unknown owner %q" $name $owner) -}}
+  {{- end -}}
+{{- end -}}
+
+ok

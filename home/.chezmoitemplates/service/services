@@ -1,8 +1,8 @@
 {{- $selected := list -}}
 {{- range $service := .services -}}
   {{- $enabled := true -}}
-  {{- if and (eq (kindOf $service) "map") (hasKey $service "tool") (hasKey (default dict $.tools) $service.tool) -}}
-    {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" $service.tool) $) | fromJson -}}
+  {{- if eq (kindOf $service) "map" -}}
+    {{- $enabled = includeTemplate "tool/item-enabled" (merge (dict "item" $service) $) | fromJson -}}
   {{- end -}}
   {{- if and $enabled (eq (kindOf $service) "map") (hasKey $service "when") -}}
     {{- $enabled = includeTemplate "when/context" (merge (dict "item" $service) $) | fromJson -}}

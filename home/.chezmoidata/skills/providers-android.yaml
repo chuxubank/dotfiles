@@ -1,0 +1,20 @@
+skills:
+  provider_groups:
+    20-android:
+      - name:
+          - agp-9-upgrade
+          - edge-to-edge
+          - navigation-3
+          - r8-analyzer
+        source: android/skills
+
+      - name: "*"
+        source: android/skills/jetpack-compose
+        full_depth: true
+
+      - name:
+          - kotlin-tooling-agp9-migration
+          - kotlin-tooling-cocoapods-spm-migration
+          - kotlin-tooling-java-to-kotlin
+          - kotlin-tooling-native-build-performance
+        source: Kotlin/kotlin-agent-skills

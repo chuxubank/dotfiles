@@ -1,0 +1,26 @@
+skills:
+  provider_groups:
+    30-personal:
+      - name: feishu-projects
+        source: chuxubank/skills
+        when:
+          enabled:
+            host_env: iv
+
+      - name: grok-build-subagent
+        source: chuxubank/skills
+        when:
+          enabled:
+            tool: [codex, cursor, grok]
+
+      - name: "*"
+        source: larksuite/cli/skills
+        when:
+          enabled:
+            host_env: iv
+
+      - name: ip-as-logo
+        source: s1dashu/ip-as-logo-skill
+
+      - name: photo-abstract-editorial
+        source: ZzzLc0405/photo-abstract-editorial

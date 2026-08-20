@@ -6,7 +6,9 @@ BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 PATH="$BUN_INSTALL/bin:$PATH"
 
 {{- if not (lookPath "bun") }}
-curl -fsSL https://bun.sh/install | bash
+{{ includeTemplate "install/fetch-verify" }}
+export BUN_VERSION={{ .installers.bun.version | quote }}
+run_verified_script {{ .installers.bun.url | quote }} {{ .installers.bun.sha256 | quote }} bash
 {{- end }}
 
 {{ includeTemplate "script/reconcile" }}

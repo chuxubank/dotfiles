@@ -1,13 +1,11 @@
-{{- /* Resolve agents for a skill based on its optional tool switch and
+{{- /* Resolve agents for a skill based on its optional owner switch and
        `when.enabled` / `when.disabled` conditions. Agents may be a plain name
-       or a map with `name` plus optional `when`. */ -}}
+       or a map with `name` plus optional `when`. `when.*.tool` matches the
+       agent name being evaluated, not the lifecycle owner. */ -}}
 {{- $skill := .skill -}}
 {{- $allAgents := .skills.agents -}}
 {{- $agents := list -}}
-{{- $skillEnabled := true -}}
-{{- if hasKey $skill "tool" -}}
-  {{- $skillEnabled = includeTemplate "tool/enabled" (merge (dict "tool" $skill.tool) .) | fromJson -}}
-{{- end -}}
+{{- $skillEnabled := includeTemplate "tool/item-enabled" (merge (dict "item" $skill "alias" true) .) | fromJson -}}
 {{- if $skillEnabled -}}
 {{- range $agentEntry := $allAgents -}}
   {{- $agent := $agentEntry -}}

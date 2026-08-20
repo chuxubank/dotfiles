@@ -1,0 +1,29 @@
+{{- /* host/facts — Probe hardware and OS version.
+       Input: root (needs .chezmoi.os and optional .chezmoi.windowsVersion)
+       Output: JSON {mem_gb, disk_gb, os_version, isDarkMode} */ -}}
+{{- $os := .chezmoi.os -}}
+{{- $memGb := 0 -}}
+{{- $diskGb := 0 -}}
+{{- $osVersion := "" -}}
+{{- $isDarkMode := false -}}
+{{- if eq $os "darwin" -}}
+  {{- $memGb = atoi (output "sh" "-c" "echo $(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))" | trim) -}}
+{{- else if or (eq $os "linux") (eq $os "android") -}}
+  {{- $memGb = atoi (output "sh" "-c" "awk '/MemTotal/{printf \"%d\", int($2/1048576)}' /proc/meminfo 2>/dev/null || echo 0" | trim) -}}
+{{- end -}}
+{{- if or (eq $os "darwin") (eq $os "linux") (eq $os "android") -}}
+  {{- $diskGb = atoi (output "sh" "-c" "df -k / 2>/dev/null | awk 'NR==2{printf \"%d\", int($2/1048576)}' || echo 0" | trim) -}}
+{{- end -}}
+{{- if eq $os "darwin" -}}
+  {{- $osVersion = output "sh" "-c" "sw_vers -productVersion 2>/dev/null || echo" | trim -}}
+{{- else if eq $os "linux" -}}
+  {{- $osVersion = (splitList "-" (output "sh" "-c" "uname -r 2>/dev/null || echo" | trim)) | first -}}
+{{- else if eq $os "android" -}}
+  {{- $osVersion = output "sh" "-c" "getprop ro.build.version.release 2>/dev/null || echo" | trim -}}
+{{- else if eq $os "windows" -}}
+  {{- $osVersion = .chezmoi.windowsVersion | default "" -}}
+{{- end -}}
+{{- if eq $os "darwin" -}}
+  {{- $isDarkMode = eq "Dark" (output "sh" "-c" "defaults read -g AppleInterfaceStyle 2>/dev/null || true" | trim) -}}
+{{- end -}}
+{{- dict "mem_gb" $memGb "disk_gb" $diskGb "os_version" $osVersion "isDarkMode" $isDarkMode | toJson -}}

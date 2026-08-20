@@ -1,0 +1,20 @@
+{{- /* host/default-roles — Suggested roles for promptMultichoiceOnce.
+       Input: dict "host_env" "device_type" "os"
+       Output: JSON list of role names (never a string) */ -}}
+{{- $roles := list -}}
+{{- if eq .host_env "personal" -}}
+  {{- if eq .device_type "server" -}}
+    {{- $roles = list "llm" -}}
+  {{- else if eq .device_type "desktop" -}}
+    {{- if eq .os "windows" -}}
+      {{- $roles = list "game" -}}
+    {{- else if eq .os "darwin" -}}
+      {{- $roles = list "llm" "router" -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $roles = list "daily" -}}
+  {{- end -}}
+{{- else if or (eq .host_env "aa") (eq .host_env "iv") -}}
+  {{- $roles = list "work" -}}
+{{- end -}}
+{{- toJson $roles -}}

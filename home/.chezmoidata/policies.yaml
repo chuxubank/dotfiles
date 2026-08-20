@@ -1,0 +1,16 @@
+# Destructive and host-wide actions. Bool or {enabled, when}. Missing is off.
+# Override per host in chezmoi.toml [data.policies] if needed.
+policies:
+  # When a declared tool is off, `remove` always deletes chezmoi-managed
+  # dest files. `purge` (runtime data, login state, caches) is skipped
+  # unless this policy is on.
+  purge_disabled_tools: false
+
+  # Zap Microsoft Edge / AutoUpdate leftovers. Off on aa (Brewfile installs
+  # those casks) and ci. Not implied by host_env alone: set false to skip.
+  uninstall_microsoft_edge:
+    when:
+      enabled:
+        os: [darwin]
+      disabled:
+        host_env: [aa, ci]

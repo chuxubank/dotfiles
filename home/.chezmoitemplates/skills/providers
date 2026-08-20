@@ -1,0 +1,10 @@
+{{- /* skills/providers — Flatten skills.provider_groups in name order.
+       Output: JSON array of provider objects */ -}}
+{{- $groups := default dict .skills.provider_groups -}}
+{{- $out := list -}}
+{{- range $name := keys $groups | sortAlpha -}}
+  {{- range $provider := index $groups $name -}}
+    {{- $out = append $out $provider -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $out -}}

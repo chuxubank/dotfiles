@@ -94,6 +94,7 @@ environment:
           literal: "8888"
 
     - tool: claude-code
+      owner: claude-code
       variables:
         CLAUDE_CODE_NO_FLICKER:
           literal: "1"
@@ -128,6 +129,7 @@ environment:
           homePath: [personal, org]
 
     - tool: opencode
+      owner: opencode
       variables:
         OPENCODE_DISABLE_CLAUDE_CODE:
           literal: "1"

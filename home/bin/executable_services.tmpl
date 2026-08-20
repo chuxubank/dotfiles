@@ -14,14 +14,11 @@ EOF
 
 validate_selector() {
 	case "$1" in
-{{- range (includeTemplate "service/services" . | fromJson) }}
-	{{- $isBrew := and (hasKey . "brew") .brew }}
-	{{- $name := .tool }}
-	{{- if not $isBrew }}{{- $name = printf "%s.%s" .tool .target }}{{- end }}
-	{{- if eq $name .tool }}
-	{{ $name | quote }}) return 0 ;;
+{{- range (includeTemplate "service/plan" . | fromJson) }}
+	{{- if eq .name .tool }}
+	{{ .name | quote }}) return 0 ;;
 	{{- else }}
-	{{ $name | quote }} | {{ .tool | quote }}) return 0 ;;
+	{{ .name | quote }} | {{ .tool | quote }}) return 0 ;;
 	{{- end }}
 {{- end }}
 	esac
@@ -206,29 +203,11 @@ log_files=
 if [ "$action" = list ]; then
 	printf '%-26s %-12s %-8s %s\n' Name Status Manager File
 fi
-{{- range (includeTemplate "service/services" . | fromJson) }}
-{{- $isBrew := and (hasKey . "brew") .brew }}
-{{- $name := "" }}
-{{- if $isBrew }}
-  {{- $name = .tool }}
-{{- else }}
-  {{- $name = printf "%s.%s" .tool .target }}
-{{- end }}
-{{- $label := includeTemplate "service/label" (dict "os" $.chezmoi.os "service" .) }}
-{{- $scheduled := or (hasKey . "startInterval") (and (hasKey . "extra") (contains "<key>Sockets</key>" .extra)) }}
-{{- $logFiles := includeTemplate "service/log-files" (dict "ctx" $ "service" .) | fromJson }}
-{{- if eq $.chezmoi.os "darwin" }}
-  {{- $manager := "launchd" }}
-  {{- if $isBrew }}{{- $manager = "brew" }}{{- end }}
-handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
-	{{ $manager | quote }} {{ printf "~/Library/LaunchAgents/%s.plist" $label | quote }} \
-	{{ $scheduled }} {{ index $logFiles 0 | quote }} {{ index $logFiles 1 | quote }} "$@"
-{{- else if eq $.chezmoi.os "linux" }}
-  {{- $manager := "systemd" }}
-  {{- if and $isBrew (lookPath "brew") }}{{- $manager = "brew" }}{{- end }}
-handle_service "$action" {{ $name | quote }} {{ .tool | quote }} {{ $label | quote }} \
-	{{ $manager | quote }} {{ printf "~/.config/systemd/user/%s.service" $label | quote }} \
-	{{ $scheduled }} {{ index $logFiles 0 | quote }} {{ index $logFiles 1 | quote }} "$@"
+{{- range (includeTemplate "service/plan" . | fromJson) }}
+{{- if or (eq $.chezmoi.os "darwin") (eq $.chezmoi.os "linux") }}
+handle_service "$action" {{ .name | quote }} {{ .tool | quote }} {{ .label | quote }} \
+	{{ .manager | quote }} {{ .file | quote }} \
+	{{ .scheduled }} {{ .stdout_log | quote }} {{ .stderr_log | quote }} "$@"
 {{- end }}
 {{- end }}
 

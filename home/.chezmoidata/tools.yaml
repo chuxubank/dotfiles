@@ -1,10 +1,14 @@
-# Declared tools. A name listed here is the single enablement switch for
-# packages (`tool = "..."`), skill providers and services (`tool: ...`),
-# environment.static entries and skills agents of the same name, explicit
-# tool-owned scripts, and destination cleanup below.
-# Names that are not listed stay enabled.
+# Declared tools. A name listed here is the single enablement switch.
+# Lifecycle affiliation in data files is `owner` (packages, skill
+# providers, defaults). Services and environment groups use `tool` as
+# identity and set `owner` only when they should follow a switch.
+# Skill `when.*.tool` and plugin/mcp `tool` values are the target agent,
+# not the owner.
+# Every `owner` must be a name listed here.
 #
-# remove: destination paths deleted via .chezmoiremove when the tool is off.
+# remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
+# tool is off. purge: runtime data (login state, history, caches); applied
+# only when policies.purge_disabled_tools is on.
 # A trailing /** wipes directory contents. The directory itself is ignored
 # in the source state so apply does not recreate it (ignore of that exact
 # path would also block .chezmoiremove). Managed files at the dest root
@@ -16,6 +20,9 @@ tools:
         host_env: [iv]
     remove:
       - ".claude.json.backup"
+      - ".claude/settings.json"
+      - ".claude/statusline.sh"
+    purge:
       - ".claude/**"
 
   codex:
@@ -23,6 +30,9 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".codex/config.toml"
+      - ".codex/model-catalog.json"
+    purge:
       - ".codex/**"
 
   cursor:
@@ -30,6 +40,9 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".cursor/mcp.json"
+      - ".cursor/cli-config.json"
+    purge:
       - ".cursor/**"
 
   gemini-cli:
@@ -37,6 +50,8 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".gemini/antigravity-cli/mcp_config.json"
+    purge:
       - ".gemini/**"
 
   goose:
@@ -44,14 +59,22 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".config/goose/config.yaml"
+    purge:
       - ".config/goose/**"
 
   grok:
     remove:
+      - ".grok/config.toml"
+      - ".grok/trusted_folders.toml"
+    purge:
       - ".grok/**"
 
   herdr:
     remove:
+      - ".config/herdr/config.toml"
+      - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
+    purge:
       - ".config/herdr/**"
 
   opencode:
@@ -59,6 +82,9 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".config/opencode/opencode.json"
+      - ".config/opencode/tui.json"
+    purge:
       - ".config/opencode/**"
       - ".local/share/opencode/**"
 
@@ -67,6 +93,11 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".pi/agent/models.json"
+      - ".pi/agent/settings.json"
+      - ".pi/agent/trust.json"
+      - ".pi/agent/mcp.json"
+    purge:
       - ".pi/**"
 
   rclone:
@@ -74,6 +105,8 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".config/rclone/rclone.conf"
+    purge:
       - ".config/rclone/**"
 
   rtk:
@@ -81,6 +114,9 @@ tools:
       disabled:
         os: [windows]
     remove:
+      - ".config/rtk/config.toml"
+      - "Library/Application Support/rtk/config.toml"
+    purge:
       - ".config/rtk/**"
       - "Library/Application Support/rtk/**"
 
@@ -94,6 +130,8 @@ tools:
       enabled:
         os: [darwin]
     remove:
+      - ".termio/settings.json"
+    purge:
       - ".termio/**"
 
   warp:
@@ -102,6 +140,9 @@ tools:
         disk_gb:
           min: 256
     remove:
+      - ".warp/settings.toml"
+      - ".warp/tab_configs/startup_config.toml"
+    purge:
       - ".warp/**"
 
   talkify:
@@ -111,5 +152,5 @@ tools:
         os:
           type: darwin
           version: ">=26"
-    remove:
+    purge:
       - "Library/Application Support/Talkify/**"

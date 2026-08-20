@@ -1,10 +1,15 @@
 {{- /* Source-state ignore for disabled tools. Only the parent of a
        trailing /** is ignored, so .chezmoiremove can still delete the
-       destination children. */ -}}
+       destination children. Ignore both remove and purge patterns so
+       apply does not recreate files while runtime data is retained. */ -}}
 {{- $ctx := . -}}
 {{- range $name, $spec := default dict $ctx.tools -}}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
-    {{- range $pattern := dig "remove" (list) $spec -}}
+    {{- $patterns := dig "remove" (list) $spec -}}
+    {{- range $p := dig "purge" (list) $spec -}}
+      {{- $patterns = append $patterns $p -}}
+    {{- end -}}
+    {{- range $pattern := $patterns -}}
       {{- if hasSuffix "/**" $pattern }}
 {{ trimSuffix "/**" $pattern }}
       {{- else if contains "/" $pattern }}
