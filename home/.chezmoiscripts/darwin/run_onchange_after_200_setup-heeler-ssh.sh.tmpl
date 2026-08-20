@@ -1,4 +1,4 @@
-{{ if eq .chezmoi.os "darwin" -}}
+{{ if and (eq .chezmoi.os "darwin") (includeTemplate "tool/enabled" (merge (dict "tool" "herdr") .) | fromJson) -}}
 #!/bin/zsh
 
 echo "{{ template "week" . }} Enable Remote Login for Heeler"

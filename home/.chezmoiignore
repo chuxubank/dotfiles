@@ -25,7 +25,9 @@ Library
 Library/LaunchAgents/rclone.rpi.plist
 {{- end }}
 
-{{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows") }}
+{{- if and
+      (or (eq .chezmoi.os "darwin") (eq .chezmoi.os "windows"))
+      (includeTemplate "tool/enabled" (merge (dict "tool" "rtk") .) | fromJson) }}
 .config/rtk
 {{- end }}
 
@@ -36,17 +38,10 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- includeTemplate "tool/disabled-ignore" . }}
 
 {{- if eq .host_env "ci" }}
-./**/opencode
 .aider.conf.yml
 .authinfo.gpg
-.codex
-.config/goose
-.config/rclone
-.cursor
 .double-entry-generator.yaml
-.gemini
 .gradle
-.pi
 .ssh
 AppData/Roaming/Zotero
 Library

@@ -24,7 +24,7 @@ pkg = [
   "pass",
   "pass-otp",
   "plantuml",
-  "rclone",
+  { name = "rclone", tool = "rclone" },
   "ripgrep",
   "rsync",
   "rust",

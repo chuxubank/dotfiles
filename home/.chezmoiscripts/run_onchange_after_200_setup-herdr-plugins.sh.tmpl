@@ -1,3 +1,4 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "herdr") .) | fromJson -}}
 #!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup herdr plugins"
@@ -47,3 +48,4 @@ remove_undeclared cleanup_enabled installed_plugins declared_plugins \
 if $had_errors; then
   exit 1
 fi
+{{- end -}}

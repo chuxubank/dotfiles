@@ -1,7 +1,7 @@
 # Declared tools. A name listed here is the single enablement switch for
-# packages (`tool = "..."`), skill providers (`tool: ...`),
-# environment.static entries and skills agents of the same name, and
-# destination cleanup below.
+# packages (`tool = "..."`), skill providers and services (`tool: ...`),
+# environment.static entries and skills agents of the same name, explicit
+# tool-owned scripts, and destination cleanup below.
 # Names that are not listed stay enabled.
 #
 # remove: destination paths deleted via .chezmoiremove when the tool is off.
@@ -18,12 +18,91 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
+  codex:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".codex/**"
+
+  cursor:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".cursor/**"
+
+  gemini-cli:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".gemini/**"
+
+  goose:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".config/goose/**"
+
+  grok:
+    remove:
+      - ".grok/**"
+
+  herdr:
+    remove:
+      - ".config/herdr/**"
+
+  opencode:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".config/opencode/**"
+      - ".local/share/opencode/**"
+
+  pi:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".pi/**"
+
+  rclone:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".config/rclone/**"
+
+  rtk:
+    when:
+      disabled:
+        os: [windows]
+    remove:
+      - ".config/rtk/**"
+      - "Library/Application Support/rtk/**"
+
+  sentry:
+    when:
+      enabled:
+        host_env: [iv]
+
   termio:
     when:
       enabled:
         os: [darwin]
     remove:
       - ".termio/**"
+
+  warp:
+    when:
+      enabled:
+        disk_gb:
+          min: 256
+    remove:
+      - ".warp/**"
 
   talkify:
     when:

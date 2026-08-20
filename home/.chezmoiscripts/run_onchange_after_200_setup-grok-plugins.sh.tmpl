@@ -1,3 +1,4 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "grok") .) | fromJson -}}
 #!/usr/bin/env zsh
 
 echo "{{ template "week" . }} 󰯁 Setup grok plugins"
@@ -120,3 +121,4 @@ fi
 if $had_errors; then
   exit 1
 fi
+{{- end -}}

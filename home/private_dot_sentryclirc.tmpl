@@ -1,4 +1,4 @@
-{{- if eq .host_env "iv" -}}
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "sentry") .) | fromJson -}}
 [defaults]
 url = {{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "url") .) }}
 org = sentry

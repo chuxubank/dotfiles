@@ -1,6 +1,6 @@
 [packages.pacman]
 core = [
-  "rclone",
+  { name = "rclone", tool = "rclone" },
   "pass",
 ]
 extra = [

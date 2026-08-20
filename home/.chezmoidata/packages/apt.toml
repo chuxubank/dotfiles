@@ -20,7 +20,7 @@ pkg = [
   "pass",
   "pkg-config",
   "plantuml",
-  "rclone",
+  { name = "rclone", tool = "rclone" },
   "ripgrep",
   "rsync",
   "rustup",

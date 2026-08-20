@@ -28,6 +28,7 @@ skills:
 
     - name: herdr
       source: herdrdev/herdr
+      tool: herdr
 
     - name: termio
       source: termio-sh/termio
@@ -80,9 +81,7 @@ skills:
 
     - name: sentry-cli
       source: https://cli.sentry.dev
-      when:
-        enabled:
-          host_env: iv
+      tool: sentry
 
     - name: feishu-projects
       source: chuxubank/skills
