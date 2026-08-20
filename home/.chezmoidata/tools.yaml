@@ -19,10 +19,10 @@ tools:
       enabled:
         host_env: [iv]
     remove:
-      - ".claude.json.backup"
       - ".claude/settings.json"
       - ".claude/statusline.sh"
     purge:
+      - ".claude.json.backup"
       - ".claude/**"
 
   codex:

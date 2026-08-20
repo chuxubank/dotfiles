@@ -5,7 +5,7 @@
 {{- $skill := .skill -}}
 {{- $allAgents := .skills.agents -}}
 {{- $agents := list -}}
-{{- $skillEnabled := includeTemplate "tool/item-enabled" (merge (dict "item" $skill "alias" true) .) | fromJson -}}
+{{- $skillEnabled := includeTemplate "tool/item-enabled" (merge (dict "item" $skill) .) | fromJson -}}
 {{- if $skillEnabled -}}
 {{- range $agentEntry := $allAgents -}}
   {{- $agent := $agentEntry -}}

@@ -6,45 +6,74 @@
   {{- fail "verify/model: tools.yaml is empty" -}}
 {{- end -}}
 
-{{- /* Every declared tool evaluates to a boolean on a few host shapes. */ -}}
-{{- $hosts := list
-      (dict "host_env" "personal" "os" "darwin" "disk_gb" 512)
-      (dict "host_env" "iv" "os" "darwin" "disk_gb" 512)
-      (dict "host_env" "ci" "os" "linux" "disk_gb" 20)
-      (dict "host_env" "aa" "os" "windows" "disk_gb" 256)
+{{- /* Explicit enable/disable table for every declared tool.
+       Host shapes: personal/darwin 512G, iv/darwin 512G, ci/linux 20G, aa/windows 256G. */ -}}
+{{- $hostShapes := dict
+      "personal" (dict "host_env" "personal" "os" "darwin" "disk_gb" 512 "os_version" "26.0")
+      "iv" (dict "host_env" "iv" "os" "darwin" "disk_gb" 512 "os_version" "26.0")
+      "ci" (dict "host_env" "ci" "os" "linux" "disk_gb" 20 "os_version" "")
+      "aa" (dict "host_env" "aa" "os" "windows" "disk_gb" 256 "os_version" "")
+-}}
+{{- $expect := dict
+      "claude-code" (dict "personal" false "iv" true "ci" false "aa" false)
+      "codex" (dict "personal" true "iv" true "ci" false "aa" true)
+      "cursor" (dict "personal" true "iv" true "ci" false "aa" true)
+      "gemini-cli" (dict "personal" true "iv" true "ci" false "aa" true)
+      "goose" (dict "personal" true "iv" true "ci" false "aa" true)
+      "grok" (dict "personal" true "iv" true "ci" true "aa" true)
+      "herdr" (dict "personal" true "iv" true "ci" true "aa" true)
+      "opencode" (dict "personal" true "iv" true "ci" false "aa" true)
+      "pi" (dict "personal" true "iv" true "ci" false "aa" true)
+      "rclone" (dict "personal" true "iv" true "ci" false "aa" true)
+      "rtk" (dict "personal" true "iv" true "ci" true "aa" false)
+      "sentry" (dict "personal" false "iv" true "ci" false "aa" false)
+      "termio" (dict "personal" true "iv" true "ci" false "aa" false)
+      "warp" (dict "personal" true "iv" true "ci" false "aa" true)
+      "talkify" (dict "personal" true "iv" false "ci" false "aa" false)
 -}}
 {{- range $name, $spec := $declared -}}
-  {{- range $host := $hosts -}}
+  {{- if not (hasKey $expect $name) -}}
+    {{- fail (printf "matrix: add expected enablement for tool %q" $name) -}}
+  {{- end -}}
+  {{- range $shapeName, $want := index $expect $name -}}
+    {{- $shape := index $hostShapes $shapeName -}}
     {{- $got := includeTemplate "tool/enabled" (dict
           "tool" $name
           "tools" $declared
-          "host_env" $host.host_env
+          "host_env" $shape.host_env
           "device_type" "laptop"
           "roles" (list "llm")
           "mem_gb" 16
-          "disk_gb" $host.disk_gb
-          "os_version" "26.0"
-          "chezmoi" (dict "os" $host.os)) | fromJson -}}
-    {{- if ne (kindOf $got) "bool" -}}
-      {{- fail (printf "tool/enabled %s on %s/%s: expected bool" $name $host.host_env $host.os) -}}
+          "disk_gb" $shape.disk_gb
+          "os_version" $shape.os_version
+          "chezmoi" (dict "os" $shape.os)) | fromJson -}}
+    {{- if ne $got $want -}}
+      {{- fail (printf "matrix: %s on %s: got %v want %v" $name $shapeName $got $want) -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
 
-{{- /* Explicit matrix for host_env / os switches. Fresh dicts: sprig merge
-       does not overwrite existing host_env on the root context. */ -}}
-{{- $eval := dict "tools" $declared "device_type" "laptop" "roles" (list) "mem_gb" 16 "disk_gb" 512 "os_version" "26.0" -}}
-{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "claude-code" "host_env" "iv" "chezmoi" (dict "os" "darwin"))) | fromJson) true -}}
-  {{- fail "matrix: claude-code on iv" -}}
-{{- end -}}
-{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "claude-code" "host_env" "personal" "chezmoi" (dict "os" "darwin"))) | fromJson) false -}}
-  {{- fail "matrix: claude-code off personal" -}}
-{{- end -}}
-{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "codex" "host_env" "ci" "chezmoi" (dict "os" "linux") "os_version" "")) | fromJson) false -}}
-  {{- fail "matrix: codex off ci" -}}
-{{- end -}}
-{{- if ne (includeTemplate "tool/enabled" (merge (dict) $eval (dict "tool" "termio" "host_env" "personal" "chezmoi" (dict "os" "linux"))) | fromJson) false -}}
-  {{- fail "matrix: termio off linux" -}}
+{{- /* Ignore lines must not be a whole well-known root. */ -}}
+{{- $broad := list ".config" "Library" ".local" "AppData" -}}
+{{- $ignoreHosts := list
+      (dict "name" "ci" "host_env" "ci" "os" "linux" "disk_gb" 20)
+      (dict "name" "windows" "host_env" "aa" "os" "windows" "disk_gb" 256)
+-}}
+{{- range $ih := $ignoreHosts -}}
+  {{- $ignore := printf "\n%s\n" (includeTemplate "tool/disabled-ignore" (dict
+        "tools" $declared
+        "host_env" $ih.host_env
+        "device_type" "laptop"
+        "roles" (list "llm")
+        "mem_gb" 16
+        "disk_gb" $ih.disk_gb
+        "os_version" ""
+        "chezmoi" (dict "os" $ih.os))) -}}
+  {{- range $root := $broad -}}
+    {{- if contains (printf "\n%s\n" $root) $ignore -}}
+      {{- fail (printf "disabled-ignore on %s: overly broad %q" $ih.name $root) -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}
 
 {{- /* Path width for remove and purge. */ -}}

@@ -1,5 +1,5 @@
-# Pin bootstrap installers and split plan from apply
+# Do not pin vendor bootstrap installers
 
-`install.sh` and the bun/uv/sdkman/Homebrew setup scripts downloaded vendor installers and executed them immediately. That is convenient and also a supply-chain footgun: HEAD contents change, and a dry-run was not a first-class entry.
+We tried version + SHA256 pins in `installers.yaml` and `install.sh`. Official install scripts (especially SDKMAN) change at HEAD, so the hash went stale and a new machine could not install. Dual-sourcing the chezmoi checksum in `install.sh` and data files made the same drift worse.
 
-Bootstraps are pinned in `installers.yaml` (version plus SHA256). `install.sh` fetches the chezmoi release tarball and checks the archive hash instead of piping `get.chezmoi.io` to sh. `./install.sh --plan` and `make plan` init (if needed) and dry-run apply. Personal source repos for skills and some plugins may still follow a branch because they change faster than a useful pin.
+Vendor `curl | sh` is accepted for chezmoi, uv, bun, SDKMAN, and Homebrew. The non-writing entry is `make plan` (`chezmoi apply --dry-run`). First-machine `./install.sh` still runs `init --apply`. PATH chezmoi is used as-is.

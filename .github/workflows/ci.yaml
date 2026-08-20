@@ -15,7 +15,7 @@ jobs:
       - name: Install zsh
         run: sudo apt-get update && sudo apt-get install -y zsh
 
-      - name: Install pinned chezmoi
+      - name: Install chezmoi
         run: |
           ./install.sh --install-only
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"

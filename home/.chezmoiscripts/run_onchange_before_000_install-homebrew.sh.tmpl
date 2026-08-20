@@ -11,9 +11,7 @@ export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles"
 export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 {{- end }}
 
-{{ includeTemplate "install/fetch-verify" }}
-export NONINTERACTIVE=1
-run_verified_script {{ .installers.homebrew.url | quote }} {{ .installers.homebrew.sha256 | quote }} /bin/bash
+NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 if [ -x /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"

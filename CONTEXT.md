@@ -6,7 +6,7 @@ Source of truth for one user's machines: declare intent in data files, resolve i
 
 ## Pipeline
 
-1. **Data** in `home/.chezmoidata/` names tools, packages, skills, services, policies, and pinned installers.
+1. **Data** in `home/.chezmoidata/` names tools, packages, skills, services, and policies.
 2. **Resolver templates** in `home/.chezmoitemplates/` turn that data plus host facts into booleans, lists, and merged documents. Callers should not reimplement `when/*`, `tool/*`, or `package/items`.
 3. **Source targets and scripts** under `home/` consume those resolvers. One destination path has one writer.
 4. **Destination** is the live home directory. `modify_` files merge through `config/merge`. `.chezmoiremove` deletes dest paths for disabled tools.
@@ -23,7 +23,7 @@ Local and CI verification is the same command: `make verify`.
 
 **Destructive operations.** `remove` deletes chezmoi-managed dest files when a tool is off. `purge` deletes runtime data and is off unless `policies.purge_disabled_tools` is on. `policies.uninstall_microsoft_edge` is the Edge zap switch. Open-world package uninstall (uv/bun/sdkman/cargo) still removes undeclared inventory names; that is reconcile, not purge.
 
-**Remote execution.** Bootstrap installers in `installers.yaml` are version-pinned and SHA256-checked. `./install.sh --plan` and `make plan` only print a dry-run. Personal git sources (skills, some plugins) may follow a branch.
+**Remote execution.** Bootstrap installers use the vendor script (chezmoi.io/get, bun, uv, SDKMAN, Homebrew). `make plan` is the non-writing dry-run. `./install.sh` with no flags still `init --apply` on a new machine. Personal git sources (skills, some plugins) may follow a branch.
 
 ## Language
 

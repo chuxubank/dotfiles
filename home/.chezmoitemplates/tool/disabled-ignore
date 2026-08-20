@@ -1,7 +1,9 @@
-{{- /* Source-state ignore for disabled tools. Only the parent of a
-       trailing /** is ignored, so .chezmoiremove can still delete the
-       destination children. Ignore both remove and purge patterns so
-       apply does not recreate files while runtime data is retained. */ -}}
+{{- /* Source-state ignore for disabled tools.
+       foo/** ignores foo so .chezmoiremove can still delete children.
+       Nested files ignore dirname (a/b/c -> a/b), never the first
+       segment alone (.config/rclone/x must not ignore .config).
+       Ignore both remove and purge so apply does not recreate files
+       while runtime data is retained. */ -}}
 {{- $ctx := . -}}
 {{- range $name, $spec := default dict $ctx.tools -}}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
@@ -12,8 +14,11 @@
     {{- range $pattern := $patterns -}}
       {{- if hasSuffix "/**" $pattern }}
 {{ trimSuffix "/**" $pattern }}
-      {{- else if contains "/" $pattern }}
-{{ index (splitList "/" $pattern) 0 }}
+      {{- else if contains "/" $pattern -}}
+        {{- $parts := splitList "/" $pattern -}}
+        {{- if gt (len $parts) 1 }}
+{{ slice $parts 0 (sub (len $parts) 1) | join "/" }}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

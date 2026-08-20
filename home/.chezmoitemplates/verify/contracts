@@ -106,7 +106,7 @@
   {{- fail "package/items: expected black" -}}
 {{- end -}}
 
-{{- /* skills/when */ -}}
+{{- /* skills/when: owner gates; a top-level tool field is not an owner alias */ -}}
 {{- $skillOn := dict "name" "herdr" "owner" "codex" -}}
 {{- $skillCtx := merge (dict) $base (dict
       "host_env" "personal"
@@ -123,6 +123,29 @@
       "skills" (dict "agents" (list "codex" "amp")))) | fromJson -}}
 {{- if ne (len $agentsOff) 0 -}}
   {{- fail "skills/when: disabled owner should yield no agents" -}}
+{{- end -}}
+{{- $skillToolField := dict "name" "herdr" "tool" "claude-code" -}}
+{{- $agentsToolField := includeTemplate "skills/when" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skill" $skillToolField
+      "skills" (dict "agents" (list "codex" "amp")))) | fromJson -}}
+{{- if ne (len $agentsToolField) 2 -}}
+  {{- fail "skills/when: tool identity must not act as owner" -}}
+{{- end -}}
+
+{{- /* disabled-ignore uses dirname, not the first path segment */ -}}
+{{- $ignoreCtx := merge (dict) $base (dict
+      "host_env" "ci"
+      "tools" (dict "rclone" (dict
+        "when" (dict "disabled" (dict "host_env" (list "ci")))
+        "remove" (list ".config/rclone/rclone.conf")
+        "purge" (list ".config/rclone/**")))) -}}
+{{- $ignore := printf "\n%s\n" (includeTemplate "tool/disabled-ignore" $ignoreCtx) -}}
+{{- if contains "\n.config\n" $ignore -}}
+  {{- fail "disabled-ignore: must not ignore .config" -}}
+{{- end -}}
+{{- if not (contains "\n.config/rclone\n" $ignore) -}}
+  {{- fail (printf "disabled-ignore: expected .config/rclone, got %q" $ignore) -}}
 {{- end -}}
 
 {{- /* service/services: identity tool does not gate; owner does */ -}}
