@@ -5,13 +5,13 @@ name = "gruvbox"
 auto_switch = true
 
 [[keys.command]]
-key = "prefix+shift+h"
+key = "prefix+alt+h"
 type = "plugin_action"
 command = "heeler.pair"
 description = "Pair Heeler"
 
 [[keys.command]]
-key = "prefix+shift+l"
+key = "prefix+alt+l"
 type = "popup"
 command = "$HOME/bin/herdr-layout"
 description = "Apply declared workspaces"
