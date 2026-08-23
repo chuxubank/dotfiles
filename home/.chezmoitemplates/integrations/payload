@@ -1,0 +1,22 @@
+{{- /* integrations/payload — JSON [{tool, args, enabled}] for .owner */ -}}
+{{- $name := .owner -}}
+{{- if not $name -}}
+{{- fail "integrations/payload: missing owner" -}}
+{{- end -}}
+{{- $ints := dig "integrations" (list) (index .tools $name) -}}
+{{- if eq (len $ints) 0 -}}
+{{- fail (printf "%s: integrations is empty" $name) -}}
+{{- end -}}
+{{- $payload := list -}}
+{{- range $int := $ints -}}
+  {{- $agent := dig "tool" "" $int -}}
+  {{- if not $agent -}}
+    {{- fail (printf "%s: integration missing tool" $name) -}}
+  {{- end -}}
+  {{- $enabled := includeTemplate "tool/enabled" (merge (dict "tool" $agent) $) | fromJson -}}
+  {{- $payload = append $payload (dict
+        "tool" $agent
+        "args" (dig "args" (list) $int)
+        "enabled" $enabled) -}}
+{{- end -}}
+{{- $payload | toJson -}}

@@ -1,0 +1,3 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "herdr") .) | fromJson -}}
+{{ includeTemplate "herdr/run.py" (merge (dict "mode" "setup") .) -}}
+{{- end -}}

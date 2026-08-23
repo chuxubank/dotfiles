@@ -2,7 +2,7 @@
 # Lifecycle affiliation in data files is `owner` (packages, skill
 # providers, defaults). Services and environment groups use `tool` as
 # identity and set `owner` only when they should follow a switch.
-# Skill `when.*.tool`, plugin/mcp `tool`, and rtk integrations `tool`
+# Skill `when.*.tool`, plugin/mcp `tool`, and integrations `tool`
 # values are the target agent, not the owner.
 # Every `owner` must be a name listed here.
 #
@@ -70,12 +70,38 @@ tools:
     purge:
       - ".grok/**"
 
+  github-copilot:
+    when:
+      disabled:
+        host_env: [ci]
+    purge:
+      - ".copilot/**"
+
   herdr:
     remove:
       - ".config/herdr/config.toml"
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
     purge:
       - ".config/herdr/**"
+    # `herdr integration install <args>`. Agent-owned hook files cannot
+    # live in remove/purge (disabled-ignore would skip the parent).
+    integrations:
+      - tool: claude-code
+        args: ["claude"]
+      - tool: codex
+        args: ["codex"]
+      - tool: cursor
+        args: ["cursor"]
+      - tool: gemini-cli
+        args: ["antigravity-cli"]
+      - tool: github-copilot
+        args: ["copilot"]
+      - tool: grok
+        args: ["grok"]
+      - tool: opencode
+        args: ["opencode"]
+      - tool: pi
+        args: ["pi"]
 
   opencode:
     when:
@@ -142,6 +168,8 @@ tools:
         args: ["--global", "--agent", "pi"]
       - tool: cursor
         args: ["--global", "--agent", "cursor", "--auto-patch"]
+      - tool: github-copilot
+        args: ["--global", "--copilot"]
 
   sentry:
     when:
@@ -156,6 +184,15 @@ tools:
       - ".termio/settings.json"
     purge:
       - ".termio/**"
+    # Termio writes hooks itself when the app runs. These names are the
+    # agent dirs to strip when termio or the agent is off.
+    integrations:
+      - tool: claude-code
+      - tool: codex
+      - tool: cursor
+      - tool: grok
+      - tool: opencode
+      - tool: pi
 
   warp:
     when:

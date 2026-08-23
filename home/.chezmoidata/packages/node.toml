@@ -4,7 +4,7 @@ global = [
   "@ansible/ansible-language-server",
   { name = "@blowmage/cursor-agent-acp", owner = "cursor" },
   { name = "@earendil-works/pi-coding-agent", owner = "pi" },
-  "@github/copilot",
+  { name = "@github/copilot", owner = "github-copilot" },
   "@github/copilot-language-server",
   "@modelcontextprotocol/inspector",
   { name = "@openai/codex", owner = "codex" },

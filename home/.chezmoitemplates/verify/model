@@ -21,6 +21,7 @@
       "gemini-cli" (dict "personal" true "iv" true "ci" false "aa" true)
       "goose" (dict "personal" true "iv" true "ci" false "aa" true)
       "grok" (dict "personal" true "iv" true "ci" true "aa" true)
+      "github-copilot" (dict "personal" true "iv" true "ci" false "aa" true)
       "herdr" (dict "personal" true "iv" true "ci" true "aa" true)
       "opencode" (dict "personal" true "iv" true "ci" false "aa" true)
       "pi" (dict "personal" true "iv" true "ci" false "aa" true)
@@ -76,29 +77,30 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* rtk integrations target declared agents and list init args.
-       Agent-owned files cannot live in remove/purge (parent ignore). */ -}}
+{{- /* Integrations target declared agents. Agent-owned files cannot live
+       in remove/purge (parent ignore). args is an optional list. */ -}}
+{{- range $name, $spec := $declared -}}
+  {{- $ints := dig "integrations" (list) $spec -}}
+  {{- if and (hasKey $spec "integrations") (eq (len $ints) 0) -}}
+    {{- fail (printf "%s: integrations must not be empty" $name) -}}
+  {{- end -}}
+  {{- range $int := $ints -}}
+    {{- if ne (kindOf $int) "map" -}}
+      {{- fail (printf "%s: each integration must be a map" $name) -}}
+    {{- end -}}
+    {{- $agent := dig "tool" "" $int -}}
+    {{- if not $agent -}}
+      {{- fail (printf "%s: integration missing tool" $name) -}}
+    {{- end -}}
+    {{- if not (hasKey $declared $agent) -}}
+      {{- fail (printf "%s integration: unknown tool %q" $name $agent) -}}
+    {{- end -}}
+    {{- if and (hasKey $int "args") (ne (kindOf $int.args) "slice") -}}
+      {{- fail (printf "%s integration %s: args must be a list" $name $agent) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- $rtkSpec := index $declared "rtk" -}}
-{{- $rtkInts := dig "integrations" (list) $rtkSpec -}}
-{{- if eq (len $rtkInts) 0 -}}
-  {{- fail "rtk: integrations must be declared" -}}
-{{- end -}}
-{{- range $int := $rtkInts -}}
-  {{- if ne (kindOf $int) "map" -}}
-    {{- fail "rtk: each integration must be a map" -}}
-  {{- end -}}
-  {{- $agent := dig "tool" "" $int -}}
-  {{- if not $agent -}}
-    {{- fail "rtk: integration missing tool" -}}
-  {{- end -}}
-  {{- if not (hasKey $declared $agent) -}}
-    {{- fail (printf "rtk integration: unknown tool %q" $agent) -}}
-  {{- end -}}
-  {{- $args := dig "args" (list) $int -}}
-  {{- if or (ne (kindOf $args) "slice") (eq (len $args) 0) -}}
-    {{- fail (printf "rtk integration %s: args must be a non-empty list" $agent) -}}
-  {{- end -}}
-{{- end -}}
 {{- $rtkPurge := dig "purge" (list) $rtkSpec -}}
 {{- range $need := list
       ".config/rtk/**"

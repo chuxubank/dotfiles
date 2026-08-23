@@ -1,0 +1,3 @@
+{{- if not (includeTemplate "tool/enabled" (merge (dict "tool" "termio") .) | fromJson) -}}
+{{ includeTemplate "termio/run.py" (merge (dict "mode" "teardown") .) -}}
+{{- end -}}
