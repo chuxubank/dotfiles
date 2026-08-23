@@ -88,50 +88,102 @@ fi
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
+export PYTHONPYCACHEPREFIX="$tmpdir"
 : >"$tmpdir/syntax_failed"
+
+mark_syntax_failed() {
+	echo 1 >"$tmpdir/syntax_failed"
+}
+
+check_shell() {
+	interp=$1
+	src=$2
+	file=$3
+	if [ "$interp" = sh ]; then
+		sh -n "$file" || {
+			echo "verify: sh -n failed: $src" >&2
+			mark_syntax_failed
+		}
+		return 0
+	fi
+	if command -v "$interp" >/dev/null 2>&1; then
+		"$interp" -n "$file" || {
+			echo "verify: $interp -n failed: $src" >&2
+			mark_syntax_failed
+		}
+	fi
+}
+
+check_python() {
+	src=$1
+	file=$2
+	if command -v python3 >/dev/null 2>&1; then
+		if ! python3 -W error::SyntaxWarning -W error::DeprecationWarning -c \
+			'import sys; compile(open(sys.argv[1], "rb").read(), sys.argv[2], "exec")' \
+			"$file" "$src"; then
+			echo "verify: python3 compile failed: $src" >&2
+			mark_syntax_failed
+		fi
+	fi
+}
+
+check_by_shebang() {
+	src=$1
+	file=$2
+	first=$3
+	case $first in
+	'#!'*zsh*)
+		check_shell zsh "$src" "$file"
+		;;
+	'#!'*bash*)
+		check_shell bash "$src" "$file"
+		;;
+	'#!'*'/bin/sh'* | '#!'*'/usr/bin/env sh'* | '#!/bin/sh' | '#!/usr/bin/env sh')
+		check_shell sh "$src" "$file"
+		;;
+	'#!'*python*)
+		check_python "$src" "$file"
+		;;
+	esac
+}
 
 find home/.chezmoiscripts home/bin -type f -name '*.tmpl' 2>/dev/null | sort |
 	while IFS= read -r tmpl; do
 		if ! rendered=$(chezmoi execute-template --source "$CHEZMOI_SOURCE" <"$tmpl"); then
 			echo "verify: template failed: $tmpl" >&2
-			echo 1 >"$tmpdir/syntax_failed"
+			mark_syntax_failed
 			continue
 		fi
 		stripped=$(printf '%s' "$rendered" | tr -d '[:space:]')
 		if [ -z "$stripped" ]; then
 			if [ -n "$rendered" ]; then
 				echo "verify: disabled script is not 0 bytes: $tmpl" >&2
-				echo 1 >"$tmpdir/syntax_failed"
+				mark_syntax_failed
 			fi
 			continue
 		fi
 		out="$tmpdir/script"
 		printf '%s\n' "$rendered" >"$out"
 		first=$(printf '%s\n' "$rendered" | sed -n '/[^[:space:]]/{p;q;}')
-		case $first in
-		'#!'*zsh*)
-			if command -v zsh >/dev/null 2>&1; then
-				zsh -n "$out" || {
-					echo "verify: zsh -n failed: $tmpl" >&2
-					echo 1 >"$tmpdir/syntax_failed"
-				}
-			fi
-			;;
-		'#!'*'/bin/sh'* | '#!'*'/usr/bin/env sh'* | '#!/bin/sh' | '#!/usr/bin/env sh')
-			sh -n "$out" || {
-				echo "verify: sh -n failed: $tmpl" >&2
-				echo 1 >"$tmpdir/syntax_failed"
-			}
-			;;
-		'#!'*python*)
-			if command -v python3 >/dev/null 2>&1; then
-				python3 -m py_compile "$out" || {
-					echo "verify: python3 -m py_compile failed: $tmpl" >&2
-					echo 1 >"$tmpdir/syntax_failed"
-				}
-			fi
+		check_by_shebang "$tmpl" "$out" "$first"
+	done
+
+find . \
+	-name .git -prune -o \
+	-name __pycache__ -prune -o \
+	-name .chezmoitemplates -prune -o \
+	-type f ! -name '*.tmpl' ! -name '*.pyc' -print |
+	sort |
+	while IFS= read -r file; do
+		rel=${file#./}
+		case $rel in
+		*.py)
+			check_python "$rel" "$file"
+			continue
 			;;
 		esac
+		first=$(sed -n '/[^[:space:]]/{p;q;}' "$file" 2>/dev/null) || continue
+		check_by_shebang "$rel" "$file" "$first"
 	done
 
 if [ -s "$tmpdir/syntax_failed" ]; then

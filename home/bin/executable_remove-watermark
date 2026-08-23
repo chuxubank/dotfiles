@@ -8,7 +8,7 @@ import sys
 from tempfile import NamedTemporaryFile
 from os import path
 
-objstart = re.compile(b"^\d+ \d+ obj\s*$")
+objstart = re.compile(rb"^\d+ \d+ obj\s*$")
 
 
 def writebuffer(fh, buffer):
