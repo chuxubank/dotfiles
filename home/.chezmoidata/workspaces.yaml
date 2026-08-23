@@ -8,14 +8,15 @@
 # workspace root when one is set. command is run in the pane after
 # create (herdr-spreader / Zellij pane command).
 workspaces:
-  - name: Configs
+  - name: configs
     focus: true
     tabs:
-      - label: Configs
+      - label: emacs
         panes:
-          - cwd: ~/.config/cat-emacs
+          - cwd: ~/.config/emacs
             command: grok
             focus: true
+      - label: chezmoi
+        panes:
           - cwd: ~/.local/share/chezmoi
-            split: right
             command: grok

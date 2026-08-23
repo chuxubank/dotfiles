@@ -25,6 +25,9 @@ config.enable_scroll_bar = true
 -- Keyboard
 -- Kitty keyboard protocol lets apps distinguish Shift+Enter from Enter.
 config.enable_kitty_keyboard = true
+-- Match Ghostty macos-option-as-alt so Herdr sees Alt+0 and other Alt chords.
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
 
 -- Modules
 config.launch_menu = launch.launch_menu
