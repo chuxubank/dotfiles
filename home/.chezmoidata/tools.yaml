@@ -136,8 +136,7 @@ tools:
 
   rtk:
     when:
-      disabled:
-        os: [windows]
+      enabled: false
     remove:
       - ".config/rtk/config.toml"
       - "Library/Application Support/rtk/config.toml"

@@ -23,15 +23,38 @@ def rtk_init(item, uninstall=False):
     cmd = [rtk_bin(), "init"] + list(item.get("args") or [])
     if uninstall:
         cmd.append("--uninstall")
-    return subprocess.run(cmd).returncode
+    return subprocess.run(cmd, capture_output=True, text=True)
+
+
+def _write_proc(proc):
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+        if not proc.stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+        if not proc.stderr.endswith("\n"):
+            sys.stderr.write("\n")
 
 
 def install(item):
-    return rtk_init(item)
+    proc = rtk_init(item)
+    if proc.returncode in (0, None):
+        _write_proc(proc)
+        return 0
+    err = (proc.stderr or "") + (proc.stdout or "")
+    lowered = err.lower()
+    if "no such file" in lowered or "not found" in lowered:
+        detail = err.strip().splitlines()[-1] if err.strip() else "not found"
+        print("  skip %s: %s" % (item["tool"], detail))
+        return 0
+    _write_proc(proc)
+    return proc.returncode
 
 
 def uninstall(item):
-    rtk_init(item, uninstall=True)
+    proc = rtk_init(item, uninstall=True)
+    _write_proc(proc)
     return 0
 
 
