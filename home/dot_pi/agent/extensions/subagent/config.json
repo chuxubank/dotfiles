@@ -1,0 +1,14 @@
+{
+  "toolDescriptionMode": "compact",
+  "inlineToolDisplay": "summary",
+  "asyncByDefault": false,
+  "maxSubagentSpawnsPerSession": 24,
+  "maxSubagentSpawnsPerRun": 8,
+  "maxActiveAsyncRunsPerSession": 3,
+  "fleetView": true,
+  "asyncWidget": true,
+  "scheduledRuns": {
+    "enabled": false,
+    "maxPending": 10
+  }
+}

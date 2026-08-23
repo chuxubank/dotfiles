@@ -20,9 +20,8 @@ workspaces:
             focus: true
       - label: chezmoi
         panes:
+          # Keep the project pane as a shell; start focused mutation agents fresh.
           - cwd: ~/.local/share/chezmoi
-            agent: chezmoi
-            kind: grok
   - name: xingzhi
     tabs:
       - label: agents

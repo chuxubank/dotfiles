@@ -1,17 +1,23 @@
 skills:
   provider_groups:
     30-personal:
+      - name: agent-collaboration
+        source: chuxubank/skills
+        when:
+          enabled:
+            tool: [codex, grok, pi]
+
       - name: feishu-projects
         source: chuxubank/skills
         when:
           enabled:
             host_env: iv
 
-      - name: grok-build-subagent
+      - name: grok-subagent
         source: chuxubank/skills
         when:
           enabled:
-            tool: [codex, cursor, grok]
+            tool: [codex, cursor, grok, pi]
 
       - name: "*"
         source: larksuite/cli/skills
