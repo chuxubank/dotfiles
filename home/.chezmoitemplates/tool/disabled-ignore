@@ -1,9 +1,7 @@
 {{- /* Source-state ignore for disabled tools.
-       foo/** ignores foo so .chezmoiremove can still delete children.
+       foo/** ignores foo so apply does not recreate runtime files.
        Nested files ignore dirname (a/b/c -> a/b), never the first
-       segment alone (.config/rclone/x must not ignore .config).
-       Ignore both remove and purge so apply does not recreate files
-       while runtime data is retained. */ -}}
+       segment alone (.config/rclone/x must not ignore .config). */ -}}
 {{- $ctx := . -}}
 {{- range $name, $spec := default dict $ctx.tools -}}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}

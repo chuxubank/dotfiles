@@ -42,15 +42,39 @@ def herdr_integration(item, uninstall=False):
     cmd = [herdr_bin(), "integration"]
     cmd.append("uninstall" if uninstall else "install")
     cmd.extend(item.get("args") or [])
-    return subprocess.run(cmd).returncode
+    return subprocess.run(cmd, capture_output=True, text=True)
 
 
 def install(item):
-    return herdr_integration(item)
+    proc = herdr_integration(item)
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+        if not proc.stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if proc.returncode in (0, None):
+        return 0
+    err = (proc.stderr or "") + (proc.stdout or "")
+    if "not found" in err.lower():
+        detail = err.strip().splitlines()[-1] if err.strip() else "not found"
+        print("  skip %s: %s" % (item["tool"], detail))
+        return 0
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+        if not proc.stderr.endswith("\n"):
+            sys.stderr.write("\n")
+    return proc.returncode
 
 
 def uninstall(item):
-    herdr_integration(item, uninstall=True)
+    proc = herdr_integration(item, uninstall=True)
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+        if not proc.stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+        if not proc.stderr.endswith("\n"):
+            sys.stderr.write("\n")
     return 0
 
 

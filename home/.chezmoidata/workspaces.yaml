@@ -1,12 +1,13 @@
 # Declared workspaces. One entry is one Herdr workspace and one Zellij
 # layout (~/.config/zellij/layouts/<name>.kdl, generated from this list).
 # Zellij dest extras are removed (exact_layouts). Apply in Herdr with
-# `herdr-layout` or prefix+shift+l.
+# `herdr-layout` or prefix+alt+l.
 # Tabs hold panes; panes are the project roots.
 #
 # cwd accepts ~ and absolute paths. relative paths resolve from the
-# workspace root when one is set. command is run in the pane after
-# create (herdr-spreader / Zellij pane command).
+# workspace root when one is set.
+# agent + kind: `herdr agent start NAME --kind KIND` (NAME is [a-z][a-z0-9_-]{0,31},
+# unique among live agents). command: `herdr pane run` when agent is unset.
 workspaces:
   - name: configs
     focus: true
@@ -14,9 +15,23 @@ workspaces:
       - label: emacs
         panes:
           - cwd: ~/.config/emacs
-            command: grok
+            agent: emacs
+            kind: grok
             focus: true
       - label: chezmoi
         panes:
           - cwd: ~/.local/share/chezmoi
-            command: grok
+            agent: chezmoi
+            kind: grok
+  - name: xingzhi
+    tabs:
+      - label: agents
+        panes:
+          - cwd: ~/Developer/XingZhi
+            agent: master
+            kind: codex
+            focus: true
+          - cwd: ~/Developer/XingZhi
+            split: right
+            agent: slave
+            kind: grok

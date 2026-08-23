@@ -45,6 +45,25 @@ pane_dir() {
   esac
 }
 
+# New workspace/tab root panes can still be settling when we try to start.
+start_named_agent() {
+  local name=$1 kind=$2 pane=$3
+  local i out
+  for i in {1..20}; do
+    if out=$(herdr agent start "$name" --kind "$kind" --pane "$pane" --timeout 120000 2>&1); then
+      print -r -- "$out"
+      return 0
+    fi
+    if ! grep -q agent_pane_busy <<<"$out"; then
+      print -u2 -- "$out"
+      return 1
+    fi
+    sleep 0.5
+  done
+  print -u2 -- "$out"
+  return 1
+}
+
 list_json=$(herdr workspace list) || die "could not list herdr workspaces (is the server running?)"
 
 id_for_label() {
@@ -93,7 +112,9 @@ apply_{{ $ws.name | replace " " "_" }}() {
   pane=$(json_field '.result.pane.pane_id' "$created")
   prev=$pane
 {{- end }}
-{{- if hasKey $p "command" }}
+{{- if hasKey $p "agent" }}
+  start_named_agent {{ $p.agent | quote }} {{ $p.kind | quote }} "$pane"
+{{- else if hasKey $p "command" }}
   herdr pane run "$pane" {{ $p.command | quote }} >/dev/null
 {{- end }}
 {{- end }}

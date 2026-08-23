@@ -1,3 +1,5 @@
 {{- /* zellij/pane — dict "pane" "indent" */ -}}
 {{- $p := .pane -}}
-{{- .indent }}pane{{ if hasKey $p "command" }} command={{ $p.command | quote }}{{ end }}{{ if hasKey $p "cwd" }} cwd={{ $p.cwd | quote }}{{ end }}{{ if and (hasKey $p "focus") $p.focus }} focus=true{{ end }}
+{{- $cmd := "" -}}
+{{- if hasKey $p "command" }}{{ $cmd = $p.command }}{{ else if hasKey $p "kind" }}{{ $cmd = $p.kind }}{{ end -}}
+{{- .indent }}pane{{ if $cmd }} command={{ $cmd | quote }}{{ end }}{{ if hasKey $p "cwd" }} cwd={{ $p.cwd | quote }}{{ end }}{{ if and (hasKey $p "focus") $p.focus }} focus=true{{ end }}

@@ -1,8 +1,15 @@
-{{- if not (lookPath "agy") -}}
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "gemini-cli") .) | fromJson -}}
 #!/bin/sh
+set -e
 
 echo "󰯁 Setup Antigravity CLI"
 
+{{- if not (lookPath "agy") }}
 curl -fsSL https://antigravity.google/cli/install.sh | bash
+{{- end }}
+
+# Herdr's antigravity-cli integration writes hooks under ~/.gemini/config.
+# agy does not create that directory until first run.
+mkdir -p "${HOME}/.gemini/config"
 
 {{- end -}}

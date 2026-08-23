@@ -47,8 +47,7 @@ tools:
 
   gemini-cli:
     when:
-      disabled:
-        host_env: [ci]
+      enabled: false
     remove:
       - ".gemini/antigravity-cli/mcp_config.json"
     purge:

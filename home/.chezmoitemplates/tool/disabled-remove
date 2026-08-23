@@ -1,6 +1,8 @@
 {{- /* Emit .chezmoiremove patterns for disabled tools, one per line.
-       `remove` is always applied. `purge` is applied only when the
-       purge_disabled_tools policy is on. */ -}}
+       `remove` is always applied. File-level `purge` entries are applied
+       when purge_disabled_tools is on. Directory trees (`foo/**`) are
+       deleted by run_after_020_purge-disabled-tools.sh, not here:
+       chezmoi cannot remove an ignored source tree as a file target. */ -}}
 {{- $ctx := . -}}
 {{- $purge := includeTemplate "policy/enabled" (merge (dict "policy" "purge_disabled_tools") $ctx) | fromJson -}}
 {{- range $name, $spec := default dict $ctx.tools -}}
@@ -10,7 +12,9 @@
     {{- end -}}
     {{- if $purge -}}
       {{- range $pattern := dig "purge" (list) $spec }}
+        {{- if not (hasSuffix "/**" $pattern) }}
 {{ $pattern }}
+        {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}

@@ -31,6 +31,8 @@ workspaces:
 {{- end }}
 {{- if hasKey . "command" }}
             command: {{ .command | quote }}
+{{- else if hasKey . "kind" }}
+            command: {{ .kind | quote }}
 {{- end }}
 {{- if and (hasKey . "focus") .focus }}
             focus: true

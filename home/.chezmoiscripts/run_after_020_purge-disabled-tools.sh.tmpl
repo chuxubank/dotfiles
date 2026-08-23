@@ -1,0 +1,16 @@
+{{- if includeTemplate "policy/enabled" (merge (dict "policy" "purge_disabled_tools") .) | fromJson -}}
+#!/bin/sh
+set -e
+
+echo "󰯁 Purge disabled tool runtime data"
+
+{{- range $name, $spec := .tools }}
+  {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson) }}
+    {{- range $pattern := dig "purge" (list) $spec }}
+      {{- $rel := trimSuffix "/**" $pattern }}
+rm -rf {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- end -}}

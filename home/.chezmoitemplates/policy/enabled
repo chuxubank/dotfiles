@@ -7,7 +7,7 @@
 {{- if not $name -}}
   {{- fail "policy/enabled: missing policy name" -}}
 {{- end -}}
-{{- $policies := default dict .policies -}}
+{{- $policies := dig "policies" dict . -}}
 {{- if not (hasKey $policies $name) -}}
   {{- toJson false -}}
 {{- else -}}
