@@ -96,6 +96,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-uv-
 
+      - name: Install python3
+        run: |
+          if command -v python3 >/dev/null; then
+            exit 0
+          fi
+          export DEBIAN_FRONTEND=noninteractive
+          if command -v sudo >/dev/null && [ "$(id -u)" -ne 0 ]; then
+            sudo apt-get update && sudo apt-get install -y python3
+          else
+            apt-get update && apt-get install -y python3
+          fi
+
       - name: Run install
         run: ./install.sh
 

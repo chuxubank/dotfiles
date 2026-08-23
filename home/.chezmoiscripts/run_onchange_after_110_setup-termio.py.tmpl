@@ -1,3 +1,3 @@
-{{- if includeTemplate "tool/enabled" (merge (dict "tool" "termio") .) | fromJson -}}
+{{- if and (lookPath "python3") (includeTemplate "tool/enabled" (merge (dict "tool" "termio") .) | fromJson) -}}
 {{ includeTemplate "termio/run.py" (merge (dict "mode" "setup") .) -}}
 {{- end -}}
