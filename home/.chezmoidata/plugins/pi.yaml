@@ -22,3 +22,9 @@ plugins:
           Desktop computer-use tools for Pi on macOS, Windows, and Linux.
           macOS requires Accessibility and Screen Recording permissions.
         source: npm:@injaneity/pi-computer-use
+
+      - name: pi-subagents
+        description: >-
+          Delegate work to focused child Pi agents (scout, researcher, worker,
+          reviewer, oracle) with foreground/background runs and fleet view.
+        source: npm:pi-subagents
