@@ -76,6 +76,41 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* rtk integrations target declared agents and list init args.
+       Agent-owned files cannot live in remove/purge (parent ignore). */ -}}
+{{- $rtkSpec := index $declared "rtk" -}}
+{{- $rtkInts := dig "integrations" (list) $rtkSpec -}}
+{{- if eq (len $rtkInts) 0 -}}
+  {{- fail "rtk: integrations must be declared" -}}
+{{- end -}}
+{{- range $int := $rtkInts -}}
+  {{- if ne (kindOf $int) "map" -}}
+    {{- fail "rtk: each integration must be a map" -}}
+  {{- end -}}
+  {{- $agent := dig "tool" "" $int -}}
+  {{- if not $agent -}}
+    {{- fail "rtk: integration missing tool" -}}
+  {{- end -}}
+  {{- if not (hasKey $declared $agent) -}}
+    {{- fail (printf "rtk integration: unknown tool %q" $agent) -}}
+  {{- end -}}
+  {{- $args := dig "args" (list) $int -}}
+  {{- if or (ne (kindOf $args) "slice") (eq (len $args) 0) -}}
+    {{- fail (printf "rtk integration %s: args must be a non-empty list" $agent) -}}
+  {{- end -}}
+{{- end -}}
+{{- $rtkPurge := dig "purge" (list) $rtkSpec -}}
+{{- range $need := list
+      ".config/rtk/**"
+      ".local/share/rtk/**"
+      "Library/Application Support/rtk/**"
+      "Library/Caches/rtk/**"
+      "AppData/Local/rtk/**" -}}
+  {{- if not (has $need $rtkPurge) -}}
+    {{- fail (printf "rtk purge missing %q" $need) -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* Path width for remove and purge. */ -}}
 {{- range $name, $spec := $declared -}}
   {{- $patterns := dig "remove" (list) $spec -}}

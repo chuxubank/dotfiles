@@ -45,6 +45,7 @@
     "defaultMode" "auto"
 -}}
 
+{{- $rtk := includeTemplate "tool/enabled" (merge (dict "tool" "rtk") .) | fromJson -}}
 {{- $hooks := dict
   "PreToolUse" (list (dict
     "matcher" "Bash"
@@ -65,14 +66,20 @@
   "enabledPlugins" $enabledPlugins
   "env" $env
   "extraKnownMarketplaces" $extraKnownMarketplaces
-  "hooks" $hooks
   "model" $cfg.model
   "permissions" $permissions
   "skipAutoPermissionPrompt" true
   "statusLine" $statusLine
 -}}
+{{- $remove := list -}}
+{{- if $rtk -}}
+  {{- $_ := set $managed "hooks" $hooks -}}
+{{- else -}}
+  {{- $remove = append $remove "hooks" -}}
+{{- end -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
+  "remove" $remove
 ) -}}

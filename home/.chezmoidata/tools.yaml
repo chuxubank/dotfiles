@@ -2,8 +2,8 @@
 # Lifecycle affiliation in data files is `owner` (packages, skill
 # providers, defaults). Services and environment groups use `tool` as
 # identity and set `owner` only when they should follow a switch.
-# Skill `when.*.tool` and plugin/mcp `tool` values are the target agent,
-# not the owner.
+# Skill `when.*.tool`, plugin/mcp `tool`, and rtk integrations `tool`
+# values are the target agent, not the owner.
 # Every `owner` must be a name listed here.
 #
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
@@ -117,8 +117,31 @@ tools:
       - ".config/rtk/config.toml"
       - "Library/Application Support/rtk/config.toml"
     purge:
+      # rtk init --uninstall leaves runtime data (history.db, tee/,
+      # trusted_filters.json, telemetry). Cover every dirs crate path.
       - ".config/rtk/**"
+      - ".local/share/rtk/**"
+      - ".local/state/rtk/**"
+      - ".cache/rtk/**"
       - "Library/Application Support/rtk/**"
+      - "Library/Caches/rtk/**"
+      - "AppData/Local/rtk/**"
+    # Target agent for `rtk init`. `tool` here is the agent, not owner.
+    # Agent-owned files (RTK.md, hooks) live inside other tools' dirs, so
+    # they cannot be in remove/purge (disabled-ignore would skip the parent).
+    integrations:
+      - tool: claude-code
+        args: ["--global", "--auto-patch"]
+      - tool: codex
+        args: ["--global", "--codex"]
+      - tool: gemini-cli
+        args: ["--global", "--gemini", "--auto-patch"]
+      - tool: opencode
+        args: ["--global", "--opencode"]
+      - tool: pi
+        args: ["--global", "--agent", "pi"]
+      - tool: cursor
+        args: ["--global", "--agent", "cursor", "--auto-patch"]
 
   sentry:
     when:

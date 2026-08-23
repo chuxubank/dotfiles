@@ -1,0 +1,3 @@
+{{- if and (ne .chezmoi.os "windows") (includeTemplate "tool/enabled" (merge (dict "tool" "rtk") .) | fromJson) -}}
+{{ includeTemplate "rtk/run.py" (merge (dict "rtkMode" "setup") .) -}}
+{{- end -}}

@@ -123,6 +123,14 @@ find home/.chezmoiscripts home/bin -type f -name '*.tmpl' 2>/dev/null | sort |
 				echo 1 >"$tmpdir/syntax_failed"
 			}
 			;;
+		'#!'*python*)
+			if command -v python3 >/dev/null 2>&1; then
+				python3 -m py_compile "$out" || {
+					echo "verify: python3 -m py_compile failed: $tmpl" >&2
+					echo 1 >"$tmpdir/syntax_failed"
+				}
+			fi
+			;;
 		esac
 	done
 
