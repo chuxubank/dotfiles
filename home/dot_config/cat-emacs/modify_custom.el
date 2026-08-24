@@ -1,11 +1,13 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- "" -}}
 ;;; -*- lexical-binding: t -*-
+(load (cat-template-file "custom.el") nil 'nomessage)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(datetime-timezone 'Asia/Shanghai)
  '(auth-source-save-behavior nil)
  '(smtpmail-smtp-server "smtp.qq.com")
  {{- if eq .host_env "aa" }}
@@ -83,4 +85,38 @@
           :key (cat/gptel-api-key-from-pass
                 "Work/IV/LLM" "cc-auth-token")
           :stream t)))
+{{- end }}
+
+{{- if eq .host_env "aa" }}
+(add-to-list 'logview-additional-timestamp-formats
+             '("Zscaler"
+               (java-pattern . "yyyy-MM-dd HH:mm:ss.SSSSSS(Z)")))
+(add-to-list 'logview-additional-level-mappings
+             '("Zscaler"
+               (error "ERR")
+               (warning "WRN")
+               (information "INF")
+               (debug "DBG")))
+(add-to-list 'logview-additional-submodes
+             '("Luna"
+               (format . "TIMESTAMP IGNORED LEVEL T: <<RX:THREAD:.+?>> NAME - MESSAGE")
+               (levels . "Logback")))
+(add-to-list 'logview-additional-submodes
+             '("Zscaler"
+               (format . "TIMESTAMP[IGNORED:THREAD] LEVEL MESSAGE")
+               (levels . "Zscaler")
+               (timestamp "Zscaler")))
+{{- end }}
+{{- if eq .host_env "iv" }}
+(add-to-list 'logview-additional-level-mappings
+             '("IV"
+               (error "ERROR")
+               (warning "WARN")
+               (information "INFO")
+               (debug "DEBUG")))
+(add-to-list 'logview-additional-submodes
+             '("IV"
+               (format . "TIMESTAMP [LEVEL] [NAME] MESSAGE")
+               (levels . "IV")
+               (timestamp "ISO 8601 datetime + millis")))
 {{- end }}
