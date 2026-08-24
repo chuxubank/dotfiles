@@ -28,3 +28,9 @@ plugins:
           Delegate work to focused child Pi agents (scout, researcher, worker,
           reviewer, oracle) with foreground/background runs and fleet view.
         source: npm:pi-subagents
+
+      - name: pi-web-access
+        description: >-
+          Web search and URL fetching for Pi, with additional GitHub, PDF,
+          YouTube, and local-video content extraction.
+        source: npm:pi-web-access
