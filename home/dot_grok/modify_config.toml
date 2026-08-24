@@ -23,6 +23,7 @@
        theme and not even follow a later apply. */ -}}
 {{- $managed := dict
   "ui" (dict "theme" "auto")
+  "memory" (dict "enabled" true)
 -}}
 {{- $replace := dict
   "mcp_servers" $servers
