@@ -141,6 +141,18 @@
   {{- end -}}
 {{- end -}}
 
+{{- range $agentEntry := default (list) .skills.agents -}}
+  {{- if eq (kindOf $agentEntry) "map" -}}
+    {{- if hasKey $agentEntry "tool" -}}
+      {{- fail (printf "skills agent %s: use owner, not tool" (dig "name" "?" $agentEntry)) -}}
+    {{- end -}}
+    {{- $owner := dig "owner" "" $agentEntry -}}
+    {{- if and $owner (not (hasKey $declared $owner)) -}}
+      {{- fail (printf "skills agent %s: unknown owner %q" (dig "name" "?" $agentEntry) $owner) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- range $service := .services -}}
   {{- $owner := dig "owner" "" $service -}}
   {{- if and $owner (not (hasKey $declared $owner)) -}}

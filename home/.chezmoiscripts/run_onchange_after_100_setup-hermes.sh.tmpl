@@ -1,0 +1,21 @@
+{{- if and (ne .chezmoi.os "windows") (includeTemplate "tool/enabled" (merge (dict "tool" "hermes") .) | fromJson) -}}
+#!/bin/sh
+set -e
+
+echo "󰯁 Setup Hermes"
+
+# Skills CLI detects Hermes by ~/.hermes existing. Create it before the
+# 200_setup-skills script runs, even if the vendor install is still going.
+mkdir -p "${HOME}/.hermes"
+
+if ! command -v hermes >/dev/null; then
+  # Telegram/CLI personal agent: skip Playwright, Chromium, and
+  # cua-driver. This machine already has uv, Node, rg, and ffmpeg.
+  curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- \
+    --skip-setup \
+    --non-interactive \
+    --skip-browser \
+    --skip-computer-use
+fi
+
+{{- end -}}

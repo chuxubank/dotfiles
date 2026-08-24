@@ -1,0 +1,7 @@
+llm:
+  tools:
+    hermes:
+      # SuperGrok OAuth is owned by Hermes (`hermes model`), not by
+      # llm.providers. This string is the config.yaml default only.
+      model: grok-4.6
+      reasoning_effort: high

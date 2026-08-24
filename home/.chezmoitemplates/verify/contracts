@@ -132,6 +132,27 @@
 {{- if ne (len $agentsToolField) 2 -}}
   {{- fail "skills/when: tool identity must not act as owner" -}}
 {{- end -}}
+{{- $agentsSlugOff := includeTemplate "skills/when" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skill" (dict "name" "find-docs")
+      "skills" (dict "agents" (list
+        (dict "name" "hermes-agent" "owner" "claude-code")
+        "codex")))) | fromJson -}}
+{{- if ne (len $agentsSlugOff) 1 -}}
+  {{- fail (printf "skills/when: expected only codex when slug owner is off, got %s" ($agentsSlugOff | toJson)) -}}
+{{- end -}}
+{{- if ne (index $agentsSlugOff 0) "codex" -}}
+  {{- fail "skills/when: remaining agent should be the skills CLI slug" -}}
+{{- end -}}
+{{- $agentsSlugOn := includeTemplate "skills/when" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skill" (dict "name" "find-docs")
+      "skills" (dict "agents" (list
+        (dict "name" "hermes-agent" "owner" "codex")
+        "amp")))) | fromJson -}}
+{{- if ne (len $agentsSlugOn) 2 -}}
+  {{- fail (printf "skills/when: expected hermes-agent+amp, got %s" ($agentsSlugOn | toJson)) -}}
+{{- end -}}
 
 {{- /* disabled-ignore uses dirname, not the first path segment */ -}}
 {{- $ignoreCtx := merge (dict) $base (dict

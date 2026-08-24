@@ -76,6 +76,24 @@ tools:
     purge:
       - ".copilot/**"
 
+  hermes:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".hermes/config.yaml"
+      - ".hermes/SOUL.md"
+    purge:
+      # The vendor checkout lives at .hermes/hermes-agent/. Do not
+      # purge .hermes/** or a disable wipes the install.
+      - ".hermes/auth.json"
+      - ".hermes/.env"
+      - ".hermes/memories/**"
+      - ".hermes/sessions/**"
+      - ".hermes/cron/**"
+      - ".hermes/logs/**"
+      - ".hermes/mcp-tokens/**"
+
   herdr:
     remove:
       - ".config/herdr/config.toml"
@@ -122,6 +140,7 @@ tools:
       - ".pi/agent/settings.json"
       - ".pi/agent/trust.json"
       - ".pi/agent/mcp.json"
+      - ".pi/web-search.json"
     purge:
       - ".pi/**"
 

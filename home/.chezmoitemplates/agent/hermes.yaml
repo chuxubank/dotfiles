@@ -1,0 +1,18 @@
+{{- /* Hermes managed configuration. Secrets stay in ~/.hermes/.env. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "hermes") .) | fromJson -}}
+{{- $model := default "grok-4.6" $cfg.model -}}
+{{- $parts := splitList "/" $model -}}
+{{- $provider := "xai" -}}
+{{- if and (gt (len $parts) 1) (hasKey (default dict $cfg.providers) (index $parts 0)) -}}
+  {{- $provider = index $parts 0 -}}
+  {{- $model = join "/" (slice $parts 1) -}}
+{{- end -}}
+model:
+  default: {{ $model | quote }}
+  provider: {{ $provider | quote }}
+terminal:
+  backend: local
+  cwd: {{ .chezmoi.homeDir | quote }}
+memory:
+  memory_enabled: true
+  user_profile_enabled: true

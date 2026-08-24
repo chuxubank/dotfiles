@@ -9,6 +9,9 @@ skills:
     - goose
     - github-copilot
     - grok
+    # skills CLI slug is hermes-agent; owner is the tools.yaml switch.
+    - name: hermes-agent
+      owner: hermes
     - kimi-code-cli
     - kiro-cli
     - opencode

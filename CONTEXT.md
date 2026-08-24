@@ -19,7 +19,7 @@ Local and CI verification is the same command: `make verify`.
 
 **Modify-template merge.** Files named `modify_*` keep unmanaged keys. They call `config/merge` with a format, the existing document, and the managed map. Use `replace` / `remove` only for keys this repo must own.
 
-**Tool lifecycle.** A name in `tools.yaml` is the enablement switch. Packages, skill providers, and defaults affiliate with `owner`. Services and environment groups use `tool` as identity and set `owner` only when they should follow the switch. `when.*.tool` on skills/mcp/plugins is the target agent, not the owner. Every `owner` must be declared.
+**Tool lifecycle.** A name in `tools.yaml` is the enablement switch. Packages, skill providers, skill agents, and defaults affiliate with `owner`. Services and environment groups use `tool` as identity and set `owner` only when they should follow the switch. `when.*.tool` on skills/mcp/plugins is the target agent, not the owner. Every `owner` must be declared.
 
 **Destructive operations.** `remove` deletes chezmoi-managed dest files when a tool is off. `purge` deletes runtime data and is off unless `policies.purge_disabled_tools` is on. `policies.uninstall_microsoft_edge` is the Edge zap switch. Open-world package uninstall (uv/bun/sdkman/cargo) still removes undeclared inventory names; that is reconcile, not purge.
 
@@ -28,7 +28,7 @@ Local and CI verification is the same command: `make verify`.
 ## Language
 
 **Owner**:
-The declared lifecycle switch a package, skill provider, default, service, or environment group follows.
+The declared lifecycle switch a package, skill provider, skill agent, default, service, or environment group follows.
 _Avoid_: tool (except as identity or target agent)
 
 **Tool**:
