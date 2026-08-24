@@ -62,7 +62,7 @@ brews = [
   "librime",
   "libvterm",
   "logrotate",
-  "lycorp-jp/tap/sim-use",
+  { name = "lycorp-jp/tap/sim-use", owner = "sim-use" },
   "mas",
   "media-info",
   "mole",

@@ -6,7 +6,7 @@ taps = [
   { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },
   { name = "deb-sig/tap", trusted = { formula = "double-entry-generator" } },
   "jimeh/emacs-builds",
-  { name = "lycorp-jp/tap", trusted = { formula = "sim-use" } },
+  { name = "lycorp-jp/tap", trusted = { formula = "sim-use" }, owner = "sim-use" },
   { name = "owo-network/brew", trusted = { cask = "herdrm" }, owner = "herdr" },
   "railwaycat/emacsmacport",
   { name = "sikarugir-app/sikarugir", trusted = { cask = "sikarugir" }, when.enabled = { host_env = ["personal"], roles = ["game"] } },

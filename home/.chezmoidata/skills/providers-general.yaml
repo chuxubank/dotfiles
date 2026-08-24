@@ -40,6 +40,7 @@ skills:
 
       - name: sim-use
         source: lycorp-jp/sim-use/skills
+        owner: sim-use
 
       - name: agent-device
         source: callstack/agent-device
