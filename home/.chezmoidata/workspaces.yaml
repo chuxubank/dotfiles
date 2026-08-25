@@ -9,23 +9,26 @@
 # workspace root when one is set.
 # agent + kind: `herdr agent start NAME --kind KIND` (NAME is [a-z][a-z0-9_-]{0,31},
 # unique among live agents). command: `herdr pane run` when agent is unset.
+# split: right | down | auto. auto picks right on a wide previous pane and
+# down on a tall one when herdr-layout creates the split.
 workspaces:
-  - name: emacs
+  - name: chezmoi
     focus: true
+    tabs:
+      - label: chezmoi
+        panes:
+          - cwd: ~/.local/share/chezmoi
+            agent: chezmoi
+            kind: pi
+            focus: true
+
+  - name: emacs
     tabs:
       - label: emacs
         panes:
           - cwd: ~/.config/emacs
             agent: emacs
-            kind: grok
-            focus: true
-
-  - name: chezmoi
-    tabs:
-      - label: chezmoi
-        panes:
-          # Keep the project pane as a shell; start focused mutation agents fresh.
-          - cwd: ~/.local/share/chezmoi
+            kind: pi
 
   - name: OpenTactic
     when:
@@ -38,13 +41,13 @@ workspaces:
 
   - name: xingzhi
     tabs:
-      - label: agents
+      - label: xingzhi
         panes:
           - cwd: ~/Developer/XingZhi
-            agent: master
-            kind: codex
+            agent: main
+            kind: pi
             focus: true
           - cwd: ~/Developer/XingZhi
-            split: right
+            split: auto
             agent: slave
             kind: grok

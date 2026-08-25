@@ -24,7 +24,7 @@ workspaces:
         panes:
 {{- range .panes }}
           -
-{{- if hasKey . "split" }}
+{{- if and (hasKey . "split") (ne .split "auto") }}
             split: {{ .split }}
 {{- end }}
 {{- if hasKey . "cwd" }}

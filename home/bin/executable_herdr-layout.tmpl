@@ -40,9 +40,34 @@ json_field() {
   jq -er "$1" <<<"$2"
 }
 
+adaptive_split_dir() {
+  local pane=$1 layout width height
+  [[ -n $pane ]] || { print -r -- right; return }
+  layout=$(herdr pane layout --pane "$pane") || { print -r -- right; return }
+  width=$(jq -er --arg id "$pane" '
+    first(
+      (.result.layout.panes[] | select(.pane_id == $id) | .rect.width),
+      .result.layout.area.width
+    )
+  ' <<<"$layout") || width=0
+  height=$(jq -er --arg id "$pane" '
+    first(
+      (.result.layout.panes[] | select(.pane_id == $id) | .rect.height),
+      .result.layout.area.height
+    )
+  ' <<<"$layout") || height=0
+  if (( height > width )); then
+    print -r -- down
+  else
+    print -r -- right
+  fi
+}
+
 pane_dir() {
-  case ${1:-right} in
+  local spec=${1:-right} pane=${2:-}
+  case $spec in
     down | horizontal) print -r -- down ;;
+    auto) adaptive_split_dir "$pane" ;;
     *) print -r -- right ;;
   esac
 }
@@ -104,7 +129,7 @@ apply_{{ $ws.name | replace " " "_" }}() {
   pane=$(json_field '.result.root_pane.pane_id' "$created")
   prev=$pane
 {{- else }}
-  dir=$(pane_dir {{ if hasKey $p "split" }}{{ $p.split | quote }}{{ else }}"right"{{ end }})
+  dir=$(pane_dir {{ if hasKey $p "split" }}{{ $p.split | quote }}{{ else }}"right"{{ end }} "$prev")
 {{- if hasKey $p "cwd" }}
   cwd=$(expand_tilde {{ $p.cwd | quote }})
   created=$(herdr pane split --pane "$prev" --direction "$dir" --cwd "$cwd" --no-focus)
