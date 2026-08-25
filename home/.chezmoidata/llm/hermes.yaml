@@ -2,9 +2,16 @@ llm:
   tools:
     hermes:
       model:
+        - iv-codex/gpt-5.6-sol
         - xai-oauth/grok-4.6
       reasoning_effort: high
       providers:
+        # OpenAI-compatible API providers are emitted as named Hermes custom
+        # providers. Keep the IV endpoint and credentials in the shared
+        # provider definition; this file only chooses its auth variant.
+        iv-codex:
+          provider: iv
+          auth_field: codex-auth-token
         # Hermes owns this provider's OAuth flow and bundled model catalog.
         # models: false keeps llm/tool-config from trying to enumerate it.
         xai-oauth:

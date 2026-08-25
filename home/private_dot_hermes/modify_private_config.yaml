@@ -1,18 +1,49 @@
 {{- /* chezmoi:modify-template */ -}}
 
-{{- /* Hermes owns OAuth credentials and runtime state. Merge only the
-       preferences managed by chezmoi so version, onboarding, and other
-       runtime-written fields survive an apply. */ -}}
+{{- /* Hermes owns OAuth credentials and runtime state. API-backed entries
+       come from the same llm/tool-config provider data used by the other
+       agents and are exposed to Hermes as named custom providers. */ -}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "hermes") .) | fromJson -}}
 {{- $model := $cfg.model_id -}}
 {{- $provider := $cfg.model_provider -}}
 {{- if not $provider -}}
   {{- fail (printf "hermes: model %q does not reference a configured provider" $cfg.model) -}}
 {{- end -}}
+{{- $selected := index $cfg.providers $provider -}}
+{{- $runtimeProvider := $provider -}}
+{{- if $selected.base_url -}}
+  {{- $runtimeProvider = printf "custom:%s" $provider -}}
+{{- end -}}
+
+{{- /* Hermes v12's keyed `providers` schema represents OpenAI-compatible
+       endpoints without mixing endpoint credentials into model state. */ -}}
+{{- $providers := dict -}}
+{{- range $alias, $ep := $cfg.providers -}}
+  {{- if $ep.base_url -}}
+    {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+    {{- $transport := "chat_completions" -}}
+    {{- if eq $ep.type "anthropic" -}}
+      {{- $transport = "anthropic_messages" -}}
+    {{- end -}}
+    {{- $entry := dict
+      "name" $ep.display_name
+      "api" $endpoint.api_base_url
+      "transport" $transport
+    -}}
+    {{- if $ep.auth_key -}}
+      {{- $_ := set $entry "api_key" $ep.auth_key -}}
+    {{- end -}}
+    {{- if eq $alias $provider -}}
+      {{- $_ := set $entry "default_model" $model -}}
+    {{- end -}}
+    {{- $_ := set $providers $alias $entry -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $managed := dict
   "model" (dict
     "default" $model
-    "provider" $provider
+    "provider" $runtimeProvider
   )
   "terminal" (dict
     "backend" "local"
@@ -27,4 +58,11 @@
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
+  "replace" (dict "providers" $providers)
+  "remove" (list
+    "model.api"
+    "model.api_key"
+    "model.api_mode"
+    "model.base_url"
+  )
 ) -}}
