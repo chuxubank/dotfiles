@@ -40,23 +40,60 @@ json_field() {
   jq -er "$1" <<<"$2"
 }
 
-adaptive_split_dir() {
+pane_cell_size() {
   local pane=$1 layout width height
-  [[ -n $pane ]] || { print -r -- right; return }
-  layout=$(herdr pane layout --pane "$pane") || { print -r -- right; return }
+  [[ -n $pane ]] || return 1
+  layout=$(herdr pane layout --pane "$pane") || return 1
   width=$(jq -er --arg id "$pane" '
     first(
       (.result.layout.panes[] | select(.pane_id == $id) | .rect.width),
       .result.layout.area.width
     )
-  ' <<<"$layout") || width=0
+  ' <<<"$layout") || return 1
   height=$(jq -er --arg id "$pane" '
     first(
       (.result.layout.panes[] | select(.pane_id == $id) | .rect.height),
       .result.layout.area.height
     )
-  ' <<<"$layout") || height=0
-  if (( height > width )); then
+  ' <<<"$layout") || return 1
+  print -r -- "$width $height"
+}
+
+tty_cell_metrics() {
+  command -v python3 >/dev/null || return 1
+  python3 - <<'PY'
+import fcntl, os, struct, termios
+try:
+    fd = os.open("/dev/tty", os.O_RDONLY)
+    rows, cols, xpixel, ypixel = struct.unpack(
+        "HHHH", fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0" * 8)
+    )
+    os.close(fd)
+except OSError:
+    raise SystemExit(1)
+if not (rows and cols and xpixel and ypixel):
+    raise SystemExit(1)
+print(f"{xpixel // cols} {ypixel // rows}")
+PY
+}
+
+adaptive_split_dir() {
+  local pane=$1 size metrics cols rows col_px row_px
+  size=$(pane_cell_size "$pane") || { print -r -- right; return }
+  cols=${size%% *}
+  rows=${size##* }
+  if metrics=$(tty_cell_metrics); then
+    col_px=${metrics%% *}
+    row_px=${metrics##* }
+    if (( cols * col_px < rows * row_px )); then
+      print -r -- down
+    else
+      print -r -- right
+    fi
+    return
+  fi
+  # No tty pixel metrics: cells are typically about 1:2.
+  if (( cols < 2 * rows )); then
     print -r -- down
   else
     print -r -- right

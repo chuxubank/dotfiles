@@ -9,8 +9,8 @@
 # workspace root when one is set.
 # agent + kind: `herdr agent start NAME --kind KIND` (NAME is [a-z][a-z0-9_-]{0,31},
 # unique among live agents). command: `herdr pane run` when agent is unset.
-# split: right | down | auto. auto picks right on a wide previous pane and
-# down on a tall one when herdr-layout creates the split.
+# split: right | down | auto. auto uses the previous pane's cell rect,
+# converted with tty cell pixels when available, else cells at ~1:2.
 workspaces:
   - name: chezmoi
     focus: true
