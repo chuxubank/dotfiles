@@ -4,11 +4,34 @@ set -e
 
 echo "󰯁 Purge disabled tool runtime data"
 
+trash_path() {
+    _path=$1
+    if [ ! -e "$_path" ] && [ ! -L "$_path" ]; then
+        return 0
+    fi
+
+    if command -v trash-put >/dev/null 2>&1; then
+        trash-put "$_path"
+    elif command -v gio >/dev/null 2>&1; then
+        gio trash "$_path"
+    elif [ "$(uname -s)" = Darwin ] && command -v osascript >/dev/null 2>&1; then
+        osascript - "$_path" <<'APPLESCRIPT'
+on run argv
+    tell application "Finder" to delete POSIX file (item 1 of argv)
+end run
+APPLESCRIPT
+    else
+        echo "No trash command available for $_path; refusing to delete it" >&2
+        return 1
+    fi
+}
+
 {{- range $name, $spec := .tools }}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson) }}
     {{- range $pattern := dig "purge" (list) $spec }}
       {{- $rel := trimSuffix "/**" $pattern }}
-rm -rf {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
+echo "Move disabled tool data to Trash: {{ printf "%s/%s" $.chezmoi.homeDir $rel }}"
+trash_path {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
     {{- end }}
   {{- end }}
 {{- end }}
