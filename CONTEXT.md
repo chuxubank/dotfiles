@@ -51,6 +51,29 @@ _Avoid_: implied by host_env alone
 The shared condition object (`enabled` / `disabled`) evaluated by `when/evaluate`.
 _Avoid_: if, gate, match (except `when/match`)
 
+Capacity conditions:
+
+- `mem_gb`: physical memory, captured in chezmoi data during `init`.
+- `disk_gb`: total capacity of the root/system filesystem, captured during `init`.
+- `disk_available_gb`: current space available to an unprivileged user on the
+  root/system filesystem, probed while templates are rendered. It is therefore
+  refreshed on each `chezmoi apply`/render rather than only on `chezmoi init`.
+
+Example:
+
+```yaml
+when:
+  enabled:
+    disk_available_gb:
+      min: 80
+```
+
+Numeric conditions use whole GB and support `min`/`max`. As with the existing
+capacity conditions, an unavailable probe returns `0` and is treated
+leniently. Package reconciliation treats a false condition as undesired:
+package managers may remove a package when available space falls below the
+threshold, so use a generous threshold to avoid install/remove oscillation.
+
 **Resolver**:
 A template whose interface is a JSON value (boolean, list, or document) consumed by many callers.
 _Avoid_: helper, partial, macro

@@ -25,6 +25,25 @@
   {{- fail "when/range: JSON float64 0 is lenient" -}}
 {{- end -}}
 
+{{- /* host/disk-available-gb: dynamic root-filesystem probe */ -}}
+{{- $availableGb := includeTemplate "host/disk-available-gb" (dict "chezmoi" (dict "os" "darwin")) | fromJson -}}
+{{- if or (lt $availableGb 0) (gt $availableGb 1000000000) -}}
+  {{- fail (printf "host/disk-available-gb: unexpected value %d" $availableGb) -}}
+{{- end -}}
+
+{{- /* when/context: dynamic disk availability condition */ -}}
+{{- $diskItem := dict "when" (dict "enabled" (dict "disk_available_gb" (dict "min" 1))) -}}
+{{- if ne (includeTemplate "when/context" (dict
+      "item" $diskItem
+      "device_type" "laptop"
+      "host_env" "personal"
+      "roles" (list)
+      "mem_gb" 16
+      "disk_gb" 512
+      "chezmoi" (dict "os" "darwin")) | fromJson) true -}}
+  {{- fail "when/context: current available disk should satisfy min 1 on this host" -}}
+{{- end -}}
+
 {{- /* llm/split-model: split only configured aliases and preserve model slashes */ -}}
 {{- $splitModel := includeTemplate "llm/split-model" (dict
       "model" "openrouter/vendor/model"

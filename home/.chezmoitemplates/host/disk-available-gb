@@ -1,0 +1,10 @@
+{{- /* host/disk-available-gb — Probe currently available space.
+       Output: a whole-number GB value for the root/system filesystem.
+       `df` reports space available to an unprivileged user, which is a
+       safer install gate than raw free blocks. A zero value means unknown. */ -}}
+{{- $os := .chezmoi.os -}}
+{{- $availableGb := 0 -}}
+{{- if or (eq $os "darwin") (eq $os "linux") (eq $os "android") -}}
+  {{- $availableGb = atoi (output "sh" "-c" "df -Pk / 2>/dev/null | awk 'NR==2{printf \"%d\", int($4/1048576)}' || echo 0" | trim) -}}
+{{- end -}}
+{{- $availableGb | toJson -}}

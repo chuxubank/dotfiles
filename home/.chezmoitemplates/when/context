@@ -1,11 +1,26 @@
 {{- /* Check whether an item passes all host context conditions. */ -}}
+{{- $root := . -}}
+{{- $diskAvailableGb := 0 -}}
+{{- if hasKey $root "item" -}}
+  {{- if hasKey $root.item "when" -}}
+    {{- $when := $root.item.when -}}
+    {{- range $mode := list "enabled" "disabled" -}}
+      {{- if and (hasKey $when $mode) (eq (kindOf (index $when $mode)) "map") -}}
+        {{- if hasKey (index $when $mode) "disk_available_gb" -}}
+          {{- $diskAvailableGb = includeTemplate "host/disk-available-gb" $root | fromJson -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- includeTemplate "when/evaluate" (dict
-      "item" .item
+      "item" $root.item
       "values" (dict
-        "device_type" .device_type
-        "host_env" .host_env
-        "os" .chezmoi.os
-        "roles" .roles
-        "mem_gb" (dig "mem_gb" 0 .)
-        "disk_gb" (dig "disk_gb" 0 .))
-      "os_version" (dig "os_version" "" .)) -}}
+        "device_type" $root.device_type
+        "host_env" $root.host_env
+        "os" $root.chezmoi.os
+        "roles" $root.roles
+        "mem_gb" (dig "mem_gb" 0 $root)
+        "disk_gb" (dig "disk_gb" 0 $root)
+        "disk_available_gb" $diskAvailableGb)
+      "os_version" (dig "os_version" "" $root)) -}}
