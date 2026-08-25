@@ -2,8 +2,8 @@
 
 echo "󰯁 Setup bun"
 
-BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
-PATH="$BUN_INSTALL/bin:$PATH"
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
 {{- if not (lookPath "bun") }}
 curl -fsSL https://bun.sh/install | bash
@@ -17,45 +17,41 @@ declared_bun=(
 )
 installed_bun=()
 cleanup_enabled=true
+inventory_ready=true
 had_errors=false
 
-parse_bun_globals() {
-    awk '
-        /^[[:space:]]*[├└]── / {
-            line = $0
-            sub(/^[[:space:]]*[├└]── /, "", line)
-            if (line ~ /^@/) {
-                slash = index(line, "/")
-                at = index(substr(line, slash + 1), "@")
-                if (slash > 0 && at > 0) {
-                    line = substr(line, 1, slash + at - 1)
-                }
-            } else {
-                sub(/@.*$/, "", line)
-            }
-            print line
-        }
-    '
-}
-
 load_installed_bun() {
-    local listing
-    if [[ ! -f $BUN_INSTALL/install/global/package.json ]]; then
+    local package_json="$BUN_INSTALL/install/global/package.json"
+    if [[ ! -f $package_json ]]; then
         installed_bun=()
+        inventory_ready=true
         return 0
     fi
-    if ! listing=$(bun pm ls -g); then
-        print -u2 -- "Could not list installed bun tools; skipping undeclared cleanup"
+
+    if ! command -v jq >/dev/null 2>&1; then
+        print -u2 -- "jq is required to read installed bun tools; skipping bun reconciliation"
         cleanup_enabled=false
         had_errors=true
+        inventory_ready=false
         installed_bun=()
         return 1
     fi
+
+    if ! jq -e '(.dependencies // {}) | type == "object"' >/dev/null < "$package_json"; then
+        print -u2 -- "Could not parse installed bun tools; skipping bun reconciliation"
+        cleanup_enabled=false
+        had_errors=true
+        inventory_ready=false
+        installed_bun=()
+        return 1
+    fi
+
     installed_bun=()
     local line
     while IFS= read -r line || [[ -n $line ]]; do
         [[ -n $line ]] && installed_bun+=("$line")
-    done < <(parse_bun_globals <<<"$listing")
+    done < <(jq -r '.dependencies // {} | keys[]' "$package_json")
+    inventory_ready=true
 }
 
 bun_tool_installed() {
@@ -65,6 +61,7 @@ bun_tool_installed() {
 
 load_installed_bun || true
 
+if $inventory_ready; then
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
 {{- $install := $tool.name }}
@@ -82,10 +79,13 @@ bun add -g {{ $tool }}
 fi
 {{- end }}
 {{- end }}
+fi
 
 load_installed_bun || true
-remove_undeclared cleanup_enabled installed_bun declared_bun \
-  'bun tool' bun remove -g
+if $inventory_ready; then
+  remove_undeclared cleanup_enabled installed_bun declared_bun \
+    'bun tool' bun remove -g
+fi
 
 {{- if lookPath "openspec" }}
 openspec completion install
