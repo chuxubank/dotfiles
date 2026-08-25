@@ -59,3 +59,10 @@ wezterm.on("toggle-opacity", function(window, pane)
   end
   window:set_config_overrides(overrides)
 end)
+
+-- The terminal palette lives on the mux server. GUI events do not run in a
+-- headless local/SSH mux server, so provide a base scheme in the returned
+-- configuration as well as applying per-window GUI overrides above.
+return {
+  color_scheme = scheme_for_appearance(get_appearance(), 1),
+}

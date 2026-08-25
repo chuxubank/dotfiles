@@ -21,6 +21,7 @@ config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = true
+config.color_scheme = theme.color_scheme
 
 -- Use a standalone local mux server so tabs, panes, and their processes can
 -- survive closing the WezTerm GUI and be reattached on the next launch.
