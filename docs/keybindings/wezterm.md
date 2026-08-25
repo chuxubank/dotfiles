@@ -34,15 +34,15 @@ receive mux commands after the `Ctrl+;` prefix.
 
 | Keys | WezTerm default / previous allocation | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Ctrl+Shift+T` | Create a terminal tab | Unbound; passed to the pane | **Changed** |
-| `Super+Shift+T` | Create a default-domain tab | Unbound; passed to the pane | **Changed** |
-| `Ctrl+Shift+W` | Close the current terminal tab | Unbound; passed to the pane | **Changed** |
-| `Super+[` / `Super+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
-| `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
-| `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Changed** |
-| `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Added** |
-| `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Added** |
-| `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Added** |
+| `Ctrl+Shift+T` | Create a terminal tab | Unbound; passed to the pane | **Delete** |
+| `Super+Shift+T` | Create a default-domain tab | Unbound; passed to the pane | **Delete** |
+| `Ctrl+Shift+W` | Close the current terminal tab | Unbound; passed to the pane | **Delete** |
+| `Super+[` / `Super+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
+| `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
+| `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Delete** |
+| `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Add** |
+| `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Add** |
+| `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Add** |
 
 ## Mux usage inside WezTerm
 

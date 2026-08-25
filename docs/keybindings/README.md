@@ -1,8 +1,12 @@
 # Terminal and mux keybindings
 
 These files document both the tool defaults and the current assignments in
-this repository. The **Changed** marker highlights a deliberate difference
-from the tool default or from the previous repository allocation.
+this repository. The status column distinguishes additions, deletions, and
+changes:
+
+- **Add** — a new binding was introduced.
+- **Delete** — a previous/default binding was removed.
+- **Change** — an existing binding now performs a different action.
 
 ## Layers
 
@@ -24,9 +28,10 @@ from the tool default or from the previous repository allocation.
 | `Super+1…9` | Terminal tab selection | Ghostty/WezTerm terminal tab selection | Unchanged |
 | `Ctrl+Tab` | Terminal tab next | Terminal tab next | Unchanged |
 | `Ctrl+Shift+Tab` | Terminal tab previous | Terminal tab previous | Unchanged |
-| `Alt+1…9` | Terminal/pane input | Herdr workspace selection | **Changed** |
-| `Ctrl+;` | Pane input / tool-specific | Herdr/Zellij prefix | **Changed** |
-| `Ctrl+;` then `1…9` | No shared default | Herdr/Zellij mux tab selection | **Changed** |
+| `Alt+1…9` | Terminal/pane input | Herdr workspace selection | **Add** |
+| `Ctrl+;` | Pane input / tool-specific | Herdr/Zellij prefix | **Add** |
+| `Ctrl+1…9` | Herdr/Zellij mux tab selection | No direct mux binding | **Delete** |
+| `Ctrl+;` then `1…9` | No shared default | Herdr/Zellij mux tab selection | **Add** |
 
 See the tool-specific documents for the exact default and current binding
 lists. “Default” means the upstream application default where it is available;

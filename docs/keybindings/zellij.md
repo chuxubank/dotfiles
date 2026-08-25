@@ -10,7 +10,7 @@ upstream default preset; the current column is the explicit repository map.
 
 | Keys | Zellij default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Ctrl+;` | Primary modifier / mode entry | Enter tmux/prefix mode | **Changed** |
+| `Ctrl+;` | Primary modifier / mode entry | Enter tmux/prefix mode | **Change** |
 | `Ctrl+P` | Enter pane mode | Enter pane mode | Unchanged |
 | `Ctrl+T` | Enter tab mode | Enter tab mode | Unchanged |
 | `Ctrl+N` | Enter resize mode | Enter resize mode | Unchanged |
@@ -29,7 +29,7 @@ Press `Ctrl+;`, then press the following key:
 | Key | Zellij default / previous allocation | Current assignment | Status |
 | --- | --- | --- | --- |
 | `c` | Create a tab | Create a tab | Unchanged |
-| `1…9` | Direct `Ctrl+1…9` selected tabs | Select tab 1–9 | **Changed** |
+| `1…9` | No binding in prefix mode | Select tab 1–9 | **Add** |
 | `n` / `p` | Select the next/previous tab | Select the next/previous tab | Unchanged |
 | `h/j/k/l` or arrows | Focus a pane | Focus a pane | Unchanged |
 | `"` | Split downward | Split downward | Unchanged |
@@ -45,7 +45,13 @@ Press `Ctrl+;`, then press the following key:
 
 | Keys | Zellij default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Super+Left/Down/Up/Right` | No assignment | Focus the pane in that direction | **Added** |
+| `Super+Left/Down/Up/Right` | No assignment | Focus the pane in that direction | **Add** |
 
 The current Zellij mux-tab shortcut is `Prefix+1…9`, not direct
 `Ctrl+1…9`.
+
+The previous direct `Ctrl+1…9` tab bindings were removed:
+
+| Keys | Previous allocation | Current assignment | Status |
+| --- | --- | --- | --- |
+| `Ctrl+1…9` | Select mux tab 1–9 | No Zellij binding | **Delete** |

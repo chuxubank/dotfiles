@@ -24,18 +24,18 @@ ghostty +list-keybinds --default
 ## Deliberate unbindings
 
 These bindings are removed from Ghostty so that the mux or pane layer can own
-them. The **Changed** rows are the important differences from the terminal
+them. These rows are deliberate **Delete** operations from the terminal
 defaults/previous allocation.
 
 | Keys | Default / previous allocation | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Ctrl+Shift+T` | Terminal/mux tab command | Unbound; passed to the pane | **Changed** |
-| `Ctrl+Shift+W` | Terminal/mux close command | Unbound; passed to the pane | **Changed** |
-| `Alt+1…9` | Terminal shortcut, if provided by the platform build | Unbound; Herdr selects workspaces | **Changed** |
-| `Super+Alt+Arrow` | Terminal/mux pane command | Unbound; mux owns pane navigation | **Changed** |
-| `Super+Ctrl+Arrow` | Terminal/mux pane command | Unbound; reserved for pane applications | **Changed** |
-| `Super+[` / `Super+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
-| `Super+Shift+[` / `Super+Shift+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
+| `Ctrl+Shift+T` | Terminal/mux tab command | Unbound; passed to the pane | **Delete** |
+| `Ctrl+Shift+W` | Terminal/mux close command | Unbound; passed to the pane | **Delete** |
+| `Alt+1…9` | Terminal shortcut, if provided by the platform build | Unbound; Herdr selects workspaces | **Delete** |
+| `Super+Alt+Arrow` | Terminal/mux pane command | Unbound; mux owns pane navigation | **Delete** |
+| `Super+Ctrl+Arrow` | Terminal/mux pane command | Unbound; reserved for pane applications | **Delete** |
+| `Super+[` / `Super+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Delete** |
+| `Super+Shift+[` / `Super+Shift+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Delete** |
 
 `macos-option-as-alt = true` enables the macOS Alt mapping.
 
