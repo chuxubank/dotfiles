@@ -216,4 +216,22 @@
   {{- fail "service/services: expected isync" -}}
 {{- end -}}
 
+{{- /* workspace/items: host-gated entries are omitted */ -}}
+{{- $workspaceDefs := list
+      (dict "name" "always")
+      (dict "name" "personal" "when" (dict "enabled" (dict "host_env" (list "personal"))))
+-}}
+{{- $personalWorkspaces := includeTemplate "workspace/items" (merge (dict) $base (dict
+      "host_env" "personal"
+      "workspaces" $workspaceDefs)) | fromJson -}}
+{{- if or (ne (len $personalWorkspaces) 2) (ne (index $personalWorkspaces 1).name "personal") -}}
+  {{- fail (printf "workspace/items: personal should include gated entry, got %s" ($personalWorkspaces | toJson)) -}}
+{{- end -}}
+{{- $ciWorkspaces := includeTemplate "workspace/items" (merge (dict) $base (dict
+      "host_env" "ci"
+      "workspaces" $workspaceDefs)) | fromJson -}}
+{{- if or (ne (len $ciWorkspaces) 1) (ne (index $ciWorkspaces 0).name "always") -}}
+  {{- fail (printf "workspace/items: ci should omit personal entry, got %s" ($ciWorkspaces | toJson)) -}}
+{{- end -}}
+
 ok

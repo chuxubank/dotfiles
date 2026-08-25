@@ -1,7 +1,8 @@
 # Declared workspaces. One entry is one Herdr workspace and one Zellij
 # layout (~/.config/zellij/layouts/<name>.kdl, generated from this list).
 # Zellij dest extras are removed (exact_layouts). Apply in Herdr with
-# `herdr-layout` or prefix+alt+l.
+# `herdr-layout` or prefix+alt+l. Entries may use shared `when` host
+# conditions; disabled entries are omitted from every generated layout.
 # Tabs hold panes; panes are the project roots.
 #
 # cwd accepts ~ and absolute paths. relative paths resolve from the
@@ -9,7 +10,7 @@
 # agent + kind: `herdr agent start NAME --kind KIND` (NAME is [a-z][a-z0-9_-]{0,31},
 # unique among live agents). command: `herdr pane run` when agent is unset.
 workspaces:
-  - name: configs
+  - name: emacs
     focus: true
     tabs:
       - label: emacs
@@ -18,10 +19,23 @@ workspaces:
             agent: emacs
             kind: grok
             focus: true
+
+  - name: chezmoi
+    tabs:
       - label: chezmoi
         panes:
           # Keep the project pane as a shell; start focused mutation agents fresh.
           - cwd: ~/.local/share/chezmoi
+
+  - name: OpenTactic
+    when:
+      enabled:
+        host_env: [personal]
+    tabs:
+      - label: OpenTactic
+        panes:
+          - cwd: ~/Developer/OpenTactic
+
   - name: xingzhi
     tabs:
       - label: agents

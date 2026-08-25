@@ -1,0 +1,11 @@
+{{- /* Filter declared workspaces through the shared host conditions.
+       Input: root context. Output: JSON list of enabled workspace maps. */ -}}
+{{- $ctx := . -}}
+{{- $selected := list -}}
+{{- range $workspace := default (list) .workspaces -}}
+  {{- $enabled := includeTemplate "when/context" (merge (dict "item" $workspace) $ctx) | fromJson -}}
+  {{- if $enabled -}}
+    {{- $selected = append $selected $workspace -}}
+  {{- end -}}
+{{- end -}}
+{{- $selected | toJson -}}

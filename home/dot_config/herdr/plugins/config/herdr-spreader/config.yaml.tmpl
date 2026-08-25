@@ -1,6 +1,7 @@
 {{- /* herdr-spreader layout. Source of truth: .chezmoidata/workspaces.yaml */ -}}
+{{- $workspaces := includeTemplate "workspace/items" . | fromJson -}}
 workspaces:
-{{- range .workspaces }}
+{{- range $workspaces }}
   - name: {{ .name | quote }}
 {{- if and (hasKey . "focus") .focus }}
     focus: true

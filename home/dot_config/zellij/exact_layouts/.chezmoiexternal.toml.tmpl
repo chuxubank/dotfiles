@@ -6,7 +6,8 @@
        path, so a bare "chezmoi" is missing from the filter PATH. */ -}}
 {{- $empty := eq .chezmoi.os "windows" | ternary "file://NUL" "file:///dev/null" -}}
 {{- $chezmoi := .chezmoi.executable -}}
-{{- range .workspaces }}
+{{- $workspaces := includeTemplate "workspace/items" . | fromJson -}}
+{{- range $workspaces }}
 [{{ printf "%s.kdl" .name | quote }}]
     type = "file"
     url = {{ $empty | quote }}

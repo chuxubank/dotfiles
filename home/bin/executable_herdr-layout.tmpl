@@ -26,6 +26,8 @@ fi
 command -v herdr >/dev/null || die "herdr is not installed"
 command -v jq >/dev/null || die "jq is required"
 
+{{- $workspaces := includeTemplate "workspace/items" . | fromJson }}
+
 expand_tilde() {
   case $1 in
     '~') print -r -- "$HOME" ;;
@@ -70,7 +72,7 @@ id_for_label() {
   jq -r --arg l "$1" '.result.workspaces[] | select(.label == $l) | .workspace_id' <<<"$list_json" | head -n 1
 }
 
-{{- range $ws := .workspaces }}
+{{- range $ws := $workspaces }}
 
 apply_{{ $ws.name | replace " " "_" }}() {
   local created ws tab pane prev dir cwd
@@ -124,18 +126,18 @@ apply_{{ $ws.name | replace " " "_" }}() {
 {{- end }}
 
 declared=(
-{{- range .workspaces }}
+{{- range $workspaces }}
   {{ .name | quote }}
 {{- end }}
 )
 
 {{- $focus := "" }}
-{{- range .workspaces }}
+{{- range $workspaces }}
   {{- if and (hasKey . "focus") .focus }}
     {{- $focus = .name }}
   {{- end }}
 {{- end }}
-focus_name={{ if $focus }}{{ $focus | quote }}{{ else }}{{ (index .workspaces 0).name | quote }}{{ end }}
+focus_name={{ if $focus }}{{ $focus | quote }}{{ else }}{{ (index $workspaces 0).name | quote }}{{ end }}
 
 targets=("$@")
 if (( $#targets == 0 )); then
@@ -151,7 +153,7 @@ for name in "${targets[@]}"; do
     print -r -- "present: $name ($id)"
   else
     case $name in
-{{- range .workspaces }}
+{{- range $workspaces }}
       {{ .name | quote }}) apply_{{ .name | replace " " "_" }} || { print -u2 -- "failed: $name"; had_errors=true; } ;;
 {{- end }}
       *) print -u2 -- "unknown workspace: $name"; had_errors=true ;;
