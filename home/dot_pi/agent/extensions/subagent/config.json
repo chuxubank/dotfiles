@@ -1,6 +1,6 @@
 {
   "toolDescriptionMode": "compact",
-  "inlineToolDisplay": "summary",
+  "inlineToolDisplay": "rich",
   "asyncByDefault": false,
   "maxSubagentSpawnsPerSession": 24,
   "maxSubagentSpawnsPerRun": 8,

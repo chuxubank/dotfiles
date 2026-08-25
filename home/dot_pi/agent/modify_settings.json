@@ -36,6 +36,7 @@
 {{- if $provider -}}
   {{- $_ := set $managed "defaultProvider" $provider -}}
 {{- end -}}
+{{- $_ := set $managed "subagents" (dict "defaultModel" "xai/grok-4.6") -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
