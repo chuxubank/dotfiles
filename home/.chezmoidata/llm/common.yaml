@@ -47,6 +47,11 @@ llm:
     openai-codex:
       name: OpenAI Codex
 
+    # Hermes' built-in SuperGrok subscription provider. Hermes owns the OAuth
+    # flow and model catalog, so there is no endpoint or API key here.
+    xai-oauth:
+      name: xAI OAuth
+
     google:
       name: Google
       type: gemini

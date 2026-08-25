@@ -1,8 +1,0 @@
-{{- /* chezmoi:modify-template */ -}}
-
-{{- $managed := includeTemplate "agent/hermes.yaml" . | fromYaml -}}
-{{- includeTemplate "config/merge" (dict
-  "format" "yaml"
-  "input" (dig "stdin" "" .chezmoi)
-  "managed" $managed
-) -}}

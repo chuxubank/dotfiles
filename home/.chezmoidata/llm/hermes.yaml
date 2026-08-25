@@ -1,7 +1,12 @@
 llm:
   tools:
     hermes:
-      # SuperGrok OAuth is owned by Hermes (`hermes model`), not by
-      # llm.providers. This string is the config.yaml default only.
-      model: grok-4.6
+      model:
+        - xai-oauth/grok-4.6
       reasoning_effort: high
+      providers:
+        # Hermes owns this provider's OAuth flow and bundled model catalog.
+        # models: false keeps llm/tool-config from trying to enumerate it.
+        xai-oauth:
+          provider: xai-oauth
+          models: false

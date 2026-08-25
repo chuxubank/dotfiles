@@ -1,0 +1,17 @@
+{{- /* llm/split-model — Split a resolved "<provider>/<model>" selection.
+       Input:  model     — resolved model string
+               providers — configured provider aliases
+       Output: JSON { "model": <model id>, "provider": <alias or ""> }
+
+       A slash is treated as the provider separator only when the first
+       segment names a configured alias. This preserves model ids that contain
+       slashes when they are not prefixed by one of our aliases.
+*/ -}}
+{{- $model := .model -}}
+{{- $provider := "" -}}
+{{- $parts := splitList "/" $model -}}
+{{- if and (gt (len $parts) 1) (hasKey .providers (index $parts 0)) -}}
+  {{- $provider = index $parts 0 -}}
+  {{- $model = join "/" (slice $parts 1) -}}
+{{- end -}}
+{{- dict "model" $model "provider" $provider | toJson -}}

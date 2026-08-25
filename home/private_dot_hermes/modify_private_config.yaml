@@ -1,0 +1,30 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Hermes owns OAuth credentials and runtime state. Merge only the
+       preferences managed by chezmoi so version, onboarding, and other
+       runtime-written fields survive an apply. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "hermes") .) | fromJson -}}
+{{- $model := $cfg.model_id -}}
+{{- $provider := $cfg.model_provider -}}
+{{- if not $provider -}}
+  {{- fail (printf "hermes: model %q does not reference a configured provider" $cfg.model) -}}
+{{- end -}}
+{{- $managed := dict
+  "model" (dict
+    "default" $model
+    "provider" $provider
+  )
+  "terminal" (dict
+    "backend" "local"
+    "cwd" .chezmoi.homeDir
+  )
+  "memory" (dict
+    "memory_enabled" true
+    "user_profile_enabled" true
+  )
+-}}
+{{- includeTemplate "config/merge" (dict
+  "format" "yaml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+) -}}

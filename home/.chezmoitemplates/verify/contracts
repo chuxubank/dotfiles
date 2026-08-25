@@ -25,6 +25,20 @@
   {{- fail "when/range: JSON float64 0 is lenient" -}}
 {{- end -}}
 
+{{- /* llm/split-model: split only configured aliases and preserve model slashes */ -}}
+{{- $splitModel := includeTemplate "llm/split-model" (dict
+      "model" "openrouter/vendor/model"
+      "providers" (dict "openrouter" (dict))) | fromJson -}}
+{{- if or (ne $splitModel.provider "openrouter") (ne $splitModel.model "vendor/model") -}}
+  {{- fail (printf "llm/split-model: unexpected split %s" ($splitModel | toJson)) -}}
+{{- end -}}
+{{- $bareModel := includeTemplate "llm/split-model" (dict
+      "model" "vendor/model"
+      "providers" (dict "openrouter" (dict))) | fromJson -}}
+{{- if or $bareModel.provider (ne $bareModel.model "vendor/model") -}}
+  {{- fail (printf "llm/split-model: unconfigured prefix must be preserved %s" ($bareModel | toJson)) -}}
+{{- end -}}
+
 {{- /* when/evaluate AND groups */ -}}
 {{- $hostItem := dict "when" (dict "enabled" (dict "host_env" (list "iv" "aa"))) -}}
 {{- if ne (includeTemplate "when/evaluate" (dict "item" $hostItem "values" (dict "host_env" "iv") "os_version" "") | fromJson) true -}}

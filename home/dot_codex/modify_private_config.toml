@@ -29,13 +29,8 @@
 {{- end }}
 
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
-{{- $model := $cfg.model -}}
-{{- $modelProvider := "" -}}
-{{- $modelParts := splitList "/" $model -}}
-{{- if and (gt (len $modelParts) 1) (hasKey $cfg.providers (index $modelParts 0)) -}}
-  {{- $modelProvider = index $modelParts 0 -}}
-  {{- $model = join "/" (slice $modelParts 1) -}}
-{{- end -}}
+{{- $model := $cfg.model_id -}}
+{{- $modelProvider := $cfg.model_provider -}}
 {{- if eq $modelProvider "openai" -}}{{- $modelProvider = "" -}}{{- end -}}
 {{- $modelProviders := dict -}}
 {{- range $alias, $ep := $cfg.providers }}

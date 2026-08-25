@@ -5,9 +5,8 @@
 {{- $chosen := "" -}}
 {{- range $m := .models -}}
   {{- if not $chosen -}}
-    {{- $parts := splitList "/" $m -}}
-    {{- $alias := index $parts 0 -}}
-    {{- if hasKey $.providers $alias -}}
+    {{- $selection := includeTemplate "llm/split-model" (dict "model" $m "providers" $.providers) | fromJson -}}
+    {{- if $selection.provider -}}
       {{- $chosen = $m -}}
     {{- end -}}
   {{- end -}}

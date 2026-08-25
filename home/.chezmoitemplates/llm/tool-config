@@ -1,8 +1,12 @@
 {{- /* llm/tool-config — Resolve tool-level config from llm.tools.
        Input: dict "tool" <tool-name> (merged with root context $)
        Output JSON:
-         model       — default model id
+         model       — selected model in "<provider>/<model>" form
+         model_provider — selected provider alias, or empty
+         model_id    — selected model with a configured provider alias removed
           small_model — small model id (if set)
+         small_model_provider — selected small-model provider alias, or empty
+         small_model_id — selected small model with its provider alias removed
           reasoning_effort — string (if set)
           default_models — map of role -> model id (if set)
          providers   — map of alias -> resolved provider:
@@ -207,19 +211,25 @@
 
 {{- /* Resolve model: string → use as-is, list → pick first with available provider */ -}}
 {{- if hasKey $toolCfg "model" -}}
+  {{- $model := $toolCfg.model -}}
   {{- if eq (kindOf $toolCfg.model) "slice" -}}
-    {{- $_ := set $result "model" (includeTemplate "llm/pick-model" (dict "models" $toolCfg.model "providers" $providers)) -}}
-  {{- else -}}
-    {{- $_ := set $result "model" $toolCfg.model -}}
+    {{- $model = includeTemplate "llm/pick-model" (dict "models" $toolCfg.model "providers" $providers) -}}
   {{- end -}}
+  {{- $selection := includeTemplate "llm/split-model" (dict "model" $model "providers" $providers) | fromJson -}}
+  {{- $_ := set $result "model" $model -}}
+  {{- $_ := set $result "model_provider" $selection.provider -}}
+  {{- $_ := set $result "model_id" $selection.model -}}
 {{- end -}}
 
 {{- if hasKey $toolCfg "small_model" -}}
+  {{- $smallModel := $toolCfg.small_model -}}
   {{- if eq (kindOf $toolCfg.small_model) "slice" -}}
-    {{- $_ := set $result "small_model" (includeTemplate "llm/pick-model" (dict "models" $toolCfg.small_model "providers" $providers)) -}}
-  {{- else -}}
-    {{- $_ := set $result "small_model" $toolCfg.small_model -}}
+    {{- $smallModel = includeTemplate "llm/pick-model" (dict "models" $toolCfg.small_model "providers" $providers) -}}
   {{- end -}}
+  {{- $selection := includeTemplate "llm/split-model" (dict "model" $smallModel "providers" $providers) | fromJson -}}
+  {{- $_ := set $result "small_model" $smallModel -}}
+  {{- $_ := set $result "small_model_provider" $selection.provider -}}
+  {{- $_ := set $result "small_model_id" $selection.model -}}
 {{- end -}}
 
 {{- toJson $result -}}

@@ -30,12 +30,7 @@
 
 {{- $models := list -}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
-{{- $activeProvider := "openai" -}}
-{{- $configuredModel := $cfg.model -}}
-{{- $modelParts := splitList "/" $configuredModel -}}
-{{- if and (gt (len $modelParts) 1) (hasKey $cfg.providers (index $modelParts 0)) -}}
-  {{- $activeProvider = index $modelParts 0 -}}
-{{- end -}}
+{{- $activeProvider := default "openai" $cfg.model_provider -}}
 
 {{- /* 1. Built-in OpenAI catalog. The on-disk cache tracks server updates;
         codex's bundled catalog is a fallback for a fresh installation. */ -}}
@@ -61,7 +56,10 @@
   {{- if eq (kindOf $builtinModel) "map" -}}
     {{- $modelID := index $builtinModel "slug" -}}
     {{- if eq (kindOf $modelID) "string" -}}
-      {{- $modelID = trimPrefix "openai/" (trim $modelID) -}}
+      {{- $builtinSelection := includeTemplate "llm/split-model" (dict
+            "model" (trim $modelID)
+            "providers" (dict "openai" (dict))) | fromJson -}}
+      {{- $modelID = $builtinSelection.model -}}
       {{- if $modelID -}}
         {{- $entry := deepCopy $builtinModel -}}
         {{- $displayName := index $entry "display_name" -}}
