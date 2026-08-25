@@ -23,12 +23,13 @@ workspaces, tabs, and panes.
 | `Cmd+W` | Close the current terminal surface/tab |
 | `Ctrl+Tab` | Select the next terminal tab |
 | `Ctrl+Shift+Tab` | Select the previous terminal tab |
+| `Ctrl+Shift+Arrow` | Select the WezTerm pane in that direction |
 
 ### Shared mux bindings
 
 | Keys | Herdr | Zellij |
 | --- | --- | --- |
-| `Ctrl+1…9` | Select tab 1–9 | Select tab 1–9 |
+| `Prefix+1…9` | Select tab 1–9 | Select tab 1–9 |
 | `Cmd+Arrow` | Focus the pane in that direction | Focus the pane in that direction |
 | `Ctrl+;` | Enter prefix mode | Enter tmux/prefix mode |
 
@@ -38,6 +39,7 @@ workspaces, tabs, and panes.
 | --- | --- |
 | `Alt+1…9` | Select workspace 1–9 |
 | `Alt+0` | Toggle the sidebar |
+| `Prefix+1…9` | Select tab 1–9 |
 | `Prefix+n` / `Prefix+p` | Select the next/previous tab |
 | `Prefix+h/j/k/l` | Focus a pane |
 | `Prefix+b` | Toggle the sidebar |
@@ -53,6 +55,7 @@ Press `Ctrl+;`, then:
 | Key | Action |
 | --- | --- |
 | `c` | Create a tab |
+| `1…9` | Select tab 1–9 |
 | `n` / `p` | Select the next/previous tab |
 | `h/j/k/l` or arrows | Focus a pane |
 | `"` | Split downward |

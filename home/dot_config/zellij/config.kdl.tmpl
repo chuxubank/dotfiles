@@ -142,19 +142,11 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" {
         // Direct chords shared with Herdr. Cmd tabs remain terminal-native.
+        // Ctrl+1..9 is left for pane apps (Grok, Codex); mux tabs use Prefix+1..9.
         bind "Super Left" { MoveFocus "left"; }
         bind "Super Down" { MoveFocus "down"; }
         bind "Super Up" { MoveFocus "up"; }
         bind "Super Right" { MoveFocus "right"; }
-        bind "Ctrl 1" { GoToTab 1; }
-        bind "Ctrl 2" { GoToTab 2; }
-        bind "Ctrl 3" { GoToTab 3; }
-        bind "Ctrl 4" { GoToTab 4; }
-        bind "Ctrl 5" { GoToTab 5; }
-        bind "Ctrl 6" { GoToTab 6; }
-        bind "Ctrl 7" { GoToTab 7; }
-        bind "Ctrl 8" { GoToTab 8; }
-        bind "Ctrl 9" { GoToTab 9; }
         bind "Ctrl g" { SwitchToMode "locked"; }
         bind "Ctrl q" { Quit; }
     }
@@ -235,6 +227,15 @@ keybinds clear-defaults=true {
         bind "[" { SwitchToMode "scroll"; }
         bind "Ctrl ;" { WriteChars "\u{1b}[59;5u"; SwitchToMode "normal"; }
         bind "c" { NewTab; SwitchToMode "normal"; }
+        bind "1" { GoToTab 1; SwitchToMode "normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "normal"; }
+        bind "5" { GoToTab 5; SwitchToMode "normal"; }
+        bind "6" { GoToTab 6; SwitchToMode "normal"; }
+        bind "7" { GoToTab 7; SwitchToMode "normal"; }
+        bind "8" { GoToTab 8; SwitchToMode "normal"; }
+        bind "9" { GoToTab 9; SwitchToMode "normal"; }
         bind "h" { MoveFocus "left"; SwitchToMode "normal"; }
         bind "j" { MoveFocus "down"; SwitchToMode "normal"; }
         bind "k" { MoveFocus "up"; SwitchToMode "normal"; }

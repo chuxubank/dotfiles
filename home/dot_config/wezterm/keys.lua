@@ -1,8 +1,9 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 
--- Cmd uses WezTerm's native tab bindings. Ctrl+1..9 passes to the mux.
--- Pane shortcuts also pass through to the mux.
+-- Cmd uses WezTerm's native tab bindings.
+-- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Cmd+Arrow passes to the mux.
+-- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 local keys = {}
 
 local function passthrough(key, mods)
@@ -28,8 +29,6 @@ passthrough("%", "CTRL|SHIFT|ALT")
 
 for _, key in ipairs({ "LeftArrow", "DownArrow", "UpArrow", "RightArrow" }) do
   passthrough(key, "CMD")
-  passthrough(key, "CTRL|SHIFT")
-  passthrough(key, "CTRL|SHIFT|ALT")
 end
 
 table.insert(keys, {
