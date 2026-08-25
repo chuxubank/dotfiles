@@ -4,30 +4,17 @@ shell-integration-features = ssh-terminfo,ssh-env
 theme = light:Gruvbox Light,dark:Gruvbox Dark
 window-padding-balance = true
 
-# Terminal layer: OS windows only. Mux owns tabs/panes; pass those chords through.
-keybind = super+w=close_window
-keybind = ctrl+shift+w=close_window
+# Cmd uses Ghostty's native tab bindings. Ctrl+1..9 passes to the mux.
 
-keybind = super+t=unbind
 keybind = super+shift+t=unbind
 keybind = ctrl+shift+t=unbind
+keybind = ctrl+shift+w=unbind
 keybind = super+d=unbind
 keybind = super+shift+d=unbind
 keybind = super+left_bracket=unbind
 keybind = super+right_bracket=unbind
 keybind = super+shift+left_bracket=unbind
 keybind = super+shift+right_bracket=unbind
-keybind = ctrl+tab=unbind
-keybind = ctrl+shift+tab=unbind
-keybind = super+one=unbind
-keybind = super+two=unbind
-keybind = super+three=unbind
-keybind = super+four=unbind
-keybind = super+five=unbind
-keybind = super+six=unbind
-keybind = super+seven=unbind
-keybind = super+eight=unbind
-keybind = super+nine=unbind
 keybind = alt+one=unbind
 keybind = alt+two=unbind
 keybind = alt+three=unbind

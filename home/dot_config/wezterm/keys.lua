@@ -1,8 +1,8 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 
--- Terminal layer: disable tab/pane defaults so the mux can own them.
--- Keep Cmd+C/V, Cmd+N, Cmd+W, font size, and the custom chords below.
+-- Cmd uses WezTerm's native tab bindings. Ctrl+1..9 passes to the mux.
+-- Pane shortcuts also pass through to the mux.
 local keys = {}
 
 local function passthrough(key, mods)
@@ -13,11 +13,9 @@ local function passthrough(key, mods)
   })
 end
 
-passthrough("t", "CMD")
 passthrough("t", "CTRL|SHIFT")
 passthrough("T", "CMD|SHIFT")
-passthrough("Tab", "CTRL")
-passthrough("Tab", "CTRL|SHIFT")
+passthrough("w", "CTRL|SHIFT")
 passthrough("[", "CMD|SHIFT")
 passthrough("]", "CMD|SHIFT")
 passthrough("PageUp", "CTRL")
@@ -27,11 +25,6 @@ passthrough("PageDown", "CTRL|SHIFT")
 passthrough("Z", "CTRL|SHIFT")
 passthrough('"', "CTRL|SHIFT|ALT")
 passthrough("%", "CTRL|SHIFT|ALT")
-
-for i = 1, 9 do
-  passthrough(tostring(i), "CMD")
-  passthrough(tostring(i), "CTRL|SHIFT")
-end
 
 for _, key in ipairs({ "LeftArrow", "DownArrow", "UpArrow", "RightArrow" }) do
   passthrough(key, "CMD")
