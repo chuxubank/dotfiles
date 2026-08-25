@@ -13,7 +13,7 @@ allocation in this repository.
 | --- | --- | --- | --- |
 | `Alt+1…9` | Select workspace 1–9 | Select workspace 1–9 | Unchanged |
 | `Alt+0` | Toggle the sidebar | Toggle the sidebar | Unchanged |
-| `Cmd+Arrow` | Focus the pane in that direction | Focus the pane in that direction | Unchanged |
+| `Super+Arrow` | Focus the pane in that direction | Focus the pane in that direction | Unchanged |
 | `Ctrl+1…9` | Select mux tab 1–9 | No Herdr binding; available to pane apps | **Changed** |
 
 ## Prefix

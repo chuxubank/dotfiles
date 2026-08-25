@@ -14,10 +14,10 @@ ghostty +list-keybinds --default
 
 | Keys | Default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Cmd+1…8` | Select terminal tab 1–8 | Select terminal tab 1–8 | Unchanged |
-| `Cmd+9` | Select the last terminal tab | Select the last terminal tab | Unchanged |
-| `Cmd+T` | Create a terminal tab | Create a terminal tab | Unchanged |
-| `Cmd+W` | Close the current surface/tab | Close the current surface/tab | Unchanged |
+| `Super+1…8` | Select terminal tab 1–8 | Select terminal tab 1–8 | Unchanged |
+| `Super+9` | Select the last terminal tab | Select the last terminal tab | Unchanged |
+| `Super+T` | Create a terminal tab | Create a terminal tab | Unchanged |
+| `Super+W` | Close the current surface/tab | Close the current surface/tab | Unchanged |
 | `Ctrl+Tab` | Select the next terminal tab | Select the next terminal tab | Unchanged |
 | `Ctrl+Shift+Tab` | Select the previous terminal tab | Select the previous terminal tab | Unchanged |
 
@@ -32,12 +32,12 @@ defaults/previous allocation.
 | `Ctrl+Shift+T` | Terminal/mux tab command | Unbound; passed to the pane | **Changed** |
 | `Ctrl+Shift+W` | Terminal/mux close command | Unbound; passed to the pane | **Changed** |
 | `Alt+1…9` | Terminal shortcut, if provided by the platform build | Unbound; Herdr selects workspaces | **Changed** |
-| `Cmd+Alt+Arrow` | Terminal/mux pane command | Unbound; mux owns pane navigation | **Changed** |
-| `Cmd+Ctrl+Arrow` | Terminal/mux pane command | Unbound; reserved for pane applications | **Changed** |
-| `Cmd+[` / `Cmd+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
-| `Cmd+Shift+[` / `Cmd+Shift+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
+| `Super+Alt+Arrow` | Terminal/mux pane command | Unbound; mux owns pane navigation | **Changed** |
+| `Super+Ctrl+Arrow` | Terminal/mux pane command | Unbound; reserved for pane applications | **Changed** |
+| `Super+[` / `Super+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
+| `Super+Shift+[` / `Super+Shift+]` | Terminal tab navigation | Unbound; kept free for the mux layer | **Changed** |
 
-Ghostty sends `Alt` as `Option` because `macos-option-as-alt = true`.
+`macos-option-as-alt = true` enables the macOS Alt mapping.
 
 ## Mux usage inside Ghostty
 

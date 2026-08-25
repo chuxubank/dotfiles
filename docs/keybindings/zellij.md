@@ -45,7 +45,7 @@ Press `Ctrl+;`, then press the following key:
 
 | Keys | Zellij default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Cmd+Left/Down/Up/Right` | No assignment | Focus the pane in that direction | **Added** |
+| `Super+Left/Down/Up/Right` | No assignment | Focus the pane in that direction | **Added** |
 
 The current Zellij mux-tab shortcut is `Prefix+1…9`, not direct
 `Ctrl+1…9`.

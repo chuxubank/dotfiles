@@ -4,7 +4,7 @@ shell-integration-features = ssh-terminfo,ssh-env
 theme = light:Gruvbox Light,dark:Gruvbox Dark
 window-padding-balance = true
 
-# Cmd uses Ghostty's native tab bindings.
+# Super uses Ghostty's native tab bindings.
 
 keybind = super+shift+t=unbind
 keybind = ctrl+shift+t=unbind

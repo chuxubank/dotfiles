@@ -1,8 +1,8 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 
--- Cmd uses WezTerm's native tab bindings.
--- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Cmd+Arrow passes to the mux.
+-- Super uses WezTerm's native tab bindings.
+-- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 local keys = {}
 

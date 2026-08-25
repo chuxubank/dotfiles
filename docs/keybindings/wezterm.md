@@ -18,10 +18,10 @@ receive mux commands after the `Ctrl+;` prefix.
 
 | Keys | WezTerm default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Cmd+T` | Create a terminal tab | Create a terminal tab | Unchanged |
-| `Cmd+W` | Close the current terminal tab | Close the current terminal tab | Unchanged |
-| `Cmd+1…8` | Select terminal tab 1–8 | Select terminal tab 1–8 | Unchanged |
-| `Cmd+9` | Select the last terminal tab | Select the last terminal tab | Unchanged |
+| `Super+T` | Create a terminal tab | Create a terminal tab | Unchanged |
+| `Super+W` | Close the current terminal tab | Close the current terminal tab | Unchanged |
+| `Super+1…8` | Select terminal tab 1–8 | Select terminal tab 1–8 | Unchanged |
+| `Super+9` | Select the last terminal tab | Select the last terminal tab | Unchanged |
 | `Ctrl+Tab` | Select the next terminal tab | Select the next terminal tab | Unchanged |
 | `Ctrl+Shift+Tab` | Select the previous terminal tab | Select the previous terminal tab | Unchanged |
 | `Ctrl+Shift+Arrow` | Focus the WezTerm pane | Focus the WezTerm pane | Unchanged |
@@ -35,14 +35,14 @@ receive mux commands after the `Ctrl+;` prefix.
 | Keys | WezTerm default / previous allocation | Current assignment | Status |
 | --- | --- | --- | --- |
 | `Ctrl+Shift+T` | Create a terminal tab | Unbound; passed to the pane | **Changed** |
-| `Cmd+Shift+T` | Create a default-domain tab | Unbound; passed to the pane | **Changed** |
+| `Super+Shift+T` | Create a default-domain tab | Unbound; passed to the pane | **Changed** |
 | `Ctrl+Shift+W` | Close the current terminal tab | Unbound; passed to the pane | **Changed** |
-| `Cmd+[` / `Cmd+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
-| `Cmd+Shift+[` / `Cmd+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
+| `Super+[` / `Super+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
+| `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Changed** |
 | `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Changed** |
 | `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Added** |
 | `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Added** |
-| `Cmd+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Added** |
+| `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Added** |
 
 ## Mux usage inside WezTerm
 

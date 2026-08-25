@@ -27,9 +27,9 @@ The complete per-tool bindings are documented in
 
 | Keys | Owner/action |
 | --- | --- |
-| `Cmd+1…9` | Ghostty/WezTerm terminal tab selection |
+| `Super+1…9` | Ghostty/WezTerm terminal tab selection |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Terminal tab next/previous |
 | `Alt+1…9` | Herdr workspace selection |
 | `Ctrl+;` | Herdr/Zellij prefix |
 | `Ctrl+;` then `1…9` | Herdr/Zellij mux tab selection |
-| `Cmd+Arrow` | Herdr/Zellij pane focus |
+| `Super+Arrow` | Herdr/Zellij pane focus |

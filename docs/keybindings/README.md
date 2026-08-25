@@ -21,7 +21,7 @@ from the tool default or from the previous repository allocation.
 
 | Keys | Tool default | Current assignment | Status |
 | --- | --- | --- | --- |
-| `Cmd+1…9` | Terminal tab selection | Ghostty/WezTerm terminal tab selection | Unchanged |
+| `Super+1…9` | Terminal tab selection | Ghostty/WezTerm terminal tab selection | Unchanged |
 | `Ctrl+Tab` | Terminal tab next | Terminal tab next | Unchanged |
 | `Ctrl+Shift+Tab` | Terminal tab previous | Terminal tab previous | Unchanged |
 | `Alt+1…9` | Terminal/pane input | Herdr workspace selection | **Changed** |
