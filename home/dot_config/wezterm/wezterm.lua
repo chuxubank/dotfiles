@@ -22,6 +22,26 @@ config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = true
 
+-- Use a standalone local mux server so tabs, panes, and their processes can
+-- survive closing the WezTerm GUI and be reattached on the next launch.
+config.unix_domains = {
+  {
+    name = "unix",
+  },
+}
+config.default_domain = "unix"
+config.default_gui_startup_args = { "connect", "unix" }
+
+-- Discover concrete Host entries (including Include files) from ~/.ssh/config.
+-- WezTerm creates both SSH:<host> for a direct connection and SSHMUX:<host>
+-- for attaching to a persistent remote WezTerm mux over SSH.
+config.ssh_domains = wezterm.default_ssh_domains()
+for _, domain in ipairs(config.ssh_domains) do
+  -- All managed SSH targets are POSIX hosts. This lets direct SSH domains
+  -- preserve the remote cwd when opening another tab or pane.
+  domain.assume_shell = "Posix"
+end
+
 -- Keyboard
 -- Kitty keyboard protocol lets apps distinguish Shift+Enter from Enter.
 config.enable_kitty_keyboard = true

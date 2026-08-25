@@ -35,7 +35,7 @@ end
 table.insert(keys, {
   key = "B",
   mods = "CTRL|SHIFT",
-  action = wezterm.action.EmitEvent("toggle-opacity"),
+  action = act.EmitEvent("toggle-opacity"),
 })
 table.insert(keys, {
   key = "l",
