@@ -120,6 +120,12 @@ tools:
       - tool: pi
         args: ["pi"]
 
+  openclaw:
+    when:
+      enabled: false
+    purge:
+      - ".openclaw/**"
+
   opencode:
     when:
       disabled:
