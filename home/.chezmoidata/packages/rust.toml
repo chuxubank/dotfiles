@@ -5,4 +5,5 @@ cargo = [
   { name = "lukaj", when.enabled.os = "darwin" },
   "mermaid-rs-renderer",
   "rust-script",
+  { name = "starlists", git = "https://github.com/chuxubank/starlists" },
 ]

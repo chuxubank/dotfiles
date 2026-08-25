@@ -19,6 +19,9 @@ skills:
           enabled:
             tool: [codex, cursor, grok, pi]
 
+      - name: starlists
+        source: chuxubank/starlists
+
       - name: "*"
         source: larksuite/cli/skills
         when:
