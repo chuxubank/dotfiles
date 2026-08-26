@@ -4,16 +4,9 @@ local launch_menu = {}
 local default_prog
 local set_environment_variables = {}
 
--- With default_gui_startup_args = {"connect", "unix"}, gui-startup does not
--- run for the attach path. Maximize the windows that are displayed after the
--- Unix-domain mux has been attached instead of spawning a duplicate local tab.
-wezterm.on("gui-attached", function()
-  local workspace = mux.get_active_workspace()
-  for _, window in ipairs(mux.all_windows()) do
-    if window:get_workspace() == workspace then
-      window:gui_window():maximize()
-    end
-  end
+wezterm.on("gui-startup", function(cmd)
+  local tab, pane, window = mux.spawn_window(cmd or {})
+  window:gui_window():maximize()
 end)
 
 if wezterm.target_triple == "x86_64-pc-windows-msvc" then

@@ -23,16 +23,6 @@ config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = true
 config.color_scheme = theme.color_scheme
 
--- Use a standalone local mux server so tabs, panes, and their processes can
--- survive closing the WezTerm GUI and be reattached on the next launch.
-config.unix_domains = {
-  {
-    name = "unix",
-  },
-}
-config.default_domain = "unix"
-config.default_gui_startup_args = { "connect", "unix" }
-
 -- Discover concrete Host entries (including Include files) from ~/.ssh/config.
 -- WezTerm creates both SSH:<host> for a direct connection and SSHMUX:<host>
 -- for attaching to a persistent remote WezTerm mux over SSH.

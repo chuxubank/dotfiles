@@ -29,11 +29,11 @@ That build is also the latest published stable GitHub release as of this report 
 
 All core capabilities recommended below meet that test, including SSH domains (since `20230408`), Lua mux/startup APIs (since `20220624`), workspaces (since `20220319`), pane relocation (since `20230326`), plugins (since `20230320`), and multi-client listing (since `20220624`). Nightly-only refinements are not relied upon.
 
-Before the configuration change accompanying this report, the repo did **not**
-enable a standalone WezTerm domain. It now configures a local `unix` domain as
-the default GUI startup target, discovers `SSH:` and `SSHMUX:` domains from
-`~/.ssh/config`, and maximizes windows after the GUI attaches. TLS domains
-remain unconfigured.
+The repo briefly enabled a local `unix` domain as the default GUI startup
+target during the pilot, then disabled it again. The current configuration
+uses the normal GUI-local mux startup, still discovers `SSH:` and `SSHMUX:`
+domains from `~/.ssh/config`, and maximizes windows at `gui-startup`. TLS
+domains remain unconfigured.
 
 ## Capability matrix
 
@@ -110,9 +110,12 @@ WezTerm can provide the panes in which these agents run and can display external
 
 1. **Keep Herdr unchanged** as the agent-aware workspace/orchestration layer.
 2. **Keep Zellij available** for Ghostty, generic SSH, shared/portable sessions, and fallback.
-3. Continue piloting the configured **WezTerm-native mux profile** for users who want native tabs/panes without nesting Zellij:
-   - keep the named `unix_domains` entry and automatic GUI attachment;
-   - use the discovered `SSHMUX:` domains for compatible remote hosts;
+3. Keep the **WezTerm-native mux profile** optional and disabled by default
+   until a later pilot:
+   - re-enable a named `unix_domains` entry only when local detach/reattach is
+     wanted;
+   - use the discovered `SSHMUX:` domains independently for compatible remote
+     hosts;
    - move declared layout generation from Zellij KDL to Lua `mux-startup` or generate Lua from [`workspaces.yaml`](../../home/.chezmoidata/workspaces.yaml);
    - preserve the current terminal/mux key ownership documented in [`README.md`](../../README.md).
 4. Do not remove Zellij until the pilot validates: GUI close/reattach, macOS sleep, mux-server crash behavior, upgrades/config reloads, multi-client focus behavior, SSH/TLS reconnect, long-lived scrollback memory, and the interaction with Herdr agent hooks.
@@ -121,7 +124,7 @@ WezTerm can provide the panes in which these agents run and can display external
 
 | Objective | Recommendation |
 |---|---|
-| Eliminate nested Zellij inside WezTerm while retaining tabs/panes/workspaces | **Yes: pilot WezTerm Unix-domain mux.** |
+| Eliminate nested Zellij inside WezTerm while retaining tabs/panes/workspaces | **Optional: pilot WezTerm Unix-domain mux before enabling it by default.** |
 | Use one mux consistently from both WezTerm and Ghostty | **Keep Zellij.** |
 | Replace remote Zellij where WezTerm is installed on both ends | **Possible:** SSH domain for convenience; TLS domain when automatic reconnect is important. |
 | Restore a full session after reboot | **Do not migrate on that basis:** WezTerm lacks built-in resurrection. |
