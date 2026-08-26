@@ -3,6 +3,36 @@
        Repos, worktrees, sessions, and Orca-owned keys survive an apply. */ -}}
 {{- $settings := dict
   "defaultTuiAgent" "pi"
+  "agentDefaultArgs" (dict
+    "aider" "--yes-always"
+    "amp" "--dangerously-allow-all"
+    "ante" "--yolo"
+    "antigravity" "--dangerously-skip-permissions"
+    "autohand" "--unrestricted"
+    "claude" "--dangerously-skip-permissions"
+    "claude-agent-teams" "--dangerously-skip-permissions"
+    "cline" "--auto-approve true"
+    "codex" "--yolo"
+    "command-code" "--yolo"
+    "continue" "--allow \"*\""
+    "copilot" "--yolo"
+    "crush" "--yolo"
+    "cursor" "--yolo"
+    "devin" "--permission-mode bypass"
+    "gemini" "--yolo"
+    "grok" "--permission-mode bypassPermissions"
+    "hermes" "--yolo"
+    "kimi" "--yolo"
+    "kiro" "--trust-all-tools"
+    "mistral-vibe" "--agent auto-approve"
+    "openclaude" "--dangerously-skip-permissions"
+    "qwen-code" "--approval-mode yolo"
+    "rovo" "--yolo"
+    "trae" "--yolo"
+  )
+  "agentDefaultEnv" (dict
+    "goose" (dict "GOOSE_MODE" "auto")
+  )
   "workspaceDir" (joinPath .chezmoi.homeDir "orca" "workspaces")
   "theme" "system"
   "nestWorkspaces" true
