@@ -1,0 +1,22 @@
+{{- /* github/release-asset-url — Download URL for the first GitHub release asset matching pattern.
+     Input: dict "repo" "owner/repo" "pattern" (path.Match glob, * only).
+     Tries gitHubLatestReleaseAssetURL, then non-draft/non-prerelease gitHubReleases.
+     Empty when no asset matches; callers must omit the external (chezmoi rejects url = "").
+*/ -}}
+{{- $repo := .repo -}}
+{{- $pattern := .pattern -}}
+{{- $url := gitHubLatestReleaseAssetURL $repo $pattern -}}
+{{- if not $url -}}
+  {{- $re := printf "^%s$" (replace "*" ".*" (replace "." "\\." $pattern)) -}}
+  {{- range gitHubReleases $repo -}}
+    {{- if and (not $url) (not .GetDraft) (not .GetPrerelease) -}}
+      {{- range .Assets -}}
+        {{- $name := .GetName -}}
+        {{- if and (not $url) $name (regexMatch $re $name) -}}
+          {{- $url = .GetBrowserDownloadURL -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $url -}}

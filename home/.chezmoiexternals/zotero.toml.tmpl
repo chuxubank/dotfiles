@@ -1,13 +1,15 @@
 {{- if ne .host_env "ci" -}}
-[{{ joinPath .path.zotero (index .path.data "zotero-ext") "better-bibtex@iris-advies.com.xpi" | quote }}]
+{{- $ext := joinPath .path.zotero (index .path.data "zotero-ext") -}}
+{{- range $plugin := list
+  (dict "file" "better-bibtex@iris-advies.com.xpi" "repo" "retorquere/zotero-better-bibtex" "pattern" "zotero-better-bibtex-*.xpi")
+  (dict "file" "zoteropdftranslate@euclpts.com.xpi" "repo" "windingwind/zotero-pdf-translate" "pattern" "translate-for-zotero.xpi")
+  (dict "file" "jasminum@linxzh.com.xpi" "repo" "l0o0/jasminum" "pattern" "jasminum_*.xpi")
+-}}
+{{-   $url := includeTemplate "github/release-asset-url" $plugin | trim -}}
+{{-   if $url }}
+[{{ joinPath $ext $plugin.file | quote }}]
     type = "file"
-    url = "{{ (gitHubLatestReleaseAssetURL "retorquere/zotero-better-bibtex" "zotero-better-bibtex-*.xpi") }}"
-
-[{{ joinPath .path.zotero (index .path.data "zotero-ext") "zoteropdftranslate@euclpts.com.xpi" | quote }}]
-    type = "file"
-    url = "{{ (gitHubLatestReleaseAssetURL "windingwind/zotero-pdf-translate" "translate-for-zotero.xpi") }}"
-
-[{{ joinPath .path.zotero (index .path.data "zotero-ext") "jasminum@linxzh.com.xpi" | quote }}]
-    type = "file"
-    url = "{{ (gitHubLatestReleaseAssetURL "l0o0/jasminum" "jasminum_*.xpi") }}"
+    url = {{ $url | quote }}
+{{-   end }}
+{{- end }}
 {{- end -}}
