@@ -137,6 +137,17 @@ tools:
       - ".config/opencode/**"
       - ".local/share/opencode/**"
 
+  orca:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".config/orca/profiles/local-default/orca-data.json"
+    purge:
+      - ".config/orca/**"
+      - ".config/Orca/**"
+      - "Library/Application Support/orca/**"
+
   pi:
     when:
       disabled:

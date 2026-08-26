@@ -31,6 +31,10 @@ Library/LaunchAgents/rclone.rpi.plist
 .config/rtk
 {{- end }}
 
+{{- if eq .chezmoi.os "windows" }}
+.config/orca
+{{- end }}
+
 {{- if ne .host_env "iv" }}
 .sentryclirc
 {{- end }}

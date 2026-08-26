@@ -25,6 +25,7 @@ skills:
           - orca-cli
           - orchestration
         source: stablyai/orca
+        owner: orca
 
       - name: "*"
         source: mattpocock/skills/skills/productivity

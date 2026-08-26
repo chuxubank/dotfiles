@@ -10,7 +10,7 @@ taps = [
   { name = "owo-network/brew", trusted = { cask = "herdrm" }, owner = "herdr" },
   "railwaycat/emacsmacport",
   { name = "sikarugir-app/sikarugir", trusted = { cask = "sikarugir" }, when.enabled = { host_env = ["personal"], roles = ["game"] } },
-  { name = "stablyai/orca", trusted = { cask = "orca" } },
+  { name = "stablyai/orca", trusted = { cask = "orca" }, owner = "orca" },
   { name = "termio-sh/tap", trusted = { cask = "termio" }, owner = "termio" },
   { name = "theseal/ssh-askpass", trusted = { formula = "ssh-askpass" } },
   { name = "vjeantet/tap", trusted = { formula = "alerter" } },

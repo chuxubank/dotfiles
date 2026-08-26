@@ -11,6 +11,6 @@ extra = [
   "zsh-syntax-highlighting",
 ]
 aur = [
-  "stably-orca-bin",
+  { name = "stably-orca-bin", owner = "orca" },
   "zsh-antidote",
 ]
