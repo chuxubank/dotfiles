@@ -111,7 +111,7 @@
  :tools
  rg
  magit
- git-misc
+ (git-misc :cat blame)
  ansible
  caddy
  docker
