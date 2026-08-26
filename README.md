@@ -10,8 +10,8 @@ chezmoi init chuxubank -a
 
 ## Terminal and mux key map
 
-The terminal layer owns terminal tabs. Herdr and Zellij own their internal
-workspaces, tabs, and panes.
+The terminal layer owns terminal tabs. Herdr, Zellij, and Luvus own their
+internal workspaces, tabs, and panes.
 
 The complete per-tool bindings are documented in
 [`docs/keybindings/`](docs/keybindings/README.md):
@@ -22,6 +22,7 @@ The complete per-tool bindings are documented in
 | WezTerm | [`docs/keybindings/wezterm.md`](docs/keybindings/wezterm.md) |
 | Herdr | [`docs/keybindings/herdr.md`](docs/keybindings/herdr.md) |
 | Zellij | [`docs/keybindings/zellij.md`](docs/keybindings/zellij.md) |
+| Luvus | [`docs/keybindings/luvus.md`](docs/keybindings/luvus.md) |
 
 ### Shared bindings
 
@@ -30,6 +31,6 @@ The complete per-tool bindings are documented in
 | `Super+1…9` | Ghostty/WezTerm terminal tab selection |
 | `Ctrl+Tab` / `Ctrl+Shift+Tab` | Terminal tab next/previous |
 | `Alt+1…9` | Herdr workspace selection |
-| `Ctrl+;` | Herdr/Zellij prefix |
-| `Ctrl+;` then `1…9` | Herdr/Zellij mux tab selection |
+| `Ctrl+;` | Herdr/Zellij/Luvus prefix |
+| `Ctrl+;` then `1…9` | Herdr/Zellij/Luvus mux tab selection |
 | `Super+Arrow` | Herdr/Zellij pane focus |

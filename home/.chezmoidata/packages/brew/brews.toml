@@ -136,6 +136,7 @@ brews = [
   "zsh",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
+  { name = "RizRiyz/luvus/luvus", owner = "luvus" },
   { name = "atlassian/homebrew-acli/acli", when.enabled.host_env = ["aa"] },
   { name = "awscli", when.enabled.host_env = ["aa"] },
   { name = "cocoapods", when.enabled.host_env = ["personal", "iv"] },

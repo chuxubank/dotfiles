@@ -120,6 +120,20 @@ tools:
       - tool: pi
         args: ["pi"]
 
+  luvus:
+    remove:
+      - ".luvus/config.json"
+    purge:
+      - ".luvus/luvus.sock"
+      - ".luvus/luvus-client.sock"
+      - ".luvus/session.json"
+      - ".luvus/orch.json"
+      - ".luvus/modules.json"
+      - ".luvus/modules/**"
+      - ".luvus/sessions/**"
+      - ".luvus/worktrees/**"
+      - ".luvus/reviews/**"
+
   openclaw:
     when:
       enabled: false
