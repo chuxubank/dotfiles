@@ -1,0 +1,4 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "termio") .) | fromJson -}}
+#!/bin/sh
+exec /Applications/termio.app/Contents/Resources/termiod "$@"
+{{- end -}}
