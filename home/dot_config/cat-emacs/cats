@@ -79,6 +79,7 @@
  :ai
  copilot
  vibe
+ (agent-shell :cat (sidebar bookmark workspace manager))
  mcp
 
  :lang
