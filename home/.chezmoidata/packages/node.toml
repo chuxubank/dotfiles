@@ -30,6 +30,7 @@ global = [
   { name = "@zed-industries/codex-acp", owner = "codex" },
   { name = "clawhub", owner = "openclaw" },
   { name = "emacs-lsp-proxy", trust = true },
+  { name = "lody", owner = "lody" },
   { name = "openclaw", owner = "openclaw" },
   { name = "opencode-ai", owner = "opencode" },
   { name = "pi-acp", owner = "pi" },

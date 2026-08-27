@@ -134,6 +134,13 @@ tools:
       - ".luvus/worktrees/**"
       - ".luvus/reviews/**"
 
+  lody:
+    when:
+      disabled:
+        host_env: [ci]
+    purge:
+      - ".lody/**"
+
   openclaw:
     when:
       enabled: false
