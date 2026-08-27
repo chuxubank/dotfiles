@@ -26,11 +26,30 @@
        so leave it unset and let pi offer whatever actually resolved. It is
        deleted rather than skipped to clear the key if it was ever written. */ -}}
 
+{{- /* omp-inspired portable knobs (oh-my-pi is a fork; these are the
+       official-pi equivalents that do not require switching binaries):
+       - defaultTools adds grep/find/ls so the model stops shelling out to
+         rg/find/ls. Pi's stock set is only read/bash/edit/write.
+       - retry is closer to omp (10 / 500ms): Codex + high thinking hits
+         transient 429s; keep provider retries at 0 so quota walls surface.
+       - httpIdleTimeoutMs 30m, because default 5m kills long thinking. */ -}}
 {{- $managed := dict
   "defaultModel" $model
   "defaultThinkingLevel" (default "medium" (index $cfg "reasoning_effort"))
+  "defaultTools" (list "read" "bash" "edit" "write" "grep" "find" "ls")
+  "httpIdleTimeoutMs" 1800000
   "npmCommand" (list "bun")
   "packages" $packages
+  "retry" (dict
+    "enabled" true
+    "maxRetries" 8
+    "baseDelayMs" 500
+    "provider" (dict
+      "timeoutMs" 3600000
+      "maxRetries" 0
+      "maxRetryDelayMs" 60000
+    )
+  )
   "theme" $theme
 -}}
 {{- if $provider -}}
