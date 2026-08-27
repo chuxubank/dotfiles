@@ -1,3 +1,4 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "herdr" "require" true) .) | fromJson -}}
 #!/usr/bin/env zsh
 # Apply declared Herdr workspaces from workspaces.yaml.
 # Existing labels are left in place; missing ones are created.
@@ -236,3 +237,4 @@ fi
 if $had_errors; then
   exit 1
 fi
+{{- end -}}

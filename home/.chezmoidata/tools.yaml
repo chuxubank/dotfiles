@@ -98,6 +98,7 @@ tools:
     remove:
       - ".config/herdr/config.toml"
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
+      - "bin/herdr-layout"
     purge:
       - ".config/herdr/**"
     # `herdr integration install <args>`. Agent-owned hook files cannot
