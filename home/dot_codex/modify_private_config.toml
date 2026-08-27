@@ -84,7 +84,14 @@
   )
   "tui" (dict "model_availability_nux" (dict "gpt-5.5" 4))
 -}}
-{{- $remove := list -}}
+{{- /* `mcp_servers` is merged, not replaced, so the Codex app can keep
+       injecting its own servers (computer-use, node_repl). Merging never
+       deletes, so servers retired from mcp.yaml linger in the existing
+       config forever and stay enabled. Prune them explicitly. */ -}}
+{{- $remove := list
+  "mcp_servers.emacs_mcp_server"
+  "mcp_servers.jetbrains"
+-}}
 {{- if $modelProvider -}}
   {{- $_ := set $managed "model_provider" $modelProvider -}}
 {{- else -}}
