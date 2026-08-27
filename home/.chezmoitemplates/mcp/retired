@@ -1,0 +1,20 @@
+{{- /* mcp/retired — snake_case keys for providers retired from mcp.providers.
+       Input: root context $ (no arguments)
+       Output: JSON list of name_snake keys, e.g. ["emacs_mcp_server"]
+
+       Consumed by configs that merge `mcp_servers` instead of replacing it,
+       to prune keys a merge would otherwise preserve forever. Fails if a
+       retired name is still live, which would silently delete a real server. */ -}}
+{{- $live := dict -}}
+{{- range $provider := .mcp.providers -}}
+  {{- $_ := set $live (regexReplaceAll "[^a-z0-9]+" ($provider.name | lower) "_") true -}}
+{{- end -}}
+{{- $out := list -}}
+{{- range $name := dig "retired" (list) .mcp -}}
+  {{- $key := regexReplaceAll "[^a-z0-9]+" ($name | lower) "_" -}}
+  {{- if hasKey $live $key -}}
+    {{- fail (printf "mcp/retired: %q (%s) is still a live provider" $name $key) -}}
+  {{- end -}}
+  {{- $out = append $out $key -}}
+{{- end -}}
+{{- toJson $out -}}

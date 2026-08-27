@@ -1,4 +1,13 @@
 mcp:
+  # Providers removed from `providers` below. Codex is the only tool whose
+  # config merges `mcp_servers` rather than replacing it, so the Codex app can
+  # keep injecting its own servers (computer-use, node_repl) — and merging
+  # never deletes. Without this list a retired provider lingers in an existing
+  # config forever, still enabled, pointing at a command that no longer
+  # resolves. Names are matched the same way live provider keys are derived.
+  retired:
+    - Emacs MCP Server # split into Elisp Dev + Org (c2ff53c)
+    - JetBrains # renamed to JetBrains MCP (043cae1)
   providers:
     - name: Amap
       description: Amap's official MCP Server

@@ -88,10 +88,10 @@
        injecting its own servers (computer-use, node_repl). Merging never
        deletes, so servers retired from mcp.yaml linger in the existing
        config forever and stay enabled. Prune them explicitly. */ -}}
-{{- $remove := list
-  "mcp_servers.emacs_mcp_server"
-  "mcp_servers.jetbrains"
--}}
+{{- $remove := list -}}
+{{- range $key := includeTemplate "mcp/retired" . | fromJson -}}
+  {{- $remove = append $remove (printf "mcp_servers.%s" $key) -}}
+{{- end -}}
 {{- if $modelProvider -}}
   {{- $_ := set $managed "model_provider" $modelProvider -}}
 {{- else -}}
