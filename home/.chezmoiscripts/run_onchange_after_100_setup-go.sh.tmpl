@@ -32,6 +32,27 @@ gup_remove_import() {
   gup remove --force "$name"
 }
 
+# sum.golang.org sometimes fails the checksum tile fetch with HTTP/2
+# INTERNAL_ERROR. Retry a couple of times before treating it as fatal.
+install_go_package() {
+  local pkg=$1
+  local attempt
+  local delay=2
+  local max_attempts=3
+
+  for ((attempt = 1; attempt <= max_attempts; attempt++)); do
+    if go install "$pkg"; then
+      return 0
+    fi
+    if ((attempt < max_attempts)); then
+      print -u2 -- "go install $pkg failed (attempt $attempt/$max_attempts); retrying in ${delay}s"
+      sleep $delay
+      delay=$((delay * 2))
+    fi
+  done
+  return 1
+}
+
 if command -v gup >/dev/null; then
   json_names_load installed_go \
     'gup list --json' \
@@ -48,7 +69,7 @@ for pkg in "${GO_PACKAGES[@]}"; do
   import_path="${pkg%%@*}"
   if (( ! ${installed_go[(Ie)$import_path]} )); then
     echo "Install go package: $pkg"
-    if ! go install "$pkg"; then
+    if ! install_go_package "$pkg"; then
       had_errors=true
     fi
   fi
