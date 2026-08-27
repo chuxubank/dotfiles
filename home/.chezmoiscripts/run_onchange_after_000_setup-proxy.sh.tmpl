@@ -9,7 +9,7 @@ echo "Sing-box running: {{ output "brew" "services" "info" "sing-box" "--json" |
 {{- end }}
 
 {{ if lookPath "ansible-playbook" }}
-cd {{ joinPath .chezmoi.homeDir .path.personal.proxy }}
+cd {{ joinPath .chezmoi.homeDir .path.personal.proxy }} || exit 1
 ansible-playbook playbook.yml --limit localhost --skip-tags "install"
 {{ end }}
 

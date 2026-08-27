@@ -2,10 +2,12 @@
 
 echo "󰯁 Install packages"
 
+had_errors=false
+
+{{- if or (eq .chezmoi.os "android") (eq .chezmoi.os "linux") }}
 {{ includeTemplate "script/reconcile-sh" }}
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi"
-had_errors=false
 
 sync_open_packages() {
 	_state=$1
@@ -30,6 +32,7 @@ DROP
 		printf '%s\n' "$_desired" | write_managed_state "$_state"
 	fi
 }
+{{- end }}
 
 {{ if eq .chezmoi.os "android" -}}
 _desired='{{ template "package/lines" (dict "ctx" . "path" (list "termux" "repo")) }}

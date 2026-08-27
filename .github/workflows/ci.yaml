@@ -5,15 +5,29 @@ on:
     branches:
       - chezmoi
   pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install zsh
-        run: sudo apt-get update && sudo apt-get install -y zsh
+      - name: Install tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y zsh shellcheck
+          curl -LsSf https://astral.sh/ruff/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Install chezmoi
         run: |
@@ -27,8 +41,9 @@ jobs:
         run: make verify
 
   clone-and-install:
-    if: github.event_name == 'push'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     container:
@@ -79,22 +94,33 @@ jobs:
             ${{ runner.os }}-rust-
 
       - name: Cache bun
-        if: false
         uses: actions/cache@v5
         with:
-          path: ~/.bun
+          path: |
+            ~/.bun
+            ~/.local/share/bun
           key: ${{ runner.os }}-bun-${{ hashFiles('home/.chezmoidata/packages/node.toml') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Cache uv
-        if: false
         uses: actions/cache@v5
         with:
           path: ~/.cache/uv
           key: ${{ runner.os }}-uv-${{ hashFiles('home/.chezmoidata/packages/python.toml') }}
           restore-keys: |
             ${{ runner.os }}-uv-
+
+      - name: Cache go
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.local/bin/go
+            ~/.local/share/go
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('home/.chezmoidata/packages/go.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Install python3
         run: |
@@ -117,6 +143,7 @@ jobs:
   smoke:
     name: Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
@@ -130,7 +157,7 @@ jobs:
 
       - name: Install chezmoi (macOS)
         if: runner.os == 'macOS'
-        run: brew install chezmoi
+        run: brew install chezmoi shellcheck ruff
 
       - name: Install chezmoi (Windows)
         if: runner.os == 'Windows'
@@ -143,7 +170,7 @@ jobs:
         run: chezmoi data
 
       - name: Dry-run apply
-        run: chezmoi apply --dry-run --exclude=encrypted,scripts,externals
+        run: chezmoi apply --dry-run --force --no-tty --exclude=encrypted,scripts,externals
 
       - name: Verify
         if: runner.os == 'macOS'

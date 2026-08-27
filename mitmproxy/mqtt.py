@@ -267,8 +267,6 @@ def tcp_message(flow: tcp.TCPFlow):
     if mqtt_packet.packet_type == mqtt_packet.SUBSCRIBE:
         topic = mqtt_packet.payload[0].topic
         print(f"Subscribed to topic '{topic}'.")
-        # Publish a predefined message to the topic
-        publish_message(flow.client, topic, b'Your predefined payload here!')
 
     # This way we can save topics
     # if mqtt_packet.packet_type == mqtt_packet.PUBLISH:

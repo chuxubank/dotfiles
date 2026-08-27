@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+set -o pipefail
 
 echo "󰯁 Setup sdkman"
 
@@ -8,9 +9,16 @@ SDKMAN_INIT="$SDKMAN_DIR/bin/sdkman-init.sh"
 
 if [ ! -s "$SDKMAN_INIT" ]; then
     rm -rf "$SDKMAN_DIR"
-    curl -s "https://get.sdkman.io?rcupdate=false" | bash
+    if ! curl -fsSL "https://get.sdkman.io?rcupdate=false" | bash; then
+        print -u2 -- "Could not install sdkman"
+        exit 1
+    fi
 fi
 
+if [[ ! -s $SDKMAN_INIT ]]; then
+    print -u2 -- "sdkman init script is missing after installation"
+    exit 1
+fi
 source "$SDKMAN_INIT"
 
 {{- $items := includeTemplate "package/items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
@@ -23,9 +31,13 @@ had_errors=false
 
 {{- range $sdk := $items }}
 {{- if eq (kindOf $sdk) "map" }}
-sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}
+if ! sdk install {{ $sdk.name }}{{- with index $sdk "version" }} {{ . }}{{ end }}; then
+  had_errors=true
+fi
 {{- else }}
-sdk install {{ $sdk }}
+if ! sdk install {{ $sdk }}; then
+  had_errors=true
+fi
 {{- end }}
 {{- end }}
 

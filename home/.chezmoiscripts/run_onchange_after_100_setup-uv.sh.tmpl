@@ -1,10 +1,14 @@
 #!/usr/bin/env zsh
+set -o pipefail
 
 echo "󰯁 Setup uv"
 
 {{- if not (lookPath "uv") }}
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.local/bin/env
+if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
+    print -u2 -- "Could not install uv"
+    exit 1
+fi
+source "$HOME/.local/bin/env"
 {{- end }}
 
 {{ includeTemplate "script/reconcile" }}
@@ -151,7 +155,7 @@ DESIRED_EXTRAS={{ $extras | quote }}
 DESIRED_PYTHON={{ $pythonVersion | quote }}
 if ! uv_tool_installed {{ $tool.name | quote }}; then
 echo "Install uv tool: {{ $tool.name }}"
-if uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
+if ! uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
 	  {{- with index $tool "with" }} --with {{.}}{{ end }}
 	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
@@ -160,12 +164,12 @@ if uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
 	  {{- else }}
 	    {{- printf " %s" $tool.name }}
 	  {{- end }} --upgrade; then
-    :
+    had_errors=true
 fi
 elif ! uv_tool_matches_config {{ $tool.name | quote }} "$DESIRED_PYTHON" "$DESIRED_WITH" "$DESIRED_EXTRAS"; then
 echo "Reinstall uv tool after config change: {{ $tool.name }}"
 print_uv_tool_config_changes {{ $tool.name | quote }} "$DESIRED_PYTHON" "$DESIRED_WITH" "$DESIRED_EXTRAS"
-if uv tool install --reinstall{{- if (and (index $tool "force") true) }} --force{{- end }}
+if ! uv tool install --reinstall{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
 	  {{- with index $tool "with" }} --with {{.}}{{ end }}
 	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
@@ -174,13 +178,15 @@ if uv tool install --reinstall{{- if (and (index $tool "force") true) }} --force
 	  {{- else }}
 	    {{- printf " %s" $tool.name }}
 	  {{- end }} --upgrade; then
-    :
+    had_errors=true
 fi
 fi
   {{ else }}
 if ! uv_tool_installed {{ $tool | quote }}; then
 echo "Install uv tool: {{ $tool }}"
-uv tool install {{ $tool }} --upgrade
+if ! uv tool install {{ $tool }} --upgrade; then
+  had_errors=true
+fi
 fi
   {{ end }}
 {{- end }}

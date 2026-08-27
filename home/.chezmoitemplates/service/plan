@@ -18,11 +18,11 @@
   {{- if eq $os "darwin" -}}
     {{- $manager = "launchd" -}}
     {{- if $isBrew -}}{{- $manager = "brew" -}}{{- end -}}
-    {{- $file = printf "~/Library/LaunchAgents/%s.plist" $label -}}
+    {{- $file = printf "$HOME/Library/LaunchAgents/%s.plist" $label -}}
   {{- else if eq $os "linux" -}}
     {{- $manager = "systemd" -}}
     {{- if and $isBrew (lookPath "brew") -}}{{- $manager = "brew" -}}{{- end -}}
-    {{- $file = printf "~/.config/systemd/user/%s.service" $label -}}
+    {{- $file = printf "$HOME/.config/systemd/user/%s.service" $label -}}
   {{- end -}}
   {{- $out = append $out (dict
         "name" $name

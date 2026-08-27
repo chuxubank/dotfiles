@@ -7,7 +7,7 @@ init:
 	./install.sh --init
 
 plan:
-	chezmoi apply --dry-run --verbose --exclude=encrypted,scripts,externals
+	chezmoi apply --dry-run --force --no-tty --verbose --exclude=encrypted,scripts,externals
 
 apply:
 	chezmoi apply --init

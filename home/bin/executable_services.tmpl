@@ -14,11 +14,14 @@ EOF
 
 validate_selector() {
 	case "$1" in
+{{- $seen := dict -}}
 {{- range (includeTemplate "service/plan" . | fromJson) }}
-	{{- if eq .name .tool }}
 	{{ .name | quote }}) return 0 ;;
-	{{- else }}
-	{{ .name | quote }} | {{ .tool | quote }}) return 0 ;;
+	{{- if not (hasKey $seen .tool) }}
+	{{- if ne .name .tool }}
+	{{ .tool | quote }}) return 0 ;;
+	{{- end }}
+	{{- $_ := set $seen .tool true -}}
 	{{- end }}
 {{- end }}
 	esac
@@ -217,6 +220,7 @@ if [ "$action" = log ]; then
 '
 	set -f
 	# log_files is newline-delimited so paths containing spaces stay intact.
+	# shellcheck disable=SC2086
 	set -- $log_files
 	IFS=$old_ifs
 	exec tail -n 100 -F "$@"

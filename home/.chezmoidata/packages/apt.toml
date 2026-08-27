@@ -25,6 +25,7 @@ pkg = [
   "ripgrep",
   "rsync",
   "rustup",
+  "shellcheck",
   "sshpass",
   "tmux",
   "wget",

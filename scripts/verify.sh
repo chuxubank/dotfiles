@@ -1,16 +1,18 @@
 #!/bin/sh
 set -eu
 
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 CHEZMOI_SOURCE=${CHEZMOI_SOURCE:-$ROOT}
 failed=0
 
 cd "$ROOT"
 
-if ! command -v chezmoi >/dev/null 2>&1; then
-	echo "verify: chezmoi is not on PATH" >&2
-	exit 1
-fi
+for required in chezmoi shellcheck ruff; do
+	if ! command -v "$required" >/dev/null 2>&1; then
+		echo "verify: $required is not on PATH" >&2
+		exit 1
+	fi
+done
 
 run_template() {
 	name=$1
@@ -39,11 +41,6 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-allow_exact = {
-    "home/dot_config/rclone/modify_private_rclone.conf": (
-        '{{ "123456" | output "rclone" "obscure" }}',
-    ),
-}
 skip_suffixes = {".asc", ".gpg", ".png", ".jpg", ".jpeg", ".webp", ".ico"}
 secret_res = [
     re.compile(r"BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY"),
@@ -69,11 +66,8 @@ for path in root.rglob("*"):
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         continue
-    allowed = allow_exact.get(rel, ())
     for i, line in enumerate(text.splitlines(), 1):
         if 'includeTemplate "safe/pass"' in line or "includeTemplate 'safe/pass'" in line:
-            continue
-        if any(token in line for token in allowed):
             continue
         for rx in secret_res:
             if rx.search(line):
@@ -104,14 +98,21 @@ check_shell() {
 			echo "verify: sh -n failed: $src" >&2
 			mark_syntax_failed
 		}
-		return 0
-	fi
-	if command -v "$interp" >/dev/null 2>&1; then
+	elif command -v "$interp" >/dev/null 2>&1; then
 		"$interp" -n "$file" || {
 			echo "verify: $interp -n failed: $src" >&2
 			mark_syntax_failed
 		}
 	fi
+
+	case $interp in
+	sh | bash)
+		if ! shellcheck --severity=warning --shell="$interp" "$file"; then
+			echo "verify: shellcheck failed: $src" >&2
+			mark_syntax_failed
+		fi
+		;;
+	esac
 }
 
 check_python() {
@@ -124,6 +125,11 @@ check_python() {
 			echo "verify: python3 compile failed: $src" >&2
 			mark_syntax_failed
 		fi
+	fi
+	if ! ruff check --quiet --select E9,F63,F7,F82 \
+		--stdin-filename "${src%.tmpl}" - <"$file"; then
+		echo "verify: ruff failed: $src" >&2
+		mark_syntax_failed
 	fi
 }
 
@@ -138,7 +144,7 @@ check_by_shebang() {
 	'#!'*bash*)
 		check_shell bash "$src" "$file"
 		;;
-	'#!'*'/bin/sh'* | '#!'*'/usr/bin/env sh'* | '#!/bin/sh' | '#!/usr/bin/env sh')
+	'#!/bin/sh'* | '#!/usr/bin/env sh'*)
 		check_shell sh "$src" "$file"
 		;;
 	'#!'*python*)
