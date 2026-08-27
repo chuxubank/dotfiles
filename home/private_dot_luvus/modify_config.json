@@ -19,6 +19,7 @@
     "prefix" "ctrl+;"
     "check_updates" false
     "layout" (dict
+      "agent_title" true
       "files_show_hidden" true
     )
     "notifications" (dict
