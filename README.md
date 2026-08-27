@@ -34,3 +34,15 @@ The complete per-tool bindings are documented in
 | `Ctrl+;` | Herdr/Zellij/Luvus prefix |
 | `Ctrl+;` then `1…9` | Herdr/Zellij/Luvus mux tab selection |
 | `Super+Arrow` | Herdr/Zellij pane focus |
+
+## Declared workspaces
+
+Shared workspace, tab, pane, command, and agent declarations live in
+[`home/.chezmoidata/workspaces.yaml`](home/.chezmoidata/workspaces.yaml).
+
+- `herdr-layout [NAME...]` creates missing Herdr workspaces.
+- `luvus-layout [NAME...]` creates missing Luvus workspaces through its CLI/API.
+- Zellij layouts are generated under `~/.config/zellij/layouts/`.
+
+Both runtime commands leave existing named workspaces untouched and focus the
+workspace marked with `focus: true` after applying missing entries.

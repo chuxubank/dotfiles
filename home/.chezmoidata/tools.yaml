@@ -123,6 +123,7 @@ tools:
   luvus:
     remove:
       - ".luvus/config.json"
+      - "bin/luvus-layout"
     purge:
       - ".luvus/luvus.sock"
       - ".luvus/luvus-client.sock"

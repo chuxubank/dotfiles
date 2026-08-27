@@ -1,0 +1,268 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "luvus" "require" true) .) | fromJson -}}
+#!/usr/bin/env zsh
+# Apply declared Luvus workspaces from workspaces.yaml.
+# Existing names are left in place; missing workspaces are created.
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+usage: luvus-layout [NAME...]
+
+Create any declared workspace that is not already open, including its tabs,
+panes, commands, and named agents. Then focus the workspace marked focus: true
+(or the first requested workspace).
+EOF
+}
+
+die() {
+  print -u2 -- "$*"
+  exit 1
+}
+
+if [[ ${1:-} == -h || ${1:-} == --help ]]; then
+  usage
+  exit 0
+fi
+
+command -v luvus >/dev/null || die "luvus is not installed"
+command -v jq >/dev/null || die "jq is required"
+
+{{- $workspaces := includeTemplate "workspace/items" . | fromJson }}
+
+expand_tilde() {
+  case $1 in
+    '~') print -r -- "$HOME" ;;
+    '~/'*) print -r -- "$HOME/${1#\~/}" ;;
+    *) print -r -- "$1" ;;
+  esac
+}
+
+resolve_cwd() {
+  local raw=$1 root=$2 expanded
+  expanded=$(expand_tilde "$raw")
+  case $expanded in
+    /*) print -r -- "$expanded" ;;
+    '') print -r -- "$root" ;;
+    *) print -r -- "$root/$expanded" ;;
+  esac
+}
+
+json_field() {
+  jq -er "$1" <<<"$2"
+}
+
+current_pane() {
+  luvus pane list | jq -er '.result.panes[] | select(.focused) | .pane' | head -n 1
+}
+
+pane_logical_rect() {
+  local pane=$1 request
+  request=$(jq -cn --arg pane "$pane" \
+    '{id:"luvus-layout",method:"pane.layout",params:{pane:$pane}}')
+  print -r -- "$request" | luvus uhp proxy |
+    jq -er '"\(.result.rect.width) \(.result.rect.height)"'
+}
+
+tty_cell_metrics() {
+  command -v python3 >/dev/null || return 1
+  python3 - <<'PY'
+import fcntl, os, struct, termios
+try:
+    fd = os.open("/dev/tty", os.O_RDONLY)
+    rows, cols, xpixel, ypixel = struct.unpack(
+        "HHHH", fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0" * 8)
+    )
+    os.close(fd)
+except OSError:
+    raise SystemExit(1)
+if not (rows and cols and xpixel and ypixel):
+    raise SystemExit(1)
+print(f"{xpixel // cols} {ypixel // rows}")
+PY
+}
+
+adaptive_split_dir() {
+  local pane=$1 logical grid metrics logical_w logical_h rows cols
+  local pane_cols pane_rows col_px row_px
+  logical=$(pane_logical_rect "$pane") || { print -r -- right; return }
+  logical_w=${logical%% *}
+  logical_h=${logical##* }
+  grid=$({ stty size </dev/tty; } 2>/dev/null) || { print -r -- right; return }
+  rows=${grid%% *}
+  cols=${grid##* }
+  pane_cols=$(( logical_w * cols / 10000 ))
+  pane_rows=$(( logical_h * rows / 10000 ))
+  if metrics=$(tty_cell_metrics); then
+    col_px=${metrics%% *}
+    row_px=${metrics##* }
+    if (( pane_cols * col_px < pane_rows * row_px )); then
+      print -r -- down
+    else
+      print -r -- right
+    fi
+    return
+  fi
+  if (( pane_cols < 2 * pane_rows )); then
+    print -r -- down
+  else
+    print -r -- right
+  fi
+}
+
+pane_dir() {
+  local spec=${1:-right} pane=${2:-}
+  case $spec in
+    down | horizontal) print -r -- down ;;
+    auto) adaptive_split_dir "$pane" ;;
+    *) print -r -- right ;;
+  esac
+}
+
+set_pane_cwd() {
+  local pane=$1 cwd=$2 quoted
+  [[ -d $cwd ]] || {
+    print -u2 -- "workspace pane directory does not exist: $cwd"
+    return 1
+  }
+  quoted=${(q)cwd}
+  luvus pane run "$pane" "cd -- $quoted" >/dev/null
+}
+
+start_named_agent() {
+  local name=$1 kind=$2 pane=$3
+  luvus agent start "$name" --kind "$kind" --pane "$pane" --timeout 120
+}
+
+list_json=$(luvus workspace list) ||
+  die "could not list Luvus workspaces (is the server running?)"
+
+index_for_name() {
+  jq -r --arg name "$1" \
+    '.result.workspaces[] | select(.name == $name) | .workspace' \
+    <<<"$list_json" | head -n 1
+}
+
+{{- range $wi, $ws := $workspaces }}
+
+apply_{{ $wi }}() {
+  local created ws pane prev dir cwd workspace_root focus_pane
+{{- $firstTab := index $ws.tabs 0 }}
+{{- $firstPane := index $firstTab.panes 0 }}
+{{- if hasKey $firstPane "cwd" }}
+  workspace_root=$(resolve_cwd {{ $firstPane.cwd | quote }} "$PWD")
+{{- else }}
+  workspace_root=$PWD
+{{- end }}
+  [[ -d $workspace_root ]] || {
+    print -u2 -- "workspace directory does not exist: $workspace_root"
+    return 1
+  }
+  created=$(luvus workspace open "$workspace_root") || return
+  ws=$(json_field '.result.workspace' "$created") || return
+  luvus workspace rename "$ws" {{ $ws.name | quote }} >/dev/null || return
+  pane=$(current_pane) || return
+  focus_pane=$pane
+{{- if and (hasKey $firstTab "label") $firstTab.label }}
+  luvus tab rename {{ $firstTab.label | quote }} >/dev/null || return
+{{- end }}
+  prev=$pane
+{{- range $ti, $tab := $ws.tabs }}
+{{- range $pi, $p := $tab.panes }}
+{{- if and (eq $ti 0) (eq $pi 0) }}
+{{- else if eq $pi 0 }}
+  created=$(luvus tab new) || return
+  pane=$(current_pane) || return
+{{- if and (hasKey $tab "label") $tab.label }}
+  luvus tab rename {{ $tab.label | quote }} >/dev/null || return
+{{- end }}
+  prev=$pane
+{{- else }}
+  dir=$(pane_dir {{ if hasKey $p "split" }}{{ $p.split | quote }}{{ else }}"right"{{ end }} "$prev")
+  if [[ $dir == down ]]; then
+    created=$(luvus pane split "$prev" --down --no-focus) || return
+  else
+    created=$(luvus pane split "$prev" --no-focus) || return
+  fi
+  pane=$(json_field '.result.pane' "$created") || return
+  prev=$pane
+{{- end }}
+{{- if hasKey $p "cwd" }}
+  cwd=$(resolve_cwd {{ $p.cwd | quote }} "$workspace_root")
+  if [[ $cwd != "$workspace_root" ]]; then
+    set_pane_cwd "$pane" "$cwd" || return
+  fi
+{{- end }}
+{{- if hasKey $p "agent" }}
+  start_named_agent {{ $p.agent | quote }} {{ $p.kind | quote }} "$pane" || return
+{{- else if hasKey $p "command" }}
+  luvus pane run "$pane" {{ $p.command | quote }} >/dev/null || return
+{{- end }}
+{{- if and (hasKey $p "focus") $p.focus }}
+  focus_pane=$pane
+{{- else if and (hasKey $tab "focus") $tab.focus (eq $pi 0) }}
+  focus_pane=$pane
+{{- end }}
+{{- end }}
+{{- end }}
+  luvus pane focus "$focus_pane" >/dev/null || return
+  print -r -- "created {{ $ws.name }} ($ws)"
+}
+{{- end }}
+
+declared=(
+{{- range $workspaces }}
+  {{ .name | quote }}
+{{- end }}
+)
+
+{{- $focus := "" }}
+{{- range $workspaces }}
+  {{- if and (hasKey . "focus") .focus }}
+    {{- $focus = .name }}
+  {{- end }}
+{{- end }}
+focus_name={{ if $focus }}{{ $focus | quote }}{{ else }}{{ (index $workspaces 0).name | quote }}{{ end }}
+
+targets=("$@")
+if (( $#targets == 0 )); then
+  targets=("${declared[@]}")
+fi
+
+had_errors=false
+focus_index=
+
+for name in "${targets[@]}"; do
+  index=$(index_for_name "$name")
+  if [[ -n $index ]]; then
+    print -r -- "present: $name ($index)"
+  else
+    case $name in
+{{- range $wi, $ws := $workspaces }}
+      {{ $ws.name | quote }}) apply_{{ $wi }} || {
+        print -u2 -- "failed: $name"
+        had_errors=true
+      } ;;
+{{- end }}
+      *)
+        print -u2 -- "unknown workspace: $name"
+        had_errors=true
+        ;;
+    esac
+    list_json=$(luvus workspace list) || true
+    index=$(index_for_name "$name")
+  fi
+  if [[ $name == "$focus_name" && -n $index ]]; then
+    focus_index=$index
+  fi
+done
+
+if [[ -n $focus_index ]]; then
+  luvus workspace focus "$focus_index" >/dev/null
+  print -r -- "focused $focus_name ($focus_index)"
+fi
+
+if $had_errors; then
+  exit 1
+fi
+{{- end -}}

@@ -1,14 +1,16 @@
-# Declared workspaces. One entry is one Herdr workspace and one Zellij
-# layout (~/.config/zellij/layouts/<name>.kdl, generated from this list).
-# Zellij dest extras are removed (exact_layouts). Apply in Herdr with
-# `herdr-layout` or prefix+alt+l. Entries may use shared `when` host
-# conditions; disabled entries are omitted from every generated layout.
+# Declared workspaces. One entry is one Herdr/Luvus workspace and one
+# Zellij layout (~/.config/zellij/layouts/<name>.kdl, generated from this
+# list). Zellij dest extras are removed (exact_layouts). Apply at runtime
+# with `herdr-layout` or `luvus-layout`; Herdr also exposes prefix+alt+l.
+# Entries may use shared `when` host conditions; disabled entries are
+# omitted from every generated layout.
 # Tabs hold panes; panes are the project roots.
 #
 # cwd accepts ~ and absolute paths. relative paths resolve from the
 # workspace root when one is set.
-# agent + kind: `herdr agent start NAME --kind KIND` (NAME is [a-z][a-z0-9_-]{0,31},
-# unique among live agents). command: `herdr pane run` when agent is unset.
+# agent + kind: start a named agent through the target mux (NAME is
+# [a-z][a-z0-9_-]{0,31}, unique among live agents). command runs in the pane
+# when agent is unset.
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
 workspaces:
