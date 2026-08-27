@@ -1,10 +1,13 @@
 # Luvus keybindings
 
 Source configuration:
-`home/dot_luvus/config.json.tmpl`
+`home/private_dot_luvus/modify_config.json`
 
 Luvus owns its own workspaces, tabs, and panes. The terminal still owns the
 outer terminal window/tab layer.
+
+Luvus rewrites `config.json` itself, so the prefix is merged in through a
+modify-template rather than owning the whole file.
 
 ## Prefix
 

@@ -1,0 +1,37 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* https://luvus.dev/docs/reference/cli/
+       Luvus rewrites config.json itself: `theme use`, `ui sidebar/dock`, and
+       `bar move` persist live UI state (sidebars, docks, bars, version) here.
+       A modify-template so that state survives apply and only the choices
+       this repo owns are pinned.
+
+       Luvus has no theme auto_switch (unlike Herdr), so the gruvbox variant
+       is resolved from the host's dark-mode fact at render time.
+       check_updates is off because Homebrew owns the binary
+       (RizRiyz/luvus/luvus in packages/brew/brews.toml). */ -}}
+
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "theme" (ternary "gruvbox" "gruvbox-light" .isDarkMode)
+    "prefix" "ctrl+;"
+    "check_updates" false
+    "layout" (dict
+      "files_show_hidden" true
+    )
+    "notifications" (dict
+      "sound_on_blocked" true
+    )
+    "sidebars" (dict
+      "left" (dict
+        "docks" (list "workspaces" "agents")
+      )
+      "right" (dict
+        "docks" (list "files")
+        "visible" true
+      )
+    )
+  )
+) -}}
