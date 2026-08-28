@@ -4,7 +4,8 @@ Source configuration:
 `home/dot_pi/private_agent/modify_keybindings.json`
 
 Pi is an in-pane application. In the current terminal setup, `Ctrl+P`,
-`Ctrl+N`, and the model-cycle chords reach Pi without terminal overrides.
+`Ctrl+N`, `Ctrl+R`, and the model-cycle chords reach Pi without terminal
+overrides.
 
 The upstream default list is in Pi's
 [keybindings.md](https://github.com/earendil-works/pi-coding-agent/blob/main/docs/keybindings.md).
@@ -27,6 +28,19 @@ After editing, run `/reload` in Pi.
 
 `Ctrl+P` in `/resume` still toggles path display. History bindings only
 override model cycling while the main editor is focused.
+
+## Prompt history and sessions
+
+`pi-input-history` keeps reverse search on `Ctrl+R` (readline/Emacs).
+Session rename moves to the Meta variant so Pi stops warning about the
+built-in `app.session.rename` chord. WezTerm's default `Ctrl+R` reload is
+unbound so the key reaches Pi; `Super+R` and `Ctrl+Shift+R` still reload
+WezTerm.
+
+| Keys | Pi default | Current assignment | Status |
+| --- | --- | --- | --- |
+| `Ctrl+R` | Rename session | Reverse-search prompt history | **Change** |
+| `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
 
 ## Model cycle
 

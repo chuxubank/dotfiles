@@ -4,6 +4,7 @@ local act = wezterm.action
 -- Super uses WezTerm's native tab bindings.
 -- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
+-- Ctrl+R is passed through for Pi reverse search; Super+R still reloads.
 local keys = {}
 
 local function passthrough(key, mods)
@@ -17,6 +18,7 @@ end
 passthrough("t", "CTRL|SHIFT")
 passthrough("T", "CMD|SHIFT")
 passthrough("w", "CTRL|SHIFT")
+passthrough("r", "CTRL")
 passthrough("[", "CMD|SHIFT")
 passthrough("]", "CMD|SHIFT")
 passthrough("PageUp", "CTRL")

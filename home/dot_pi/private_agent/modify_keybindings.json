@@ -1,7 +1,8 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- /* pi keybindings — schema: @earendil-works/pi-coding-agent/docs/keybindings.md
        Emacs editor chords. Model cycle is C-M-p / C-M-n because WezTerm
-       keeps Ctrl+Shift+P for the command palette. */ -}}
+       keeps Ctrl+Shift+P for the command palette. Session rename is
+       C-M-r so Ctrl+R stays reverse search (pi-input-history). */ -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
@@ -17,5 +18,6 @@
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
     "app.model.cycleForward" "ctrl+alt+p"
     "app.model.cycleBackward" "ctrl+alt+n"
+    "app.session.rename" "ctrl+alt+r"
   )
 ) -}}

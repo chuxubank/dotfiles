@@ -40,6 +40,7 @@ receive mux commands after the `Ctrl+;` prefix.
 | `Super+[` / `Super+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
 | `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
 | `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Delete** |
+| `Ctrl+R` | Reload configuration | Unbound; passed to the pane (Pi reverse search) | **Delete** |
 | `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Add** |
 | `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Add** |
 | `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Add** |
