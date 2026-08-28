@@ -1,0 +1,21 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* pi keybindings — schema: @earendil-works/pi-coding-agent/docs/keybindings.md
+       Emacs editor chords. Model cycle is C-M-p / C-M-n because WezTerm
+       keeps Ctrl+Shift+P for the command palette. */ -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "tui.editor.historyPrevious" "ctrl+p"
+    "tui.editor.historyNext" "ctrl+n"
+    "tui.editor.cursorLeft" (list "left" "ctrl+b")
+    "tui.editor.cursorRight" (list "right" "ctrl+f")
+    "tui.editor.cursorWordLeft" (list "alt+left" "alt+b")
+    "tui.editor.cursorWordRight" (list "alt+right" "alt+f")
+    "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
+    "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
+    "tui.input.newLine" (list "shift+enter" "ctrl+j")
+    "app.model.cycleForward" "ctrl+alt+p"
+    "app.model.cycleBackward" "ctrl+alt+n"
+  )
+) -}}

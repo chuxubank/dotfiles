@@ -21,6 +21,7 @@ changes:
 - [Herdr](herdr.md)
 - [Zellij](zellij.md)
 - [Luvus](luvus.md)
+- [Pi](pi.md)
 
 ## Shared allocation
 

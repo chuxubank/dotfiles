@@ -23,6 +23,7 @@ The complete per-tool bindings are documented in
 | Herdr | [`docs/keybindings/herdr.md`](docs/keybindings/herdr.md) |
 | Zellij | [`docs/keybindings/zellij.md`](docs/keybindings/zellij.md) |
 | Luvus | [`docs/keybindings/luvus.md`](docs/keybindings/luvus.md) |
+| Pi | [`docs/keybindings/pi.md`](docs/keybindings/pi.md) |
 
 ### Shared bindings
 

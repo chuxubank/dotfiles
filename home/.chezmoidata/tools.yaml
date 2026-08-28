@@ -180,6 +180,7 @@ tools:
       - ".pi/agent/settings.json"
       - ".pi/agent/trust.json"
       - ".pi/agent/mcp.json"
+      - ".pi/agent/keybindings.json"
       - ".pi/web-search.json"
     purge:
       - ".pi/**"
