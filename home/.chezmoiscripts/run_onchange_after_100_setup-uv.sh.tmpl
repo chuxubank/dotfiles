@@ -66,9 +66,12 @@ normalize_csv_list() {
     if [[ -z "$csv" ]]; then
         return 0
     fi
+    # uv tool list --show-with drops PEP 508 extras (rapid-mlx[vision] ->
+    # rapid-mlx). Strip them before comparing so with-exec extras do not
+    # look like a config change on every apply.
     printf '%s\n' "$csv" \
         | tr ',' '\n' \
-        | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' \
+        | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/\[[^]]*\]//g' \
         | tr '[:upper:]' '[:lower:]' \
         | tr '_' '-' \
         | awk 'NF' \
@@ -157,12 +160,12 @@ if ! uv_tool_installed {{ $tool.name | quote }}; then
 echo "Install uv tool: {{ $tool.name }}"
 if ! uv tool install{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
-	  {{- with index $tool "with" }} --with {{.}}{{ end }}
-	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
+	  {{- with index $tool "with" }} --with {{ . | quote }}{{ end }}
+	  {{- with index $tool "with-exec" }} --with-executables-from {{ . | quote }}{{ end }}
 	  {{- if hasKey $tool "extra" -}}
-	    {{- printf " %s[%s]" $tool.name $tool.extra }}
+	    {{- printf " %s" (printf "%s[%s]" $tool.name $tool.extra | quote) }}
 	  {{- else }}
-	    {{- printf " %s" $tool.name }}
+	    {{- printf " %s" ($tool.name | quote) }}
 	  {{- end }} --upgrade; then
     had_errors=true
 fi
@@ -171,12 +174,12 @@ echo "Reinstall uv tool after config change: {{ $tool.name }}"
 print_uv_tool_config_changes {{ $tool.name | quote }} "$DESIRED_PYTHON" "$DESIRED_WITH" "$DESIRED_EXTRAS"
 if ! uv tool install --reinstall{{- if (and (index $tool "force") true) }} --force{{- end }}
       {{- with index $tool "version" }} --python python{{ . }}{{ end }}
-	  {{- with index $tool "with" }} --with {{.}}{{ end }}
-	  {{- with index $tool "with-exec" }} --with-executables-from {{.}}{{ end }}
+	  {{- with index $tool "with" }} --with {{ . | quote }}{{ end }}
+	  {{- with index $tool "with-exec" }} --with-executables-from {{ . | quote }}{{ end }}
 	  {{- if hasKey $tool "extra" -}}
-	    {{- printf " %s[%s]" $tool.name $tool.extra }}
+	    {{- printf " %s" (printf "%s[%s]" $tool.name $tool.extra | quote) }}
 	  {{- else }}
-	    {{- printf " %s" $tool.name }}
+	    {{- printf " %s" ($tool.name | quote) }}
 	  {{- end }} --upgrade; then
     had_errors=true
 fi
@@ -184,7 +187,7 @@ fi
   {{ else }}
 if ! uv_tool_installed {{ $tool | quote }}; then
 echo "Install uv tool: {{ $tool }}"
-if ! uv tool install {{ $tool }} --upgrade; then
+if ! uv tool install {{ $tool | quote }} --upgrade; then
   had_errors=true
 fi
 fi
