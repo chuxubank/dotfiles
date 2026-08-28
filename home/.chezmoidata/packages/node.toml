@@ -26,6 +26,7 @@ global = [
   { name = "@github/copilot", owner = "github-copilot" },
   { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },
   { name = "@larksuite/cli", when.enabled.host_env = ["iv"] },
+  { name = "@monid-ai/cli" },
   { name = "@openai/codex", owner = "codex" },
   { name = "@zed-industries/codex-acp", owner = "codex" },
   { name = "clawhub", owner = "openclaw" },

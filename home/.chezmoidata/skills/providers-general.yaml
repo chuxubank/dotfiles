@@ -70,3 +70,6 @@ skills:
       - name: sentry-cli
         source: https://cli.sentry.dev
         owner: sentry
+
+      - name: monid
+        source: https://monid.ai/SKILL.md
