@@ -46,3 +46,10 @@ plugins:
           Persist prompt history across sessions and provide fuzzy reverse
           search from the editor.
         source: npm:pi-input-history
+
+      - name: pi-image-view
+        description: >-
+          Replace pasted or dropped image paths with stable [Image #N]
+          markers, send a compact thumbnail to the model, and keep the
+          reference clickable in history.
+        source: npm:pi-image-view
