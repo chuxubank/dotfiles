@@ -34,3 +34,15 @@ plugins:
           Web search and URL fetching for Pi, with additional GitHub, PDF,
           YouTube, and local-video content extraction.
         source: npm:pi-web-access
+
+      - name: pi-edit-session-in-place
+        description: >-
+          Re-edit or delete an earlier user or assistant message in the
+          current Pi session branch.
+        source: npm:pi-edit-session-in-place
+
+      - name: pi-input-history
+        description: >-
+          Persist prompt history across sessions and provide fuzzy reverse
+          search from the editor.
+        source: npm:pi-input-history
