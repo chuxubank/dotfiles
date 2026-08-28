@@ -117,7 +117,7 @@ WezTerm can provide the panes in which these agents run and can display external
    - use the discovered `SSHMUX:` domains independently for compatible remote
      hosts;
    - move declared layout generation from Zellij KDL to Lua `mux-startup` or generate Lua from [`workspaces.yaml`](../../home/.chezmoidata/workspaces.yaml);
-   - preserve the current terminal/mux key ownership documented in [`README.md`](../../README.md).
+   - preserve the current terminal/mux key ownership documented in [`README.org`](../../README.org).
 4. Do not remove Zellij until the pilot validates: GUI close/reattach, macOS sleep, mux-server crash behavior, upgrades/config reloads, multi-client focus behavior, SSH/TLS reconnect, long-lived scrollback memory, and the interaction with Herdr agent hooks.
 
 ### Decision by objective
