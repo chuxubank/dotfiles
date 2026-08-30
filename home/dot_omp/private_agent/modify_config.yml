@@ -1,0 +1,56 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* OMP settings — schema: https://github.com/can1357/oh-my-pi/blob/main/docs/settings.md
+       Preserve settings written by `omp config` and `/settings` while managing
+       model roles and the subagent execution policy declaratively. */ -}}
+
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "omp") .) | fromJson -}}
+{{- $effort := default "high" (index $cfg "reasoning_effort") -}}
+{{- $roles := dict "default" (printf "%s:%s" $cfg.model $effort) -}}
+{{- range $role, $model := default dict (index $cfg "default_models") -}}
+  {{- $_ := set $roles $role $model -}}
+{{- end -}}
+
+{{- $managed := dict
+  "async" (dict
+    "enabled" true
+  )
+  "composer" (dict
+    "shape" "pi"
+  )
+  "disabledProviders" (list
+    "claude"
+    "claude-plugins"
+    "cline"
+    "codex"
+    "cursor"
+    "gemini"
+    "github"
+    "opencode"
+    "vscode"
+    "windsurf"
+  )
+  "modelRoles" $roles
+  "symbolPreset" "nerd"
+  "task" (dict
+    "batch" true
+    "eager" "preferred"
+    "enableEffort" true
+    "maxConcurrency" 3
+    "maxRecursionDepth" 2
+    "isolation" (dict
+      "mode" "auto"
+      "apply" true
+      "merge" "patch"
+    )
+  )
+  "theme" (dict
+    "dark" "dark-gruvbox"
+    "light" "light-gruvbox"
+  )
+-}}
+{{- includeTemplate "config/merge" (dict
+  "format" "yaml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" $managed
+) -}}

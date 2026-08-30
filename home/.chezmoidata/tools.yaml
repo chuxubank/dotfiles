@@ -143,6 +143,16 @@ tools:
     purge:
       - ".lody/**"
 
+  omp:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".omp/agent/config.yml"
+      - ".omp/agent/mcp.json"
+    purge:
+      - ".omp/**"
+
   openclaw:
     when:
       enabled: false

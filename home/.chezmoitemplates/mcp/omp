@@ -1,0 +1,39 @@
+{{- /* mcp/omp — mcp.providers as OMP native ~/.omp/agent/mcp.json.
+       OMP reads mcpServers with command/url, enabled, and timeout in ms.
+
+       Disabled providers are kept with enabled: false rather than dropped,
+       so a server turned off here overrides any lower-precedence config file.
+*/ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "omp") $) | fromJson -}}
+{{- range $s := $all }}
+  {{- $server := dict "enabled" $s.enabled -}}
+
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if gt (len $s.args) 0 }}
+      {{- $_ := set $server "args" $s.args -}}
+    {{- end }}
+    {{- if gt (len $s.envs) 0 }}
+      {{- $_ := set $server "env" $s.envs -}}
+    {{- end }}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "type" $s.type -}}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
+  {{- else }}
+    {{- continue -}}
+  {{- end }}
+
+  {{- /* mcp.yaml carries seconds; OMP timeout is milliseconds. */ -}}
+  {{- if gt $s.tool_timeout 0 }}
+    {{- $_ := set $server "timeout" (mul $s.tool_timeout 1000) -}}
+  {{- else if gt $s.timeout 0 }}
+    {{- $_ := set $server "timeout" (mul $s.timeout 1000) -}}
+  {{- end }}
+
+  {{- $_ := set $servers $s.name $server -}}
+{{- end -}}
+{{- toJson (dict "mcpServers" $servers) -}}

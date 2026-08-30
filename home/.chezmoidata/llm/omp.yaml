@@ -1,0 +1,19 @@
+llm:
+  tools:
+    omp:
+      # Keep the primary session on the Codex subscription and route bundled
+      # task agents through SuperGrok. OMP owns both OAuth flows and catalogs.
+      model:
+        - openai-codex/gpt-5.6-sol
+        - xai-oauth/grok-4.6
+      reasoning_effort: high
+      default_models:
+        task: xai-oauth/grok-4.6:high
+        smol: xai-oauth/grok-4.6:medium
+      providers:
+        openai-codex:
+          provider: openai-codex
+          models: false
+        xai-oauth:
+          provider: xai-oauth
+          models: false
