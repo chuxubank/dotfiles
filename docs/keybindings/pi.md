@@ -19,5 +19,5 @@ After editing, run `/reload` in Pi.
 | `Ctrl+H` | No delete-backward binding | Delete character backward | **Add** |
 | `Ctrl+R` | Rename session | Reverse-search prompt history | **Change** |
 | `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
-| `Ctrl+Alt+P` | No assignment (`Ctrl+P` cycled models) | Next scoped model | **Change** |
-| `Ctrl+Alt+N` | No assignment (`Ctrl+Shift+P` cycled backward) | Previous scoped model | **Change** |
+| `Ctrl+Shift+P` | Cycle backward (`Ctrl+Shift+P`) | Next scoped model | **Change** |
+| `Ctrl+Shift+N` | No assignment (`Ctrl+Shift+P` cycled backward) | Previous scoped model | **Change** |

@@ -10,9 +10,10 @@ Source configurations:
 - `home/dot_omp/private_agent/modify_keybindings.yml`
 
 WezTerm's default `Ctrl+R` reload is unbound so the key reaches the agent;
-`Super+R` and `Ctrl+Shift+R` still reload WezTerm. WezTerm keeps
-`Ctrl+Shift+P` for the command palette, so model cycle uses the Meta
-variants of the Emacs history keys.
+`Super+R` and `Ctrl+Shift+R` still reload WezTerm. Model cycle uses
+`Ctrl+Shift+P` / `Ctrl+Shift+N` because macOS often drops `Ctrl+Alt+letter`.
+WezTerm's command palette moves to `Super+Shift+P`; `Super+N` still opens a
+window.
 
 `Ctrl+P` in `/resume` still toggles path display. History bindings only
 override model cycling while the main editor is focused.
@@ -41,5 +42,5 @@ override model cycling while the main editor is focused.
 
 | Keys | Current assignment |
 | --- | --- |
-| `Ctrl+Alt+P` | Next scoped model |
-| `Ctrl+Alt+N` | Previous scoped model |
+| `Ctrl+Shift+P` | Next scoped model |
+| `Ctrl+Shift+N` | Previous scoped model |

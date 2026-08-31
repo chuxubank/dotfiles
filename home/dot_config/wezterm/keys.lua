@@ -5,6 +5,9 @@ local act = wezterm.action
 -- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 -- Ctrl+R is passed through for Pi reverse search; Super+R still reloads.
+-- Ctrl+Shift+P/N go to Pi/OMP model cycle. Palette moves to Super+Shift+P.
+-- Super+N still opens a WezTerm window.
+
 local keys = {}
 
 local function passthrough(key, mods)
@@ -19,6 +22,10 @@ passthrough("t", "CTRL|SHIFT")
 passthrough("T", "CMD|SHIFT")
 passthrough("w", "CTRL|SHIFT")
 passthrough("r", "CTRL")
+passthrough("p", "CTRL|SHIFT")
+passthrough("P", "CTRL|SHIFT")
+passthrough("n", "CTRL|SHIFT")
+passthrough("N", "CTRL|SHIFT")
 passthrough("[", "CMD|SHIFT")
 passthrough("]", "CMD|SHIFT")
 passthrough("PageUp", "CTRL")
@@ -42,6 +49,11 @@ table.insert(keys, {
   key = "l",
   mods = "CTRL|SHIFT|ALT",
   action = act.ShowLauncher,
+})
+table.insert(keys, {
+  key = "P",
+  mods = "CMD|SHIFT",
+  action = act.ActivateCommandPalette,
 })
 
 return keys

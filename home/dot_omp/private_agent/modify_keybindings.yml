@@ -2,10 +2,10 @@
 {{- /* omp keybindings — schema: https://github.com/can1357/oh-my-pi/blob/main/docs/keybindings.md
        Emacs editor chords, matching Pi. OMP has no historyPrevious/historyNext
        actions; C-p/C-n go on cursorUp/cursorDown (history when empty, line
-       motion otherwise). Model cycle is C-M-p / C-M-n because WezTerm keeps
-       Ctrl+Shift+P for the command palette. Session rename is C-M-r so
-       Ctrl+R stays reverse search. Unbind app.exit so Ctrl+D never quits.
-       Double Ctrl+C still exits. */ -}}
+       motion otherwise). Model cycle is C-S-p / C-S-n; WezTerm palette moves
+       to Super+Shift+P because macOS drops Ctrl+Alt+letter. Session rename
+       is C-M-r so Ctrl+R stays reverse search. Unbind app.exit so Ctrl+D
+       never quits. Double Ctrl+C still exits. */ -}}
 {{- includeTemplate "config/merge" (dict
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
@@ -20,8 +20,8 @@
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
-    "app.model.cycleForward" "ctrl+alt+p"
-    "app.model.cycleBackward" "ctrl+alt+n"
+    "app.model.cycleForward" "ctrl+shift+p"
+    "app.model.cycleBackward" "ctrl+shift+n"
     "app.session.rename" "ctrl+alt+r"
   )
 ) -}}

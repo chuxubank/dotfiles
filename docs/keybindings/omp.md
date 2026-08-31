@@ -24,5 +24,5 @@ unchanged.
 | `Ctrl+D` | Exit (saves the current prompt as a draft) | Delete character forward | **Change** |
 | `Ctrl+R` | Search prompt history (editor); rename session (picker) | Reverse-search prompt history; rename on `Ctrl+Alt+R` | **Change** |
 | `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
-| `Ctrl+Alt+P` | No assignment (`Ctrl+P` cycled models) | Next scoped model | **Change** |
-| `Ctrl+Alt+N` | No assignment (`Ctrl+Shift+P` cycled backward) | Previous scoped model | **Change** |
+| `Ctrl+Shift+P` | Cycle backward | Next scoped model | **Change** |
+| `Ctrl+Shift+N` | No assignment (`Ctrl+Shift+P` cycled backward) | Previous scoped model | **Change** |
