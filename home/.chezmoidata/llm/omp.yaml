@@ -1,8 +1,9 @@
 llm:
   tools:
     omp:
-      # Primary session cycles Cursor Opus / Fable / Sol. Bundled task
-      # agents stay on SuperGrok. OMP owns both OAuth flows and catalogs.
+      # Primary session cycles Cursor Opus / Fable / Sol and SuperGrok.
+      # Bundled task agents stay on SuperGrok. OMP owns both OAuth flows
+      # and catalogs.
       model:
         - cursor/claude-opus-5-high
         - xai-oauth/grok-4.6
@@ -10,12 +11,14 @@ llm:
       default_models:
         fable: cursor/claude-fable-5-high:high
         sol: cursor/gpt-5.6-sol:high
+        grok: xai-oauth/grok-4.6:high
         task: xai-oauth/grok-4.6:high
         smol: xai-oauth/grok-4.6:medium
       cycle_order:
         - default
         - fable
         - sol
+        - grok
       enabled_models:
         - cursor/claude-opus-5-high
         - cursor/claude-fable-5-high
