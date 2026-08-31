@@ -1,4 +1,4 @@
-# Terminal and mux keybindings
+# Keybindings
 
 These files document both the tool defaults and the current assignments in
 this repository. The status column distinguishes additions, deletions, and
@@ -8,22 +8,19 @@ changes:
 - **Delete** — a previous/default binding was removed.
 - **Change** — an existing binding now performs a different action.
 
-## Layers
+## Terminal and mux
 
 1. **Terminal layer** — Ghostty and WezTerm own terminal windows and tabs.
 2. **Mux layer** — Herdr, Zellij, and Luvus own workspaces, mux tabs, and panes.
 3. **Prefix layer** — mux structural commands use `Ctrl+;` as the prefix.
-
-## Per-tool reference
 
 - [Ghostty](ghostty.md)
 - [WezTerm](wezterm.md)
 - [Herdr](herdr.md)
 - [Zellij](zellij.md)
 - [Luvus](luvus.md)
-- [Pi](pi.md)
 
-## Shared allocation
+### Shared bindings
 
 | Keys | Tool default | Current assignment | Status |
 | --- | --- | --- | --- |
@@ -39,3 +36,12 @@ See the tool-specific documents for the exact default and current binding
 lists. “Default” means the upstream application default where it is available;
 for Herdr it means the previous repository allocation because its built-in
 bindings are version-dependent.
+
+## In-pane agents
+
+Pi and OMP run inside a pane. They share Emacs editor chords. Per-tool
+defaults and the few implementation differences are in the tool files.
+
+- [Shared Emacs bindings](agents.md)
+- [Pi](pi.md)
+- [OMP](omp.md)

@@ -1,0 +1,27 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* omp keybindings — schema: https://github.com/can1357/oh-my-pi/blob/main/docs/keybindings.md
+       Emacs editor chords, matching Pi. OMP has no historyPrevious/historyNext
+       actions; C-p/C-n go on cursorUp/cursorDown (history when empty, line
+       motion otherwise). Model cycle is C-M-p / C-M-n because WezTerm keeps
+       Ctrl+Shift+P for the command palette. Session rename is C-M-r so
+       Ctrl+R stays reverse search. Unbind app.exit so Ctrl+D never quits.
+       Double Ctrl+C still exits. */ -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "yaml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "app.exit" (list)
+    "tui.editor.cursorUp" (list "up" "ctrl+p")
+    "tui.editor.cursorDown" (list "down" "ctrl+n")
+    "tui.editor.cursorLeft" (list "left" "ctrl+b")
+    "tui.editor.cursorRight" (list "right" "ctrl+f")
+    "tui.editor.cursorWordLeft" (list "alt+left" "alt+b")
+    "tui.editor.cursorWordRight" (list "alt+right" "alt+f")
+    "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
+    "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
+    "tui.input.newLine" (list "shift+enter" "ctrl+j")
+    "app.model.cycleForward" "ctrl+alt+p"
+    "app.model.cycleBackward" "ctrl+alt+n"
+    "app.session.rename" "ctrl+alt+r"
+  )
+) -}}
