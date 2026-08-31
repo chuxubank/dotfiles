@@ -7,8 +7,10 @@
           small_model — small model id (if set)
          small_model_provider — selected small-model provider alias, or empty
          small_model_id — selected small model with its provider alias removed
-          reasoning_effort — string (if set)
-          default_models — map of role -> model id (if set)
+         reasoning_effort — string (if set)
+         default_models — map of role -> model id (if set)
+         cycle_order — role names for the model switcher (if set)
+         enabled_models — model patterns for the selection pool (if set)
          providers   — map of alias -> resolved provider:
            name      — provider key in llm.providers
            base_url  — string
@@ -40,6 +42,14 @@
 
 {{- if hasKey $toolCfg "default_models" }}
   {{- $_ := set $result "default_models" $toolCfg.default_models -}}
+{{- end }}
+
+{{- if hasKey $toolCfg "cycle_order" }}
+  {{- $_ := set $result "cycle_order" $toolCfg.cycle_order -}}
+{{- end }}
+
+{{- if hasKey $toolCfg "enabled_models" }}
+  {{- $_ := set $result "enabled_models" $toolCfg.enabled_models -}}
 {{- end }}
 
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}

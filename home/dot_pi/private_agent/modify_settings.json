@@ -20,11 +20,12 @@
 {{- $provider := $cfg.model_provider -}}
 {{- $model := $cfg.model_id -}}
 
-{{- /* No enabledModels: llm.yaml's `model` is a fallback chain (first
-       resolvable provider wins), not a cycling set. Deriving `<alias>/*` globs
-       from it makes pi warn at startup for every alias unusable on this host,
-       so leave it unset and let pi offer whatever actually resolved. It is
-       deleted rather than skipped to clear the key if it was ever written. */ -}}
+{{- /* enabledModels is the Ctrl+P cycling pool. Patterns come from
+       llm.yaml; unused provider/* aliases warn, so keep globs. */ -}}
+{{- $remove := list -}}
+{{- if not (hasKey $cfg "enabled_models") -}}
+  {{- $remove = list "enabledModels" -}}
+{{- end -}}
 
 {{- /* omp-inspired portable knobs (oh-my-pi is a fork; these are the
        official-pi equivalents that do not require switching binaries):
@@ -57,9 +58,12 @@
   {{- $_ := set $managed "defaultProvider" $provider -}}
 {{- end -}}
 {{- $_ := set $managed "subagents" (dict "defaultModel" "xai/grok-4.6") -}}
+{{- if hasKey $cfg "enabled_models" -}}
+  {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
+{{- end -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
-  "remove" (list "enabledModels")
+  "remove" $remove
 ) -}}

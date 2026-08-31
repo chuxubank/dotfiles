@@ -52,6 +52,11 @@ llm:
     xai-oauth:
       name: xAI OAuth
 
+    # OMP's built-in Cursor subscription provider. It has no endpoint or API
+    # key here: omp owns its OAuth flow and bundled model catalog.
+    cursor:
+      name: Cursor
+
     google:
       name: Google
       type: gemini

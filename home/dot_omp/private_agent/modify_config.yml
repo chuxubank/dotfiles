@@ -23,7 +23,6 @@
     "claude-plugins"
     "cline"
     "codex"
-    "cursor"
     "gemini"
     "github"
     "opencode"
@@ -31,6 +30,8 @@
     "windsurf"
   )
   "modelRoles" $roles
+  "cycleOrder" (default (list "smol" "default" "slow") (index $cfg "cycle_order"))
+  "enabledModels" (default (list) (index $cfg "enabled_models"))
   "symbolPreset" "nerd"
   "task" (dict
     "batch" true
