@@ -1,0 +1,30 @@
+# Worktrunk user config. https://worktrunk.dev/config/
+#
+# Shell integration lives in the chezmoi-managed ~/.zshrc, which evals
+# `wt config shell init zsh`. `wt config shell install` would append that
+# line to ~/.zshrc itself and break the one-writer-per-path rule, so the
+# first-run prompt offering to do it is suppressed here.
+skip-shell-integration-prompt = true
+
+# Worktrunk's own default, declared explicitly: leaving it unset makes every
+# `wt switch --create` print a hint to run `wt config create`, which would
+# write this chezmoi-owned file. Worktrunk expands these braces, not chezmoi;
+# this file is deliberately not a .tmpl. Must stay above any table header,
+# or TOML folds it into that table as an unknown field.
+worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
+
+# LLM commit messages for `wt merge` / `wt step commit`. Worktrunk pipes its
+# prompt on stdin; pi reads stdin and `-p` prints the plain reply, so no JSON
+# extraction is needed. Model selection stays in
+# home/.chezmoidata/llm/pi.yaml: no --model here, so this follows whatever pi
+# resolves. Thinking is off and tools are disabled because writing a commit
+# subject is a pure text transform. Discovery of extensions, skills, context
+# files, and prompt templates is off too: a commit subject must not inherit
+# instructions from whatever repo the merge happens to run in.
+[commit.generation]
+command = "pi -p --no-session --no-tools --no-extensions --no-skills --no-context-files --no-prompt-templates --thinking off --system-prompt ''"
+
+# Pinned explicitly: unset means a deprecation warning on every run plus a
+# prompt to `wt config update`, which would rewrite this chezmoi-owned file.
+[list]
+json-schema = 2

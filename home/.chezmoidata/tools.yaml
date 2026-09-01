@@ -279,6 +279,15 @@ tools:
     purge:
       - ".warp/**"
 
+  worktrunk:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".config/worktrunk/config.toml"
+    purge:
+      - ".config/worktrunk/**"
+
   talkify:
     when:
       enabled:

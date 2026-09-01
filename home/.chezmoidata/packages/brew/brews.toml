@@ -129,6 +129,7 @@ brews = [
   "vjeantet/tap/alerter",
   "watch",
   "wget",
+  { name = "worktrunk", owner = "worktrunk" },
   "xray",
   "yq",
   "zbar",
