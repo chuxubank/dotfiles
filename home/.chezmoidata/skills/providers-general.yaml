@@ -16,6 +16,12 @@ skills:
         source: herdrdev/herdr
         owner: herdr
 
+      - name:
+          - luvus
+          - luvus-module
+        source: RizRiyz/luvus
+        owner: luvus
+
       - name: termio
         source: termio-sh/termio
         owner: termio
