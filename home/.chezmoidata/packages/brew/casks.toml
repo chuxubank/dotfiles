@@ -1,6 +1,7 @@
 [packages.darwin]
 casks = [
   "AnInsomniacy/motrix-next/motrix-next",
+  "android-ndk",
   "android-studio",
   "anki",
   "appcleaner",

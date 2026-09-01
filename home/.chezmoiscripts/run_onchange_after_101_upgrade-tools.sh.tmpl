@@ -51,9 +51,11 @@ if command -v uv >/dev/null; then
   run_upgrade 'uv tools' uv tool upgrade --all
 fi
 
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "hermes") .) | fromJson }}
 if command -v hermes >/dev/null; then
   run_upgrade hermes hermes update --yes
 fi
+{{- end }}
 
 if command -v gup >/dev/null; then
   run_upgrade 'go binaries' gup update

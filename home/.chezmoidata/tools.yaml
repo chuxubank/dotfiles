@@ -78,8 +78,7 @@ tools:
 
   hermes:
     when:
-      disabled:
-        host_env: [ci]
+      enabled: false
     remove:
       - ".hermes/config.yaml"
       - ".hermes/SOUL.md"
@@ -95,6 +94,8 @@ tools:
       - ".hermes/mcp-tokens/**"
 
   herdr:
+    when:
+      enabled: false
     remove:
       - ".config/herdr/config.toml"
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
@@ -138,8 +139,7 @@ tools:
 
   lody:
     when:
-      disabled:
-        host_env: [ci]
+      enabled: false
     purge:
       - ".lody/**"
 
@@ -173,8 +173,7 @@ tools:
 
   orca:
     when:
-      disabled:
-        host_env: [ci]
+      enabled: false
     remove:
       - ".config/orca/profiles/local-default/orca-data.json"
     purge:
