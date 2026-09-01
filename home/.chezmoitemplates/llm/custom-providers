@@ -1,0 +1,68 @@
+{{- /* llm/custom-providers — Alias map for Pi/OMP custom-provider files.
+       Input: dict "tool" <tool-name> merged with root context.
+       Output: JSON object of alias -> {baseUrl, apiKey, api, models, headers}.
+
+       models: false → endpoint override only (no catalog rewrite).
+       Emit only when the alias contributes a model list, or an endpoint we
+       can authenticate against. A bare baseUrl with no key would just restate
+       the tool's own default. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" . | fromJson -}}
+{{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
+
+{{- $providers := dict -}}
+{{- range $alias, $ep := $cfg.providers -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- $api := $endpoint.api -}}
+  {{- $baseURL := $endpoint.api_base_url -}}
+
+  {{- $models := list -}}
+  {{- $declaresModels := true -}}
+  {{- if and (hasKey $ep "models") (eq (kindOf $ep.models) "bool") -}}
+    {{- $declaresModels = false -}}
+  {{- else -}}
+    {{- $source := dict -}}
+    {{- if hasKey $ep "models" -}}
+      {{- $source = $ep.models -}}
+    {{- else -}}
+      {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+    {{- end -}}
+    {{- $metadata := default dict (index $ep "model_metadata") -}}
+    {{- $filter := default dict (index $ep "model_filter") -}}
+    {{- if and (gt (len $filter) 0) (gt (len $metadata) 0) -}}
+      {{- $allowed := includeTemplate "llm/filter-models" (dict "models" $metadata "filter" $filter) | fromJson -}}
+      {{- $kept := dict -}}
+      {{- range $id, $name := $source -}}
+        {{- if hasKey $allowed $id -}}{{- $_ := set $kept $id $name -}}{{- end -}}
+      {{- end -}}
+      {{- $source = $kept -}}
+    {{- end -}}
+    {{- range $id, $name := $source -}}
+      {{- $model := dict "id" $id "name" $name "api" $api -}}
+      {{- if hasKey $metadata $id -}}
+        {{- $model = mergeOverwrite (deepCopy (index $metadata $id)) $model -}}
+      {{- end -}}
+      {{- $models = append $models (includeTemplate "model-config/pi" $model | fromJson) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) -}}
+    {{- $p := dict -}}
+    {{- if $baseURL -}}{{- $_ := set $p "baseUrl" $baseURL -}}{{- end -}}
+    {{- if hasKey $ep "headers" -}}{{- $_ := set $p "headers" $ep.headers -}}{{- end -}}
+    {{- if $ep.auth_path -}}
+      {{- $args := $ep.auth_path -}}
+      {{- if $ep.auth_field -}}
+        {{- $args = printf "%s %s" $ep.auth_path $ep.auth_field -}}
+      {{- end -}}
+      {{- $_ := set $p "apiKey" (printf "!%s %s" $passField $args) -}}
+    {{- else if $declaresModels -}}
+      {{- $_ := set $p "apiKey" "unused" -}}
+    {{- end -}}
+    {{- if $declaresModels -}}
+      {{- $_ := set $p "api" $api -}}
+      {{- $_ := set $p "models" $models -}}
+    {{- end -}}
+    {{- $_ := set $providers $alias $p -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $providers -}}

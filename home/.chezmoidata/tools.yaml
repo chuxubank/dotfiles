@@ -152,6 +152,7 @@ tools:
       - ".omp/agent/keybindings.yml"
       - ".omp/agent/mcp.json"
       - ".omp/agent/extensions/emacs-eof.ts"
+      - ".omp/agent/models.yml"
     purge:
       - ".omp/**"
 

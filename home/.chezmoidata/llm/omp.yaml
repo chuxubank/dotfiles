@@ -1,12 +1,15 @@
 llm:
   tools:
     omp:
-      # Primary session cycles Cursor Opus / Fable / Sol and SuperGrok.
-      # Bundled task agents stay on SuperGrok. OMP owns both OAuth flows
-      # and catalogs.
+      # Primary session prefers IV, then SuperGrok, then ChatGPT/Codex OAuth,
+      # then Cursor. `openai`/`anthropic` are IV aliases (same as Pi); the
+      # ChatGPT subscription is `openai-codex`.
       model:
-        - cursor/claude-opus-5-high
+        - anthropic/claude-opus-5
+        - openai/gpt-5.6-sol
         - xai-oauth/grok-4.6
+        - openai-codex/gpt-5.6-sol
+        - cursor/claude-opus-5-high
       reasoning_effort: high
       default_models:
         fable: cursor/claude-fable-5-high:high
@@ -20,14 +23,31 @@ llm:
         - sol
         - grok
       enabled_models:
+        - anthropic/claude-opus-5
+        - anthropic/claude-fable-5
+        - openai/gpt-5.6-sol
+        - xai-oauth/grok-4.6
+        - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high
         - cursor/claude-fable-5-high
         - cursor/gpt-5.6-sol
-        - xai-oauth/grok-4.6
       providers:
-        cursor:
-          provider: cursor
-          models: false
+        openai:
+          provider: iv
+          auth_field: codex-auth-token
+        anthropic:
+          provider: iv
+          type: anthropic
+          auth_field: cc-auth-token
+        iv:
+          provider: iv
+          auth_field: default-auth-token
         xai-oauth:
           provider: xai-oauth
+          models: false
+        openai-codex:
+          provider: openai-codex
+          models: false
+        cursor:
+          provider: cursor
           models: false

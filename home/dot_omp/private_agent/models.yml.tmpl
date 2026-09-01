@@ -1,0 +1,11 @@
+{{- /* omp custom models — generated from llm.yaml (llm.tools.omp).
+       Schema: https://github.com/can1357/oh-my-pi/blob/main/docs/models.md
+
+       Secrets stay out of this file: apiKey uses OMP's `!command` form to
+       shell out to bin/pass-field at request time. Nothing here is sensitive,
+       so no private_ attribute.
+
+       Same merge as Pi: bundled providers keep their catalog and upsert our
+       ids. IV is gated in llm.providers; on other hosts this file is empty. */ -}}
+{{- $providers := includeTemplate "llm/custom-providers" (merge (dict "tool" "omp") .) | fromJson -}}
+{{ dict "providers" $providers | toYaml }}
