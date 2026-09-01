@@ -1,8 +1,15 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- /* pi keybindings — schema: @earendil-works/pi-coding-agent/docs/keybindings.md
-       Emacs editor chords. Model cycle is C-S-p / C-S-n; WezTerm palette
-       moves to Super+Shift+P because macOS drops Ctrl+Alt+letter. Session
-       rename is C-M-r so Ctrl+R stays reverse search (pi-input-history). */ -}}
+       Emacs editor chords. Model cycle is M-n / M-p, the Emacs next/previous
+       pair, and NOT C-S-p / C-S-n: Luvus panes advertise neither the kitty
+       keyboard protocol nor xterm modifyOtherKeys, and pi-tui only matches
+       shift+ctrl+<key> through those two encodings, with no legacy fallback.
+       Alt chords do have one (ESC+<key>), so they survive. Letters rather than
+       punctuation because OMP shares these chords and matches only
+       alt+<letter>. Pi upstream already falls back to M-p on Windows for the
+       same reason.
+       Session rename is C-M-r so Ctrl+R stays reverse search
+       (pi-input-history). */ -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
@@ -16,8 +23,8 @@
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
-    "app.model.cycleForward" "ctrl+shift+p"
-    "app.model.cycleBackward" "ctrl+shift+n"
+    "app.model.cycleForward" "alt+n"
+    "app.model.cycleBackward" "alt+p"
     "app.session.rename" "ctrl+alt+r"
   )
 ) -}}

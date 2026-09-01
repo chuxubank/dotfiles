@@ -41,11 +41,11 @@ receive mux commands after the `Ctrl+;` prefix.
 | `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
 | `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Delete** |
 | `Ctrl+R` | Reload configuration | Unbound; passed to the pane (Pi reverse search) | **Delete** |
-| `Ctrl+Shift+P` | Command palette | Unbound; passed to the pane (Pi/OMP model cycle) | **Delete** |
-| `Ctrl+Shift+N` | Spawn window | Unbound; passed to the pane (Pi/OMP model cycle) | **Delete** |
+| `Ctrl+Shift+P` | Command palette | Command palette (kept; cannot reach a Luvus pane) | Unchanged |
+| `Ctrl+Shift+N` | Spawn window | Spawn window (kept; cannot reach a Luvus pane) | Unchanged |
 | `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Add** |
 | `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Add** |
-| `Super+Shift+P` | No assignment | Command palette | **Add** |
+| `Super+Shift+P` | No assignment | Command palette (second chord) | **Add** |
 | `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Add** |
 
 ## Mux usage inside WezTerm

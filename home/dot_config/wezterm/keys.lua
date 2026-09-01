@@ -5,8 +5,11 @@ local act = wezterm.action
 -- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 -- Ctrl+R is passed through for Pi reverse search; Super+R still reloads.
--- Ctrl+Shift+P/N go to Pi/OMP model cycle. Palette moves to Super+Shift+P.
--- Super+N still opens a WezTerm window.
+-- Ctrl+Shift+P/N are NOT passed through: Luvus panes support neither the kitty
+-- keyboard protocol nor modifyOtherKeys, so Ctrl+Shift+letter collapses onto
+-- Ctrl+letter and can never reach Pi/OMP. Model cycle is Alt+N / Alt+P instead,
+-- so Ctrl+Shift+P keeps WezTerm's command palette and Ctrl+Shift+N its window.
+-- Super+Shift+P is a second palette chord. Super+N still opens a window.
 
 local keys = {}
 
@@ -22,10 +25,6 @@ passthrough("t", "CTRL|SHIFT")
 passthrough("T", "CMD|SHIFT")
 passthrough("w", "CTRL|SHIFT")
 passthrough("r", "CTRL")
-passthrough("p", "CTRL|SHIFT")
-passthrough("P", "CTRL|SHIFT")
-passthrough("n", "CTRL|SHIFT")
-passthrough("N", "CTRL|SHIFT")
 passthrough("[", "CMD|SHIFT")
 passthrough("]", "CMD|SHIFT")
 passthrough("PageUp", "CTRL")

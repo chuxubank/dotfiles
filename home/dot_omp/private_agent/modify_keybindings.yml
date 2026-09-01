@@ -2,10 +2,18 @@
 {{- /* omp keybindings — schema: https://github.com/can1357/oh-my-pi/blob/main/docs/keybindings.md
        Emacs editor chords, matching Pi. OMP has no historyPrevious/historyNext
        actions; C-p/C-n go on cursorUp/cursorDown (history when empty, line
-       motion otherwise). Model cycle is C-S-p / C-S-n; WezTerm palette moves
-       to Super+Shift+P because macOS drops Ctrl+Alt+letter. Session rename
-       is C-M-r so Ctrl+R stays reverse search. Unbind app.exit so Ctrl+D
-       never quits. Double Ctrl+C still exits. */ -}}
+       motion otherwise). Model cycle is M-n / M-p, the Emacs next/previous
+       pair, and NOT C-S-p / C-S-n: Luvus panes carry neither the kitty
+       keyboard protocol nor xterm modifyOtherKeys, and OMP's own chord encoder
+       folds ctrl chords through toUpperCase()&31, so Ctrl+Shift+letter
+       collapses onto plain Ctrl+letter and can never reach the agent. Alt
+       chords survive legacy encoding as ESC+<key>, but OMP matches
+       alt+<letter> and alt+shift+<letter> only — a rebound alt+<symbol> such
+       as alt+. registers in /hotkeys yet never fires, so the chords must be
+       letters. M-p is OMP's own selectTemporary by default, moved to M-S-m
+       next to model.select on M-m. Session rename is C-M-r so Ctrl+R stays
+       reverse search. Unbind app.exit so Ctrl+D never quits. Double Ctrl+C
+       still exits. */ -}}
 {{- includeTemplate "config/merge" (dict
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
@@ -20,8 +28,9 @@
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
-    "app.model.cycleForward" "ctrl+shift+p"
-    "app.model.cycleBackward" "ctrl+shift+n"
+    "app.model.cycleForward" "alt+n"
+    "app.model.cycleBackward" "alt+p"
+    "app.model.selectTemporary" "alt+shift+m"
     "app.session.rename" "ctrl+alt+r"
   )
 ) -}}

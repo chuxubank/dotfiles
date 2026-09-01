@@ -62,7 +62,7 @@ are in the per-tool files.
 | =Ctrl+J= / =Shift+Enter= | New line                                      |
 | =Ctrl+R=                | Reverse-search prompt history                  |
 | =Ctrl+Alt+R=            | Rename session                                 |
-| =Ctrl+Shift+P= / =Ctrl+Shift+N= | Next/previous scoped model             |
+| =Alt+N= / =Alt+P=       | Next/previous scoped model                     |
 
 ** Declared workspaces
 
