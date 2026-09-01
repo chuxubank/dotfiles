@@ -39,9 +39,10 @@ bindings are version-dependent.
 
 ## In-pane agents
 
-Pi and OMP run inside a pane. They share Emacs editor chords. Per-tool
-defaults and the few implementation differences are in the tool files.
+Agents run inside a pane and share one Emacs editor chord set. The shared set,
+per-agent defaults, and the implementation differences are under
+[agents/](agents/README.md).
 
-- [Shared Emacs bindings](agents.md)
-- [Pi](pi.md)
-- [OMP](omp.md)
+- [Shared Emacs bindings](agents/README.md)
+- [Pi](agents/pi.md)
+- [OMP](agents/omp.md)

@@ -1,8 +1,11 @@
-# Pi and OMP shared bindings
+# In-pane agent keybindings
 
-Pi and OMP use the same Emacs editor chords. This page is the current
-assignment. Tool defaults and status live in [pi.md](pi.md) and
-[omp.md](omp.md).
+Agents run inside a mux pane and share one Emacs editor chord set. This page is
+the current assignment for that shared set. Per-agent defaults, and the few
+implementation differences that force a chord apart, live in the tool files:
+
+- [Pi](pi.md)
+- [OMP](omp.md)
 
 Source configurations:
 

@@ -3,7 +3,7 @@
 Source configuration:
 `home/dot_pi/private_agent/modify_keybindings.json`
 
-Current Emacs chords are in the [shared bindings](agents.md). Pi is an
+Current Emacs chords are in the [shared bindings](README.md). Pi is an
 in-pane application. The upstream default list is in Pi's
 [keybindings.md](https://github.com/earendil-works/pi-coding-agent/blob/main/docs/keybindings.md).
 After editing, run `/reload` in Pi.
@@ -16,7 +16,7 @@ has no legacy fallback for it, while `alt+<key>` does fall back to `ESC` + the
 key. A Luvus pane offers neither enhanced encoding, so the shifted chord is
 unreachable there. Pi upstream already substitutes `Alt+P` on Windows for the
 same reason. Letters rather than punctuation because OMP shares these chords and
-matches only `alt+<letter>`. See [agents.md](agents.md).
+matches only `alt+<letter>`. See the [shared bindings](README.md).
 
 ## Deltas from upstream
 

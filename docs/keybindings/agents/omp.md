@@ -3,7 +3,7 @@
 Source configuration:
 `home/dot_omp/private_agent/modify_keybindings.yml`
 
-Current Emacs chords are in the [shared bindings](agents.md). OMP is an
+Current Emacs chords are in the [shared bindings](README.md). OMP is an
 in-pane application. User remaps live in `~/.omp/agent/keybindings.yml`.
 The upstream default list is in OMP's
 [keybindings.md](https://github.com/can1357/oh-my-pi/blob/main/docs/keybindings.md).
@@ -23,7 +23,7 @@ replacements must be letters: OMP lists a rebound `alt+<symbol>` in `/hotkeys`
 but never matches it. Verified by binding `app.model.select` to `alt+u` (fires)
 versus `alt+.` (does not); `alt+shift+<letter>` fires too. `Alt+P` is OMP's own
 `selectTemporary`, moved to `Alt+Shift+M` beside `model.select` on `Alt+M`.
-See [agents.md](agents.md).
+See the [shared bindings](README.md).
 
 ## Deltas from upstream
 

@@ -39,14 +39,14 @@ The complete per-tool bindings are documented in
 ** In-pane agent key map
 
 Pi and OMP share Emacs editor chords. The shared set is
-[[file:docs/keybindings/agents.md][docs/keybindings/agents.md]]; tool defaults
-are in the per-tool files.
+[[file:docs/keybindings/agents/README.md][docs/keybindings/agents/]]; tool
+defaults are in the per-tool files.
 
-| Tool | Detailed bindings                      |
-|------+----------------------------------------|
-| Shared | [[file:docs/keybindings/agents.md][docs/keybindings/agents.md]] |
-| Pi     | [[file:docs/keybindings/pi.md][docs/keybindings/pi.md]]           |
-| OMP    | [[file:docs/keybindings/omp.md][docs/keybindings/omp.md]]         |
+| Tool   | Detailed bindings                                                             |
+|--------+-------------------------------------------------------------------------------|
+| Shared | [[file:docs/keybindings/agents/README.md][docs/keybindings/agents/README.md]] |
+| Pi     | [[file:docs/keybindings/agents/pi.md][docs/keybindings/agents/pi.md]]         |
+| OMP    | [[file:docs/keybindings/agents/omp.md][docs/keybindings/agents/omp.md]]       |
 
 *** Shared bindings
 
