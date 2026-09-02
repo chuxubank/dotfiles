@@ -8,7 +8,8 @@
          small_model_provider — selected small-model provider alias, or empty
          small_model_id — selected small model with its provider alias removed
          reasoning_effort — string (if set)
-         default_models — map of role -> model id (if set)
+         default_models — map of role -> model id (if set); a role may list
+                          candidates and the first available provider wins
          cycle_order — role names for the model switcher (if set)
          enabled_models — model patterns for the selection pool (if set)
          providers   — map of alias -> resolved provider:
@@ -17,6 +18,9 @@
            auth_key  — resolved API key (with optional field override)
            auth_path — pass path used for auth (if set)
            auth_field — pass field used for auth (if set)
+           disable_strict_tools — opt out of Anthropic strict tool schemas (if set)
+           compat    — provider compatibility overrides (if set)
+           model_overrides — per-model metadata overrides (if set)
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
            model_metadata — map of model id -> data set metadata (if resolved)
@@ -38,10 +42,6 @@
 
 {{- if hasKey $toolCfg "reasoning_effort" }}
   {{- $_ := set $result "reasoning_effort" $toolCfg.reasoning_effort -}}
-{{- end }}
-
-{{- if hasKey $toolCfg "default_models" }}
-  {{- $_ := set $result "default_models" $toolCfg.default_models -}}
 {{- end }}
 
 {{- if hasKey $toolCfg "cycle_order" }}
@@ -145,6 +145,16 @@
   {{- if hasKey $prov "headers" -}}{{- $headers = deepCopy $prov.headers -}}{{- end -}}
   {{- if hasKey $ref "headers" -}}{{- $headers = mergeOverwrite $headers (deepCopy $ref.headers) -}}{{- end -}}
   {{- if gt (len $headers) 0 -}}{{- $_ := set $resolved "headers" $headers -}}{{- end -}}
+  {{- if hasKey $prov "disable_strict_tools" -}}{{- $_ := set $resolved "disable_strict_tools" $prov.disable_strict_tools -}}{{- end -}}
+  {{- if hasKey $ref "disable_strict_tools" -}}{{- $_ := set $resolved "disable_strict_tools" $ref.disable_strict_tools -}}{{- end -}}
+  {{- $compat := dict -}}
+  {{- if hasKey $prov "compat" -}}{{- $compat = deepCopy $prov.compat -}}{{- end -}}
+  {{- if hasKey $ref "compat" -}}{{- $compat = mergeOverwrite $compat (deepCopy $ref.compat) -}}{{- end -}}
+  {{- if gt (len $compat) 0 -}}{{- $_ := set $resolved "compat" $compat -}}{{- end -}}
+  {{- $modelOverrides := dict -}}
+  {{- if hasKey $prov "model_overrides" -}}{{- $modelOverrides = deepCopy $prov.model_overrides -}}{{- end -}}
+  {{- if hasKey $ref "model_overrides" -}}{{- $modelOverrides = mergeOverwrite $modelOverrides (deepCopy $ref.model_overrides) -}}{{- end -}}
+  {{- if gt (len $modelOverrides) 0 -}}{{- $_ := set $resolved "model_overrides" $modelOverrides -}}{{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
@@ -240,6 +250,20 @@
   {{- $_ := set $result "small_model" $smallModel -}}
   {{- $_ := set $result "small_model_provider" $selection.provider -}}
   {{- $_ := set $result "small_model_id" $selection.model -}}
+{{- end -}}
+
+{{- /* Resolve default_models roles: string → use as-is, list → pick first
+       candidate whose provider alias resolved for this tool. */ -}}
+{{- if hasKey $toolCfg "default_models" -}}
+  {{- $roles := dict -}}
+  {{- range $role, $spec := $toolCfg.default_models -}}
+    {{- $picked := $spec -}}
+    {{- if eq (kindOf $spec) "slice" -}}
+      {{- $picked = includeTemplate "llm/pick-model" (dict "models" $spec "providers" $providers) -}}
+    {{- end -}}
+    {{- $_ := set $roles $role $picked -}}
+  {{- end -}}
+  {{- $_ := set $result "default_models" $roles -}}
 {{- end -}}
 
 {{- toJson $result -}}

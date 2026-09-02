@@ -1,8 +1,12 @@
 {{- /* llm/custom-providers — Alias map for Pi/OMP custom-provider files.
        Input: dict "tool" <tool-name> merged with root context.
-       Output: JSON object of alias -> {baseUrl, apiKey, api, models, headers}.
+       Output: JSON object of alias -> {baseUrl, apiKey, api, models, headers,
+                                       disableStrictTools, compat}.
 
        models: false → endpoint override only (no catalog rewrite).
+       model_overrides → per-id metadata fields applied last, for endpoints
+       whose real capabilities differ from the catalog's.
+
        Emit only when the alias contributes a model list, or an endpoint we
        can authenticate against. A bare baseUrl with no key would just restate
        the tool's own default. */ -}}
@@ -36,10 +40,14 @@
       {{- end -}}
       {{- $source = $kept -}}
     {{- end -}}
+    {{- $overrides := default dict (index $ep "model_overrides") -}}
     {{- range $id, $name := $source -}}
       {{- $model := dict "id" $id "name" $name "api" $api -}}
       {{- if hasKey $metadata $id -}}
         {{- $model = mergeOverwrite (deepCopy (index $metadata $id)) $model -}}
+      {{- end -}}
+      {{- if hasKey $overrides $id -}}
+        {{- $model = mergeOverwrite $model (deepCopy (index $overrides $id)) -}}
       {{- end -}}
       {{- $models = append $models (includeTemplate "model-config/pi" $model | fromJson) -}}
     {{- end -}}
@@ -49,6 +57,8 @@
     {{- $p := dict -}}
     {{- if $baseURL -}}{{- $_ := set $p "baseUrl" $baseURL -}}{{- end -}}
     {{- if hasKey $ep "headers" -}}{{- $_ := set $p "headers" $ep.headers -}}{{- end -}}
+    {{- if hasKey $ep "disable_strict_tools" -}}{{- $_ := set $p "disableStrictTools" $ep.disable_strict_tools -}}{{- end -}}
+    {{- if hasKey $ep "compat" -}}{{- $_ := set $p "compat" $ep.compat -}}{{- end -}}
     {{- if $ep.auth_path -}}
       {{- $args := $ep.auth_path -}}
       {{- if $ep.auth_field -}}

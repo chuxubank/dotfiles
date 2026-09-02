@@ -11,9 +11,17 @@ llm:
         - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high
       reasoning_effort: high
+      # Each cycle role falls back the same way the primary session does: IV
+      # first, then the subscriptions. Grok has no IV entry, so SuperGrok
+      # stays its only source.
       default_models:
-        fable: cursor/claude-fable-5-high:high
-        sol: cursor/gpt-5.6-sol:high
+        fable:
+          - iv-anthropic/claude-fable-5:high
+          - cursor/claude-fable-5-high:high
+        sol:
+          - openai/gpt-5.6-sol:high
+          - openai-codex/gpt-5.6-sol:high
+          - cursor/gpt-5.6-sol:high
         grok: xai-oauth/grok-4.6:high
         task: xai-oauth/grok-4.6:high
         smol: xai-oauth/grok-4.6:medium
@@ -24,7 +32,7 @@ llm:
         - grok
       enabled_models:
         - anthropic/claude-opus-5
-        - anthropic/claude-fable-5
+        - iv-anthropic/claude-fable-5
         - openai/gpt-5.6-sol
         - xai-oauth/grok-4.6
         - openai-codex/gpt-5.6-sol
@@ -39,6 +47,32 @@ llm:
           provider: iv
           type: anthropic
           auth_field: cc-auth-token
+        # The IV endpoint's Anthropic surface on the default token. Named for
+        # the surface, not its one model: `anthropic` above is the same surface
+        # on the cc token, and `iv` below is the same token on the OpenAI one.
+        #
+        # claude-fable-5 needs exactly this combination. The cc-auth group 404s
+        # the id, and the OpenAI-typed `iv` alias is rejected for sending
+        # reasoning_effort. The catalog is scoped to that one id so the group's
+        # OpenAI-format models are not mistyped as Anthropic.
+        #
+        # This group's Anthropic front is also stricter than the cc-auth one:
+        # it rejects the `strict` tool field, and rejects the oauth,
+        # prompt-caching-scope, and advanced-tool-use betas OMP sends by
+        # default. allowAnthropicHeaderOverrides lets the header below replace
+        # that set with the betas this endpoint accepts (probed 2026-09-02);
+        # effort-2025-11-24 is what carries the role's `:high` thinking.
+        iv-anthropic:
+          provider: iv
+          type: anthropic
+          auth_field: default-auth-token
+          disable_strict_tools: true
+          compat:
+            allowAnthropicHeaderOverrides: true
+          headers:
+            anthropic-beta: claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24,context-management-2025-06-27
+          models:
+            claude-fable-5: Claude Fable 5
         iv:
           provider: iv
           auth_field: default-auth-token

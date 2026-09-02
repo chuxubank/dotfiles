@@ -13,11 +13,14 @@ llm:
         - openai-codex/gpt-5.6-sol
       reasoning_effort: high
       # Ctrl+P cycles these patterns against whatever actually resolved.
-      # Globs, not provider/* aliases: unused aliases warn at startup.
+      # Prefer globs: an alias that resolves to nothing warns at startup.
+      # Pin a provider only to steer away from a broken duplicate id.
       enabled_models:
         - gpt-5.6-sol
         - claude-opus-5*
-        - claude-fable-5*
+        # Pinned, not a `claude-fable-5*` glob: that also matches the two IV
+        # aliases where the id resolves but every request fails.
+        - iv-anthropic/claude-fable-5
         - grok-4.6
       providers:
         openai:
@@ -27,6 +30,30 @@ llm:
           provider: iv
           type: anthropic
           auth_field: cc-auth-token
+        # The IV endpoint's Anthropic surface on the default token. Named for
+        # the surface, not its one model: `anthropic` above is the same surface
+        # on the cc token, and `iv` below is the same token on the OpenAI one.
+        #
+        # claude-fable-5 needs exactly this combination. The cc-auth group 404s
+        # the id, and the OpenAI-typed `iv` alias sends a `developer` role this
+        # group's Anthropic front rejects. The catalog is scoped to that one id
+        # so the group's OpenAI-format models are not mistyped as Anthropic.
+        #
+        # reasoning: false is a lie about the model, told to shut pi up: this
+        # endpoint rejects `thinking.enabled` with budget_tokens (wants adaptive
+        # mode) and rejects `thinking.disabled` outright, and pi can only send
+        # those two. Absent the field it thinks adaptively on its own, and pi
+        # omits the field only for a non-reasoning model. So the server picks
+        # the effort and pi's defaultThinkingLevel never reaches this model.
+        iv-anthropic:
+          provider: iv
+          type: anthropic
+          auth_field: default-auth-token
+          model_overrides:
+            claude-fable-5:
+              reasoning: false
+          models:
+            claude-fable-5: Claude Fable 5
         iv:
           provider: iv
           auth_field: default-auth-token
