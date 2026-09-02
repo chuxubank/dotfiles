@@ -34,7 +34,7 @@ global = [
   { name = "emacs-lsp-proxy", trust = true },
   { name = "lody", owner = "lody" },
   { name = "openclaw", owner = "openclaw" },
-  { name = "opencode-ai", owner = "opencode" },
+  { name = "opencode-ai", owner = "opencode", trust = true },
   { name = "pi-acp", owner = "pi" },
   { name = "sentry", owner = "sentry" },
 ]

@@ -41,6 +41,12 @@ run_upgrade pacman sudo pacman -Syu --noconfirm
 if command -v bun >/dev/null; then
   run_upgrade bun bun upgrade
   run_upgrade 'bun globals' bun update -g --latest
+  {{- if includeTemplate "tool/enabled" (merge (dict "tool" "opencode") .) | fromJson }}
+  opencode_postinstall="$BUN_INSTALL/install/global/node_modules/opencode-ai/postinstall.mjs"
+  if [[ -f $opencode_postinstall ]]; then
+    run_upgrade 'opencode postinstall' node "$opencode_postinstall"
+  fi
+  {{- end }}
   run_upgrade playwright bunx playwright install chromium
 fi
 
