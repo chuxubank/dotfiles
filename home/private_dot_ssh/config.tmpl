@@ -2,11 +2,11 @@
 Include ~/.orbstack/ssh/config
 {{ end -}}
 
-{{ if eq .host_env "aa" -}}
+{{ if has .host_env (list "aa" "personal") -}}
 Include ~/.ssh/aa/config
 {{ end -}}
 
-{{ if eq .host_env "iv" -}}
+{{ if has .host_env (list "iv" "personal") -}}
 Include ~/.ssh/iv/config
 {{ end -}}
 

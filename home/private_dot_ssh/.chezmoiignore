@@ -1,7 +1,6 @@
-{{- if ne .host_env "aa" }}
+{{- if not (has .host_env (list "aa" "personal")) }}
 aa
-{{- else if ne .host_env "iv" }}
+{{- end }}
+{{- if not (has .host_env (list "iv" "personal")) }}
 iv
-{{- else }}
-personal/id_ed25519
 {{- end }}
