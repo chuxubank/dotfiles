@@ -53,7 +53,7 @@ llm:
             claude-fable-5:
               reasoning: false
           models:
-            claude-fable-5: Claude Fable 5
+            - claude-fable-5
         iv:
           provider: iv
           auth_field: default-auth-token

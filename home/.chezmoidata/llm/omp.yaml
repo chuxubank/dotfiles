@@ -72,7 +72,7 @@ llm:
           headers:
             anthropic-beta: claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24,context-management-2025-06-27
           models:
-            claude-fable-5: Claude Fable 5
+            - claude-fable-5
         iv:
           provider: iv
           auth_field: default-auth-token

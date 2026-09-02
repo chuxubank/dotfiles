@@ -4,6 +4,7 @@
                                        disableStrictTools, compat}.
 
        models: false → endpoint override only (no catalog rewrite).
+       models as a bare id list → display name is the id.
        model_overrides → per-id metadata fields applied last, for endpoints
        whose real capabilities differ from the catalog's.
 
@@ -26,7 +27,13 @@
   {{- else -}}
     {{- $source := dict -}}
     {{- if hasKey $ep "models" -}}
-      {{- $source = $ep.models -}}
+      {{- if eq (kindOf $ep.models) "slice" -}}
+        {{- /* Bare id list: the display name is the id, matching what the
+               endpoint's own /v1/models returns for these entries. */ -}}
+        {{- range $id := $ep.models -}}{{- $_ := set $source $id $id -}}{{- end -}}
+      {{- else -}}
+        {{- $source = $ep.models -}}
+      {{- end -}}
     {{- else -}}
       {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
     {{- end -}}
@@ -42,7 +49,11 @@
     {{- end -}}
     {{- $overrides := default dict (index $ep "model_overrides") -}}
     {{- range $id, $name := $source -}}
-      {{- $model := dict "id" $id "name" $name "api" $api -}}
+      {{- $model := dict "id" $id "api" $api -}}
+      {{- /* Only a real display name is authoritative. Endpoints that echo the
+             id (every IV group) leave the slot open for the data set's name,
+             and model-config/pi falls back to the id if neither has one. */ -}}
+      {{- if ne $name $id -}}{{- $_ := set $model "name" $name -}}{{- end -}}
       {{- if hasKey $metadata $id -}}
         {{- $model = mergeOverwrite (deepCopy (index $metadata $id)) $model -}}
       {{- end -}}
