@@ -28,7 +28,7 @@ workspaces:
     tabs:
       - label: emacs
         panes:
-          - cwd: ~/.config/emacs
+          - path: [personal, emacs]
             agent: emacs
             kind: pi
 
@@ -36,10 +36,29 @@ workspaces:
     tabs:
       - label: proxy
         panes:
-          - cwd: ~/Developer/Personal/proxy
+          - path: [personal, proxy]
             agent: proxy
             kind: pi
             focus: true
+
+  - name: InfinityValley
+    when:
+      enabled:
+        host_env: [personal, iv]
+    tabs:
+      - label: ivc
+        panes:
+          - path: [workspace, iv]
+            dest: ivc
+            agent: ivc
+            kind: pi
+            focus: true
+      - label: agentia
+        panes:
+          - path: [workspace, iv]
+            dest: agentia
+            agent: agentia
+            kind: pi
 
   - name: OpenTactic
     when:
@@ -48,7 +67,7 @@ workspaces:
     tabs:
       - label: OpenTactic
         panes:
-          - cwd: ~/Developer/OpenTactic
+          - path: [workspace, opentactic]
 
   - name: AsahiArt
     when:
@@ -57,7 +76,7 @@ workspaces:
     tabs:
       - label: asahiart
         panes:
-          - cwd: ~/Developer/AsahiArt
+          - path: [workspace, asahiart]
             agent: asahiart
             kind: pi
             focus: true
@@ -69,7 +88,7 @@ workspaces:
     tabs:
       - label: xingzhi
         panes:
-          - cwd: ~/Developer/XingZhi
+          - path: [workspace, xz]
             agent: main
             kind: pi
             focus: true

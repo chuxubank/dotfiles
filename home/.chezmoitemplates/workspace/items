@@ -1,10 +1,31 @@
 {{- /* Filter declared workspaces through the shared host conditions.
-       Input: root context. Output: JSON list of enabled workspace maps. */ -}}
+       Input: root context. Output: JSON list of enabled workspace maps.
+
+       A pane may declare `path` (a path.toml key path, optionally with
+       `dest`) instead of a literal `cwd`; both resolve to `cwd` here so
+       every consumer only reads `cwd`. */ -}}
 {{- $ctx := . -}}
 {{- $selected := list -}}
 {{- range $workspace := default (list) .workspaces -}}
   {{- $enabled := includeTemplate "when/context" (merge (dict "item" $workspace) $ctx) | fromJson -}}
   {{- if $enabled -}}
+    {{- $tabs := list -}}
+    {{- range $tab := default (list) (dig "tabs" (list) $workspace) -}}
+      {{- $panes := list -}}
+      {{- range $pane := default (list) (dig "panes" (list) $tab) -}}
+        {{- if hasKey $pane "path" -}}
+          {{- $value := includeTemplate "path/value" (merge
+                (dict "path" $ctx.path "keys" $pane.path "label" "workspace path")
+                (pick $pane "dest")) -}}
+          {{- $pane = merge (dict "cwd" (joinPath $ctx.chezmoi.homeDir $value)) (omit $pane "path" "dest") -}}
+        {{- end -}}
+        {{- $panes = append $panes $pane -}}
+      {{- end -}}
+      {{- $tabs = append $tabs (merge (dict "panes" $panes) (omit $tab "panes")) -}}
+    {{- end -}}
+    {{- if $tabs -}}
+      {{- $workspace = merge (dict "tabs" $tabs) (omit $workspace "tabs") -}}
+    {{- end -}}
     {{- $selected = append $selected $workspace -}}
   {{- end -}}
 {{- end -}}

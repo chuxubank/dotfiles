@@ -3,21 +3,9 @@
 {{- range $repo := default (list) .repositories -}}
 {{-   $enabled := includeTemplate "when/context" (merge (dict "item" $repo) $) | fromJson -}}
 {{-   if $enabled -}}
-{{-     $path := $.path -}}
-{{-     $visited := list -}}
-{{-     range $key := $repo.path -}}
-{{-       $visited = append $visited $key -}}
-{{-       if or (ne (kindOf $path) "map") (not (hasKey $path $key)) -}}
-{{-         fail (printf "unknown repository path: path.%s" (join "." $visited)) -}}
-{{-       end -}}
-{{-       $path = index $path $key -}}
-{{-     end -}}
-{{-     if ne (kindOf $path) "string" -}}
-{{-       fail (printf "repository path is not a string: path.%s" (join "." $visited)) -}}
-{{-     end -}}
-{{-     if hasKey $repo "dest" -}}
-{{-       $path = joinPath $path $repo.dest -}}
-{{-     end -}}
+{{-     $path := includeTemplate "path/value" (merge
+          (dict "path" $.path "keys" $repo.path "label" "repository path")
+          (pick $repo "dest")) -}}
 {{-     if hasKey $destinations $path -}}
 {{-       fail (printf "duplicate repository destination: %s" $path) -}}
 {{-     end -}}
