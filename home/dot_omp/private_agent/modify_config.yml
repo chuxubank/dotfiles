@@ -54,4 +54,5 @@
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
+  "replace" (dict "modelRoles" $roles)
 ) -}}

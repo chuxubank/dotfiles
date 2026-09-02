@@ -11,25 +11,16 @@ llm:
         - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high
       reasoning_effort: high
-      # Each cycle role falls back the same way the primary session does: IV
-      # first, then the subscriptions. Grok has no IV entry, so SuperGrok
-      # stays its only source.
+      # OMP roles, not model names. Same keys on every host; each list picks
+      # the first candidate whose provider resolved here (IV aliases on iv,
+      # subscriptions on personal). Grok has no IV entry, so SuperGrok stays
+      # its only source. Cycle is OMP's default: smol → default → slow.
       default_models:
-        fable:
+        slow:
           - iv-anthropic/claude-fable-5:high
-          - cursor/claude-fable-5-high:high
-        sol:
-          - openai/gpt-5.6-sol:high
-          - openai-codex/gpt-5.6-sol:high
-          - cursor/gpt-5.6-sol:high
-        grok: xai-oauth/grok-4.6:high
-        task: xai-oauth/grok-4.6:high
+          - cursor/claude-fable-5-1-medium:medium
         smol: xai-oauth/grok-4.6:medium
-      cycle_order:
-        - default
-        - fable
-        - sol
-        - grok
+        task: xai-oauth/grok-4.6:high
       enabled_models:
         - anthropic/claude-opus-5
         - iv-anthropic/claude-fable-5
@@ -37,7 +28,8 @@ llm:
         - xai-oauth/grok-4.6
         - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high
-        - cursor/claude-fable-5-high
+        - cursor/claude-fable-5-1-medium
+        - cursor/claude-fable-5-1-high
         - cursor/gpt-5.6-sol
       providers:
         openai:
