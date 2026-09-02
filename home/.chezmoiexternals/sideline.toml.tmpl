@@ -1,9 +1,10 @@
-{{- /* Side-project org trees: path.workspace.asahiart + path.workspace.xz.
-       Work trees (aa, iv) have no externals — those are cloned by hand.
+{{- /* Side-project org trees: path.workspace.asahiart, path.workspace.opentactic,
+       path.workspace.xz. Work trees (aa, iv) have no externals — those are
+       cloned by hand.
        Source trees only clone on personal; InventoryConfig and
        RobotDroidConfig also clone on aa/iv because those are the Gitee
        write targets the apps read at runtime.
-       Inclusion rule for both orgs: non-archived, non-fork, active. */ -}}
+       Inclusion rule for every org: non-archived, non-fork, active. */ -}}
 {{- if ne .host_env "ci" -}}
 {{- if eq .host_env "personal" -}}
 {{- range $repo := list
@@ -33,6 +34,14 @@
     type = "git-repo"
     url = "https://github.com/OpenXingZhi/{{ $repo }}"
     refreshPeriod = "48h"
+{{ end }}
+{{- range $repo := list
+  "OpenTactic"
+}}
+[{{ joinPath (index $.path.workspace "opentactic") $repo | quote }}]
+    type = "git-repo"
+    url = "https://github.com/OpenTactic/{{ $repo }}"
+    refreshPeriod = "4h"
 {{ end }}
 {{- end }}
 {{- /* Gitee is the write target and runtime source, not the GitHub copy. */}}
