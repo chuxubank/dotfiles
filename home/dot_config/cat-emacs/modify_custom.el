@@ -27,7 +27,7 @@
  '(logview-additional-timestamp-formats
    '(("Zscaler"
       (java-pattern . "yyyy-MM-dd HH:mm:ss.SSSSSS(Z)"))
-{{- includeTemplate "emacs/logview/timestamp-formats" . }})
+{{- includeTemplate "emacs/logview/timestamp-formats.eld" . }})
    t)
  '(logview-additional-level-mappings
    '(("Zscaler"
@@ -35,7 +35,7 @@
       (warning "WRN")
       (information "INF")
       (debug "DBG"))
-{{- includeTemplate "emacs/logview/level-mappings" . }})
+{{- includeTemplate "emacs/logview/level-mappings.eld" . }})
    t)
  '(logview-additional-submodes
    '(("Zscaler"
@@ -45,7 +45,7 @@
      ("Luna"
       (format . "TIMESTAMP IGNORED LEVEL T: <<RX:THREAD:.+?>> NAME - MESSAGE")
       (levels . "Logback"))
-{{- includeTemplate "emacs/logview/submodes" . }})
+{{- includeTemplate "emacs/logview/submodes.eld" . }})
    t)
  {{- end }}
  {{- if eq .host_env "iv" }}
@@ -55,14 +55,14 @@
       (warning "WARN")
       (information "INFO")
       (debug "DEBUG"))
-{{- includeTemplate "emacs/logview/level-mappings" . }})
+{{- includeTemplate "emacs/logview/level-mappings.eld" . }})
    t)
  '(logview-additional-submodes
    '(("IV"
       (format . "TIMESTAMP [LEVEL] [NAME] MESSAGE")
       (levels . "IV")
       (timestamp "ISO 8601 datetime + millis"))
-{{- includeTemplate "emacs/logview/submodes" . }})
+{{- includeTemplate "emacs/logview/submodes.eld" . }})
    t)
  {{- end }}
  '(gptel-model-updater-backends
