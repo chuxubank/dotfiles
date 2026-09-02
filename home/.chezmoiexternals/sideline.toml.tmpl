@@ -1,18 +1,39 @@
+{{- /* Side-project org trees: path.workspace.asahiart + path.workspace.xz.
+       Work trees (aa, iv) have no externals — those are cloned by hand.
+       Inclusion rule for both orgs: non-archived, non-fork, active. */ -}}
 {{- if ne .host_env "ci" -}}
-[{{ joinPath (index .path.workspace "xz") "RobotDroid" | quote }}]
+{{- range $repo := list
+  "Arborist"
+  "Luvia"
+  "font-subset-gradle-plugin"
+  "org-parser"
+  "quote0-school-calendar"
+  "tree-sitter-template"
+}}
+[{{ joinPath $.path.workspace.asahiart $repo | quote }}]
     type = "git-repo"
-    url = "https://github.com/OpenXingZhi/RobotDroid"
+    url = "https://github.com/AsahiArt/{{ $repo }}"
+    refreshPeriod = "4h"
+{{ end }}
+{{- range $repo := list
+  "AndroidCI"
+  "HardwareServerContainer"
+  "Inventory"
+  "InventoryConfig"
+  "RobotDroid"
+  "license-library"
+  "remote-config"
+  "rfid-codec"
+  "trusted-time"
+}}
+[{{ joinPath (index $.path.workspace "xz") $repo | quote }}]
+    type = "git-repo"
+    url = "https://github.com/OpenXingZhi/{{ $repo }}"
     refreshPeriod = "48h"
-
+{{ end }}
+{{- /* Gitee mirror is the write target for this one, not the GitHub copy. */}}
 [{{ joinPath (index .path.workspace "xz") "RobotDroidConfig" | quote }}]
     type = "git-repo"
     url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
     refreshPeriod = "48h"
-
-{{- if has "qmk" .roles -}}
-["{{ .path.workspace.qmk }}"]
-    type = "git-repo"
-    url = "https://github.com/qmk/qmk_firmware"
-    refreshPeriod = "48h"
-{{- end -}}
-{{- end -}}
+{{ end -}}

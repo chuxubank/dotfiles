@@ -1,0 +1,9 @@
+{{- /* Upstream QMK firmware checkout — path.workspace.qmk, the one workspace
+       key that is neither work nor side project. environment.yaml exports it
+       as QMK_HOME and dot_zshrc.tmpl sources its tab-completion from there. */ -}}
+{{- if and (ne .host_env "ci") (has "qmk" .roles) -}}
+["{{ .path.workspace.qmk }}"]
+    type = "git-repo"
+    url = "https://github.com/qmk/qmk_firmware"
+    refreshPeriod = "48h"
+{{ end -}}

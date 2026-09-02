@@ -10,6 +10,9 @@ org-roam = "Developer/Personal/org-roam"
 blog = "Developer/Personal/blog"
 skills = "Developer/Personal/skills"
 
+# Work trees (aa, iv) are cloned by hand. Side-project org trees (asahiart, xz)
+# are declared in .chezmoiexternals/sideline.toml.tmpl; qmk is an upstream
+# checkout with its own file. Keep that split in mind when adding a key.
 [path.workspace]
 aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"
