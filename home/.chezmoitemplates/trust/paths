@@ -8,8 +8,8 @@
        1. No home directory. A parent-or-self match would blanket-trust
           every repo on the machine.
        2. Workspace trees are listed as roots, not enumerated per child.
-          Inheritance covers their subprojects, so Codex's depth-1 `fd`
-          expansion is unnecessary here.
+          Inheritance covers their subprojects, so Codex's git-repo child
+          expansion via fd is unnecessary here.
 
        Paths are written whether or not they exist yet. */ -}}
 {{- $trusted := list .chezmoi.workingTree -}}

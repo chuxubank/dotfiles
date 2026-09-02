@@ -15,13 +15,16 @@
 {{- range $path := $trustedPaths }}
   {{- $_ := set $projects $path $trustedLevel -}}
 {{- end }}
-{{- $trustedTreeKeys := list "iv" "aa" "asahiart" "opentactic" "xz" -}}
-{{- range $k := $trustedTreeKeys }}
-  {{- $root := joinPath $.chezmoi.homeDir (index $.path.workspace $k) -}}
+{{- /* Enumerate git-repo children of every path.workspace tree. Filter on
+       .git (dir or worktree file) so upstream checkouts like qmk_firmware
+       don't contribute keyboards/, lib/, etc. Empty trees still trip fd's
+       exit-1; that's pre-existing. */ -}}
+{{- range $path := sortAlpha (values $.path.workspace) }}
+  {{- $root := joinPath $.chezmoi.homeDir $path -}}
   {{- if stat $root }}
     {{- $dirs := output "fd" "--hidden" "--no-ignore" "--min-depth" "1" "--max-depth" "1" "--type" "d" "--absolute-path" "--format" "{}" "." $root -}}
     {{- range $dir := splitList "\n" ($dirs | trim) }}
-      {{- if $dir }}
+      {{- if and $dir (stat (joinPath $dir ".git")) }}
         {{- $_ := set $projects $dir $trustedLevel -}}
       {{- end }}
     {{- end }}
