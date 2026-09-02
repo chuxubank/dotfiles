@@ -1,0 +1,190 @@
+# Git repositories managed by chezmoi externals.
+# path resolves through path.toml; dest appends a repo directory to a tree root.
+# Keep entries in path.toml namespace/key order.
+repositories:
+  # path.personal
+  - path: [personal, pass]
+    url: https://github.com/chuxubank/pass
+    refresh_period: 4h
+    when: &non_ci
+      disabled:
+        host_env: [ci]
+
+  - path: [personal, beancount]
+    url: https://github.com/chuxubank/beancount
+    refresh_period: 24h
+    when: *non_ci
+
+  - path: [personal, proxy]
+    url: https://github.com/chuxubank/proxy-config
+    refresh_period: 4h
+    branch: stable
+    when: *non_ci
+
+  - path: [personal, keyboard]
+    url: https://github.com/chuxubank/keyboard-config
+    refresh_period: 4h
+    when: *non_ci
+
+  - path: [personal, emacs]
+    url: https://github.com/cat-emacs/cat-emacs
+    refresh_period: 4h
+    when: *non_ci
+
+  - path: [personal, org]
+    url: https://github.com/chuxubank/org
+    refresh_period: 4h
+    when: *non_ci
+
+  - path: [personal, org-roam]
+    url: https://github.com/chuxubank/org-roam
+    refresh_period: 4h
+    when: *non_ci
+
+  - path: [personal, blog]
+    url: https://github.com/chuxubank/chuxubank.github.io
+    refresh_period: 4h
+    when: *non_ci
+
+  - path: [personal, skills]
+    url: https://github.com/chuxubank/skills
+    refresh_period: 4h
+    when: *non_ci
+
+  # path.workspace.asahiart
+  - path: [workspace, asahiart]
+    dest: Arborist
+    url: https://github.com/AsahiArt/Arborist
+    refresh_period: 4h
+    when: &personal_only
+      enabled:
+        host_env: [personal]
+
+  - path: [workspace, asahiart]
+    dest: Luvia
+    url: https://github.com/AsahiArt/Luvia
+    refresh_period: 4h
+    when: *personal_only
+
+  - path: [workspace, asahiart]
+    dest: font-subset-gradle-plugin
+    url: https://github.com/AsahiArt/font-subset-gradle-plugin
+    refresh_period: 4h
+    when: *personal_only
+
+  - path: [workspace, asahiart]
+    dest: org-parser
+    url: https://github.com/AsahiArt/org-parser
+    refresh_period: 4h
+    when: *personal_only
+
+  - path: [workspace, asahiart]
+    dest: quote0-school-calendar
+    url: https://github.com/AsahiArt/quote0-school-calendar
+    refresh_period: 4h
+    when: *personal_only
+
+  - path: [workspace, asahiart]
+    dest: tree-sitter-template
+    url: https://github.com/AsahiArt/tree-sitter-template
+    refresh_period: 4h
+    when: *personal_only
+
+  # path.workspace.iv
+  - path: [workspace, iv]
+    dest: agentia
+    url: git@git.infinityparadise.com:agentia/agentia.git
+    refresh_period: 4h
+    when: &personal_or_iv
+      enabled:
+        host_env: [personal, iv]
+
+  - path: [workspace, iv]
+    dest: ivc
+    url: git@git.infinityparadise.com:mobile/ivc.git
+    refresh_period: 4h
+    when: *personal_or_iv
+
+  # path.workspace.opentactic
+  - path: [workspace, opentactic]
+    dest: OpenTactic
+    url: https://github.com/OpenTactic/OpenTactic
+    refresh_period: 4h
+    when: *personal_only
+
+  # path.workspace.xz source trees
+  - path: [workspace, xz]
+    dest: AndroidCI
+    url: https://github.com/OpenXingZhi/AndroidCI
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: HardwareServerContainer
+    url: https://github.com/OpenXingZhi/HardwareServerContainer
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: Inventory
+    url: https://github.com/OpenXingZhi/Inventory
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: RobotDroid
+    url: https://github.com/OpenXingZhi/RobotDroid
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: license-library
+    url: https://github.com/OpenXingZhi/license-library
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: remote-config
+    url: https://github.com/OpenXingZhi/remote-config
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: rfid-codec
+    url: https://github.com/OpenXingZhi/rfid-codec
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
+    dest: trusted-time
+    url: https://github.com/OpenXingZhi/trusted-time
+    refresh_period: 48h
+    when: *personal_only
+
+  # Gitee write targets and runtime sources; available on every non-CI host.
+  - path: [workspace, xz]
+    dest: InventoryConfig
+    url: https://gitee.com/star-spider-intelligence/inventory-config
+    refresh_period: 48h
+    when: *non_ci
+
+  - path: [workspace, xz]
+    dest: RobotDroidConfig
+    url: https://gitee.com/star-spider-intelligence/robot-droid-config
+    refresh_period: 48h
+    when: *non_ci
+
+  # path.workspace.qmk
+  - path: [workspace, qmk]
+    url: https://github.com/qmk/qmk_firmware
+    refresh_period: 48h
+    when:
+      enabled:
+        roles: [qmk]
+      disabled:
+        host_env: [ci]
+
+  # path.tool
+  - path: [tool, plum]
+    url: https://github.com/rime/plum
+    refresh_period: 168h

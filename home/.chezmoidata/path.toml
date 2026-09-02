@@ -10,12 +10,10 @@ org-roam = "Developer/Personal/org-roam"
 blog = "Developer/Personal/blog"
 skills = "Developer/Personal/skills"
 
-# Work tree aa is cloned by hand. Infinity Valley is declared in
-# .chezmoiexternals/iv.toml.tmpl and clones on personal and iv. Side-project
-# org trees (asahiart, opentactic, xz) are declared in
-# .chezmoiexternals/sideline.toml.tmpl and clone only on personal, except
-# InventoryConfig and RobotDroidConfig (Gitee write targets, also on aa/iv).
-# qmk is an upstream checkout with its own file.
+# Git clone metadata for these paths lives in repositories.yaml. Work tree aa
+# is cloned by hand. Infinity Valley clones on personal/iv; side-project org
+# trees clone only on personal, except the XingZhi Gitee runtime config repos.
+# qmk is role-gated.
 [path.workspace]
 aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"

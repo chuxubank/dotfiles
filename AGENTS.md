@@ -15,18 +15,17 @@ Run `make verify` after modifying keyboard configuration or its documentation.
 
 ## External repo definitions
 
-`home/.chezmoiexternals/` holds one file per `path` namespace in
-`home/.chezmoidata/path.toml`, or one per semantic group within a namespace.
-When adding a `path` key that needs a clone, put its entry in the matching
-existing file rather than a new per-project one, and keep entry order aligned
-with the key order in `path.toml`. `darwin.toml.tmpl` (platform gate) and
-`zotero.toml.tmpl` (application plugins) are outside the scheme. The rationale
-and the rejected `[path.sideline]` alternative are in
-`docs/adr/0004-externals-per-path-namespace.md`.
+`home/.chezmoidata/path.toml` owns path strings only.
+`home/.chezmoidata/repositories.yaml` maps those paths to git clone metadata;
+add every managed git repository there rather than writing another external
+template. `home/.chezmoiexternals/repositories.toml.tmpl` is the single
+renderer. Keep entries in `path.toml` namespace/key order. Platform-, app-, or
+file-specific non-git externals remain in their existing specialized files.
+The rationale is in
+`docs/adr/0004-repository-metadata.md`.
 
-Private or host-specific entries need a CI guard, either `ne .host_env "ci"` in
-the file or a covering rule in `.chezmoiignore`; moving an entry between files
-can drop the guard it was relying on. `common.toml.tmpl` has neither on purpose,
-because `llm/tool-config` reads its `path.cache` fetches at render time on every
-host. chezmoi merges all externals into one namespace and a duplicated path is
-silently last-wins, so verify no path is defined twice after moving entries.
+Private or host-specific repositories need a `when` condition that excludes
+inapplicable hosts. The renderer uses the shared host-condition evaluator, so
+use the same `when.enabled` / `when.disabled` schema as other data files.
+chezmoi merges all externals into one namespace and a duplicated destination
+is silently last-wins, so verify the rendered destinations are unique.
