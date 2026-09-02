@@ -1,0 +1,27 @@
+{{- /* path/value — Resolve a path.toml key path to its string leaf.
+       Input: dict "path" (the path map) "keys" (string or list)
+              optional "label" for error messages, default "path"
+              optional "dest" appended to the resolved value. */ -}}
+{{- $label := dig "label" "path" . -}}
+{{- $keys := .keys -}}
+{{- if eq (kindOf $keys) "string" -}}
+  {{- $keys = list $keys -}}
+{{- else if ne (kindOf $keys) "slice" -}}
+  {{- fail (printf "%s must be a string or list, got %s" $label (kindOf $keys)) -}}
+{{- end -}}
+{{- $value := .path -}}
+{{- $visited := list -}}
+{{- range $key := $keys -}}
+  {{- $visited = append $visited $key -}}
+  {{- if or (ne (kindOf $value) "map") (not (hasKey $value $key)) -}}
+    {{- fail (printf "unknown %s: path.%s" $label (join "." $visited)) -}}
+  {{- end -}}
+  {{- $value = index $value $key -}}
+{{- end -}}
+{{- if ne (kindOf $value) "string" -}}
+  {{- fail (printf "%s is not a string: path.%s" $label (join "." $visited)) -}}
+{{- end -}}
+{{- if hasKey . "dest" -}}
+  {{- $value = joinPath $value .dest -}}
+{{- end -}}
+{{- $value -}}

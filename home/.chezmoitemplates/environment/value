@@ -14,10 +14,10 @@
     {{- if eq (kindOf $parts) "string" -}}{{- $parts = list $parts -}}{{- end -}}
     {{- range $parts -}}{{- $value = joinPath $value . -}}{{- end -}}
   {{- else if hasKey $item "homePath" -}}
-    {{- $pathValue := includeTemplate "environment/path-value" (dict "path" $ctx.path "keys" $item.homePath) -}}
+    {{- $pathValue := includeTemplate "path/value" (dict "path" $ctx.path "keys" $item.homePath "label" "environment path") -}}
     {{- $value = joinPath $ctx.chezmoi.homeDir $pathValue -}}
   {{- else if hasKey $item "path" -}}
-    {{- $value = includeTemplate "environment/path-value" (dict "path" $ctx.path "keys" $item.path) -}}
+    {{- $value = includeTemplate "path/value" (dict "path" $ctx.path "keys" $item.path "label" "environment path") -}}
   {{- else if hasKey $item "pathList" -}}
     {{- $items := list -}}
     {{- range $item.pathList -}}
