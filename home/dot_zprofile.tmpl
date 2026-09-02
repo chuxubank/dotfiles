@@ -15,6 +15,7 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 # Set PATH, MANPATH, etc., for Homebrew.
 eval "$({{ $brewBin }} shellenv)"
+export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
 {{- if has .host_env (list "personal" "iv") }}
 export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.ustc.edu.cn/brew.git"
 export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.ustc.edu.cn/homebrew-core.git"
