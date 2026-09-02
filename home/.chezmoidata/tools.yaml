@@ -252,8 +252,7 @@ tools:
 
   termio:
     when:
-      enabled:
-        os: [darwin]
+      enabled: false
     remove:
       - ".termio/settings.json"
     purge:
