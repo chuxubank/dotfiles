@@ -17,7 +17,7 @@
 {{- end }}
 {{- $trustedTreeKeys := list "iv" "aa" "asahiart" "xz" -}}
 {{- range $k := $trustedTreeKeys }}
-  {{- $root := joinPath $.chezmoi.homeDir (index $.path $k) -}}
+  {{- $root := joinPath $.chezmoi.homeDir (index $.path.workspace $k) -}}
   {{- if stat $root }}
     {{- $dirs := output "fd" "--hidden" "--no-ignore" "--min-depth" "1" "--max-depth" "1" "--type" "d" "--absolute-path" "--format" "{}" "." $root -}}
     {{- range $dir := splitList "\n" ($dirs | trim) }}
