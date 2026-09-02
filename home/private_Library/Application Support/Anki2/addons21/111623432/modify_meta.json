@@ -53,7 +53,13 @@
 
 {{- $in := trim .chezmoi.stdin -}}
 {{- if gt (len $in) 0 -}}
-{{ fromJson $in |
+{{- $meta := fromJson $in -}}
+{{- $config := default dict (index $meta "config") -}}
+{{- if not (hasKey $config "config_schema") -}}
+  {{- $_ := set $config "config_schema" 4 -}}
+{{- end -}}
+{{- $_ := set $meta "config" $config -}}
+{{ $meta |
    setValueAtPath "config.realtime_config" $realtimeConfig |
    setValueAtPath "config.configuration" $configuration |
    toJson }}
