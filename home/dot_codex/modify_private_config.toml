@@ -15,7 +15,7 @@
 {{- range $path := $trustedPaths }}
   {{- $_ := set $projects $path $trustedLevel -}}
 {{- end }}
-{{- $trustedTreeKeys := list "iv" "aa" "asahiart" "xz" -}}
+{{- $trustedTreeKeys := list "iv" "aa" "asahiart" "opentactic" "xz" -}}
 {{- range $k := $trustedTreeKeys }}
   {{- $root := joinPath $.chezmoi.homeDir (index $.path.workspace $k) -}}
   {{- if stat $root }}
