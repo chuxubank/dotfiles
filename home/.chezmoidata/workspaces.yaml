@@ -24,13 +24,22 @@ workspaces:
             kind: pi
             focus: true
 
-  - name: emacs
+  - name: cat-emacs
     tabs:
       - label: emacs
         panes:
           - cwd: ~/.config/emacs
             agent: emacs
             kind: pi
+
+  - name: proxy
+    tabs:
+      - label: proxy
+        panes:
+          - cwd: ~/Developer/Personal/proxy
+            agent: proxy
+            kind: pi
+            focus: true
 
   - name: OpenTactic
     when:
@@ -41,7 +50,22 @@ workspaces:
         panes:
           - cwd: ~/Developer/OpenTactic
 
-  - name: xingzhi
+  - name: AsahiArt
+    when:
+      enabled:
+        host_env: [personal]
+    tabs:
+      - label: asahiart
+        panes:
+          - cwd: ~/Developer/AsahiArt
+            agent: asahiart
+            kind: pi
+            focus: true
+
+  - name: XingZhi
+    when:
+      enabled:
+        host_env: [personal]
     tabs:
       - label: xingzhi
         panes:
@@ -49,7 +73,3 @@ workspaces:
             agent: main
             kind: pi
             focus: true
-          - cwd: ~/Developer/XingZhi
-            split: auto
-            agent: slave
-            kind: grok
