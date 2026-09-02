@@ -6,8 +6,8 @@
        A modify-template so that state survives apply and only the choices
        this repo owns are pinned.
 
-       Luvus has no theme auto_switch (unlike Herdr), so the gruvbox variant
-       is resolved from the host's dark-mode fact at render time.
+       Luvus has no theme auto_switch (unlike Herdr). Pin `terminal` so
+       chrome follows the host terminal palette instead of a packed theme.
        check_updates is off because Homebrew owns the binary
        (RizRiyz/luvus/luvus in packages/brew/brews.toml). */ -}}
 
@@ -15,7 +15,7 @@
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
-    "theme" (ternary "gruvbox" "gruvbox-light" .isDarkMode)
+    "theme" "terminal"
     "prefix" "ctrl+;"
     "check_updates" false
     "layout" (dict
