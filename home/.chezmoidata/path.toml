@@ -11,8 +11,9 @@ blog = "Developer/Personal/blog"
 skills = "Developer/Personal/skills"
 
 # Work trees (aa, iv) are cloned by hand. Side-project org trees (asahiart, xz)
-# are declared in .chezmoiexternals/sideline.toml.tmpl; qmk is an upstream
-# checkout with its own file. Keep that split in mind when adding a key.
+# are declared in .chezmoiexternals/sideline.toml.tmpl and clone only on
+# personal, except InventoryConfig and RobotDroidConfig (Gitee write targets,
+# also on aa/iv). qmk is an upstream checkout with its own file.
 [path.workspace]
 aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"

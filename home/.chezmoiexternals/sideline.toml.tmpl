@@ -1,7 +1,11 @@
 {{- /* Side-project org trees: path.workspace.asahiart + path.workspace.xz.
        Work trees (aa, iv) have no externals — those are cloned by hand.
+       Source trees only clone on personal; InventoryConfig and
+       RobotDroidConfig also clone on aa/iv because those are the Gitee
+       write targets the apps read at runtime.
        Inclusion rule for both orgs: non-archived, non-fork, active. */ -}}
 {{- if ne .host_env "ci" -}}
+{{- if eq .host_env "personal" -}}
 {{- range $repo := list
   "Arborist"
   "Luvia"
@@ -19,7 +23,6 @@
   "AndroidCI"
   "HardwareServerContainer"
   "Inventory"
-  "InventoryConfig"
   "RobotDroid"
   "license-library"
   "remote-config"
@@ -31,9 +34,15 @@
     url = "https://github.com/OpenXingZhi/{{ $repo }}"
     refreshPeriod = "48h"
 {{ end }}
-{{- /* Gitee mirror is the write target for this one, not the GitHub copy. */}}
-[{{ joinPath (index .path.workspace "xz") "RobotDroidConfig" | quote }}]
+{{- end }}
+{{- /* Gitee is the write target and runtime source, not the GitHub copy. */}}
+{{- range $cfg := list
+  (dict "dest" "InventoryConfig" "slug" "inventory-config")
+  (dict "dest" "RobotDroidConfig" "slug" "robot-droid-config")
+}}
+[{{ joinPath (index $.path.workspace "xz") $cfg.dest | quote }}]
     type = "git-repo"
-    url = "https://gitee.com/star-spider-intelligence/robot-droid-config"
+    url = "https://gitee.com/star-spider-intelligence/{{ $cfg.slug }}"
     refreshPeriod = "48h"
+{{ end }}
 {{ end -}}
