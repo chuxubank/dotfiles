@@ -19,7 +19,7 @@ layout {
     }
 
     {{- if eq .host_env "iv" }}
-    opencode name="ivc" cwd="~/Developer/IV/ivc" {
+    opencode name="ivc" cwd="{{- joinPath .chezmoi.homeDir .path.workspace.iv "ivc" -}}" {
         pane
     }
     {{- end }}

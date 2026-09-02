@@ -13,7 +13,7 @@
 [includeIf "gitdir:~/Developer/AA/"]
     path = config_aa
 
-[includeIf "gitdir:~/Developer/IV/"]
+[includeIf "gitdir:~/{{ .path.workspace.iv }}/"]
     path = config_iv
 
 [interactive]
