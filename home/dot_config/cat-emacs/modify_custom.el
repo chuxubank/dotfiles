@@ -23,6 +23,48 @@
       "git.infinityparadise.com" forge-gitlab-repository)))
  '(cat-gptel-forge-prs-prompt-file "prompt/iv-mr.yml.j2")
  {{- end }}
+ {{- if eq .host_env "aa" }}
+ '(logview-additional-timestamp-formats
+   '(("Zscaler"
+      (java-pattern . "yyyy-MM-dd HH:mm:ss.SSSSSS(Z)"))
+{{- includeTemplate "emacs/logview/timestamp-formats" . }})
+   t)
+ '(logview-additional-level-mappings
+   '(("Zscaler"
+      (error "ERR")
+      (warning "WRN")
+      (information "INF")
+      (debug "DBG"))
+{{- includeTemplate "emacs/logview/level-mappings" . }})
+   t)
+ '(logview-additional-submodes
+   '(("Zscaler"
+      (format . "TIMESTAMP[IGNORED:THREAD] LEVEL MESSAGE")
+      (levels . "Zscaler")
+      (timestamp "Zscaler"))
+     ("Luna"
+      (format . "TIMESTAMP IGNORED LEVEL T: <<RX:THREAD:.+?>> NAME - MESSAGE")
+      (levels . "Logback"))
+{{- includeTemplate "emacs/logview/submodes" . }})
+   t)
+ {{- end }}
+ {{- if eq .host_env "iv" }}
+ '(logview-additional-level-mappings
+   '(("IV"
+      (error "ERROR")
+      (warning "WARN")
+      (information "INFO")
+      (debug "DEBUG"))
+{{- includeTemplate "emacs/logview/level-mappings" . }})
+   t)
+ '(logview-additional-submodes
+   '(("IV"
+      (format . "TIMESTAMP [LEVEL] [NAME] MESSAGE")
+      (levels . "IV")
+      (timestamp "ISO 8601 datetime + millis"))
+{{- includeTemplate "emacs/logview/submodes" . }})
+   t)
+ {{- end }}
  '(gptel-model-updater-backends
    '(gptel--gemini
      {{- if eq .host_env "iv" }}
@@ -85,38 +127,4 @@
           :key (cat/gptel-api-key-from-pass
                 "Work/IV/LLM" "cc-auth-token")
           :stream t)))
-{{- end }}
-
-{{- if eq .host_env "aa" }}
-(add-to-list 'logview-additional-timestamp-formats
-             '("Zscaler"
-               (java-pattern . "yyyy-MM-dd HH:mm:ss.SSSSSS(Z)")))
-(add-to-list 'logview-additional-level-mappings
-             '("Zscaler"
-               (error "ERR")
-               (warning "WRN")
-               (information "INF")
-               (debug "DBG")))
-(add-to-list 'logview-additional-submodes
-             '("Luna"
-               (format . "TIMESTAMP IGNORED LEVEL T: <<RX:THREAD:.+?>> NAME - MESSAGE")
-               (levels . "Logback")))
-(add-to-list 'logview-additional-submodes
-             '("Zscaler"
-               (format . "TIMESTAMP[IGNORED:THREAD] LEVEL MESSAGE")
-               (levels . "Zscaler")
-               (timestamp "Zscaler")))
-{{- end }}
-{{- if eq .host_env "iv" }}
-(add-to-list 'logview-additional-level-mappings
-             '("IV"
-               (error "ERROR")
-               (warning "WARN")
-               (information "INFO")
-               (debug "DEBUG")))
-(add-to-list 'logview-additional-submodes
-             '("IV"
-               (format . "TIMESTAMP [LEVEL] [NAME] MESSAGE")
-               (levels . "IV")
-               (timestamp "ISO 8601 datetime + millis")))
 {{- end }}
