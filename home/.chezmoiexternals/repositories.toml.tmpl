@@ -1,4 +1,8 @@
-{{- /* Render repositories.yaml into chezmoi git-repo externals. */ -}}
+{{- /* Render repositories.yaml into chezmoi git-repo externals.
+       url is origin. When upstream is set, url is our fork and the upstream
+       remote is configured at clone time, because chezmoi has no post-clone
+       hook. Refresh runs a bare `git pull`, so branch names what it follows
+       and it follows upstream whenever one exists. */ -}}
 {{- $destinations := dict -}}
 {{- range $repo := default (list) .repositories -}}
 {{-   $enabled := includeTemplate "when/context" (merge (dict "item" $repo) $) | fromJson -}}
@@ -21,11 +25,16 @@
 {{-     if hasKey $repo "depth" -}}
 {{-       $cloneArgs = append $cloneArgs (printf "--depth=%v" $repo.depth) -}}
 {{-     end -}}
+{{-     if hasKey $repo "upstream" -}}
+{{-       $cloneArgs = concat $cloneArgs (list
+            "-c" (printf "remote.upstream.url=%s" $repo.upstream)
+            "-c" "remote.upstream.fetch=+refs/heads/*:refs/remotes/upstream/*") -}}
+{{-     end -}}
 {{-     if $cloneArgs }}
     clone.args = [{{ range $i, $arg := $cloneArgs }}{{ if $i }}, {{ end }}{{ $arg | quote }}{{ end }}]
 {{-     end }}
 {{-     if hasKey $repo "branch" }}
-    pull.args = ["--ff-only", "origin", {{ $repo.branch | quote }}]
+    pull.args = ["--ff-only", {{ if hasKey $repo "upstream" }}"upstream"{{ else }}"origin"{{ end }}, {{ $repo.branch | quote }}]
 {{-     end }}
 {{ end -}}
 {{- end -}}

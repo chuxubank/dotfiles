@@ -174,17 +174,22 @@ repositories:
     refresh_period: 48h
     when: *non_ci
 
-  # path.workspace.oss — third-party projects we contribute to.
+  # path.workspace.oss — third-party projects we contribute to. url is our
+  # fork (origin, where we push); upstream is what refresh follows.
   - path: [workspace, oss]
     dest: chezmoi
-    url: https://github.com/twpayne/chezmoi
+    url: https://github.com/chuxubank/chezmoi
+    upstream: https://github.com/twpayne/chezmoi
     refresh_period: 48h
+    branch: master
     when: *non_ci
 
   - path: [workspace, oss]
     dest: luvus
-    url: https://github.com/RizRiyz/luvus
+    url: https://github.com/chuxubank/luvus
+    upstream: https://github.com/RizRiyz/luvus
     refresh_period: 48h
+    branch: main
     when: *non_ci
 
   # path.workspace.example — third-party trees we only read or build against.

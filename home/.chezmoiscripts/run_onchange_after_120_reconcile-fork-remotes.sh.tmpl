@@ -1,0 +1,50 @@
+#!/bin/sh
+# Reconcile the upstream remote on repositories we contribute to.
+#
+# repositories.yaml injects the upstream remote through clone.args, which git
+# applies only when it clones. A clone that already existed before its entry
+# gained an `upstream` — or that predates the field entirely — therefore has no
+# upstream remote, and its refresh `git pull --ff-only upstream <branch>` would
+# fail. This script adds what the clone missed.
+#
+# origin must be our fork: an origin still pointing at upstream is leftover
+# from an older entry, and we cannot push there anyway, so rewriting it loses
+# nothing. Never fails the apply: a missing clone is skipped.
+set -eu
+
+reconcile() {
+	repo=$1
+	want_origin=$2
+	want_upstream=$3
+
+	[ -e "$repo/.git" ] || return 0
+
+	for remote in origin upstream; do
+		case $remote in
+		origin) want=$want_origin ;;
+		upstream) want=$want_upstream ;;
+		esac
+
+		have=$(git -C "$repo" remote get-url "$remote" 2>/dev/null || echo -)
+		if [ "$have" = - ]; then
+			if git -C "$repo" remote add "$remote" "$want" 2>/dev/null; then
+				printf 'fork-remotes: %s: added %s -> %s\n' "$repo" "$remote" "$want"
+			fi
+		elif [ "$have" != "$want" ]; then
+			if git -C "$repo" remote set-url "$remote" "$want" 2>/dev/null; then
+				printf 'fork-remotes: %s: %s %s -> %s\n' "$repo" "$remote" "$have" "$want"
+			fi
+		fi
+	done
+}
+
+{{ range $repo := default (list) .repositories -}}
+{{-   if hasKey $repo "upstream" -}}
+{{-     if includeTemplate "when/context" (merge (dict "item" $repo) $) | fromJson -}}
+{{-       $path := includeTemplate "path/value" (merge
+            (dict "path" $.path "keys" $repo.path "label" "repository path")
+            (pick $repo "dest")) -}}
+reconcile {{ joinPath $.chezmoi.homeDir $path | quote }} {{ $repo.url | quote }} {{ $repo.upstream | quote }}
+{{      end -}}
+{{-   end -}}
+{{- end -}}
