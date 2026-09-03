@@ -50,19 +50,19 @@ defaults are in the per-tool files.
 
 *** Shared bindings
 
-| Keys                    | Action                                         |
-|-------------------------+------------------------------------------------|
-| =Ctrl+P= / =Ctrl+N=     | Previous/next line, or prompt history if empty |
-| =Ctrl+B= / =Ctrl+F=     | Cursor left/right                              |
-| =Alt+B= / =Alt+F=       | Word left/right                                |
-| =Ctrl+A= / =Ctrl+E=     | Line start/end                                 |
-| =Ctrl+H= / =Ctrl+D=     | Delete character backward/forward              |
-| =Ctrl+K= / =Ctrl+U=     | Delete to line end/start                       |
-| =Ctrl+Y= / =Alt+Y=      | Yank / yank-pop                                |
-| =Ctrl+J= / =Shift+Enter= | New line                                      |
-| =Ctrl+R=                | Reverse-search prompt history                  |
-| =Ctrl+Alt+R=            | Rename session                                 |
-| =Alt+N= / =Alt+P=       | Next/previous scoped model                     |
+| Keys                     | Action                                              |
+|--------------------------+-----------------------------------------------------|
+| =Ctrl+P= / =Ctrl+N=      | Previous/next line, or prompt history if empty      |
+| =Ctrl+B= / =Ctrl+F=      | Cursor left/right                                   |
+| =Alt+B= / =Alt+F=        | Word left/right                                     |
+| =Ctrl+A= / =Ctrl+E=      | Line start/end                                      |
+| =Ctrl+H= / =Ctrl+D=      | Delete character backward/forward                   |
+| =Ctrl+K= / =Ctrl+U=      | Delete to line end/start                            |
+| =Ctrl+Y= / =Alt+Y=       | Yank / yank-pop                                     |
+| =Ctrl+J= / =Shift+Enter= | New line                                            |
+| =Ctrl+R=                 | Reverse-search prompt history                       |
+| =Ctrl+Alt+R=             | Rename session                                      |
+| =Alt+N= / =Alt+P=        | Next/previous scoped model (Pi: also =Alt+Down/Up=) |
 
 ** Declared workspaces
 
