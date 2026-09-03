@@ -10,7 +10,7 @@ plan:
 	chezmoi apply --dry-run --force --no-tty --verbose --exclude=encrypted,scripts,externals
 
 apply:
-	chezmoi apply --init
+	./scripts/report-externals.sh apply --init
 
 re-add:
 	chezmoi re-add
@@ -22,7 +22,7 @@ status:
 	chezmoi status
 
 update:
-	chezmoi update
+	./scripts/report-externals.sh update
 
 edit:
 	chezmoi edit
