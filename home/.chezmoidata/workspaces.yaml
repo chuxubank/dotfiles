@@ -61,7 +61,8 @@ workspaces:
             focus: true
 
   - name: agentia
-    when: *personal_or_iv
+    when:
+      enabled: false
     tabs:
       - label: agentia
         panes:
