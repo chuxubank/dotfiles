@@ -14,8 +14,17 @@
     type = "git-repo"
     url = {{ $repo.url | quote }}
     refreshPeriod = {{ $repo.refresh_period | quote }}
+{{-     $cloneArgs := list -}}
+{{-     if hasKey $repo "branch" -}}
+{{-       $cloneArgs = concat $cloneArgs (list "-b" $repo.branch) -}}
+{{-     end -}}
+{{-     if hasKey $repo "depth" -}}
+{{-       $cloneArgs = append $cloneArgs (printf "--depth=%v" $repo.depth) -}}
+{{-     end -}}
+{{-     if $cloneArgs }}
+    clone.args = [{{ range $i, $arg := $cloneArgs }}{{ if $i }}, {{ end }}{{ $arg | quote }}{{ end }}]
+{{-     end }}
 {{-     if hasKey $repo "branch" }}
-    clone.args = ["-b", {{ $repo.branch | quote }}]
     pull.args = ["--ff-only", "origin", {{ $repo.branch | quote }}]
 {{-     end }}
 {{ end -}}

@@ -174,8 +174,59 @@ repositories:
     refresh_period: 48h
     when: *non_ci
 
-  # path.workspace.qmk
-  - path: [workspace, qmk]
+  # path.workspace.oss — third-party projects we contribute to.
+  - path: [workspace, oss]
+    dest: chezmoi
+    url: https://github.com/twpayne/chezmoi
+    refresh_period: 48h
+    when: *non_ci
+
+  - path: [workspace, oss]
+    dest: luvus
+    url: https://github.com/RizRiyz/luvus
+    refresh_period: 48h
+    when: *non_ci
+
+  # path.workspace.example — third-party trees we only read or build against.
+  - path: [workspace, example]
+    dest: Android/nowinandroid
+    url: https://github.com/android/nowinandroid.git
+    refresh_period: 168h
+    when: *non_ci
+
+  - path: [workspace, example]
+    dest: KMP/compose-multiplatform
+    url: https://github.com/JetBrains/compose-multiplatform.git
+    refresh_period: 168h
+    when: *non_ci
+
+  - path: [workspace, example]
+    dest: Raycast/script-commands
+    url: https://github.com/raycast/script-commands.git
+    refresh_period: 24h
+    depth: 1
+    when:
+      enabled:
+        os: darwin
+      disabled:
+        host_env: [ci]
+
+  - path: [workspace, example]
+    dest: Concourse/ci
+    url: https://github.com/concourse/ci
+    refresh_period: 24h
+    when: &aa_only
+      enabled:
+        host_env: [aa]
+
+  - path: [workspace, example]
+    dest: Concourse/examples
+    url: https://github.com/concourse/examples
+    refresh_period: 24h
+    when: *aa_only
+
+  - path: [workspace, example]
+    dest: QMK
     url: https://github.com/qmk/qmk_firmware
     refresh_period: 48h
     when:

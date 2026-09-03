@@ -147,7 +147,8 @@ environment:
           roles: [qmk]
       variables:
         QMK_HOME:
-          homePath: [workspace, qmk]
+          homePath: [workspace, example]
+          suffix: [QMK]
 
     - tool: sdkman
       variables:

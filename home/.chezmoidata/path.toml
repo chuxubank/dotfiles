@@ -13,14 +13,17 @@ skills = "Developer/Personal/skills"
 # Git clone metadata for these paths lives in repositories.yaml. Work tree aa
 # is cloned by hand. Infinity Valley clones on personal/iv; side-project org
 # trees clone only on personal, except the XingZhi Gitee runtime config repos.
-# qmk is role-gated.
+# oss holds third-party projects we contribute to; example holds third-party
+# trees we only read or build against, including the role-gated qmk tree that
+# QMK_HOME points at.
 [path.workspace]
 aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"
 iv = "Developer/InfinityValley"
 opentactic = "Developer/OpenTactic"
 xz = "Developer/XingZhi"
-qmk = "Developer/Example/QMK"
+oss = "Developer/OpenSource"
+example = "Developer/Example"
 
 [path.tool]
 bun = ".bun"
