@@ -1,16 +1,19 @@
 {{- /* llm/custom-providers — Alias map for Pi/OMP custom-provider files.
        Input: dict "tool" <tool-name> merged with root context.
        Output: JSON object of alias -> {baseUrl, apiKey, api, models, headers,
-                                       disableStrictTools, compat}.
+                                       disableStrictTools, compat, modelOverrides}.
 
        models: false → endpoint override only (no catalog rewrite).
        models as a bare id list → display name is the id.
-       model_overrides → per-id metadata fields applied last, for endpoints
-       whose real capabilities differ from the catalog's.
+       model_overrides → per-id metadata. When models are declared, merged into
+       each row last. When models: false, emitted as OMP provider-level
+       modelOverrides. A stem with no thinking-effort or -fast suffix is
+       copied onto effort siblings (the rate does not split). -fast is a
+       price lane and stays exact.
 
-       Emit only when the alias contributes a model list, or an endpoint we
-       can authenticate against. A bare baseUrl with no key would just restate
-       the tool's own default. */ -}}
+       Emit only when the alias contributes a model list, an override-only
+       modelOverrides map, or an endpoint we can authenticate against. A bare
+       baseUrl with no key would just restate the tool's own default. */ -}}
 {{- $cfg := includeTemplate "llm/tool-config" . | fromJson -}}
 {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
 
@@ -22,6 +25,7 @@
 
   {{- $models := list -}}
   {{- $declaresModels := true -}}
+  {{- $overrides := default dict (index $ep "model_overrides") -}}
   {{- if and (hasKey $ep "models") (eq (kindOf $ep.models) "bool") -}}
     {{- $declaresModels = false -}}
   {{- else -}}
@@ -47,7 +51,6 @@
       {{- end -}}
       {{- $source = $kept -}}
     {{- end -}}
-    {{- $overrides := default dict (index $ep "model_overrides") -}}
     {{- range $id, $name := $source -}}
       {{- $model := dict "id" $id "api" $api -}}
       {{- /* Only a real display name is authoritative. Endpoints that echo the
@@ -64,7 +67,8 @@
     {{- end -}}
   {{- end -}}
 
-  {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) -}}
+  {{- $hasOverrides := and (not $declaresModels) (gt (len $overrides) 0) -}}
+  {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) $hasOverrides -}}
     {{- $p := dict -}}
     {{- if $baseURL -}}{{- $_ := set $p "baseUrl" $baseURL -}}{{- end -}}
     {{- if hasKey $ep "headers" -}}{{- $_ := set $p "headers" $ep.headers -}}{{- end -}}
@@ -82,6 +86,29 @@
     {{- if $declaresModels -}}
       {{- $_ := set $p "api" $api -}}
       {{- $_ := set $p "models" $models -}}
+    {{- end -}}
+    {{- if $hasOverrides -}}
+      {{- /* Stem keys cover thinking-effort siblings. An explicit sibling
+             or -fast key still wins. */ -}}
+      {{- $effortSuffixes := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
+      {{- $expanded := dict -}}
+      {{- range $id, $ov := $overrides -}}
+        {{- $_ := set $expanded $id $ov -}}
+        {{- $stem := true -}}
+        {{- if hasSuffix "-fast" $id -}}{{- $stem = false -}}{{- end -}}
+        {{- range $suf := $effortSuffixes -}}
+          {{- if hasSuffix (printf "-%s" $suf) $id -}}{{- $stem = false -}}{{- end -}}
+        {{- end -}}
+        {{- if $stem -}}
+          {{- range $suf := $effortSuffixes -}}
+            {{- $alias := printf "%s-%s" $id $suf -}}
+            {{- if not (hasKey $overrides $alias) -}}
+              {{- $_ := set $expanded $alias $ov -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $_ := set $p "modelOverrides" $expanded -}}
     {{- end -}}
     {{- $_ := set $providers $alias $p -}}
   {{- end -}}

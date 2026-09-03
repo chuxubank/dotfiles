@@ -77,3 +77,44 @@ llm:
         cursor:
           provider: cursor
           models: false
+          # GetUsableModels ships no pricing. Third-party ids copy first-party
+          # API list prices; Composer copies Cursor's published table
+          # (https://cursor.com/docs/models-and-pricing, 2026-09-03).
+          # Stems cover thinking-effort siblings; -fast is a separate rate.
+          model_overrides:
+            claude-opus-5:
+              cost:
+                input: 5
+                output: 25
+                cacheRead: 0.5
+                cacheWrite: 6.25
+            claude-fable-5-1:
+              cost:
+                input: 10
+                output: 50
+                cacheRead: 1
+                cacheWrite: 12.5
+            gpt-5.6-sol:
+              cost:
+                input: 4
+                output: 20
+                cacheRead: 0.4
+                cacheWrite: 5
+                longContext:
+                  inputThreshold: 272000
+                  input: 10
+                  output: 45
+                  cacheRead: 1
+                  cacheWrite: 12.5
+            composer-2.5:
+              cost:
+                input: 0.5
+                output: 2.5
+                cacheRead: 0.2
+                cacheWrite: 0
+            composer-2.5-fast:
+              cost:
+                input: 3
+                output: 15
+                cacheRead: 0.5
+                cacheWrite: 0
