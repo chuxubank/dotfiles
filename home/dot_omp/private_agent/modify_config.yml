@@ -11,7 +11,20 @@
   {{- $_ := set $roles $role $model -}}
 {{- end -}}
 
+{{- /* Per-agent model overrides are role aliases, not model ids: they
+       re-resolve per host through modelRoles, so IV gets the aggressive pick
+       and personal hosts fall back to the subscription entry without a second
+       table here. Unlisted agents keep @task. */ -}}
+{{- $agentModels := dict
+  "scout" "@smol"
+  "sonic" "@smol"
+  "security-reviewer" "@slow"
+-}}
+
 {{- $managed := dict
+  "advisor" (dict
+    "enabled" true
+  )
   "async" (dict
     "enabled" true
   )
@@ -39,6 +52,7 @@
     "enableEffort" true
     "maxConcurrency" 3
     "maxRecursionDepth" 2
+    "agentModelOverrides" $agentModels
     "isolation" (dict
       "enabled" true
       "apply" true

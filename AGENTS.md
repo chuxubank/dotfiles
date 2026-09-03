@@ -44,3 +44,29 @@ union, reaching a different provider with no error. Pin the provider on any id
 more than one alias can serve. Leave deliberate globs like `claude-opus-5*`
 alone: they are meant to surface every copy. The rationale is in
 `docs/adr/0005-llm-provider-aliases.md`.
+
+## OMP model roles
+
+`default_models` in `home/.chezmoidata/llm/omp.yaml` owns the role table, and
+`home/dot_omp/private_agent/modify_config.yml` renders it into `modelRoles`.
+Each role is a candidate list resolved by first surviving provider alias: lead
+with an IV entry, which is company-funded and may spend effort freely, and
+follow with the personal-subscription entry that applies off `iv`. Do not add a
+`host_env` conditional to the template for this; the alias gating already
+carries it. Role targets must also be listed in `enabled_models`, or the role
+resolves to a model the picker cannot select.
+
+Update the resolved two-tier table in `docs/llm/model-roles.md` in the same
+change, treating the data file as the source of truth. Verify the non-`iv` tier
+explicitly — the working host only exercises one branch:
+
+```sh
+chezmoi execute-template '{{- $c := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}
+{{ range $r, $m := $c.default_models }}{{ $r }}={{ $m }}
+{{ end }}'
+```
+
+Prefer leaving a role unset over assigning what its fallback chain would reach
+anyway; an assignment earns its place by changing the model or the effort.
+Effort levels are per model, so a fallback cannot assume its IV sibling's level.
+The rationale is in `docs/adr/0006-omp-model-role-tiers.md`.

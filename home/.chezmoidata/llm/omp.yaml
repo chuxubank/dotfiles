@@ -5,26 +5,66 @@ llm:
       # then Cursor. `openai`/`anthropic` are IV aliases (same as Pi); the
       # ChatGPT subscription is `openai-codex`.
       model:
-        - anthropic/claude-opus-5
         - openai/gpt-5.6-sol
+        - anthropic/claude-opus-5
         - xai-oauth/grok-4.6
         - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high
       reasoning_effort: high
       # OMP roles, not model names. Same keys on every host; each list picks
-      # the first candidate whose provider resolved here (IV aliases on iv,
-      # subscriptions on personal). Grok has no IV entry, so SuperGrok stays
-      # its only source. Cycle is OMP's default: smol → default → slow.
+      # the first candidate whose provider resolved here. IV is company-funded,
+      # so every role leads with an IV alias and spends effort freely; the
+      # trailing entries are the personal-subscription fallback for non-iv
+      # hosts and stay deliberately cheaper. Grok has no IV entry, so SuperGrok
+      # is only ever a fallback. Cycle is OMP's default: smol → default → slow.
       default_models:
         slow:
           - iv-anthropic/claude-fable-5:high
           - cursor/claude-fable-5-1-medium:medium
-        smol: xai-oauth/grok-4.6:medium
-        task: xai-oauth/grok-4.6:high
+        # Prewalk target and background worker. Luna's thinking floor is `low`,
+        # so the IV pick is a big model held at a low-ish effort rather than a
+        # small model pushed hard.
+        smol:
+          - openai/gpt-5.6-luna:medium
+          - xai-oauth/grok-4.6:medium
+        # Every subagent's default, and the system's heaviest output producer.
+        # Terra is the reason this is not Sonnet: same input price as Sol at
+        # $1.5, but $2 output against Sonnet's $15. The 372K context is smaller
+        # than Sonnet's 1M and that is affordable here — each subagent starts
+        # on a fresh context rather than inheriting the parent's.
+        task:
+          - openai/gpt-5.6-terra:high
+          - xai-oauth/grok-4.6:high
+        # Reviews every primary turn's delta, so it wants a family other than
+        # the primary's and a provider that does not bill per review.
+        advisor:
+          - anthropic/claude-sonnet-5:medium
+          - xai-oauth/grok-4.6:medium
+        # Titles, memory, auto-thinking classification, unexpected-stop checks.
+        # Unset would borrow @smol, which is the same model here — the point of
+        # spelling it out is the lower effort.
+        tiny:
+          - openai/gpt-5.6-luna:low
+          - xai-oauth/grok-4.6:minimal
+        # Architectural planning: once per session, low volume, and the one
+        # place where the best available reasoning outranks its price. Opus is
+        # $6/$30 — worth it at this call frequency, not at task's.
+        plan:
+          - anthropic/claude-opus-5:xhigh
+          - cursor/claude-opus-5-high
+        # No `vision` role on purpose. inspect_image falls back @vision →
+        # @default → active model, each level requiring image input, and both
+        # tiers' @default already advertises it (gpt-5.6-sol, grok-4.6). Neither
+        # provider bills per image, so there is nothing to route away from.
+      # Allow-list for the picker. Role targets must be listed too, or the role
+      # resolves to a model the session cannot select.
       enabled_models:
         - anthropic/claude-opus-5
+        - anthropic/claude-sonnet-5
         - iv-anthropic/claude-fable-5
         - openai/gpt-5.6-sol
+        - openai/gpt-5.6-terra
+        - openai/gpt-5.6-luna
         - xai-oauth/grok-4.6
         - openai-codex/gpt-5.6-sol
         - cursor/claude-opus-5-high

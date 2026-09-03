@@ -75,3 +75,13 @@ Shared workspace, tab, pane, command, and agent declarations live in
 
 Both runtime commands leave existing named workspaces untouched and focus the
 workspace marked with =focus: true= after applying missing entries.
+
+** OMP model roles
+
+OMP resolves named model slots (=default=, =smol=, =slow=, =task=, =advisor=,
+=tiny=) rather than one model. Each is a candidate list in
+[[file:home/.chezmoidata/llm/omp.yaml][home/.chezmoidata/llm/omp.yaml]] whose
+first entry with a resolvable provider wins, so IV-backed models are used on
+work hosts and personal subscriptions elsewhere. The resolved table for both
+tiers, the roles left deliberately unset, and the subagent overrides are in
+[[file:docs/llm/model-roles.md][docs/llm/model-roles.md]].
