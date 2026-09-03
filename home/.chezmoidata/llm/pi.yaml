@@ -16,7 +16,11 @@ llm:
       # Prefer globs: an alias that resolves to nothing warns at startup.
       # Pin a provider only to steer away from a broken duplicate id.
       enabled_models:
-        - gpt-5.6-sol
+        # Pinned to the IV Codex surface (`openai` here = provider: iv on the
+        # codex token). Bare `gpt-5.6-sol` also matches pi's bundled openrouter
+        # catalog and resolved there instead, so the cycle served the wrong
+        # endpoint for the same id.
+        - openai/gpt-5.6-sol
         - claude-opus-5*
         # Pinned, not a `claude-fable-5*` glob: that also matches the two IV
         # aliases where the id resolves but every request fails.
