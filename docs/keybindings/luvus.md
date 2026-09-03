@@ -49,9 +49,27 @@ Press `Ctrl+;`, then press the following key:
 | `/` | Open the global fuzzy finder | Open the global fuzzy finder | Unchanged |
 | `d` / `q` | Detach and keep the server active | Detach and keep the server active | Unchanged |
 
+## Direct bindings
+
+No prefix. `direct_keybindings` is empty by default in Luvus.
+
+| Keys | Luvus default | Current assignment | Status |
+| --- | --- | --- | --- |
+| `Alt+1…9` | Unbound; `Prefix+Shift+1…9` jumps to workspace 1–9 | Jump to workspace 1–9 | **Add** |
+
+This mirrors Herdr's `Alt+1…9` because Herdr, Zellij, and Luvus are one mux
+layer and never run at the same time. Luvus's own default reaches the same
+action through the prefix, which stays available.
+
+Not yet live: `jump_workspace_1…9` landed upstream after the 0.13.4 release, so
+the configured entries are ignored until the next version. Luvus only walks its
+known command list when building direct bindings, so unknown ids are skipped
+without an error and the binding starts working on upgrade. Until then, use
+`Ctrl+; w` / `Ctrl+; W` or the jump palette at `Ctrl+; m`.
+
 Luvus's internal tab shortcut is intentionally `Prefix+1…9`, matching the
 Herdr/Zellij mux layer. Direct `Ctrl+1…9` remains available to pane
-applications, while `Alt+1…9` remains assigned to Herdr workspaces.
+applications, and `Alt+1…9` selects workspaces as in Herdr.
 
 ## Terminal and mux layers
 

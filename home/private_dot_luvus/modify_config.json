@@ -9,7 +9,17 @@
        Luvus has no theme auto_switch (unlike Herdr). Pin `terminal` so
        chrome follows the host terminal palette instead of a packed theme.
        check_updates is off because Homebrew owns the binary
-       (RizRiyz/luvus/luvus in packages/brew/brews.toml). */ -}}
+       (RizRiyz/luvus/luvus in packages/brew/brews.toml).
+
+       direct_keybindings mirrors Herdr's `alt+1..9` workspace switching
+       (dot_config/herdr/config.toml) because Herdr, Zellij, and Luvus are one
+       mux layer and never run together. Luvus's own default for these is
+       `Prefix+Shift+1..9`; the direct form drops the prefix to match Herdr.
+
+       `jump_workspace_1..9` does not exist in Luvus 0.13.4: the action landed
+       upstream after that release, so the entries are inert until the next
+       version. build_direct_keymap only walks Cmd::ALL, so unknown ids are
+       ignored rather than rejected, and this starts working on upgrade. */ -}}
 
 {{- includeTemplate "config/merge" (dict
   "format" "json"
@@ -18,6 +28,17 @@
     "theme" "terminal"
     "prefix" "ctrl+;"
     "check_updates" false
+    "direct_keybindings" (dict
+      "jump_workspace_1" "alt+1"
+      "jump_workspace_2" "alt+2"
+      "jump_workspace_3" "alt+3"
+      "jump_workspace_4" "alt+4"
+      "jump_workspace_5" "alt+5"
+      "jump_workspace_6" "alt+6"
+      "jump_workspace_7" "alt+7"
+      "jump_workspace_8" "alt+8"
+      "jump_workspace_9" "alt+9"
+    )
     "layout" (dict
       "agent_title" true
       "files_show_hidden" true

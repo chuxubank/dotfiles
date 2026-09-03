@@ -31,7 +31,7 @@ The complete per-tool bindings are documented in
 |-------------------------+-------------------------------------------|
 | =Super+1…9=             | Ghostty/WezTerm terminal tab selection    |
 | =Ctrl+Tab= / =Ctrl+Shift+Tab= | Terminal tab next/previous          |
-| =Alt+1…9=               | Herdr workspace selection                 |
+| =Alt+1…9=               | Herdr/Luvus workspace selection           |
 | =Ctrl+;=                | Herdr/Zellij/Luvus prefix                 |
 | =Ctrl+;= then =1…9=     | Herdr/Zellij/Luvus mux tab selection      |
 | =Super+Arrow=           | Herdr/Zellij pane focus                   |

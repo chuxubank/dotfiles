@@ -27,7 +27,7 @@ changes:
 | `Super+1…9` | Terminal tab selection | Ghostty/WezTerm terminal tab selection | Unchanged |
 | `Ctrl+Tab` | Terminal tab next | Terminal tab next | Unchanged |
 | `Ctrl+Shift+Tab` | Terminal tab previous | Terminal tab previous | Unchanged |
-| `Alt+1…9` | Terminal/pane input | Herdr workspace selection | **Add** |
+| `Alt+1…9` | Terminal/pane input | Herdr/Luvus workspace selection | **Add** |
 | `Ctrl+;` | Pane input / tool-specific | Herdr/Zellij/Luvus prefix | **Add** |
 | `Ctrl+1…9` | Herdr/Zellij mux tab selection | No direct mux binding | **Delete** |
 | `Ctrl+;` then `1…9` | No shared default | Herdr/Zellij/Luvus mux tab selection | **Add** |
