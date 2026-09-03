@@ -29,3 +29,18 @@ inapplicable hosts. The renderer uses the shared host-condition evaluator, so
 use the same `when.enabled` / `when.disabled` schema as other data files.
 chezmoi merges all externals into one namespace and a duplicated destination
 is silently last-wins, so verify the rendered destinations are unique.
+
+## LLM provider aliases
+
+`home/.chezmoidata/llm/*.yaml` names provider aliases after the consuming
+tool's bundled catalog, not after the endpoint: the same IV surface is `openai`
+where the tool ships an OpenAI provider and `iv-codex` where it does not.
+Do not unify these names. The alias is the lookup key for the tool's built-in
+model list, and an unrecognized alias silently loses that catalog's metadata.
+
+Because our entries merge into the bundled catalog instead of replacing it, one
+model id can exist on several providers and a bare id resolves against the
+union, reaching a different provider with no error. Pin the provider on any id
+more than one alias can serve. Leave deliberate globs like `claude-opus-5*`
+alone: they are meant to surface every copy. The rationale is in
+`docs/adr/0005-llm-provider-aliases.md`.
