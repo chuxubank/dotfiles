@@ -135,6 +135,6 @@
  nov
  oj
  pass
- pdf
+ (pdf :cat text)
  toc
  undo)
