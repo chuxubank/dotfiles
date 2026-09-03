@@ -52,8 +52,54 @@ json_field() {
   jq -er "$1" <<<"$2"
 }
 
+# Tab and pane writes act on whichever workspace is focused: `tab new`,
+# `tab rename`, and the focused-pane lookup take no workspace argument, and
+# UHP silently ignores a `workspace` param. Another client can steal focus
+# mid-run, which once landed a second tab in its own workspace. So refocus by
+# stable workspace_id before every such write, then verify where it landed.
+workspace_position() {
+  luvus workspace list |
+    jq -er --arg id "$1" \
+      'first(.result.workspaces[] | select(.workspace_id == $id) | .workspace)'
+}
+
+focus_workspace() {
+  local id=$1 position
+  position=$(workspace_position "$id") || return 1
+  luvus workspace focus "$position" >/dev/null || return 1
+  luvus workspace list |
+    jq -er --arg id "$id" \
+      'first(.result.workspaces[] | select(.active)).workspace_id == $id' \
+      >/dev/null || {
+    print -u2 -- "another client holds focus; expected workspace $id"
+    return 1
+  }
+}
+
 current_pane() {
   luvus pane list | jq -er '.result.panes[] | select(.focused) | .pane' | head -n 1
+}
+
+# Anchor to a pane the caller already owns: `pane focus` jumps to its
+# workspace and tab, so the following tab write cannot drift elsewhere.
+new_tab_after() {
+  local id=$1 anchor=$2 before after
+  focus_workspace "$id" || return 1
+  luvus pane focus "$anchor" >/dev/null || return 1
+  before=$(luvus tab list | jq -er '.result.tabs | length') || return 1
+  luvus tab new >/dev/null || return 1
+  after=$(luvus tab list | jq -er '.result.tabs | length') || return 1
+  (( after == before + 1 )) || {
+    print -u2 -- "tab new did not add a tab to workspace $id"
+    return 1
+  }
+}
+
+rename_tab() {
+  local id=$1 anchor=$2 label=$3
+  focus_workspace "$id" || return 1
+  luvus pane focus "$anchor" >/dev/null || return 1
+  luvus tab rename "$label" >/dev/null
 }
 
 pane_logical_rect() {
@@ -146,7 +192,7 @@ index_for_name() {
 {{- range $wi, $ws := $workspaces }}
 
 apply_{{ $wi }}() {
-  local created ws pane prev dir cwd workspace_root focus_pane
+  local created ws ws_id pane prev dir cwd workspace_root focus_pane
 {{- $firstTab := index $ws.tabs 0 }}
 {{- $firstPane := index $firstTab.panes 0 }}
 {{- if hasKey $firstPane "cwd" }}
@@ -160,21 +206,27 @@ apply_{{ $wi }}() {
   }
   created=$(luvus workspace open "$workspace_root") || return
   ws=$(json_field '.result.workspace' "$created") || return
+  # `workspace open` returns only a position, which shifts when any workspace
+  # closes or moves. Resolve the stable id once and address by it afterwards.
+  ws_id=$(luvus workspace list |
+    jq -er --arg w "$ws" \
+      'first(.result.workspaces[] | select(.workspace == $w) | .workspace_id)') || return
   luvus workspace rename "$ws" {{ $ws.name | quote }} >/dev/null || return
+  focus_workspace "$ws_id" || return
   pane=$(current_pane) || return
   focus_pane=$pane
 {{- if and (hasKey $firstTab "label") $firstTab.label }}
-  luvus tab rename {{ $firstTab.label | quote }} >/dev/null || return
+  rename_tab "$ws_id" "$pane" {{ $firstTab.label | quote }} || return
 {{- end }}
   prev=$pane
 {{- range $ti, $tab := $ws.tabs }}
 {{- range $pi, $p := $tab.panes }}
 {{- if and (eq $ti 0) (eq $pi 0) }}
 {{- else if eq $pi 0 }}
-  created=$(luvus tab new) || return
+  new_tab_after "$ws_id" "$prev" || return
   pane=$(current_pane) || return
 {{- if and (hasKey $tab "label") $tab.label }}
-  luvus tab rename {{ $tab.label | quote }} >/dev/null || return
+  rename_tab "$ws_id" "$pane" {{ $tab.label | quote }} || return
 {{- end }}
   prev=$pane
 {{- else }}
@@ -230,7 +282,7 @@ if (( $#targets == 0 )); then
 fi
 
 had_errors=false
-focus_index=
+focus_wanted=false
 
 for name in "${targets[@]}"; do
   index=$(index_for_name "$name")
@@ -253,13 +305,18 @@ for name in "${targets[@]}"; do
     index=$(index_for_name "$name")
   fi
   if [[ $name == "$focus_name" && -n $index ]]; then
-    focus_index=$index
+    focus_wanted=true
   fi
 done
 
-if [[ -n $focus_index ]]; then
-  luvus workspace focus "$focus_index" >/dev/null
-  print -r -- "focused $focus_name ($focus_index)"
+# Resolve the position last: every apply above can shift the others.
+if $focus_wanted; then
+  list_json=$(luvus workspace list) || true
+  focus_index=$(index_for_name "$focus_name")
+  if [[ -n $focus_index ]]; then
+    luvus workspace focus "$focus_index" >/dev/null
+    print -r -- "focused $focus_name ($focus_index)"
+  fi
 fi
 
 if $had_errors; then
