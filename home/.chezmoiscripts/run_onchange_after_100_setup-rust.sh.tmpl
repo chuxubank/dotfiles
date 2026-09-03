@@ -64,7 +64,7 @@ install_cargo_crate() {
 {{- if eq (kindOf $tool) "map" }}
 if ! cargo_crate_installed {{ $tool.name | quote }}; then
 echo "Install cargo crate: {{ $tool.name }}"
-if ! install_cargo_crate {{ $tool.name | quote }}{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }}; then
+if ! install_cargo_crate {{ $tool.name | quote }}{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "branch" }} --branch {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }}; then
   had_errors=true
 fi
 fi

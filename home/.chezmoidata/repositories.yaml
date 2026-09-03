@@ -177,6 +177,14 @@ repositories:
   # path.workspace.oss — third-party projects we contribute to. url is our
   # fork (origin, where we push); upstream is what refresh follows.
   - path: [workspace, oss]
+    dest: beancount-language-server
+    url: https://github.com/cat-emacs/beancount-language-server
+    upstream: https://github.com/polarmutex/beancount-language-server
+    refresh_period: 48h
+    branch: main
+    when: *non_ci
+
+  - path: [workspace, oss]
     dest: chezmoi
     url: https://github.com/chuxubank/chezmoi
     upstream: https://github.com/twpayne/chezmoi

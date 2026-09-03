@@ -1,7 +1,9 @@
 [packages.rust]
 cargo = [
   "cargo-update",
-  { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git" },
+  # Our OpenPGP work lives on a topic branch so the fork's main stays a clean
+  # fast-forward of upstream; see repositories.yaml.
+  { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git", branch = "codex/gpg-source-provider" },
   { name = "lukaj", when.enabled.os = "darwin" },
   "mermaid-rs-renderer",
   "rust-script",
