@@ -20,8 +20,6 @@ environment:
       path:
         - home: [bin]
         - home: [.local, bin]
-        - path: usr
-          suffix: [bin]
 
     - tool: bun
       variables:
@@ -84,6 +82,14 @@ environment:
           os: [darwin]
       path:
         - home: [Library, "Application Support", JetBrains, Toolbox, scripts]
+
+    # Last of the static paths: a language toolchain's own bin should win over
+    # the same name installed as a system package, while Homebrew still
+    # precedes the inherited system paths.
+    - tool: brew
+      path:
+        - path: usr
+          suffix: [bin]
 
     - tool: beancount
       variables:
