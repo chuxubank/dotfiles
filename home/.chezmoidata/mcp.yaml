@@ -42,6 +42,28 @@ mcp:
           - --no-usage-statistics
           - --autoConnect
         timeout: 20
+    - name: CodeGraph
+      description:
+        Semantic code intelligence over a local code graph. `codegraph_explore`
+        answers "how does X work" / "how does X reach Y" in one call, returning
+        the relevant symbols' verbatim source grouped by file, the call paths
+        between them, and a blast-radius summary.
+        Needs a per-project index (`codegraph init`); an unindexed path answers
+        with guidance to use built-in tools instead, so it is safe everywhere.
+      execution:
+        type: stdio
+        cmd: codegraph
+        args:
+          - serve
+          - --mcp
+        timeout: 30
+        tool_timeout: 60
+        envs:
+          # Telemetry defaults to on and the installer prompt never runs here,
+          # so the opt-out has to be explicit. Agents may launch the server
+          # without the login shell env, hence set here as well as in
+          # environment.yaml.
+          CODEGRAPH_TELEMETRY: "0"
     - name: Elisp Dev
       description: MCP Server for Agentic Elisp Development
       execution:

@@ -105,6 +105,18 @@ environment:
         CLAUDE_CODE_NO_FLICKER:
           literal: "1"
 
+    - tool: codegraph
+      variables:
+        # Telemetry is on by default and `codegraph install` (which asks) never
+        # runs: bun owns the CLI and chezmoi owns the agent wiring.
+        CODEGRAPH_TELEMETRY:
+          literal: "0"
+        # Same reason the upgrade check is pointless: `bun add -g` pins the
+        # version, so a nag would only advertise an upgrade path that fights
+        # the reconcile loop.
+        CODEGRAPH_NO_UPDATE_CHECK:
+          literal: "1"
+
     - tool: emacs
       variables:
         EMACSLOADPATH:

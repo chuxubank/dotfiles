@@ -2,6 +2,7 @@
 global = [
   "@actions/languageserver",
   "@ansible/ansible-language-server",
+  "@colbymchenry/codegraph",
   "@github/copilot-language-server",
   "@modelcontextprotocol/inspector",
   "@prettier/plugin-ruby",
