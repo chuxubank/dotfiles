@@ -6,6 +6,12 @@
 # omitted from every generated layout.
 # Tabs hold panes; panes are the project roots.
 #
+# Every pane in one entry must share a single root directory. A Luvus
+# workspace *is* a project directory: it reassigns a tab to the workspace
+# matching its pane's live cwd and opens a new one when none matches, so a
+# second root silently splits the entry in two. Herdr and Zellij accept
+# per-tab roots, so a split entry is the only shape all three agree on.
+#
 # cwd accepts ~ and absolute paths. relative paths resolve from the
 # workspace root when one is set.
 # agent + kind: start a named agent through the target mux (NAME is
@@ -41,8 +47,8 @@ workspaces:
             kind: pi
             focus: true
 
-  - name: InfinityValley
-    when:
+  - name: ivc
+    when: &personal_or_iv
       enabled:
         host_env: [personal, iv]
     tabs:
@@ -53,6 +59,10 @@ workspaces:
             agent: ivc
             kind: pi
             focus: true
+
+  - name: agentia
+    when: *personal_or_iv
+    tabs:
       - label: agentia
         panes:
           - path: [workspace, iv]

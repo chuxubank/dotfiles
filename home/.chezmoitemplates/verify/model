@@ -178,4 +178,23 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* One entry, one root. Luvus reassigns a tab to the workspace matching
+       its pane's live cwd, so a second root splits the entry into two
+       workspaces and no longer matches the Herdr and Zellij output. */ -}}
+{{- range $ws := default (list) .workspaces -}}
+  {{- $roots := list -}}
+  {{- range $tab := dig "tabs" (list) $ws -}}
+    {{- range $pane := dig "panes" (list) $tab -}}
+      {{- if hasKey $pane "cwd" -}}
+        {{- $roots = append $roots $pane.cwd -}}
+      {{- else if hasKey $pane "path" -}}
+        {{- $roots = append $roots (printf "%s/%s" (join "." $pane.path) (dig "dest" "" $pane)) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt (len (uniq $roots)) 1 -}}
+    {{- fail (printf "workspace %s: %d roots %s; split it into one entry per root" (dig "name" "?" $ws) (len (uniq $roots)) (uniq $roots | toJson)) -}}
+  {{- end -}}
+{{- end -}}
+
 ok
