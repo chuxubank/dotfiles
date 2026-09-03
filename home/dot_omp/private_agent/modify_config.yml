@@ -40,7 +40,7 @@
     "maxConcurrency" 3
     "maxRecursionDepth" 2
     "isolation" (dict
-      "mode" "auto"
+      "enabled" true
       "apply" true
       "merge" "patch"
     )
@@ -54,5 +54,6 @@
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
-  "replace" (dict "modelRoles" $roles)
+  "replace" (dict "modelRoles" $roles "isolation.backend" "auto")
+  "remove" (list "task.isolation.mode")
 ) -}}
