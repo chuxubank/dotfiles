@@ -13,6 +13,10 @@
 # in the source state so apply does not recreate it (ignore of that exact
 # path would also block .chezmoiremove). Managed files at the dest root
 # (e.g. .claude.json) are emptied in their templates instead.
+# Every remove/purge path must sit under a directory this tool owns, so the
+# parent that disabled-ignore derives is never a shared tree. A managed file
+# in a shared tree (e.g. bin/) belongs in neither list: gate its template on
+# tool/enabled and it renders empty, which chezmoi removes on its own.
 tools:
   claude-code:
     when:
@@ -99,7 +103,6 @@ tools:
     remove:
       - ".config/herdr/config.toml"
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
-      - "bin/herdr-layout"
     purge:
       - ".config/herdr/**"
     # `herdr integration install <args>`. Agent-owned hook files cannot
@@ -125,7 +128,6 @@ tools:
   luvus:
     remove:
       - ".luvus/config.json"
-      - "bin/luvus-layout"
     purge:
       - ".luvus/luvus.sock"
       - ".luvus/luvus-client.sock"

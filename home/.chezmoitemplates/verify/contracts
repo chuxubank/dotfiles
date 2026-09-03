@@ -202,6 +202,19 @@
   {{- fail (printf "disabled-ignore: expected .config/rclone, got %q" $ignore) -}}
 {{- end -}}
 
+{{- /* disabled-ignore derives a parent from every remove/purge path. A
+       two-segment path under a non-hidden first segment makes that parent a
+       shared tree (bin/herdr-layout once ignored all of ~/bin and froze every
+       home/bin script). Gate such a file's template on tool/enabled instead. */ -}}
+{{- range $name, $spec := default dict .tools -}}
+  {{- range $pattern := concat (dig "remove" (list) $spec) (dig "purge" (list) $spec) -}}
+    {{- $parts := splitList "/" (trimSuffix "/**" $pattern) -}}
+    {{- if and (eq (len $parts) 2) (not (hasPrefix "." (index $parts 0))) -}}
+      {{- fail (printf "tool %s: %q would make disabled-ignore skip the shared tree %q" $name $pattern (index $parts 0)) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* service/services: identity tool does not gate; owner does */ -}}
 {{- $svcCtx := merge (dict) $base (dict
       "host_env" "personal"

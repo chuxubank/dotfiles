@@ -7,7 +7,7 @@
 {{- end -}}
 
 {{- /* Ignore lines must not be a whole well-known root. */ -}}
-{{- $broad := list ".config" "Library" ".local" "AppData" -}}
+{{- $broad := list ".config" "Library" ".local" "AppData" "bin" -}}
 {{- $ignoreHosts := list
       (dict "name" "ci" "host_env" "ci" "os" "linux" "disk_gb" 20)
       (dict "name" "windows" "host_env" "aa" "os" "windows" "disk_gb" 256)
