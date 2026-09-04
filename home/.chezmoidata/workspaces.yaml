@@ -19,6 +19,14 @@
 # when agent is unset.
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
+workspace_conditions:
+  personal_only: &personal_only
+    enabled:
+      host_env: [personal]
+  personal_or_iv: &personal_or_iv
+    enabled:
+      host_env: [personal, iv]
+
 workspaces:
   - name: chezmoi
     focus: true
@@ -48,9 +56,7 @@ workspaces:
             focus: true
 
   - name: ivc
-    when: &personal_or_iv
-      enabled:
-        host_env: [personal, iv]
+    when: *personal_or_iv
     tabs:
       - label: ivc
         panes:
@@ -72,18 +78,14 @@ workspaces:
             kind: pi
 
   - name: OpenTactic
-    when:
-      enabled:
-        host_env: [personal]
+    when: *personal_only
     tabs:
       - label: OpenTactic
         panes:
           - path: [workspace, opentactic]
 
   - name: AsahiArt
-    when:
-      enabled:
-        host_env: [personal]
+    when: *personal_only
     tabs:
       - label: asahiart
         panes:
@@ -92,10 +94,19 @@ workspaces:
             kind: pi
             focus: true
 
+  - name: Luvia
+    when: *personal_or_iv
+    tabs:
+      - label: luvia
+        panes:
+          - path: [workspace, asahiart]
+            dest: Luvia
+            agent: luvia
+            kind: pi
+            focus: true
+
   - name: XingZhi
-    when:
-      enabled:
-        host_env: [personal]
+    when: *personal_only
     tabs:
       - label: xingzhi
         panes:

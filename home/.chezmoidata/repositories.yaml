@@ -1,14 +1,26 @@
 # Git repositories managed by chezmoi externals.
 # path resolves through path.toml; dest appends a repo directory to a tree root.
 # Keep entries in path.toml namespace/key order.
+repository_conditions:
+  non_ci: &non_ci
+    disabled:
+      host_env: [ci]
+  personal_only: &personal_only
+    enabled:
+      host_env: [personal]
+  personal_or_iv: &personal_or_iv
+    enabled:
+      host_env: [personal, iv]
+  aa_only: &aa_only
+    enabled:
+      host_env: [aa]
+
 repositories:
   # path.personal
   - path: [personal, pass]
     url: https://github.com/chuxubank/pass
     refresh_period: 4h
-    when: &non_ci
-      disabled:
-        host_env: [ci]
+    when: *non_ci
 
   - path: [personal, beancount]
     url: https://github.com/chuxubank/beancount
@@ -56,15 +68,13 @@ repositories:
     dest: Arborist
     url: https://github.com/AsahiArt/Arborist
     refresh_period: 4h
-    when: &personal_only
-      enabled:
-        host_env: [personal]
+    when: *personal_only
 
   - path: [workspace, asahiart]
     dest: Luvia
     url: https://github.com/AsahiArt/Luvia
     refresh_period: 4h
-    when: *personal_only
+    when: *personal_or_iv
 
   - path: [workspace, asahiart]
     dest: font-subset-gradle-plugin
@@ -95,9 +105,7 @@ repositories:
     dest: agentia
     url: git@git.infinityparadise.com:agentia/agentia.git
     refresh_period: 4h
-    when: &personal_or_iv
-      enabled:
-        host_env: [personal, iv]
+    when: *personal_or_iv
 
   - path: [workspace, iv]
     dest: ivc
@@ -228,9 +236,7 @@ repositories:
     dest: Concourse/ci
     url: https://github.com/concourse/ci
     refresh_period: 24h
-    when: &aa_only
-      enabled:
-        host_env: [aa]
+    when: *aa_only
 
   - path: [workspace, example]
     dest: Concourse/examples
