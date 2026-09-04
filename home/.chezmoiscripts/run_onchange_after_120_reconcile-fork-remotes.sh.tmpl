@@ -3,9 +3,10 @@
 #
 # repositories.yaml injects the upstream remote through clone.args, which git
 # applies only when it clones. A clone that already existed before its entry
-# gained an `upstream` — or that predates the field entirely — therefore has no
-# upstream remote, and its refresh `git pull --ff-only upstream <branch>` would
-# fail. This script adds what the clone missed.
+# gained an `upstream` — or that predates the field entirely — therefore has
+# no upstream remote and still tracks origin on its declared branch. This
+# script adds what the clone missed, points pulls at upstream, and keeps pushes
+# on origin.
 #
 # origin must be our fork: an origin still pointing at upstream is leftover
 # from an older entry, and we cannot push there anyway, so rewriting it loses
@@ -16,6 +17,7 @@ reconcile() {
 	repo=$1
 	want_origin=$2
 	want_upstream=$3
+	branch=$4
 
 	[ -e "$repo/.git" ] || return 0
 
@@ -36,6 +38,10 @@ reconcile() {
 			fi
 		fi
 	done
+
+	git -C "$repo" config remote.pushDefault origin
+	git -C "$repo" config "branch.$branch.remote" upstream
+	git -C "$repo" config "branch.$branch.merge" "refs/heads/$branch"
 }
 
 {{ range $repo := default (list) .repositories -}}
@@ -44,7 +50,7 @@ reconcile() {
 {{-       $path := includeTemplate "path/value" (merge
             (dict "path" $.path "keys" $repo.path "label" "repository path")
             (pick $repo "dest")) -}}
-reconcile {{ joinPath $.chezmoi.homeDir $path | quote }} {{ $repo.url | quote }} {{ $repo.upstream | quote }}
+reconcile {{ joinPath $.chezmoi.homeDir $path | quote }} {{ $repo.url | quote }} {{ $repo.upstream | quote }} {{ $repo.branch | quote }}
 {{      end -}}
 {{-   end -}}
 {{- end -}}

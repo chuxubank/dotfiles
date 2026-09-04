@@ -28,7 +28,8 @@
 {{-     if hasKey $repo "upstream" -}}
 {{-       $cloneArgs = concat $cloneArgs (list
             "-c" (printf "remote.upstream.url=%s" $repo.upstream)
-            "-c" "remote.upstream.fetch=+refs/heads/*:refs/remotes/upstream/*") -}}
+            "-c" "remote.upstream.fetch=+refs/heads/*:refs/remotes/upstream/*"
+            "-c" "remote.pushDefault=origin") -}}
 {{-     end -}}
 {{-     if $cloneArgs }}
     clone.args = [{{ range $i, $arg := $cloneArgs }}{{ if $i }}, {{ end }}{{ $arg | quote }}{{ end }}]
