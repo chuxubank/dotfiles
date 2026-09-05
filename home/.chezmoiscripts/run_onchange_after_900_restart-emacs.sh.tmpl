@@ -4,6 +4,9 @@ set -eu
 
 {{ $customFile := joinPath "dot_config" "cat-emacs" "modify_custom.el" -}}
 # custom.el hash: {{ include $customFile | sha256sum }}
+{{ if lookPath "emacs" -}}
+# emacs-version: {{ template "emacs/version" . }}
+{{ end }}
 
 {{ $emacsDir := joinPath .chezmoi.homeDir .path.personal.emacs -}}
 {{ $orgDir := joinPath $emacsDir "elpa" "org-mode" -}}

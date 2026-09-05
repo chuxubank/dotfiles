@@ -1,0 +1,9 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") (lookPath "emacs") -}}
+#!/bin/sh
+set -eu
+
+# emacs-version: {{ template "emacs/version" . }}
+
+echo "󰯁 {{ template "emacs/version" . }}: recompile packages"
+{{ template "emacs/recompile-packages.sh" . }}
+{{ end -}}

@@ -1,0 +1,1 @@
+{{- output "emacs" "--version" | regexFind "GNU Emacs [0-9.]+" -}}
