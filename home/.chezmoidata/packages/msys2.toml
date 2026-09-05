@@ -1,12 +1,13 @@
 # MSYS2 pacman. `msys` is POSIX tools under /usr. `ucrt64` names are
 # prefixed with mingw-w64-ucrt-x86_64- when installing.
+# zsh is not listed: apply runs under zsh, and pacman upgrading it in-place
+# breaks fork.
 [packages.msys2]
 msys = [
   "curl",
   "git",
   "jq",
   "unzip",
-  "zsh",
 ]
 ucrt64 = [
   "nodejs",

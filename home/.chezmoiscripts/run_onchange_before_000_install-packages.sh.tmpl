@@ -93,7 +93,6 @@ if ! command -v pacman >/dev/null 2>&1; then
 	echo "pacman is required for Windows packages" >&2
 	had_errors=true
 else
-	# Ignore the running MSYS runtime: -Sy otherwise upgrades zsh in-place and fork fails.
 	if ! pacman -Sy --needed --noconfirm --ignore zsh,msys2-runtime,bash,pacman,filesystem \
 	    {{ template "package/args" $msysPkgs }}
 	then
