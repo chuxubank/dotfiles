@@ -44,6 +44,7 @@ Library/LaunchAgents/rclone.rpi.plist
 {{- if eq .host_env "ci" }}
 .aider.conf.yml
 .authinfo.gpg
+.config/monid
 .double-entry-generator.yaml
 .gradle
 .ssh

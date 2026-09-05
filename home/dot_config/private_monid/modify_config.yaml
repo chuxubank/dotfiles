@@ -1,0 +1,13 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Keep last_update_check / latest_version that the CLI writes. */ -}}
+
+{{- $cred := includeTemplate "monid/key" . | fromJson -}}
+{{- if $cred.key -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "yaml"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict "active_key" "main")
+) -}}
+{{- else -}}
+{{- dig "stdin" "" .chezmoi -}}
+{{- end -}}

@@ -1,0 +1,14 @@
+{{- /* monid/key — JSON {key, prefix} from pass. Empty in CI or before the entry exists. */ -}}
+{{- $key := "" -}}
+{{- $passFile := joinPath .chezmoi.homeDir .path.personal.pass "Personal/Tech/AI/Monid.gpg" -}}
+{{- if and (ne .host_env "ci") (stat $passFile) -}}
+  {{- $key = includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/Monid" "field" "api-key") .) | trim -}}
+{{- end -}}
+{{- $prefix := "" -}}
+{{- if $key -}}
+  {{- $parts := splitList "_" $key -}}
+  {{- if gt (len $parts) 1 -}}
+    {{- $prefix = join "_" (slice $parts 0 (sub (len $parts) 1)) -}}
+  {{- end -}}
+{{- end -}}
+{{- dict "key" $key "prefix" $prefix | toJson -}}
