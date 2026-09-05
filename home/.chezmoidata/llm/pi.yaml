@@ -32,6 +32,13 @@ llm:
       autoname_model:
         - iv/deepseek-v4-flash
         - xai/grok-4.6
+      # pi-subagents defaultModel. Same split as OMP's task role: IV spends
+      # company-funded terra, SuperGrok is only the personal-host fallback.
+      # xai is bundled, not a pi.yaml alias, so the modify template takes the
+      # last candidate when no alias resolves.
+      subagent_model:
+        - openai/gpt-5.6-terra
+        - xai/grok-4.6
       providers:
         openai:
           provider: iv

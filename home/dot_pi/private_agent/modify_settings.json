@@ -57,7 +57,17 @@
 {{- if $provider -}}
   {{- $_ := set $managed "defaultProvider" $provider -}}
 {{- end -}}
-{{- $_ := set $managed "subagents" (dict "defaultModel" "xai/grok-4.6") -}}
+{{- /* subagents.defaultModel comes from llm/pi.yaml subagent_model. IV
+       terra leads; SuperGrok is last. xai is bundled, not a pi.yaml alias,
+       so pick-model cannot see it — when no alias resolves, take the last
+       candidate. */ -}}
+{{- $subagentCandidates := default (list "xai/grok-4.6") (index (index .llm.tools "pi") "subagent_model") -}}
+{{- $subagentModel := includeTemplate "llm/pick-model" (dict "models" $subagentCandidates "providers" $cfg.providers) -}}
+{{- $subagentSel := includeTemplate "llm/split-model" (dict "model" $subagentModel "providers" $cfg.providers) | fromJson -}}
+{{- if not $subagentSel.provider -}}
+  {{- range $subagentCandidates -}}{{- $subagentModel = . -}}{{- end -}}
+{{- end -}}
+{{- $_ := set $managed "subagents" (dict "defaultModel" $subagentModel) -}}
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}
