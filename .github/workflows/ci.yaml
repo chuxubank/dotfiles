@@ -175,3 +175,67 @@ jobs:
       - name: Verify
         if: runner.os == 'macOS'
         run: make verify
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Disable git autocrlf
+        shell: pwsh
+        run: git config --global core.autocrlf input
+
+      - uses: actions/checkout@v6
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: zsh curl git
+
+      - name: Configure env
+        run: |
+          win_home=$(cygpath -u "$USERPROFILE")
+          echo "CARGO_HOME=$win_home/.local/share/cargo" >> "$GITHUB_ENV"
+          echo "RUSTUP_HOME=$win_home/.local/share/rustup" >> "$GITHUB_ENV"
+          echo "$(cygpath -w "$win_home/.local/bin")" >> "$GITHUB_PATH"
+          echo "$(cygpath -w "$win_home/.local/share/cargo/bin")" >> "$GITHUB_PATH"
+
+      - name: Cache rust
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.local/share/cargo
+            ~/.local/share/rustup
+          key: ${{ runner.os }}-msys2-rustup-${{ hashFiles('home/.chezmoidata/packages/rust.toml', 'home/.chezmoiscripts/run_onchange_after_100_setup-rust.sh.tmpl', 'home/.chezmoiscripts/run_onchange_before_000_install-packages.sh.tmpl') }}
+          restore-keys: |
+            ${{ runner.os }}-msys2-rustup-
+
+      - name: Install chezmoi
+        run: |
+          bin_dir="$(cygpath -u "$USERPROFILE")/.local/bin"
+          mkdir -p "$bin_dir"
+          sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b "$bin_dir"
+          export PATH="$bin_dir:$PATH"
+          chezmoi --version
+
+      - name: Init chezmoi
+        run: |
+          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:$PATH"
+          chezmoi init --source "$(cygpath -u "$GITHUB_WORKSPACE")"
+
+      - name: Apply
+        run: |
+          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
+          chezmoi apply --force --no-tty --exclude=encrypted,externals
+
+      - name: Verify rust
+        run: |
+          export PATH="${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
+          rustc --version
+          cargo --version
+          rustup show

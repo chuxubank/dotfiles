@@ -83,6 +83,14 @@ sync_open_packages "$STATE_DIR/packages.pacman" "pacman package" pacman_remove
 {{ end -}}
 
 {{ else if eq .chezmoi.os "windows" }}
+{{ includeTemplate "script/rust-env" . }}
+if ! command -v rustup >/dev/null 2>&1; then
+	echo "Installing rustup"
+	if ! curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path --default-toolchain stable; then
+		echo "Could not install rustup" >&2
+		had_errors=true
+	fi
+fi
 {{ end -}}
 
 if [ "$had_errors" = true ]; then

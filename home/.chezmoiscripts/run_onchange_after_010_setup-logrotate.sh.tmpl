@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "windows" -}}
 #!/bin/sh
 set -eu
 
@@ -37,3 +38,4 @@ LOGROTATE
 {{ if eq .chezmoi.os "darwin" }}
 brew services restart logrotate
 {{ end -}}
+{{- end -}}

@@ -2,6 +2,7 @@
 
 echo "󰯁 Setup rust"
 
+{{ includeTemplate "script/rust-env" . }}
 {{ includeTemplate "script/reconcile" }}
 
 had_errors=false
@@ -12,6 +13,7 @@ if ! rustup component add rust-analyzer; then
   had_errors=true
 fi
 
+{{- if ne .chezmoi.os "windows" -}}
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "rust" "cargo")) | fromJson }}
 declared_cargo=(
 {{- template "package/list" (dict "ctx" . "path" (list "rust" "cargo")) }}
@@ -80,6 +82,7 @@ fi
 
 remove_undeclared cleanup_enabled installed_cargo declared_cargo \
   'cargo crate' cargo uninstall
+{{- end }}
 
 if $had_errors; then
   exit 1
