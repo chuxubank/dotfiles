@@ -1,7 +1,11 @@
-{{- /* llm/pick-model — Pick first model from list whose provider is available.
+{{- /* llm/pick-model — Pick first model from list whose provider alias resolved.
         Input: dict "models" <list> "providers" <dict>
         Output: chosen model string
-*/ -}}
+
+        If no alias resolves, take the last candidate. IV-first lists put a
+        bundled fallback last (SuperGrok, ChatGPT OAuth). pick-model cannot
+        see a provider that is not a tool alias, so the last entry is the
+        one the consuming tool already ships. */ -}}
 {{- $chosen := "" -}}
 {{- range $m := .models -}}
   {{- if not $chosen -}}
@@ -11,4 +15,6 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
-{{- if not $chosen -}}{{- $chosen = index .models 0 -}}{{- end -}}{{- $chosen -}}
+{{- if not $chosen -}}
+  {{- range .models -}}{{- $chosen = . -}}{{- end -}}
+{{- end -}}{{- $chosen -}}

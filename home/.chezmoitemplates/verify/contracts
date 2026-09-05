@@ -58,6 +58,20 @@
   {{- fail (printf "llm/split-model: unconfigured prefix must be preserved %s" ($bareModel | toJson)) -}}
 {{- end -}}
 
+{{- /* llm/pick-model: first resolved alias, else last candidate */ -}}
+{{- $picked := includeTemplate "llm/pick-model" (dict
+      "models" (list "iv/flash" "openai/sol" "xai/grok")
+      "providers" (dict "openai" (dict))) -}}
+{{- if ne $picked "openai/sol" -}}
+  {{- fail (printf "llm/pick-model: first resolved alias, got %s" $picked) -}}
+{{- end -}}
+{{- $fallback := includeTemplate "llm/pick-model" (dict
+      "models" (list "iv/flash" "xai/grok")
+      "providers" (dict "openai" (dict))) -}}
+{{- if ne $fallback "xai/grok" -}}
+  {{- fail (printf "llm/pick-model: unresolved should take last, got %s" $fallback) -}}
+{{- end -}}
+
 {{- /* when/evaluate AND groups */ -}}
 {{- $hostItem := dict "when" (dict "enabled" (dict "host_env" (list "iv" "aa"))) -}}
 {{- if ne (includeTemplate "when/evaluate" (dict "item" $hostItem "values" (dict "host_env" "iv") "os_version" "") | fromJson) true -}}
