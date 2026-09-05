@@ -178,6 +178,30 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* Coding agents with bundled catalogs omit OpenRouter so a bare id cannot
+       resolve there instead of IV or a subscription fallback. */ -}}
+{{- $llmTools := default dict (index (default dict .llm) "tools") -}}
+{{- range $tool := list "pi" "omp" "hermes" "opencode" -}}
+  {{- $toolCfg := default dict (index $llmTools $tool) -}}
+  {{- $raw := index $toolCfg "providers" -}}
+  {{- $has := false -}}
+  {{- if eq (kindOf $raw) "slice" -}}
+    {{- range $name := $raw -}}
+      {{- if eq $name "openrouter" -}}{{- $has = true -}}{{- end -}}
+    {{- end -}}
+  {{- else if eq (kindOf $raw) "map" -}}
+    {{- if hasKey $raw "openrouter" -}}{{- $has = true -}}{{- end -}}
+    {{- range $alias, $ref := $raw -}}
+      {{- if and (eq (kindOf $ref) "map") (eq (index $ref "provider") "openrouter") -}}
+        {{- $has = true -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $has -}}
+    {{- fail (printf "llm.%s must not enable openrouter" $tool) -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* One entry, one root. Luvus reassigns a tab to the workspace matching
        its pane's live cwd, so a second root splits the entry into two
        workspaces and no longer matches the Herdr and Zellij output. */ -}}

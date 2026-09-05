@@ -63,9 +63,6 @@ llm:
           auth_field: default-auth-token
         ollama:
           provider: ollama
-        openrouter:
-          provider: openrouter
-          models: false
         # Subscription providers have no base_url or API key here. Keeping
         # models false makes models.json leave pi's OAuth and bundled catalog
         # untouched while allowing model fallbacks to resolve the aliases.

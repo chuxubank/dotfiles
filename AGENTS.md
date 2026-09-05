@@ -42,8 +42,11 @@ Because our entries merge into the bundled catalog instead of replacing it, one
 model id can exist on several providers and a bare id resolves against the
 union, reaching a different provider with no error. Pin the provider on any id
 more than one alias can serve. Leave deliberate globs like `claude-opus-5*`
-alone: they are meant to surface every copy. The rationale is in
-`docs/adr/0005-llm-provider-aliases.md`.
+alone: they are meant to surface every copy. Omit OpenRouter on pi, omp,
+hermes, and opencode: `models: false` still injects the API key and enables
+the bundled catalog, so a bare id can resolve there instead of IV or the
+subscription fallback. Tools that actually route through it (goose, gptel)
+keep the alias. The rationale is in `docs/adr/0005-llm-provider-aliases.md`.
 
 ## OMP model roles
 

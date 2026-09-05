@@ -19,7 +19,6 @@ llm:
       small_model:
         - iv/deepseek-v4-flash
         - opencode/deepseek-v4-flash-free
-        - openrouter/openai/gpt-oss-120b:free
       providers:
         openai:
           provider: iv
@@ -35,8 +34,6 @@ llm:
           auth_field: default-auth-token
         ollama:
           provider: ollama
-        openrouter:
-          provider: openrouter
         # Official OpenCode provider IDs. Their model lists come from the
         # live Zen/Go /v1/models endpoints; models-dev only enriches metadata.
         opencode:
