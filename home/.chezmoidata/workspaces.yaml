@@ -105,6 +105,9 @@ workspaces:
       - label: OpenTactic
         panes:
           - path: [workspace, opentactic]
+            dest: OpenTactic
+            agent: open-tactic
+            kind: pi
 
   - name: AsahiArt
     when: *personal_only
