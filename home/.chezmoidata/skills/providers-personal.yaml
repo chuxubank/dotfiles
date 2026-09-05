@@ -36,3 +36,16 @@ skills:
           - lieflat-less-ai-tone
         source: larashero3-dotcom/writing-dna-skill
         full_depth: true
+
+      - name:
+          - rare-style-explorer
+          - shan-ze-school
+          - vibeshot-candid-photography
+          - virtual-couple-travel-vlog
+        source: vibeshotclub/vsc-skills
+
+      - name: codex-image-to-eagle
+        source: vibeshotclub/vsc-skills
+        when:
+          enabled:
+            tool: codex
