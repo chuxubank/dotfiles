@@ -1,11 +1,15 @@
 {{- /* Filter declared workspaces through the shared host conditions.
        Input: root context. Output: JSON list of enabled workspace maps.
 
+       CI is omitted by default: mux layouts and personal clones do not
+       belong there. Extra `when` conditions still apply on real hosts.
+
        A pane may declare `path` (a path.toml key path, optionally with
        `dest`) instead of a literal `cwd`; both resolve to `cwd` here so
        every consumer only reads `cwd`. */ -}}
 {{- $ctx := . -}}
 {{- $selected := list -}}
+{{- if ne $ctx.host_env "ci" -}}
 {{- range $workspace := default (list) .workspaces -}}
   {{- $enabled := includeTemplate "when/context" (merge (dict "item" $workspace) $ctx) | fromJson -}}
   {{- if $enabled -}}
@@ -28,5 +32,6 @@
     {{- end -}}
     {{- $selected = append $selected $workspace -}}
   {{- end -}}
+{{- end -}}
 {{- end -}}
 {{- $selected | toJson -}}

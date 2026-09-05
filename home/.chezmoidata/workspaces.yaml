@@ -2,8 +2,8 @@
 # Zellij layout (~/.config/zellij/layouts/<name>.kdl, generated from this
 # list). Zellij dest extras are removed (exact_layouts). Apply at runtime
 # with `herdr-layout` or `luvus-layout`; Herdr also exposes prefix+alt+l.
-# Entries may use shared `when` host conditions; disabled entries are
-# omitted from every generated layout.
+# Generation skips CI. Entries may also use shared `when` host
+# conditions; disabled entries are omitted from every generated layout.
 # Tabs hold panes; panes are the project roots.
 #
 # Every pane in one entry must share a single root directory. A Luvus
@@ -20,9 +20,6 @@
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
 workspace_conditions:
-  non_ci: &non_ci
-    disabled:
-      host_env: [ci]
   personal_only: &personal_only
     enabled:
       host_env: [personal]
@@ -45,7 +42,6 @@ workspaces:
             focus: true
 
   - name: luvus
-    when: *non_ci
     tabs:
       - label: luvus
         panes:
@@ -69,6 +65,15 @@ workspaces:
         panes:
           - path: [personal, proxy]
             agent: proxy
+            kind: pi
+            focus: true
+
+  - name: skills
+    tabs:
+      - label: skills
+        panes:
+          - path: [personal, skills]
+            agent: skills
             kind: pi
             focus: true
 

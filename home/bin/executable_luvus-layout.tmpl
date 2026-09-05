@@ -274,7 +274,7 @@ declared=(
     {{- $focus = .name }}
   {{- end }}
 {{- end }}
-focus_name={{ if $focus }}{{ $focus | quote }}{{ else }}{{ (index $workspaces 0).name | quote }}{{ end }}
+focus_name={{ if $focus }}{{ $focus | quote }}{{ else if $workspaces }}{{ (index $workspaces 0).name | quote }}{{ else }}""{{ end }}
 
 targets=("$@")
 if (( $#targets == 0 )); then
