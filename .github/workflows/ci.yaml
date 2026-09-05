@@ -195,11 +195,12 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
-          install: zsh curl git unzip
+          install: zsh curl git unzip jq
 
       - name: Configure env
         run: |
           win_home=$(cygpath -u "$USERPROFILE")
+          echo "HOME=$win_home" >> "$GITHUB_ENV"
           echo "CARGO_HOME=$win_home/.local/share/cargo" >> "$GITHUB_ENV"
           echo "RUSTUP_HOME=$win_home/.local/share/rustup" >> "$GITHUB_ENV"
           echo "$(cygpath -w "$win_home/.local/bin")" >> "$GITHUB_PATH"
