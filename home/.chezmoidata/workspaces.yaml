@@ -20,6 +20,9 @@
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
 workspace_conditions:
+  non_ci: &non_ci
+    disabled:
+      host_env: [ci]
   personal_only: &personal_only
     enabled:
       host_env: [personal]
@@ -38,6 +41,17 @@ workspaces:
         panes:
           - cwd: ~/.local/share/chezmoi
             agent: chezmoi
+            kind: pi
+            focus: true
+
+  - name: luvus
+    when: *non_ci
+    tabs:
+      - label: luvus
+        panes:
+          - path: [workspace, oss]
+            dest: luvus
+            agent: luvus
             kind: pi
             focus: true
 
