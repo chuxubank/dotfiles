@@ -2,10 +2,14 @@ local wezterm = require("wezterm")
 local mux = wezterm.mux
 local launch_menu = {}
 local default_prog
-local set_environment_variables = {}
+local set_environment_variables = {
+  -- Finder/Dock PATH is sparse. See:
+  -- https://wezterm.org/faq.html#im-on-macos-and-wezterm-cannot-find-things-in-my-path
+  PATH = "{{ joinPath .path.usr "bin" }}:" .. os.getenv("PATH"),
+}
 
 wezterm.on("gui-startup", function(cmd)
-  local tab, pane, window = mux.spawn_window(cmd or {})
+  local tab, pane, window = mux.spawn_window(cmd or { args = { "luvus" } })
   window:gui_window():maximize()
 end)
 
