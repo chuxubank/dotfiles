@@ -67,3 +67,10 @@ plugins:
           the topic drifts. Configurable naming model; does not touch the
           terminal title.
         source: npm:pi-autoname
+
+      - name: pi-btw
+        description: >-
+          Parallel /btw side session while the main agent keeps running.
+          Overlay stays out of the main transcript; inject or summarize
+          back on request.
+        source: npm:pi-btw
