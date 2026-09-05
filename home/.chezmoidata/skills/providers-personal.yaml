@@ -30,3 +30,9 @@ skills:
 
       - name: mono-color
         source: yanliudesign/mono-color-skill
+
+      - name:
+          - writing-dna-skill
+          - lieflat-less-ai-tone
+        source: larashero3-dotcom/writing-dna-skill
+        full_depth: true
