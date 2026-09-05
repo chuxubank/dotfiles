@@ -26,6 +26,9 @@ workspace_conditions:
   personal_or_iv: &personal_or_iv
     enabled:
       host_env: [personal, iv]
+  iv_only: &iv_only
+    enabled:
+      host_env: [iv]
 
 workspaces:
   - name: chezmoi
@@ -56,7 +59,7 @@ workspaces:
             focus: true
 
   - name: ivc
-    when: *personal_or_iv
+    when: *iv_only
     tabs:
       - label: ivc
         panes:
