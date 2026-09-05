@@ -230,10 +230,9 @@ jobs:
           chezmoi init --source "$(cygpath -u "$GITHUB_WORKSPACE")"
 
       - name: Apply
-        continue-on-error: true
         run: |
           export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
-          chezmoi apply --force --no-tty --keep-going --exclude=encrypted,externals
+          chezmoi apply --force --no-tty --exclude=encrypted,externals
 
       - name: Verify rust
         run: |

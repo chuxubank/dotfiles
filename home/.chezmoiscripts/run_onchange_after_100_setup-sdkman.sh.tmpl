@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "windows" -}}
 #!/usr/bin/env zsh
 set -o pipefail
 
@@ -86,3 +87,4 @@ sdk flush
 if $had_errors; then
   exit 1
 fi
+{{- end -}}
