@@ -243,6 +243,20 @@
   {{- fail "service/services: expected isync" -}}
 {{- end -}}
 
+{{- /* Homebrew 6 launchd dest/label is sh.brew.<formula>, not homebrew.mxcl.<formula> */ -}}
+{{- $brewDarwin := includeTemplate "service/label" (dict "os" "darwin" "service" (dict "tool" "isync" "brew" true)) -}}
+{{- if ne $brewDarwin "sh.brew.isync" -}}
+  {{- fail (printf "service/label: darwin brew expected sh.brew.isync, got %q" $brewDarwin) -}}
+{{- end -}}
+{{- $brewLinux := includeTemplate "service/label" (dict "os" "linux" "service" (dict "tool" "isync" "brew" true)) -}}
+{{- if ne $brewLinux "homebrew.isync" -}}
+  {{- fail (printf "service/label: linux brew expected homebrew.isync, got %q" $brewLinux) -}}
+{{- end -}}
+{{- $customLabel := includeTemplate "service/label" (dict "os" "darwin" "service" (dict "tool" "gitwatch" "target" "org")) -}}
+{{- if ne $customLabel "gitwatch.org" -}}
+  {{- fail (printf "service/label: expected gitwatch.org, got %q" $customLabel) -}}
+{{- end -}}
+
 {{- /* workspace/items: CI omitted by default; host-gated entries still filter */ -}}
 {{- $workspaceDefs := list
       (dict "name" "always")
