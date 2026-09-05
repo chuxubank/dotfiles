@@ -1,0 +1,22 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* pi-autoname — schema: npm:pi-autoname README Configuration
+       Hardcoded to ~/.pi/agent/pi-autoname.json (not XDG). A modify-template
+       so cooldown and /autoname runtime writes survive.
+
+       Model comes from llm/pi.yaml autoname_model. IV flash leads; SuperGrok
+       is last. xai is bundled, not a pi.yaml alias, so pick-model cannot see
+       it — when no alias resolves, take the last candidate. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "pi") .) | fromJson -}}
+{{- $candidates := default (list "xai/grok-4.6") (index (index .llm.tools "pi") "autoname_model") -}}
+{{- $model := includeTemplate "llm/pick-model" (dict "models" $candidates "providers" $cfg.providers) -}}
+{{- $sel := includeTemplate "llm/split-model" (dict "model" $model "providers" $cfg.providers) | fromJson -}}
+{{- if not $sel.provider -}}
+  {{- range $candidates -}}{{- $model = . -}}{{- end -}}
+{{- end -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "model" $model)
+) -}}

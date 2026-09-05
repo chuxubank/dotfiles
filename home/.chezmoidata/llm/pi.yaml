@@ -26,6 +26,12 @@ llm:
         # aliases where the id resolves but every request fails.
         - iv-anthropic/claude-fable-5
         - grok-4.6
+      # pi-autoname. IV first (company-funded flash); SuperGrok last.
+      # xai is bundled, not a pi.yaml alias, so the modify template takes the
+      # last candidate when no alias resolves.
+      autoname_model:
+        - iv/deepseek-v4-flash
+        - xai/grok-4.6
       providers:
         openai:
           provider: iv

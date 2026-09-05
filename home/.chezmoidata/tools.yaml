@@ -195,6 +195,7 @@ tools:
       - ".pi/agent/trust.json"
       - ".pi/agent/mcp.json"
       - ".pi/agent/keybindings.json"
+      - ".pi/agent/pi-autoname.json"
       - ".config/pi/web-search.json"
     purge:
       - ".pi/**"

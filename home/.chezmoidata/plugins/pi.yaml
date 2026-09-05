@@ -60,3 +60,10 @@ plugins:
           turns changed. Git repos use a shadow git; non-git dirs snapshot
           only explicit write/edit paths.
         source: npm:pi-undo-redo
+
+      - name: pi-autoname
+        description: >-
+          LLM session titles after the first settled turn, then again when
+          the topic drifts. Configurable naming model; does not touch the
+          terminal title.
+        source: npm:pi-autoname
