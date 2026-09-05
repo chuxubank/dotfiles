@@ -47,6 +47,11 @@ encryption = "gpg"
 [scriptEnv]
     PASSWORD_STORE_DIR = {{- joinPath .chezmoi.homeDir $passDir | quote }}
 
+{{- if eq $os "windows" }}
+[interpreters.sh]
+    command = "zsh"
+{{- end }}
+
 [data]
     email = {{- $email | quote }}
     device_type = {{- $deviceType | quote }}
