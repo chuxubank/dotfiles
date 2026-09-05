@@ -1,12 +1,6 @@
 skills:
   provider_groups:
     30-personal:
-      - name: agent-collaboration
-        source: chuxubank/skills
-        when:
-          enabled:
-            tool: [codex, grok, pi]
-
       - name: feishu-projects
         source: chuxubank/skills
         when:
@@ -33,3 +27,6 @@ skills:
 
       - name: photo-abstract-editorial
         source: ZzzLc0405/photo-abstract-editorial
+
+      - name: mono-color
+        source: yanliudesign/mono-color-skill

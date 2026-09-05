@@ -79,3 +79,6 @@ skills:
 
       - name: monid
         source: https://monid.ai/SKILL.md
+
+      - name: "*"
+        source: emilkowalski/skills
