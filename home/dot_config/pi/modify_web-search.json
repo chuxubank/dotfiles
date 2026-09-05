@@ -1,15 +1,14 @@
 {{- /* chezmoi:modify-template */ -}}
 
 {{- /* pi-web-access — schema: npm:pi-web-access README Configuration
+       Dest is ~/.config/pi/web-search.json because this repo exports
+       XDG_CONFIG_HOME and getWebSearchConfigDir() prefers it over ~/.pi.
        A modify-template so API keys and /curator runtime writes survive. */ -}}
-
-{{- $managed := dict
-  "summaryModel" "xai/grok-4.6"
-  "workflow" "auto-summary"
-  "autoOpenBrowser" false
--}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
-  "managed" $managed
+  "managed" (dict
+    "summaryModel" "xai/grok-4.6"
+    "workflow" "auto-summary"
+    "autoOpenBrowser" false)
 ) -}}
