@@ -32,7 +32,7 @@ global = [
   { name = "@openai/codex", owner = "codex" },
   { name = "@zed-industries/codex-acp", owner = "codex" },
   { name = "clawhub", owner = "openclaw" },
-  { name = "emacs-lsp-proxy", trust = true, when.disabled.os = "windows" },
+  { name = "emacs-lsp-proxy", trust = true },
   { name = "lody", owner = "lody" },
   { name = "openclaw", owner = "openclaw" },
   { name = "opencode-ai", owner = "opencode", trust = true },

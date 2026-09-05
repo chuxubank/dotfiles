@@ -1,8 +1,10 @@
 {{- /* package/names-all — Unique package names on a path, ignoring when/owner
-       and ensure. Used as the tombstone universe for open-world managers:
-       names that are declared but not currently enabled should be removed. */ -}}
+       and ensure. Optional .prefix is prepended (same as package/select).
+       Used as the tombstone universe for open-world managers: names that
+       are declared but not currently enabled should be removed. */ -}}
 {{- $list := .ctx -}}
 {{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}
+{{- $prefix := dig "prefix" "" . -}}
 {{- $names := list -}}
 {{- range $package := $list -}}
   {{- $name := $package -}}
@@ -10,7 +12,7 @@
     {{- $name = index $package "name" -}}
   {{- end -}}
   {{- if $name -}}
-    {{- $names = append $names $name -}}
+    {{- $names = append $names (printf "%s%s" $prefix $name) -}}
   {{- end -}}
 {{- end -}}
 {{- $names | uniq | toJson -}}

@@ -1,10 +1,12 @@
+{{- /* package/select — Enabled package names. Optional .prefix is prepended. */ -}}
 {{- $selected := list -}}
+{{- $prefix := dig "prefix" "" . -}}
 {{- $items := includeTemplate "package/items" . | fromJson -}}
 {{- range $package := $items -}}
+{{- $name := $package -}}
 {{- if eq (kindOf $package) "map" -}}
-{{- $selected = append $selected $package.name -}}
-{{- else -}}
-{{- $selected = append $selected $package -}}
+{{- $name = $package.name -}}
 {{- end -}}
+{{- $selected = append $selected (printf "%s%s" $prefix $name) -}}
 {{- end -}}
 {{- $selected | toJson -}}

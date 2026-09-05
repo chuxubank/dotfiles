@@ -99,6 +99,8 @@
       (list "pacman" "core")
       (list "pacman" "extra")
       (list "pacman" "aur")
+      (list "msys2" "msys")
+      (list "msys2" "ucrt64")
       (list "termux" "pkg")
       (list "sdkman")
       (list "rust" "cargo")

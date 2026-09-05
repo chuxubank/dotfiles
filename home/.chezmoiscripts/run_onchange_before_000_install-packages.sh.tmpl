@@ -4,7 +4,7 @@ echo "󰯁 Install packages"
 
 had_errors=false
 
-{{- if or (eq .chezmoi.os "android") (eq .chezmoi.os "linux") }}
+{{- if or (eq .chezmoi.os "android") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
 {{ includeTemplate "script/reconcile-sh" }}
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi"
@@ -83,6 +83,37 @@ sync_open_packages "$STATE_DIR/packages.pacman" "pacman package" pacman_remove
 {{ end -}}
 
 {{ else if eq .chezmoi.os "windows" }}
+{{- $msysPkgs := dict "ctx" . "path" (list "msys2" "msys") -}}
+{{- $ucrt64Pkgs := dict "ctx" . "path" (list "msys2" "ucrt64") "prefix" "mingw-w64-ucrt-x86_64-" -}}
+_desired='{{ template "package/lines" $msysPkgs }}
+{{ template "package/lines" $ucrt64Pkgs }}'
+_all='{{ template "package/lines-all" $msysPkgs }}
+{{ template "package/lines-all" $ucrt64Pkgs }}'
+if ! command -v pacman >/dev/null 2>&1; then
+	echo "pacman is required for Windows packages" >&2
+	had_errors=true
+else
+	if ! pacman -Sy --needed --noconfirm \
+	    {{ template "package/args" $msysPkgs }}
+	then
+		echo "Could not install msys packages" >&2
+		had_errors=true
+	fi
+	if ! pacman -S --needed --noconfirm \
+	    {{ template "package/args" $ucrt64Pkgs }}
+	then
+		echo "Could not install ucrt64 packages" >&2
+		had_errors=true
+	fi
+	if [ "$had_errors" = false ]; then
+		msys2_remove() {
+			pacman -Q "$1" >/dev/null 2>&1 || return 0
+			pacman -Rns --noconfirm "$1"
+		}
+		sync_open_packages "$STATE_DIR/packages.msys2" "msys2 package" msys2_remove
+	fi
+fi
+
 {{ includeTemplate "script/rust-env" . }}
 if ! command -v rustup >/dev/null 2>&1; then
 	echo "Installing rustup"

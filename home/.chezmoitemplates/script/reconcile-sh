@@ -1,5 +1,5 @@
 {{- /* script/reconcile-sh — POSIX helpers for open-world package managers
-       (apt, pacman, termux). Brew already owns cleanup via brew bundle.
+       (apt, pacman, termux, msys2). Brew already owns cleanup via brew bundle.
 
        Removals are the union of:
          - names in the last apply state that are no longer desired
