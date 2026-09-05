@@ -19,6 +19,10 @@ run_upgrade() {
   fi
 }
 
+{{ template "gpg/functions.sh" . }}
+
+gpg_before=$(gpg_version)
+
 if command -v brew >/dev/null; then
   run_upgrade brew brew upgrade
 fi
@@ -37,6 +41,8 @@ fi
 {{ else if and (eq .chezmoi.os "linux") (lookPath "pacman") -}}
 run_upgrade pacman sudo pacman -Syu --noconfirm
 {{ end -}}
+
+gpg_kill_if_updated "$gpg_before"
 
 if command -v bun >/dev/null; then
   run_upgrade bun bun upgrade

@@ -222,11 +222,26 @@ load-api-keys() {
   export OPENROUTER_API_KEY="$key"
 }
 
+{{ template "gpg/functions.sh" . }}
+
+if (( $+commands[brew] )); then
+  brew() {
+    case "$1" in
+      upgrade|reinstall|install|bundle)
+        run_with_gpgk command brew "$@"
+        ;;
+      *)
+        command brew "$@"
+        ;;
+    esac
+  }
+fi
+
 function up() {
   {{- if eq .chezmoi.os "darwin" }}
   brew update && brew bundle --quiet --global
   {{- else if eq .chezmoi.os "android" }}
-  pkg update && pkg upgrade
+  pkg update && run_with_gpgk pkg upgrade
   {{- end }}
 }
 function upe() {
@@ -236,8 +251,6 @@ function upe() {
 }
 alias upn="bun update -g --latest"
 alias upp="uv tool upgrade --all"
-
-alias gpgk="gpgconf --kill all"
 
 function webp-duration () {
   webpmux -info "$1" | awk '
