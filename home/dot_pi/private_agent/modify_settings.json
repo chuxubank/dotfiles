@@ -61,6 +61,16 @@
 {{- $subagentCandidates := default (list "xai/grok-4.6") (index (index .llm.tools "pi") "subagent_model") -}}
 {{- $subagentModel := includeTemplate "llm/pick-model" (dict "models" $subagentCandidates "providers" $cfg.providers) -}}
 {{- $_ := set $managed "subagents" (dict "defaultModel" $subagentModel) -}}
+{{- /* session.titleGeneration is @furbyhaxx/pi-session-naming. useTags
+       false is a plain description, not feat(scope): …. Model comes from
+       llm/pi.yaml session_title_model and already carries :thinking. */ -}}
+{{- $titleCandidates := default (list "xai/grok-4.6:low") (index (index .llm.tools "pi") "session_title_model") -}}
+{{- $titleModel := includeTemplate "llm/pick-model" (dict "models" $titleCandidates "providers" $cfg.providers) -}}
+{{- $_ := set $managed "session" (dict
+  "titleGeneration" (dict
+    "useTags" false
+    "model" $titleModel)
+) -}}
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}

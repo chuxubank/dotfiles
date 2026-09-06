@@ -26,12 +26,14 @@ llm:
         # aliases where the id resolves but every request fails.
         - iv-anthropic/claude-fable-5
         - grok-4.6
-      # pi-autoname. IV first (company-funded flash); SuperGrok last.
-      # xai is bundled, not a pi.yaml alias, so pick-model takes the last
-      # candidate when no alias resolves.
-      autoname_model:
-        - iv/deepseek-v4-flash
-        - xai/grok-4.6
+      # @furbyhaxx/pi-session-naming title model. IV first (company-funded
+      # flash); SuperGrok last. :low is the thinking suffix the plugin
+      # parses; Grok 4.6 cannot turn thinking off. xai is bundled, not a
+      # pi.yaml alias, so pick-model takes the last candidate when no
+      # alias resolves.
+      session_title_model:
+        - iv/deepseek-v4-flash:low
+        - xai/grok-4.6:low
       # pi-subagents defaultModel. Same split as OMP's task role: IV spends
       # company-funded terra, SuperGrok is only the personal-host fallback.
       # xai is bundled, not a pi.yaml alias, so pick-model takes the last

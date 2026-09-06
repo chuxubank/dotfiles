@@ -1,0 +1,70 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "pi") .) | fromJson -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Setup pi plugins"
+
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+if ! command -v pi >/dev/null; then
+  print -u2 -- "pi is not installed; skipping plugin setup"
+  exit 0
+fi
+
+{{ includeTemplate "script/reconcile" }}
+
+{{- $plugins := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson }}
+
+declared_plugins=({{- range $p := $plugins }}{{- if $p.enabled }} {{ $p.source | quote }}{{- end }}{{- end }})
+installed_plugins=()
+cleanup_enabled=true
+had_errors=false
+
+settings="$HOME/.pi/agent/settings.json"
+if [[ -f $settings ]]; then
+  json_names_load installed_plugins \
+    'jq -c '\''[.packages[]? | if type == "string" then . else .source end]'\'' "$settings"' \
+    'type == "array"' \
+    '.[]' \
+    cleanup_enabled \
+    'pi packages'
+else
+  installed_plugins=()
+fi
+
+remove_undeclared cleanup_enabled installed_plugins declared_plugins \
+  'pi package' pi remove
+
+installed_plugins=()
+npm_manifest="$HOME/.pi/agent/npm/package.json"
+if [[ -f $npm_manifest ]]; then
+  json_names_load installed_plugins \
+    'jq -c '\''[(.dependencies // {}) | keys[] | "npm:" + .]'\'' "$npm_manifest"' \
+    'type == "array"' \
+    '.[]' \
+    cleanup_enabled \
+    'pi packages'
+else
+  installed_plugins=()
+fi
+
+{{- range $p := $plugins }}
+{{- if $p.enabled }}
+
+pkg={{ $p.source | quote }}
+if (( ! ${installed_plugins[(Ie)$pkg]} )); then
+  echo "Install pi package: $pkg"
+  if pi install "$pkg"; then
+    installed_plugins+=("$pkg")
+  else
+    print -u2 -- "Could not install pi package $pkg"
+    had_errors=true
+  fi
+fi
+{{- end }}
+{{- end }}
+
+if $had_errors; then
+  exit 1
+fi
+{{- end -}}

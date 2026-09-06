@@ -1,7 +1,9 @@
 plugins:
   # pi-only packages (plugins/pi.yaml). The tool is implied by the filename,
   # so a plain `source` string is enough. `when` conditions work the same as
-  # elsewhere.
+  # elsewhere. This list is the source of truth. Before apply,
+  # setup-pi-plugins `pi remove`s undeclared sources while they still
+  # match live settings.packages, then `pi install`s anything missing.
   #
   # Sources follow pi's package spec: `npm:<pkg>[@version]`, `git:<host>/<repo>[@ref]`,
   # or an absolute/relative local path. Versioned specs are pinned and skipped
@@ -61,12 +63,11 @@ plugins:
           only explicit write/edit paths.
         source: npm:pi-undo-redo
 
-      - name: pi-autoname
+      - name: pi-session-naming
         description: >-
-          LLM session titles after the first settled turn, then again when
-          the topic drifts. Configurable naming model; does not touch the
-          terminal title.
-        source: npm:pi-autoname
+          LLM titles for unnamed Pi sessions. Tags are off (plain
+          descriptions, not feat(scope): …). Does not overwrite /name.
+        source: npm:@furbyhaxx/pi-session-naming
 
       - name: pi-btw
         description: >-
