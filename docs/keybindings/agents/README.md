@@ -83,3 +83,10 @@ override model cycling while the main editor is focused.
 | `Alt+P` | Previous scoped model (also `Alt+Up` in Pi) |
 | `Alt+M` / `Alt+Shift+M` | Open the model selector / pick a temporary model (OMP) |
 | `Alt+Q` | Dequeue a queued message (Pi; was `Alt+Up`) |
+
+## Message queue (Pi)
+
+| Keys | Current assignment |
+| --- | --- |
+| `Enter` | Submit; while working, queue a follow-up (was steer) |
+| `Alt+Enter` | While working, steer (was follow-up) |

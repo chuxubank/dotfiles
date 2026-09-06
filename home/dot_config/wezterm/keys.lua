@@ -10,6 +10,9 @@ local act = wezterm.action
 -- Ctrl+letter and can never reach Pi/OMP. Model cycle is Alt+N / Alt+P instead,
 -- so Ctrl+Shift+P keeps WezTerm's command palette and Ctrl+Shift+N its window.
 -- Super+Shift+P is a second palette chord. Super+N still opens a window.
+-- Alt+Enter is WezTerm's default ToggleFullScreen. Unbind it so the pane gets
+-- it (Pi steer). Fullscreen uses the platform chord: macOS Ctrl+Cmd+F, same
+-- as Ghostty, and F11 elsewhere.
 
 local keys = {}
 
@@ -34,6 +37,7 @@ passthrough("PageDown", "CTRL|SHIFT")
 passthrough("Z", "CTRL|SHIFT")
 passthrough('"', "CTRL|SHIFT|ALT")
 passthrough("%", "CTRL|SHIFT|ALT")
+passthrough("Enter", "ALT")
 
 for _, key in ipairs({ "LeftArrow", "DownArrow", "UpArrow", "RightArrow" }) do
   passthrough(key, "CMD")
@@ -54,5 +58,18 @@ table.insert(keys, {
   mods = "CMD|SHIFT",
   action = act.ActivateCommandPalette,
 })
+
+if wezterm.target_triple:find("darwin", 1, true) then
+  table.insert(keys, {
+    key = "f",
+    mods = "CTRL|CMD",
+    action = act.ToggleFullScreen,
+  })
+else
+  table.insert(keys, {
+    key = "F11",
+    action = act.ToggleFullScreen,
+  })
+end
 
 return keys

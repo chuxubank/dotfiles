@@ -47,6 +47,9 @@ receive mux commands after the `Ctrl+;` prefix.
 | `Ctrl+Shift+Alt+L` | No assignment | Open the WezTerm launcher | **Add** |
 | `Super+Shift+P` | No assignment | Command palette (second chord) | **Add** |
 | `Super+Arrow` | No assignment | Passed to Herdr/Zellij for pane focus | **Add** |
+| `Alt+Enter` | Toggle fullscreen | Unbound; passed to the pane (Pi steer) | **Delete** |
+| `Super+Ctrl+F` | No assignment | Toggle fullscreen (macOS; same as Ghostty) | **Add** |
+| `F11` | No assignment | Toggle fullscreen (non-macOS) | **Add** |
 
 ## Mux usage inside WezTerm
 

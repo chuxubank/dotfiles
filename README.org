@@ -35,6 +35,7 @@ The complete per-tool bindings are documented in
 | =Ctrl+;=                | Herdr/Zellij/Luvus prefix                 |
 | =Ctrl+;= then =1…9=     | Herdr/Zellij/Luvus mux tab selection      |
 | =Super+Arrow=           | Herdr/Zellij pane focus                   |
+| =Super+Ctrl+F=          | Ghostty/WezTerm fullscreen (macOS)        |
 
 ** In-pane agent key map
 
@@ -63,6 +64,8 @@ defaults are in the per-tool files.
 | =Ctrl+R=                 | Reverse-search prompt history                       |
 | =Ctrl+Alt+R=             | Rename session                                      |
 | =Alt+N= / =Alt+P=        | Next/previous scoped model (Pi: also =Alt+Down/Up=) |
+| =Enter=                  | Submit; Pi follow-up queue while working            |
+| =Alt+Enter=              | Pi steer while working (swapped with Enter)         |
 
 ** Declared workspaces
 
