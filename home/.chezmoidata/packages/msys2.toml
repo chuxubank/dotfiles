@@ -10,9 +10,11 @@ msys = [
   "jq",
   "pass",
   "pinentry",
+  "tmux",
   "unzip",
 ]
 ucrt64 = [
+  "fzf",
   "nodejs",
   "rustup",
 ]
