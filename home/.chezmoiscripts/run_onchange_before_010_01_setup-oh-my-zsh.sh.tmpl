@@ -3,15 +3,16 @@
 
 echo "󰯁 Setup oh-my-zsh"
 
-if [[ -d $HOME/.oh-my-zsh ]]; then
+if [[ -f $HOME/.oh-my-zsh/oh-my-zsh.sh ]]; then
     echo "✅ Omz is already installed."
 else
     echo "🚀 Installing omz..."
+    rm -rf "$HOME/.oh-my-zsh"
     if ! installer=$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh); then
         print -u2 -- "Could not download oh-my-zsh installer"
         exit 1
     fi
-    if ! RUNZSH=no sh -c "$installer"; then
+    if ! RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$installer"; then
         print -u2 -- "Could not install oh-my-zsh"
         exit 1
     fi
