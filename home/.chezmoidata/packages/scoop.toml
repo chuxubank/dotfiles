@@ -12,5 +12,6 @@ apps = [
   { name = "fd", when.disabled.host_env = ["ci"] },
   { name = "Iosevka-NF", when.disabled.host_env = ["ci"] },
   { name = "ripgrep", when.disabled.host_env = ["ci"] },
+  { name = "starship", when.disabled.host_env = ["ci"] },
   { name = "uv", when.disabled.host_env = ["ci"] },
 ]
