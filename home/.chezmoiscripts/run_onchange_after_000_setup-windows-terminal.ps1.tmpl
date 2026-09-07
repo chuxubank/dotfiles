@@ -1,0 +1,40 @@
+{{ if eq .chezmoi.os "windows" -}}
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Add Windows Terminal UCRT64 zsh profile"
+
+$guid = '{6e8f0c2a-4b71-4d3e-9a12-7c1d5e8f3b90}'
+$fragDir = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\Fragments\dotfiles'
+New-Item -ItemType Directory -Force -Path $fragDir | Out-Null
+$frag = @{
+  profiles = @(
+    @{
+      guid              = $guid
+      name              = 'UCRT64 / MSYS2'
+      commandline       = 'C:\msys64\msys2_shell.cmd -defterm -no-start -full-path -ucrt64 -shell zsh'
+      startingDirectory = '%USERPROFILE%'
+      icon              = 'C:\msys64\ucrt64.ico'
+    }
+  )
+}
+$frag | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $fragDir 'ucrt64.json') -Encoding utf8
+
+$candidates = @(
+  (Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'),
+  (Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\settings.json')
+)
+$settingsPath = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $settingsPath) {
+  Write-Host "Windows Terminal settings.json not found; fragment installed"
+  exit 0
+}
+
+$raw = Get-Content -Raw -Path $settingsPath
+$updated = [regex]::Replace($raw, '"defaultProfile"\s*:\s*"[^"]+"', ('"defaultProfile": "' + $guid + '"'))
+if ($updated -eq $raw) {
+  Write-Host "defaultProfile key not found in $settingsPath"
+} else {
+  Set-Content -Path $settingsPath -Value $updated -Encoding utf8
+  Write-Host "defaultProfile set in $settingsPath"
+}
+{{ end -}}

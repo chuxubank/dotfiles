@@ -365,7 +365,10 @@ alias codex="codex --yolo"
 # also lazily registers completions, so it must come after oh-my-zsh's
 # compinit. `wt config shell install` would append this same line itself,
 # which this file must own instead.
-if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+wt_bin=$(command -v wt 2>/dev/null) || true
+if [[ -n $wt_bin && $wt_bin != *WindowsApps* && $wt_bin != *WindowsTerminal* ]]; then
+  eval "$(command wt config shell init zsh)"
+fi
 {{- end }}
 
 {{- if includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson }}

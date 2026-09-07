@@ -17,6 +17,11 @@ config.font_size = 14
 
 -- UI
 config.window_decorations = "RESIZE"
+if wezterm.target_triple == "x86_64-pc-windows-msvc" then
+  -- RDP and many Windows adapters fail WezTerm's default OpenGL/glium path.
+  config.front_end = "WebGpu"
+  config.window_decorations = "TITLE | RESIZE"
+end
 config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true

@@ -22,7 +22,12 @@ wezterm.on("gui-startup", function(cmd)
     end
   end
   local tab, pane, window = mux.spawn_window(spawn)
-  window:gui_window():maximize()
+  local ok, gui = pcall(function()
+    return window:gui_window()
+  end)
+  if ok and gui then
+    gui:maximize()
+  end
 end)
 
 if wezterm.target_triple == "x86_64-pc-windows-msvc" then
