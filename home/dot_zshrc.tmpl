@@ -150,6 +150,9 @@ source_if /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 {{- end }}
 
 source_if $ZSH/oh-my-zsh.sh
+if command -v starship >/dev/null && [[ -z ${STARSHIP_SHELL:-} ]]; then
+  eval "$(starship init zsh)"
+fi
 
 # plugin
 zstyle ':omz:plugins:alias-finder' autoload yes
