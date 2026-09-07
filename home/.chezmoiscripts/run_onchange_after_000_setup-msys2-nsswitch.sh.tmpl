@@ -1,0 +1,27 @@
+{{ if eq .chezmoi.os "windows" -}}
+#!/bin/sh
+set -eu
+
+echo "󰯁 Point MSYS2 HOME at the Windows user profile"
+
+conf=/etc/nsswitch.conf
+if [ ! -f "$conf" ]; then
+	conf=/c/msys64/etc/nsswitch.conf
+fi
+if [ ! -f "$conf" ]; then
+	echo "msys2 nsswitch.conf not found" >&2
+	exit 1
+fi
+
+if grep -q '^db_home:[[:space:]]*windows[[:space:]]*$' "$conf"; then
+	echo "db_home already windows"
+	exit 0
+fi
+
+if grep -q '^db_home:' "$conf"; then
+	sed -i 's/^db_home:.*/db_home: windows/' "$conf"
+else
+	printf '\ndb_home: windows\n' >> "$conf"
+fi
+echo "db_home set to windows in $conf"
+{{ end -}}

@@ -6,6 +6,10 @@
 {{-   $gui = or (lookPath "pinentry-mac") $curses -}}
 {{- else if eq .chezmoi.os "linux" -}}
 {{-   $gui = or (lookPath "pinentry-gnome3") (lookPath "pinentry-qt") (lookPath "pinentry-gtk-2") $curses -}}
+{{- else if eq .chezmoi.os "windows" -}}
+{{-   $gui = or (lookPath "pinentry-w32") (lookPath "pinentry-qt") "C:/msys64/usr/bin/pinentry-w32.exe" -}}
+{{-   $curses = or (lookPath "pinentry-curses") (lookPath "pinentry-tty") "C:/msys64/usr/bin/pinentry.exe" -}}
+{{-   $tty = or (lookPath "pinentry-tty") $curses -}}
 {{- end -}}
 #!/bin/sh
 # Managed by chezmoi. Picks the pinentry backend at runtime so that GUI
@@ -14,12 +18,12 @@
 # The concrete binaries are resolved at apply time via chezmoi lookPath.
 case "$PINENTRY_USER_DATA" in
   *USE_CURSES*)
-    exec {{ $curses }} "$@"
+    exec "{{ $curses | replace "\\" "/" }}" "$@"
     ;;
   *USE_TTY*)
-    exec {{ $tty }} "$@"
+    exec "{{ $tty | replace "\\" "/" }}" "$@"
     ;;
   *)
-    exec {{ $gui }} "$@"
+    exec "{{ $gui | replace "\\" "/" }}" "$@"
     ;;
 esac

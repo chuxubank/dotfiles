@@ -9,6 +9,7 @@ msys = [
   "gnupg",
   "jq",
   "pass",
+  "pinentry",
   "unzip",
 ]
 ucrt64 = [

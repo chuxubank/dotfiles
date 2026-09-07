@@ -2,14 +2,26 @@ local wezterm = require("wezterm")
 local mux = wezterm.mux
 local launch_menu = {}
 local default_prog
+{{- if eq .chezmoi.os "darwin" }}
 local set_environment_variables = {
   -- Finder/Dock PATH is sparse. See:
   -- https://wezterm.org/faq.html#im-on-macos-and-wezterm-cannot-find-things-in-my-path
   PATH = "{{ joinPath .path.usr "bin" }}:" .. os.getenv("PATH"),
 }
+{{- else }}
+local set_environment_variables = {}
+{{- end }}
 
 wezterm.on("gui-startup", function(cmd)
-  local tab, pane, window = mux.spawn_window(cmd or { args = { "luvus" } })
+  local spawn = cmd
+  if not spawn then
+    if wezterm.target_triple == "x86_64-pc-windows-msvc" then
+      spawn = {}
+    else
+      spawn = { args = { "luvus" } }
+    end
+  end
+  local tab, pane, window = mux.spawn_window(spawn)
   window:gui_window():maximize()
 end)
 
@@ -27,9 +39,13 @@ if wezterm.target_triple == "x86_64-pc-windows-msvc" then
     args = { "C:/msys64/msys2_shell.cmd", "-defterm", "-no-start", "-full-path", "-mingw64", "-shell", "zsh" },
   })
 
-  default_prog = { "pwsh.exe", "-NoLogo" }
+  default_prog = { "C:/msys64/msys2_shell.cmd", "-defterm", "-no-start", "-full-path", "-ucrt64", "-shell", "zsh" }
 
   set_environment_variables = {
+    HOME = {{ printf "%q" (.chezmoi.homeDir | replace "\\" "/") }},
+    MSYSTEM = "UCRT64",
+    MSYS2_PATH_TYPE = "inherit",
+    CHERE_INVOKING = "1",
     -- This changes the default prompt for cmd.exe to report the
     -- current directory using OSC 7, show the current time and
     -- the current directory colored in the prompt.

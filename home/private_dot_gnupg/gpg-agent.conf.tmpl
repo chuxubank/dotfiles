@@ -1,8 +1,6 @@
-{{- if ne .chezmoi.os "windows" -}}
 {{- if ne .chezmoi.os "android" -}}
 enable-ssh-support
 default-cache-ttl 600
 max-cache-ttl 7200
 {{- end }}
-pinentry-program {{ .chezmoi.homeDir }}/.gnupg/pinentry-wrapper
-{{- end -}}
+pinentry-program {{ printf "%s/.gnupg/pinentry-wrapper" (.chezmoi.homeDir | replace "\\" "/") }}

@@ -10,9 +10,6 @@ Documents/WindowsPowerShell
 .local/bin/pass.cmd
 {{- else }}
 .config/powershell
-.zprofile
-.zshenv
-.zshrc
 .config/zellij
 {{- end }}
 

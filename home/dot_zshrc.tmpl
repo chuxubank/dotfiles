@@ -351,9 +351,13 @@ source $HOME/.config/op/plugins.sh
 {{- else if eq .host_env "iv" }}
 source <(glab completion -s zsh)
 {{- end }}
-source <(opencode completion)
+if command -v opencode >/dev/null 2>&1; then
+  source <(opencode completion)
+fi
 
-eval "$(codex completion zsh)"
+if command -v codex >/dev/null 2>&1; then
+  eval "$(codex completion zsh)"
+fi
 alias codex="codex --yolo"
 
 {{ if includeTemplate "tool/enabled" (merge (dict "tool" "worktrunk") .) | fromJson -}}
