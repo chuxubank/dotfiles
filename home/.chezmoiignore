@@ -7,6 +7,7 @@ ACLI
 AppData
 Documents/PowerShell
 Documents/WindowsPowerShell
+.local/bin/pass.cmd
 {{- else }}
 .config/powershell
 .zprofile

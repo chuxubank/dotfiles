@@ -1,4 +1,4 @@
-{{ if not (eq .host_env "ci") -}}
+{{ if and (not (eq .host_env "ci")) (ne .chezmoi.os "windows") -}}
 #!/bin/sh
 
 echo "󰯁 Setup isync and mu"

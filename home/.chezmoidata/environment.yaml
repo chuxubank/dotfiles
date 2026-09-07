@@ -29,6 +29,13 @@ environment:
         - homePath: [tool, bun]
           suffix: [bin]
 
+    - tool: scoop
+      when:
+        enabled:
+          os: [windows]
+      path:
+        - home: [scoop, shims]
+
     - tool: go
       variables:
         GOBIN:

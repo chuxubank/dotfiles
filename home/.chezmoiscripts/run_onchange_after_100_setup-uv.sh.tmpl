@@ -3,13 +3,20 @@ set -o pipefail
 
 echo "󰯁 Setup uv"
 
-{{- if not (lookPath "uv") }}
-if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
-    print -u2 -- "Could not install uv"
+{{ includeTemplate "script/windows-path" . }}
+
+if ! command -v uv >/dev/null; then
+{{- if eq .chezmoi.os "windows" }}
+    print -u2 -- "uv is not installed; declare it in packages/scoop.toml"
     exit 1
-fi
-source "$HOME/.local/bin/env"
+{{- else }}
+    if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
+        print -u2 -- "Could not install uv"
+        exit 1
+    fi
+    source "$HOME/.local/bin/env"
 {{- end }}
+fi
 
 {{ includeTemplate "script/reconcile" }}
 

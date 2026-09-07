@@ -6,7 +6,9 @@
 msys = [
   "curl",
   "git",
+  "gnupg",
   "jq",
+  "pass",
   "unzip",
 ]
 ucrt64 = [

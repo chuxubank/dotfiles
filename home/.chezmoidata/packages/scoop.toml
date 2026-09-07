@@ -1,0 +1,16 @@
+# Scoop CLI apps. Buckets other than main must be listed before the apps
+# that use them. CI uses vendor bootstraps; Scoop is for real Windows hosts.
+[packages.scoop]
+buckets = [
+  { name = "extras", when.disabled.host_env = ["ci"] },
+  { name = "nerd-fonts", when.disabled.host_env = ["ci"] },
+]
+apps = [
+  { name = "7zip", when.disabled.host_env = ["ci"] },
+  { name = "aria2", when.disabled.host_env = ["ci"] },
+  { name = "bun", when.disabled.host_env = ["ci"] },
+  { name = "fd", when.disabled.host_env = ["ci"] },
+  { name = "Iosevka-NF", when.disabled.host_env = ["ci"] },
+  { name = "ripgrep", when.disabled.host_env = ["ci"] },
+  { name = "uv", when.disabled.host_env = ["ci"] },
+]

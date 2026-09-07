@@ -1,0 +1,9 @@
+# winget package ids. GUI apps follow the same host_env / role gates as brew casks.
+[packages.winget]
+apps = [
+  { name = "GitHub.cli", when.disabled.host_env = ["ci"] },
+  { name = "wez.wezterm", when.disabled.host_env = ["ci"] },
+  { name = "Discord.Discord", when.enabled = { host_env = ["personal"], roles = ["game"] } },
+  { name = "Google.Chrome", when.enabled.host_env = ["personal", "iv"] },
+  { name = "Valve.Steam", when.enabled = { host_env = ["personal"], roles = ["game"] } },
+]

@@ -1,0 +1,5 @@
+{{- if eq .chezmoi.os "windows" -}}
+@echo off
+set "HOME={{ .chezmoi.homeDir }}"
+C:\msys64\usr\bin\bash.exe -lc "export HOME=/c/Users/{{ .chezmoi.username }} PASSWORD_STORE_DIR=/c/Users/{{ .chezmoi.username }}/.password-store; pass %*"
+{{- end -}}

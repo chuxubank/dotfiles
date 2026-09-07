@@ -5,13 +5,19 @@ echo "󰯁 Setup bun"
 
 export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
+{{ includeTemplate "script/windows-path" . }}
 
-{{- if not (lookPath "bun") }}
-if ! curl -fsSL https://bun.sh/install | bash; then
-    print -u2 -- "Could not install bun"
+if ! command -v bun >/dev/null; then
+{{- if eq .chezmoi.os "windows" }}
+    print -u2 -- "bun is not installed; declare it in packages/scoop.toml"
     exit 1
-fi
+{{- else }}
+    if ! curl -fsSL https://bun.sh/install | bash; then
+        print -u2 -- "Could not install bun"
+        exit 1
+    fi
 {{- end }}
+fi
 
 {{ includeTemplate "script/reconcile" }}
 

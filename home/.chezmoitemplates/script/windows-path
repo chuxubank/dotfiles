@@ -1,0 +1,7 @@
+{{- /* script/windows-path — Prepend Scoop shims and cargo bin for MSYS2 zsh
+       scripts. Forward slashes so zsh does not treat backslashes as escapes. */ -}}
+{{- if eq .chezmoi.os "windows" -}}
+export PATH="$HOME/scoop/shims:$HOME/.local/share/cargo/bin:$HOME/.local/bin:$PATH"
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+{{- end -}}

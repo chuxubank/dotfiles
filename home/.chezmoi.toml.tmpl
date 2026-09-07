@@ -46,6 +46,10 @@ encryption = "gpg"
 
 [scriptEnv]
     PASSWORD_STORE_DIR = {{- joinPath .chezmoi.homeDir $passDir | quote }}
+{{- if eq $os "windows" }}
+    PYTHONUTF8 = "1"
+    PYTHONIOENCODING = "utf-8"
+{{- end }}
 
 {{- if eq $os "windows" }}
 [interpreters.sh]
