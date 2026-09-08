@@ -29,9 +29,14 @@ BAR="${FILL// /█}${PAD// /░}"
 MINS=$((DURATION_MS / 60000))
 SECS=$(((DURATION_MS % 60000) / 1000))
 
+WT_STATUS=""
+if command -v wt >/dev/null 2>&1 && [ -n "$DIR" ]; then
+    WT_STATUS=$(wt -C "$DIR" list statusline --format=table 2>/dev/null || true)
+fi
+
 BRANCH=""
 GIT_STATUS=""
-if git rev-parse --git-dir >/dev/null 2>&1; then
+if [ -z "$WT_STATUS" ] && git rev-parse --git-dir >/dev/null 2>&1; then
     BRANCH=" | 🌿 $(git branch --show-current 2>/dev/null)"
     STAGED=$(git diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
     MODIFIED=$(git diff --numstat 2>/dev/null | wc -l | tr -d ' ')
@@ -39,6 +44,10 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     [ "$MODIFIED" -gt 0 ] && GIT_STATUS=" ${GIT_STATUS}${YELLOW}~${MODIFIED}${RESET}"
 fi
 
-echo -e "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH$GIT_STATUS"
+if [ -n "$WT_STATUS" ]; then
+    echo -e "${CYAN}[$MODEL]${RESET} ${WT_STATUS}"
+else
+    echo -e "${CYAN}[$MODEL]${RESET} 📁 ${DIR##*/}$BRANCH$GIT_STATUS"
+fi
 COST_FMT=$(printf '$%.2f' "$COST")
 echo -e "${BAR_COLOR}${BAR}${RESET} ${PCT}% | ${YELLOW}${COST_FMT}${RESET} | ⏱️ ${MINS}m ${SECS}s"

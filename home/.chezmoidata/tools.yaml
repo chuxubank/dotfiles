@@ -290,6 +290,21 @@ tools:
       - ".config/worktrunk/config.toml"
     purge:
       - ".config/worktrunk/**"
+    # `wt config plugins <args> install|uninstall`.
+    # Worktrunk's `pi` plugin is the OMP/Pi hook. Default path is
+    # ~/.omp/agent/hooks/pre/worktrunk.ts; the pi row sets
+    # PI_CODING_AGENT_DIR so install/uninstall target ~/.pi/agent instead.
+    integrations:
+      - tool: claude-code
+        args: ["claude"]
+      - tool: codex
+        args: ["codex"]
+      - tool: opencode
+        args: ["opencode"]
+      - tool: omp
+        args: ["pi"]
+      - tool: pi
+        args: ["pi"]
 
   talkify:
     when:
