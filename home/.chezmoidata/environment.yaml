@@ -173,6 +173,13 @@ environment:
         SDKMAN_DIR:
           homePath: [tool, sdkman]
 
+    # sentry 0.44+ scopes config-file tokens to SENTRY_URL. Keeping the URL
+    # outside .sentryclirc avoids the CLI credential-store login requirement.
+    - tool: sentry
+      variables:
+        SENTRY_URL:
+          literal: https://sentry.infinityparadise.com
+
     - tool: stardict
       variables:
         STARDICT_DATA_DIR:

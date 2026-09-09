@@ -1,6 +1,6 @@
 {{- if includeTemplate "tool/enabled" (merge (dict "tool" "sentry") .) | fromJson -}}
+# IV self-hosted Sentry. SENTRY_URL scopes this token to the company instance.
 [defaults]
-url = {{ includeTemplate "safe/pass" (merge (dict "path" "Work/IV/Sentry" "field" "url") .) }}
 org = sentry
 
 [auth]
