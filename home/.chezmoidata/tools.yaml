@@ -164,6 +164,8 @@ tools:
       - ".config/orca/profiles/local-default/orca-data.json"
     purge:
       - ".orca/**"
+      - ".orca-relay/**"
+      - ".orca-remote/**"
       - ".config/orca/**"
       - ".config/Orca/**"
       - "Library/Application Support/orca/**"
