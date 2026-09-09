@@ -26,6 +26,13 @@ skills:
         source: termio-sh/termio
         owner: termio
 
+      - name: worktrunk
+        source: max-sixty/worktrunk
+        owner: worktrunk
+        when:
+          disabled:
+            tool: [claude-code, codex]
+
       - name:
           - computer-use
           - orca-cli
