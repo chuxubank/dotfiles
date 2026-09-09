@@ -181,9 +181,21 @@ tools:
     remove:
       - ".config/orca/profiles/local-default/orca-data.json"
     purge:
+      - ".orca/**"
       - ".config/orca/**"
       - ".config/Orca/**"
       - "Library/Application Support/orca/**"
+    # Orca injects hooks into agent-owned config trees. Keep these out of
+    # remove/purge so disabling Orca does not ignore another tool's parent.
+    integrations:
+      - tool: claude-code
+      - tool: codex
+      - tool: cursor
+      - tool: gemini-cli
+      - tool: github-copilot
+      - tool: grok
+      - tool: opencode
+      - tool: pi
 
   pi:
     when:

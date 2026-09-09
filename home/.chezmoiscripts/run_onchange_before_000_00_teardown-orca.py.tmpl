@@ -1,0 +1,13 @@
+{{- if and (lookPath "python3") (not (includeTemplate "tool/enabled" (merge (dict "tool" "orca") .) | fromJson)) -}}
+#!/usr/bin/env python3
+
+{{ includeTemplate "integrations/hooks.py" }}
+{{ includeTemplate "orca/cleanup.py" }}
+
+INTEGRATIONS = json.loads({{ includeTemplate "integrations/payload" (merge (dict "owner" "orca") .) | quote }})
+
+
+if __name__ == "__main__":
+    print("󰯁 Teardown Orca agent integrations")
+    remove_agents([item["tool"] for item in INTEGRATIONS], extras=True)
+{{- end -}}
