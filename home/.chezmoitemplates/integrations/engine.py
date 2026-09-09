@@ -2,11 +2,49 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 HOME = Path.home()
+
+
+def home_path(relative):
+    path = Path(relative)
+    if path.is_absolute() or ".." in path.parts or str(relative).startswith("~"):
+        raise ValueError("integration path must stay relative to HOME: %r" % relative)
+    root = HOME.resolve()
+    candidate = HOME / path
+    resolved = candidate.resolve(strict=False)
+    if resolved != root and root not in resolved.parents:
+        raise ValueError(
+            "integration path escapes HOME through a symlink: %r" % relative
+        )
+    return candidate
+
+
+def atomic_write_text(path, text):
+    if path.is_symlink():
+        path = path.resolve(strict=False)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else None
+    fd, temporary = tempfile.mkstemp(prefix=".%s." % path.name, dir=path.parent)
+    try:
+        with os.fdopen(fd, "w") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if mode is not None:
+            os.chmod(temporary, mode)
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def text_matches(text, cleanup):
@@ -27,8 +65,10 @@ def entry_matches(entry, cleanup):
     if any(text_matches(entry.get(field), cleanup) for field in fields):
         return True
     nested = entry.get("hooks")
-    return isinstance(nested, list) and nested and all(
-        entry_matches(item, cleanup) for item in nested
+    return (
+        isinstance(nested, list)
+        and nested
+        and all(entry_matches(item, cleanup) for item in nested)
     )
 
 
@@ -54,6 +94,7 @@ def scrub_hooks(node, cleanup):
         if cleaned not in ([], {}):
             out[key] = cleaned
     return out
+
 
 def remove_path(path):
     if path.is_file() or path.is_symlink():
@@ -98,7 +139,7 @@ def clean_json_hooks(path, cleanup):
         path.unlink()
         print("  removed %s" % path)
         return
-    path.write_text(json.dumps(data, indent=2) + "\n")
+    atomic_write_text(path, json.dumps(data, indent=2) + "\n")
     print("  stripped hooks from %s" % path)
 
 
@@ -113,11 +154,12 @@ def strip_matching_lines(path, patterns):
         return
     text = "".join(kept)
     if text.strip():
-        path.write_text(text)
+        atomic_write_text(path, text)
         print("  stripped managed references from %s" % path)
     else:
         path.unlink()
         print("  removed %s" % path)
+
 
 def strip_managed_block(path, start, end):
     if not path.is_file():
@@ -128,14 +170,16 @@ def strip_managed_block(path, start, end):
         return
     last = original.find(end, first)
     if last < 0:
-        print("integration cleanup: skip unterminated block in %s" % path, file=sys.stderr)
+        print(
+            "integration cleanup: skip unterminated block in %s" % path, file=sys.stderr
+        )
         return
     last += len(end)
     if last < len(original) and original[last] == "\n":
         last += 1
     text = original[:first] + original[last:]
     if text.strip():
-        path.write_text(text)
+        atomic_write_text(path, text)
         print("  stripped managed block from %s" % path)
     else:
         path.unlink()
@@ -158,27 +202,30 @@ def clean_targets(cleanup, names, agent_roots, extras=False):
     known = set(agent_roots)
     unknown = [name for name in names if name not in known]
     if unknown:
-        raise SystemExit("integration cleanup: unknown agent(s): %s" % ", ".join(unknown))
+        raise SystemExit(
+            "integration cleanup: unknown agent(s): %s" % ", ".join(unknown)
+        )
     for name in names:
-        stop = HOME / agent_roots[name]
+        stop = home_path(agent_roots[name])
         for rel in cleanup.get("standalone", {}).get(name, []):
-            path = HOME / rel
+            path = home_path(rel)
             if remove_path(path):
                 rmdir_empty(path.parent, stop)
         for rel in cleanup.get("json_hooks", {}).get(name, []):
-            clean_json_hooks(HOME / rel, cleanup)
+            clean_json_hooks(home_path(rel), cleanup)
         markdown = cleanup.get("markdown_refs", {})
         for rel in markdown.get("agents", {}).get(name, []):
-            strip_matching_lines(HOME / rel, markdown.get("patterns", []))
+            strip_matching_lines(home_path(rel), markdown.get("patterns", []))
         for rule in cleanup.get("marked_files", {}).get(name, []):
-            remove_marked_file(HOME / rule["path"], rule)
+            remove_marked_file(home_path(rule["path"]), rule)
     if extras:
         for rel in cleanup.get("extras", []):
-            path = HOME / rel
+            path = home_path(rel)
             if remove_path(path):
                 rmdir_empty(path.parent, path.parent.parent)
         for rule in cleanup.get("managed_blocks", []):
-            strip_managed_block(HOME / rule["path"], rule["start"], rule["end"])
+            strip_managed_block(home_path(rule["path"]), rule["start"], rule["end"])
+
 
 def expand_command(template, item):
     command = []
@@ -204,19 +251,31 @@ def run_command(lifecycle, action, item):
     template = lifecycle.get(action)
     if not template:
         return None
-    proc = subprocess.run(
-        expand_command(template, item),
-        capture_output=True,
-        text=True,
-        env=command_env(lifecycle, item),
-    )
+    try:
+        proc = subprocess.run(
+            expand_command(template, item),
+            capture_output=True,
+            text=True,
+            env=command_env(lifecycle, item),
+            timeout=lifecycle.get("timeout_seconds", 30),
+        )
+    except subprocess.TimeoutExpired:
+        print(
+            "integration %s timed out after %ss"
+            % (item["tool"], lifecycle.get("timeout_seconds", 30)),
+            file=sys.stderr,
+        )
+        return 124
     if proc.stdout:
         sys.stdout.write(proc.stdout)
         if not proc.stdout.endswith("\n"):
             sys.stdout.write("\n")
     if proc.returncode not in (0, None):
         error = (proc.stderr or "") + (proc.stdout or "")
-        if any(needle.lower() in error.lower() for needle in lifecycle.get("skip_errors", [])):
+        if any(
+            needle.lower() in error.lower()
+            for needle in lifecycle.get("skip_errors", [])
+        ):
             detail = error.strip().splitlines()[-1] if error.strip() else "not found"
             print("  skip %s: %s" % (item["tool"], detail))
             return 0
@@ -234,21 +293,20 @@ def post_install(lifecycle, item, agent_roots):
     move = rule.get("move")
     if not move:
         return
-    src = HOME / move["from"]
-    dst = HOME / move["to"]
+    src = home_path(move["from"])
+    dst = home_path(move["to"])
     if not src.is_file():
         print("  skip %s: hook not installed" % item["tool"])
         return
     text = src.read_text()
     for old, new in rule.get("replacements", []):
         text = text.replace(old, new)
-    dst.parent.mkdir(parents=True, exist_ok=True)
     if not dst.is_file() or dst.read_text() != text:
-        dst.write_text(text)
+        atomic_write_text(dst, text)
         print("  wrote %s" % dst)
     src.unlink()
     print("  removed %s" % src)
-    rmdir_empty(src.parent, HOME / agent_roots[item["tool"]])
+    rmdir_empty(src.parent, home_path(agent_roots[item["tool"]]))
 
 
 def reconcile(spec, mode, agent_roots):
@@ -263,14 +321,31 @@ def reconcile(spec, mode, agent_roots):
 
     if mode == "teardown":
         print("󰯁 Teardown %s agent integrations" % label)
+        errors = []
         if installed and lifecycle.get("uninstall"):
             for item in targets:
-                run_command(lifecycle, "uninstall", item)
+                code = run_command(lifecycle, "uninstall", item)
+                if code not in (0, None):
+                    errors.append((item["tool"], code))
             declared = {arg for item in targets for arg in item.get("args", [])}
             for target in lifecycle.get("uninstall_all", []):
                 if target not in declared:
-                    run_command(lifecycle, "uninstall", {"tool": target, "args": [target]})
+                    code = run_command(
+                        lifecycle, "uninstall", {"tool": target, "args": [target]}
+                    )
+                    if code not in (0, None):
+                        errors.append((target, code))
         clean_targets(cleanup, names, agent_roots, extras=True)
+        if errors:
+            print(
+                "%s uninstall failed: %s"
+                % (
+                    label,
+                    ", ".join("%s=%s" % error for error in errors),
+                ),
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
         return
 
     print("󰯁 Setup %s agent integrations" % label)
@@ -286,10 +361,23 @@ def reconcile(spec, mode, agent_roots):
                 raise SystemExit(code)
             post_install(lifecycle, item, agent_roots)
     disabled = [item for item in targets if not item["enabled"]]
+    uninstall_errors = []
     if lifecycle.get("uninstall_disabled") and lifecycle.get("uninstall"):
         for item in disabled:
-            run_command(lifecycle, "uninstall", item)
+            code = run_command(lifecycle, "uninstall", item)
+            if code not in (0, None):
+                uninstall_errors.append((item["tool"], code))
     for item in disabled:
         print("  remove %s" % item["tool"])
     if disabled:
         clean_targets(cleanup, [item["tool"] for item in disabled], agent_roots)
+    if uninstall_errors:
+        print(
+            "%s uninstall failed: %s"
+            % (
+                label,
+                ", ".join("%s=%s" % error for error in uninstall_errors),
+            ),
+            file=sys.stderr,
+        )
+        raise SystemExit(1)

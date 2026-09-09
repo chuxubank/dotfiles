@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+import contextlib
 import importlib.util
+import io
 import json
+import stat
 import sys
 import tempfile
 from pathlib import Path
@@ -20,28 +23,36 @@ with tempfile.TemporaryDirectory() as tmp:
     roots = {"agent": ".agent"}
     hooks = home / ".agent/hooks.json"
     hooks.parent.mkdir(parents=True)
-    hooks.write_text(json.dumps({
-        "version": 1,
-        "hooks": {
-            "event": [
-                {"command": "owned hook"},
-                {"command": "keep hook"},
-            ]
-        },
-    }))
+    hooks.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "hooks": {
+                    "event": [
+                        {"command": "owned hook"},
+                        {"command": "keep hook"},
+                    ]
+                },
+            }
+        )
+    )
     owned = home / ".agent/owned.js"
     owned.write_text("owned")
     block = home / ".agent/config.toml"
-    block.write_text("keep = true\n# begin owner\nremove = true\n# end owner\nafter = true\n")
+    block.write_text(
+        "keep = true\n# begin owner\nremove = true\n# end owner\nafter = true\n"
+    )
     cleanup = {
         "needles": ["owned"],
         "standalone": {"agent": [".agent/owned.js"]},
         "json_hooks": {"agent": [".agent/hooks.json"]},
-        "managed_blocks": [{
-            "path": ".agent/config.toml",
-            "start": "# begin owner",
-            "end": "# end owner",
-        }],
+        "managed_blocks": [
+            {
+                "path": ".agent/config.toml",
+                "start": "# begin owner",
+                "end": "# end owner",
+            }
+        ],
     }
     engine.clean_targets(cleanup, ["agent"], roots, extras=True)
     data = json.loads(hooks.read_text())
@@ -49,6 +60,18 @@ with tempfile.TemporaryDirectory() as tmp:
     assert not owned.exists()
     text = block.read_text()
     assert "remove" not in text and "keep = true" in text and "after = true" in text
+    mode_path = home / ".agent/mode.txt"
+    mode_path.write_text("before")
+    mode_path.chmod(0o640)
+    engine.atomic_write_text(mode_path, "after")
+    assert mode_path.read_text() == "after"
+    assert stat.S_IMODE(mode_path.stat().st_mode) == 0o640
+    try:
+        engine.home_path("../escape")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("parent traversal was accepted")
 
 with tempfile.TemporaryDirectory() as tmp:
     home = Path(tmp)
@@ -75,5 +98,16 @@ with tempfile.TemporaryDirectory() as tmp:
     target = home / ".agent/extensions/plugin.ts"
     assert target.read_text() == "NewType from new-package\n"
     assert not source.exists()
+
+with tempfile.TemporaryDirectory() as tmp:
+    engine.HOME = Path(tmp)
+    lifecycle = {
+        "install": [sys.executable, "-c", "import time; time.sleep(2)"],
+        "timeout_seconds": 1,
+    }
+    with contextlib.redirect_stderr(io.StringIO()) as stderr:
+        code = engine.run_command(lifecycle, "install", {"tool": "agent", "args": []})
+    assert code == 124
+    assert "timed out" in stderr.getvalue()
 
 print("ok integration engine")

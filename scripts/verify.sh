@@ -5,6 +5,25 @@ ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 CHEZMOI_SOURCE=${CHEZMOI_SOURCE:-$ROOT}
 failed=0
 
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+state="$tmpdir/chezmoistate.boltdb"
+cache="$tmpdir/cache"
+mkdir -p "$cache"
+for candidate in \
+	"${XDG_CONFIG_HOME:-$HOME/.config}/chezmoi/chezmoistate.boltdb" \
+	"$HOME/Library/Application Support/chezmoi/chezmoistate.boltdb" \
+	"${LOCALAPPDATA:-}/chezmoi/chezmoistate.boltdb"; do
+	if [ -n "$candidate" ] && [ -f "$candidate" ]; then
+		cp "$candidate" "$state"
+		break
+	fi
+done
+
+cm() {
+	chezmoi --persistent-state "$state" --cache "$cache" "$@"
+}
+
 cd "$ROOT"
 
 for required in chezmoi shellcheck ruff; do
@@ -17,7 +36,7 @@ done
 run_template() {
 	name=$1
 	out=
-	if ! out=$(chezmoi execute-template --source "$CHEZMOI_SOURCE" "{{ includeTemplate \"$name\" . }}"); then
+	if ! out=$(cm execute-template --source "$CHEZMOI_SOURCE" "{{ includeTemplate \"$name\" . }}"); then
 		echo "verify: $name failed" >&2
 		failed=1
 		return 1
@@ -35,6 +54,10 @@ run_template() {
 run_template verify/contracts
 run_template verify/model
 
+if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
+	python3 "$ROOT/scripts/test-integration-schema.py" "$ROOT"; then
+	failed=1
+fi
 if ! python3 "$ROOT/scripts/test-integration-engine.py" "$ROOT"; then
 	failed=1
 fi
@@ -105,8 +128,6 @@ PY
 	failed=1
 fi
 
-tmpdir=$(mktemp -d)
-trap 'rm -rf "$tmpdir"' EXIT
 export PYTHONPYCACHEPREFIX="$tmpdir"
 : >"$tmpdir/syntax_failed"
 
@@ -180,7 +201,7 @@ check_by_shebang() {
 
 find home/.chezmoiscripts home/bin -type f -name '*.tmpl' 2>/dev/null | sort |
 	while IFS= read -r tmpl; do
-		if ! rendered=$(chezmoi execute-template --source "$CHEZMOI_SOURCE" <"$tmpl"); then
+		if ! rendered=$(cm execute-template --source "$CHEZMOI_SOURCE" <"$tmpl"); then
 			echo "verify: template failed: $tmpl" >&2
 			mark_syntax_failed
 			continue

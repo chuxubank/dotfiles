@@ -17,11 +17,11 @@ The repository has two fixed lifecycle entry points:
 - `run_onchange_after_110_setup-integrations.py.tmpl` reconciles enabled owners
   when its rendered declarations or the shared engine change.
 
-A tool participates only through `tools.yaml`: `integrations` declares target
-agents and arguments; `integration_lifecycle` declares platform support,
-commands, target environment, cleanup, and optional post-install file moves.
-`integration_lifecycle.setup: false` declares a cleanup-only owner. Shared target
-roots live in `.chezmoidata/integrations.yaml`.
+An owner participates through `.chezmoidata/integrations.yaml`: `targets`
+declares target agents and arguments; `lifecycle` declares platform support,
+commands, target environment, cleanup, timeout, and optional post-install file
+moves. `lifecycle.setup: false` declares a cleanup-only owner. `tools.yaml`
+remains the source for owner enablement and self-owned remove/purge paths.
 
 No integration owner gets a file under `.chezmoiscripts` or a private
 `<owner>/run.py` / `<owner>/cleanup.py`. `integrations/owners` selects owners,
@@ -31,8 +31,10 @@ executes a finite action schema. Data cannot contain arbitrary Python.
 Supported cleanup actions are standalone file removal, structural JSON hook
 filtering, marked Markdown-line removal, marker-guarded file removal, and managed
 block removal. Post-install may move one generated file while applying literal
-text replacements. New behavior should first be expressed by composing these
-actions; extending the shared engine requires a genuinely new reusable action.
+text replacements. All paths are validated as HOME-relative and checked again at
+runtime; shared writes use same-directory atomic replacement. Vendor commands
+have a bounded timeout. New behavior should first be expressed by composing
+these actions; extending the shared engine requires a genuinely reusable action.
 
 Cleanup must preserve entries installed by other owners. CLI uninstall is best
 effort; local conservative cleanup is the final invariant.

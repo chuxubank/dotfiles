@@ -195,7 +195,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
-          install: zsh curl git unzip
+          install: zsh curl git unzip mingw-w64-ucrt-x86_64-python
 
       - name: Configure env
         run: |
@@ -233,6 +233,13 @@ jobs:
         run: |
           export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
           chezmoi apply --force --no-tty --exclude=encrypted,externals
+
+      - name: Verify integration engine
+        run: |
+          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:$PATH"
+          source_root=$(cygpath -u "$GITHUB_WORKSPACE")
+          python3 "$source_root/scripts/test-integration-schema.py" "$source_root"
+          python3 "$source_root/scripts/test-integration-engine.py" "$source_root"
 
       - name: Verify rust
         run: |

@@ -29,9 +29,11 @@ APPLESCRIPT
 {{- range $name, $spec := .tools }}
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson) }}
     {{- range $pattern := dig "purge" (list) $spec }}
-      {{- $rel := trimSuffix "/**" $pattern }}
+      {{- if hasSuffix "/**" $pattern }}
+        {{- $rel := trimSuffix "/**" $pattern }}
 echo "Move disabled tool data to Trash: {{ printf "%s/%s" $.chezmoi.homeDir $rel }}"
 trash_path {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

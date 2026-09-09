@@ -1,24 +1,22 @@
 {{- /* integrations/owners — JSON owner names selected for one lifecycle mode.
-       setup: enabled owners whose integration_lifecycle.setup is not false.
-       teardown: disabled owners. Optional integration_lifecycle.os limits both. */ -}}
+       setup: enabled owners whose lifecycle.setup is not false.
+       teardown: disabled owners. Optional lifecycle.os limits both. */ -}}
 {{- $mode := dig "mode" "" . -}}
 {{- if not (has $mode (list "setup" "teardown")) -}}
 {{- fail "integrations/owners: mode must be setup or teardown" -}}
 {{- end -}}
 {{- $owners := list -}}
-{{- range $name := keys (default dict .tools) | sortAlpha -}}
-  {{- $spec := index $.tools $name -}}
-  {{- if hasKey $spec "integrations" -}}
-    {{- $lifecycle := dig "integration_lifecycle" dict $spec -}}
-    {{- $oses := dig "os" (list) $lifecycle -}}
-    {{- $platform := or (eq (len $oses) 0) (has $.chezmoi.os $oses) -}}
-    {{- $enabled := includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson -}}
-    {{- $setup := dig "setup" true $lifecycle -}}
-    {{- if and $platform (or
-          (and (eq $mode "setup") $enabled $setup)
-          (and (eq $mode "teardown") (not $enabled))) -}}
-      {{- $owners = append $owners $name -}}
-    {{- end -}}
+{{- range $name := keys (default dict .integration_owners) | sortAlpha -}}
+  {{- $spec := index $.integration_owners $name -}}
+  {{- $lifecycle := dig "lifecycle" dict $spec -}}
+  {{- $oses := dig "os" (list) $lifecycle -}}
+  {{- $platform := or (eq (len $oses) 0) (has $.chezmoi.os $oses) -}}
+  {{- $enabled := includeTemplate "tool/enabled" (merge (dict "tool" $name "require" true) $) | fromJson -}}
+  {{- $setup := dig "setup" true $lifecycle -}}
+  {{- if and $platform (or
+        (and (eq $mode "setup") $enabled $setup)
+        (and (eq $mode "teardown") (not $enabled))) -}}
+    {{- $owners = append $owners $name -}}
   {{- end -}}
 {{- end -}}
 {{- $owners | toJson -}}

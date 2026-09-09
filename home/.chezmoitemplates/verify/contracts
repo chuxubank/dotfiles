@@ -120,18 +120,23 @@
 
 {{- /* integrations/owners: fixed dispatcher selects by mode and platform. */ -}}
 {{- $integrationTools := dict
-      "active" (dict "integrations" (list (dict "tool" "codex")))
-      "cleanup-only" (dict
-        "when" (dict "enabled" false)
-        "integration_lifecycle" (dict "setup" false)
-        "integrations" (list (dict "tool" "codex")))
-      "windows-only" (dict
-        "integration_lifecycle" (dict "os" (list "windows"))
-        "integrations" (list (dict "tool" "codex")))
+      "active" (dict)
+      "cleanup-only" (dict "when" (dict "enabled" false))
+      "windows-only" (dict)
       "codex" (dict)
+-}}
+{{- $integrationOwners := dict
+      "active" (dict "lifecycle" (dict) "targets" (list (dict "tool" "codex")))
+      "cleanup-only" (dict
+        "lifecycle" (dict "setup" false)
+        "targets" (list (dict "tool" "codex")))
+      "windows-only" (dict
+        "lifecycle" (dict "os" (list "windows"))
+        "targets" (list (dict "tool" "codex")))
 -}}
 {{- $integrationCtx := merge (dict) $base (dict
       "tools" $integrationTools
+      "integration_owners" $integrationOwners
       "host_env" "personal"
       "chezmoi" (dict "os" "darwin")) -}}
 {{- $setupOwners := includeTemplate "integrations/owners" (merge (dict "mode" "setup") $integrationCtx) | fromJson -}}
