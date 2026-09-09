@@ -84,7 +84,7 @@
                               ("IV:deepseek-v4-flash"
                                "OpenRouter:openrouter/free"))))
  '(gptel-model-updater-models
-   '("IV:gpt-5.6-sol"
+   '("IV:{{ .llm.models.gpt_primary }}"
      "IV:claude-opus-5"
      "IV:deepseek-v4-pro"
      "OpenRouter:auto"))

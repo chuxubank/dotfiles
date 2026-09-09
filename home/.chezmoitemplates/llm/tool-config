@@ -38,6 +38,7 @@
 {{- $tool := .tool -}}
 {{- $toolCfg := index .llm.tools $tool -}}
 {{- $llmProviders := .llm.providers -}}
+{{- $modelAliases := default dict .llm.models -}}
 {{- $result := dict -}}
 
 {{- if hasKey $toolCfg "reasoning_effort" }}
@@ -49,7 +50,11 @@
 {{- end }}
 
 {{- if hasKey $toolCfg "enabled_models" }}
-  {{- $_ := set $result "enabled_models" $toolCfg.enabled_models -}}
+  {{- $enabledModels := list -}}
+  {{- range $model := $toolCfg.enabled_models -}}
+    {{- $enabledModels = append $enabledModels (includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases)) -}}
+  {{- end -}}
+  {{- $_ := set $result "enabled_models" $enabledModels -}}
 {{- end }}
 
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}
@@ -154,7 +159,14 @@
   {{- $modelOverrides := dict -}}
   {{- if hasKey $prov "model_overrides" -}}{{- $modelOverrides = deepCopy $prov.model_overrides -}}{{- end -}}
   {{- if hasKey $ref "model_overrides" -}}{{- $modelOverrides = mergeOverwrite $modelOverrides (deepCopy $ref.model_overrides) -}}{{- end -}}
-  {{- if gt (len $modelOverrides) 0 -}}{{- $_ := set $resolved "model_overrides" $modelOverrides -}}{{- end -}}
+  {{- if gt (len $modelOverrides) 0 -}}
+    {{- $resolvedModelOverrides := dict -}}
+    {{- range $model, $override := $modelOverrides -}}
+      {{- $resolvedModel := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
+      {{- $_ := set $resolvedModelOverrides $resolvedModel $override -}}
+    {{- end -}}
+    {{- $_ := set $resolved "model_overrides" $resolvedModelOverrides -}}
+  {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
@@ -229,11 +241,17 @@
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
 
-{{- /* Resolve model: string → use as-is, list → pick first with available provider */ -}}
+{{- /* Resolve shared model aliases before selecting a provider fallback. */ -}}
 {{- if hasKey $toolCfg "model" -}}
   {{- $model := $toolCfg.model -}}
   {{- if eq (kindOf $toolCfg.model) "slice" -}}
-    {{- $model = includeTemplate "llm/pick-model" (dict "models" $toolCfg.model "providers" $providers) -}}
+    {{- $models := list -}}
+    {{- range $candidate := $toolCfg.model -}}
+      {{- $models = append $models (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
+    {{- end -}}
+    {{- $model = includeTemplate "llm/pick-model" (dict "models" $models "providers" $providers) -}}
+  {{- else -}}
+    {{- $model = includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
   {{- end -}}
   {{- $selection := includeTemplate "llm/split-model" (dict "model" $model "providers" $providers) | fromJson -}}
   {{- $_ := set $result "model" $model -}}
@@ -244,7 +262,13 @@
 {{- if hasKey $toolCfg "small_model" -}}
   {{- $smallModel := $toolCfg.small_model -}}
   {{- if eq (kindOf $toolCfg.small_model) "slice" -}}
-    {{- $smallModel = includeTemplate "llm/pick-model" (dict "models" $toolCfg.small_model "providers" $providers) -}}
+    {{- $smallModels := list -}}
+    {{- range $candidate := $toolCfg.small_model -}}
+      {{- $smallModels = append $smallModels (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
+    {{- end -}}
+    {{- $smallModel = includeTemplate "llm/pick-model" (dict "models" $smallModels "providers" $providers) -}}
+  {{- else -}}
+    {{- $smallModel = includeTemplate "llm/resolve-model-alias" (dict "model" $smallModel "aliases" $modelAliases) -}}
   {{- end -}}
   {{- $selection := includeTemplate "llm/split-model" (dict "model" $smallModel "providers" $providers) | fromJson -}}
   {{- $_ := set $result "small_model" $smallModel -}}
@@ -259,7 +283,13 @@
   {{- range $role, $spec := $toolCfg.default_models -}}
     {{- $picked := $spec -}}
     {{- if eq (kindOf $spec) "slice" -}}
-      {{- $picked = includeTemplate "llm/pick-model" (dict "models" $spec "providers" $providers) -}}
+      {{- $candidates := list -}}
+      {{- range $candidate := $spec -}}
+        {{- $candidates = append $candidates (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
+      {{- end -}}
+      {{- $picked = includeTemplate "llm/pick-model" (dict "models" $candidates "providers" $providers) -}}
+    {{- else -}}
+      {{- $picked = includeTemplate "llm/resolve-model-alias" (dict "model" $picked "aliases" $modelAliases) -}}
     {{- end -}}
     {{- $_ := set $roles $role $picked -}}
   {{- end -}}

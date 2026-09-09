@@ -5,10 +5,10 @@ llm:
       # then Cursor. `openai`/`anthropic` are IV aliases (same as Pi); the
       # ChatGPT subscription is `openai-codex`.
       model:
-        - openai/gpt-5.6-sol
+        - openai/${gpt_primary}
         - anthropic/claude-opus-5
         - xai-oauth/grok-4.6
-        - openai-codex/gpt-5.6-sol
+        - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-high
       reasoning_effort: high
       # OMP roles, not model names. Same keys on every host; each list picks
@@ -62,15 +62,15 @@ llm:
         - anthropic/claude-opus-5
         - anthropic/claude-sonnet-5
         - iv-anthropic/claude-fable-5
-        - openai/gpt-5.6-sol
+        - openai/${gpt_primary}
         - openai/gpt-5.6-terra
         - openai/gpt-5.6-luna
         - xai-oauth/grok-4.6
-        - openai-codex/gpt-5.6-sol
+        - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-high
         - cursor/claude-fable-5-1-medium
         - cursor/claude-fable-5-1-high
-        - cursor/gpt-5.6-sol
+        - cursor/${gpt_primary}
       providers:
         openai:
           provider: iv
@@ -134,7 +134,7 @@ llm:
                 output: 50
                 cacheRead: 1
                 cacheWrite: 12.5
-            gpt-5.6-sol:
+            ${gpt_primary}:
               cost:
                 input: 4
                 output: 20

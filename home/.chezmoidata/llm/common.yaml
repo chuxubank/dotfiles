@@ -1,4 +1,10 @@
 llm:
+  # ── Shared model ids ────────────────────────────────────────────────
+  # Tool configs reference these as ${name}; llm/tool-config expands them
+  # before provider selection. Keep provider aliases in each tool config.
+  models:
+    gpt_primary: gpt-5.6-sol
+
   # ── Data sets (model catalogs, independent from inference providers) ──
   data_sets:
     models-dev:

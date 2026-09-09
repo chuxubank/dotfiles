@@ -1,0 +1,11 @@
+{{- /* llm/resolve-model-alias — Expand ${name} tokens in a model reference.
+       Input: model — model id/reference, aliases — llm.models map.
+       Unknown tokens fail instead of leaking into generated tool configs. */ -}}
+{{- $model := .model -}}
+{{- range $name, $value := default dict .aliases -}}
+  {{- $model = replace (printf "${%s}" $name) $value $model -}}
+{{- end -}}
+{{- if regexMatch `\$\{[a-z][a-z0-9_]*\}` $model -}}
+  {{- fail (printf "llm/resolve-model-alias: unknown alias in %q" $model) -}}
+{{- end -}}
+{{- $model -}}

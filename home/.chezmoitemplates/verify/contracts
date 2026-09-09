@@ -44,6 +44,14 @@
   {{- fail "when/context: current available disk should satisfy min 1 on this host" -}}
 {{- end -}}
 
+{{- /* llm/resolve-model-alias: shared ids expand inside provider-qualified refs. */ -}}
+{{- $aliasedModel := includeTemplate "llm/resolve-model-alias" (dict
+      "model" "openai/${gpt_primary}:high"
+      "aliases" (dict "gpt_primary" "gpt-5.6-sol")) -}}
+{{- if ne $aliasedModel "openai/gpt-5.6-sol:high" -}}
+  {{- fail (printf "llm/resolve-model-alias: unexpected expansion %q" $aliasedModel) -}}
+{{- end -}}
+
 {{- /* llm/split-model: split only configured aliases and preserve model slashes */ -}}
 {{- $splitModel := includeTemplate "llm/split-model" (dict
       "model" "openrouter/vendor/model"

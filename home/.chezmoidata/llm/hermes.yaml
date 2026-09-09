@@ -2,7 +2,7 @@ llm:
   tools:
     hermes:
       model:
-        - iv-codex/gpt-5.6-sol
+        - iv-codex/${gpt_primary}
         - xai-oauth/grok-4.6
       reasoning_effort: high
       providers:
