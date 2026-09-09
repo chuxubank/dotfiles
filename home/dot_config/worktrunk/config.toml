@@ -24,6 +24,22 @@ worktree-path = "{{ repo_path }}/../{{ repo }}.{{ branch | sanitize }}"
 [commit.generation]
 command = "pi -p --no-session --no-tools --no-extensions --no-skills --no-context-files --no-prompt-templates --thinking off --system-prompt ''"
 
+# Report new worktrees to Luvus as workspaces. Worktrunk owns create/remove;
+# Luvus only shows the folder. Inside a Luvus pane this inherits
+# LUVUS_BIN_PATH and LUVUS_SOCKET_PATH; outside it falls back to `luvus` on
+# PATH. post-start is background, so a missing client or offline server
+# does not abort `wt switch --create`.
+[post-start]
+luvus = '''
+bin="${LUVUS_BIN_PATH:-luvus}"
+if [ -n "$LUVUS_BIN_PATH" ]; then
+  [ -x "$bin" ] || exit 0
+elif ! command -v "$bin" >/dev/null 2>&1; then
+  exit 0
+fi
+"$bin" worktree open "{{ worktree_path }}" || true
+'''
+
 # Pinned explicitly: unset means a deprecation warning on every run plus a
 # prompt to `wt config update`, which would rewrite this chezmoi-owned file.
 [list]
