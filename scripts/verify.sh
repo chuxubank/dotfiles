@@ -54,6 +54,17 @@ secret_res = [
     re.compile(r"""(?i)\bpass\s*=\s*["'][^"'{$\n./][^"'{$\n]{2,}["']"""),
 ]
 failed = False
+tools_text = (root / "home/.chezmoidata/tools.yaml").read_text(encoding="utf-8")
+owner_names = set(re.findall(r"^  ([a-z0-9][a-z0-9-]*):$", tools_text, re.MULTILINE))
+for path in (root / "home/.chezmoiscripts").glob("*.py.tmpl"):
+    name = path.name
+    for owner in owner_names:
+        if re.search(rf"(?:setup|teardown)-{re.escape(owner)}\.py\.tmpl$", name):
+            print(
+                f"verify: integration owner {owner} has a dedicated lifecycle script: {name}",
+                file=sys.stderr,
+            )
+            failed = True
 for path in root.rglob("*"):
     if not path.is_file():
         continue

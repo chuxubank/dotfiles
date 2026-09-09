@@ -30,9 +30,28 @@
 {{- end -}}
 
 {{- /* Integrations target declared agents. Agent-owned files cannot live
-       in remove/purge (parent ignore). args is an optional list. */ -}}
+       in remove/purge (parent ignore). args is an optional list. Every owner
+       is dispatched through <owner>/run.py by two fixed chezmoi scripts. */ -}}
 {{- range $name, $spec := $declared -}}
   {{- $ints := dig "integrations" (list) $spec -}}
+  {{- $lifecycle := dig "integration_lifecycle" dict $spec -}}
+  {{- if and (hasKey $spec "integration_lifecycle") (not (hasKey $spec "integrations")) -}}
+    {{- fail (printf "%s: integration_lifecycle requires integrations" $name) -}}
+  {{- end -}}
+  {{- if and (hasKey $lifecycle "setup") (ne (kindOf $lifecycle.setup) "bool") -}}
+    {{- fail (printf "%s: integration_lifecycle.setup must be boolean" $name) -}}
+  {{- end -}}
+  {{- if and (hasKey $lifecycle "os") (ne (kindOf $lifecycle.os) "slice") -}}
+    {{- fail (printf "%s: integration_lifecycle.os must be a list" $name) -}}
+  {{- end -}}
+  {{- range $os := dig "os" (list) $lifecycle -}}
+    {{- if not (has $os (list "darwin" "linux" "windows" "android")) -}}
+      {{- fail (printf "%s: unsupported integration lifecycle OS %q" $name $os) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if hasKey $spec "integrations" -}}
+    {{- $_ := includeTemplate (printf "%s/run.py" $name) (merge (dict "mode" "teardown") $) -}}
+  {{- end -}}
   {{- if and (hasKey $spec "integrations") (eq (len $ints) 0) -}}
     {{- fail (printf "%s: integrations must not be empty" $name) -}}
   {{- end -}}

@@ -118,6 +118,31 @@
   {{- fail "tool/enabled: undeclared defaults on" -}}
 {{- end -}}
 
+{{- /* integrations/owners: fixed dispatcher selects by mode and platform. */ -}}
+{{- $integrationTools := dict
+      "active" (dict "integrations" (list (dict "tool" "codex")))
+      "cleanup-only" (dict
+        "when" (dict "enabled" false)
+        "integration_lifecycle" (dict "setup" false)
+        "integrations" (list (dict "tool" "codex")))
+      "windows-only" (dict
+        "integration_lifecycle" (dict "os" (list "windows"))
+        "integrations" (list (dict "tool" "codex")))
+      "codex" (dict)
+-}}
+{{- $integrationCtx := merge (dict) $base (dict
+      "tools" $integrationTools
+      "host_env" "personal"
+      "chezmoi" (dict "os" "darwin")) -}}
+{{- $setupOwners := includeTemplate "integrations/owners" (merge (dict "mode" "setup") $integrationCtx) | fromJson -}}
+{{- if or (ne (len $setupOwners) 1) (ne (index $setupOwners 0) "active") -}}
+  {{- fail (printf "integrations/owners: unexpected setup owners %s" ($setupOwners | toJson)) -}}
+{{- end -}}
+{{- $teardownOwners := includeTemplate "integrations/owners" (merge (dict "mode" "teardown") $integrationCtx) | fromJson -}}
+{{- if or (ne (len $teardownOwners) 1) (ne (index $teardownOwners 0) "cleanup-only") -}}
+  {{- fail (printf "integrations/owners: unexpected teardown owners %s" ($teardownOwners | toJson)) -}}
+{{- end -}}
+
 {{- /* tool/item-enabled: owner required, tool is identity unless alias */ -}}
 {{- $owned := dict "owner" "claude-code" -}}
 {{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" $owned "host_env" "iv")) | fromJson) true -}}

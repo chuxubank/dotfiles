@@ -1,3 +1,0 @@
-{{- if and (lookPath "python3") (not (includeTemplate "tool/enabled" (merge (dict "tool" "herdr") .) | fromJson)) -}}
-{{ includeTemplate "herdr/run.py" (merge (dict "mode" "teardown") .) -}}
-{{- end -}}

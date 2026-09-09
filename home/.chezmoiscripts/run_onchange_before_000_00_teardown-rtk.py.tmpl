@@ -1,3 +1,0 @@
-{{- if and (ne .chezmoi.os "windows") (lookPath "python3") (not (includeTemplate "tool/enabled" (merge (dict "tool" "rtk") .) | fromJson)) -}}
-{{ includeTemplate "rtk/run.py" (merge (dict "mode" "teardown") .) -}}
-{{- end -}}

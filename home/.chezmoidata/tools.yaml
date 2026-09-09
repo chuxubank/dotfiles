@@ -3,7 +3,9 @@
 # providers, defaults). Services and environment groups use `tool` as
 # identity and set `owner` only when they should follow a switch.
 # Skill `when.*.tool`, plugin/mcp `tool`, and integrations `tool`
-# values are the target agent, not the owner.
+# values are the target agent, not the owner. Tools with integrations use
+# `.chezmoitemplates/<owner>/run.py`; setup defaults on and can be disabled
+# with `integration_lifecycle.setup: false`.
 # Every `owner` must be a name listed here.
 #
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
@@ -187,6 +189,8 @@ tools:
       - "Library/Application Support/orca/**"
     # Orca injects hooks into agent-owned config trees. Keep these out of
     # remove/purge so disabling Orca does not ignore another tool's parent.
+    integration_lifecycle:
+      setup: false
     integrations:
       - tool: claude-code
       - tool: codex
@@ -241,6 +245,8 @@ tools:
     # Target agent for `rtk init`. `tool` here is the agent, not owner.
     # Agent-owned files (RTK.md, hooks) live inside other tools' dirs, so
     # they cannot be in remove/purge (disabled-ignore would skip the parent).
+    integration_lifecycle:
+      os: [android, darwin, linux]
     integrations:
       - tool: claude-code
         args: ["--global", "--auto-patch"]
@@ -303,6 +309,8 @@ tools:
     purge:
       - ".config/worktrunk/**"
     # `wt config plugins <args> install|uninstall`.
+    integration_lifecycle:
+      os: [android, darwin, linux]
     # Worktrunk's `pi` plugin writes hooks/pre/worktrunk.ts (OMP layout).
     # Earendil Pi renamed hooks/ to extensions/, so the runner relocates
     # that file to ~/.pi/agent/extensions/worktrunk.ts after install.
