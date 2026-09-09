@@ -1,0 +1,17 @@
+plugins:
+  # omp-only packages (plugins/omp.yaml). The tool is implied by the
+  # filename, so a plain `source` string is enough. `when` conditions work
+  # the same as elsewhere. This list is the source of truth. After apply,
+  # setup-omp-plugins `omp plugin uninstall`s undeclared npm plugins, then
+  # `omp plugin install`s anything missing.
+  #
+  # Source is the npm package name passed to `omp plugin install`.
+  # Marketplace plugins (`name@marketplace`) are not managed here.
+  omp:
+    providers:
+      - name: omp-undo-redo
+        description: >-
+          Undo/redo session-tree navigation and worktree snapshots. Git
+          repos snapshot through an alternate index; non-git dirs use a
+          private per-workspace git. Does not rewrite HEAD or the index.
+        source: "@baylarsadigov/omp-undo-redo"

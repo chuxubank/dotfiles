@@ -1,0 +1,54 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "omp") .) | fromJson -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Setup omp plugins"
+
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+if ! command -v omp >/dev/null; then
+  print -u2 -- "omp is not installed; skipping plugin setup"
+  exit 0
+fi
+
+{{ includeTemplate "script/reconcile" }}
+
+{{- $plugins := includeTemplate "plugins/resolve" (merge (dict "tool" "omp") .) | fromJson }}
+
+declared_plugins=({{- range $p := $plugins }}{{- if $p.enabled }} {{ $p.source | quote }}{{- end }}{{- end }})
+installed_plugins=()
+cleanup_enabled=true
+had_errors=false
+
+json_names_load installed_plugins \
+  'omp plugin list --json' \
+  '.npm | type == "array"' \
+  '.npm[].name' \
+  cleanup_enabled \
+  'omp plugins'
+
+{{- range $p := $plugins }}
+{{- if $p.enabled }}
+
+pkg={{ $p.source | quote }}
+if (( ! ${installed_plugins[(Ie)$pkg]} )); then
+  echo "Install omp plugin: $pkg"
+  if omp plugin install "$pkg"; then
+    installed_plugins+=("$pkg")
+  else
+    print -u2 -- "Could not install omp plugin $pkg"
+    cleanup_enabled=false
+    had_errors=true
+  fi
+fi
+omp plugin enable "$pkg" >/dev/null 2>&1 || true
+{{- end }}
+{{- end }}
+
+remove_undeclared cleanup_enabled installed_plugins declared_plugins \
+  'omp plugin' omp plugin uninstall
+
+if $had_errors; then
+  exit 1
+fi
+{{- end -}}
