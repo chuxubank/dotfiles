@@ -149,6 +149,8 @@ jobs:
     needs: validate
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     defaults:
       run:
         shell: ${{ matrix.shell }}

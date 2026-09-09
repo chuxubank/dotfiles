@@ -1,4 +1,4 @@
-{{- if eq .chezmoi.os "darwin" }}
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") }}
 ["iloader.app"]
     type = "archive"
     url = "{{ (gitHubLatestReleaseAssetURL "nab138/iloader" "iloader-darwin-universal.app.tar.gz") }}"
