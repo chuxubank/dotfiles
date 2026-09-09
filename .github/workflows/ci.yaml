@@ -42,8 +42,8 @@ jobs:
       - name: Verify
         run: make verify
 
-  clone-and-install:
-    name: Full install (Linux)
+  bootstrap-linux:
+    name: Bootstrap (Linux)
     needs: validate
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -145,16 +145,51 @@ jobs:
         run: '"$HOME/.local/bin/chezmoi" data'
 
   apply:
-    name: Apply managed files (${{ matrix.os }})
+    name: Apply managed files (${{ matrix.name }})
     needs: validate
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            shell: bash
+          - name: macOS
+            os: macos-latest
+            shell: bash
+          - name: Windows
+            os: windows-latest
+            shell: "msys2 {0}"
     steps:
+      - name: Disable git autocrlf
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: git config --global core.autocrlf input
+
       - uses: actions/checkout@v6
+
+      - uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
+        with:
+          msystem: UCRT64
+          install: zsh curl git unzip
+
+      - name: Configure Windows env
+        if: runner.os == 'Windows'
+        run: |
+          win_home=$(cygpath -u "$USERPROFILE")
+          echo "HOME=$win_home" >> "$GITHUB_ENV"
+          echo "SOURCE_DIR=$(cygpath -u "$GITHUB_WORKSPACE")" >> "$GITHUB_ENV"
+          echo "$(cygpath -w "$win_home/.local/bin")" >> "$GITHUB_PATH"
+
+      - name: Configure Unix env
+        if: runner.os != 'Windows'
+        run: echo "SOURCE_DIR=${{ github.workspace }}" >> "$GITHUB_ENV"
 
       - name: Install chezmoi (Linux)
         if: runner.os == 'Linux'
@@ -168,17 +203,90 @@ jobs:
 
       - name: Install chezmoi (Windows)
         if: runner.os == 'Windows'
-        run: choco install chezmoi -y
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b "$HOME/.local/bin"
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi --version
 
       - name: Initialize source
-        run: chezmoi init --source "${{ github.workspace }}"
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi init --source "$SOURCE_DIR"
 
       - name: Apply managed files
-        run: >-
-          chezmoi apply --force --no-tty
-          --exclude=encrypted,scripts,externals
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi apply --force --no-tty --exclude=encrypted,scripts,externals
 
       - name: Verify target state
-        run: >-
-          chezmoi verify
-          --exclude=encrypted,scripts,externals
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi verify --exclude=encrypted,scripts,externals
+
+  bootstrap-windows:
+    name: Bootstrap (Windows)
+    needs: validate
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        shell: "msys2 {0}"
+    steps:
+      - name: Disable git autocrlf
+        shell: pwsh
+        run: git config --global core.autocrlf input
+
+      - uses: actions/checkout@v6
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: zsh curl git unzip mingw-w64-ucrt-x86_64-python
+
+      - name: Configure env
+        run: |
+          win_home=$(cygpath -u "$USERPROFILE")
+          echo "HOME=$win_home" >> "$GITHUB_ENV"
+          echo "CARGO_HOME=$win_home/.local/share/cargo" >> "$GITHUB_ENV"
+          echo "RUSTUP_HOME=$win_home/.local/share/rustup" >> "$GITHUB_ENV"
+          echo "SOURCE_DIR=$(cygpath -u "$GITHUB_WORKSPACE")" >> "$GITHUB_ENV"
+          echo "$(cygpath -w "$win_home/.local/bin")" >> "$GITHUB_PATH"
+          echo "$(cygpath -w "$win_home/.local/share/cargo/bin")" >> "$GITHUB_PATH"
+
+      - name: Cache rust
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.local/share/cargo
+            ~/.local/share/rustup
+          key: ${{ runner.os }}-msys2-rustup-${{ hashFiles('home/.chezmoidata/packages/rust.toml', 'home/.chezmoiscripts/run_onchange_after_100_setup-rust.sh.tmpl', 'home/.chezmoiscripts/run_onchange_before_000_install-packages.sh.tmpl') }}
+          restore-keys: |
+            ${{ runner.os }}-msys2-rustup-
+
+      - name: Install chezmoi
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b "$HOME/.local/bin"
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi --version
+
+      - name: Initialize source
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          chezmoi init --source "$SOURCE_DIR"
+
+      - name: Apply scripts and managed files
+        run: |
+          export PATH="$HOME/.local/bin:${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
+          chezmoi apply --force --no-tty --exclude=encrypted,externals
+
+      - name: Verify rust
+        run: |
+          export PATH="${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
+          rustc --version
+          cargo --version
+          rustup show
