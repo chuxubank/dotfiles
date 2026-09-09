@@ -1,0 +1,12 @@
+# Shared target-agent roots for conservative empty-directory cleanup.
+# Owner-specific install and cleanup behavior stays declarative in tools.yaml.
+integration_agents:
+  claude-code: ".claude"
+  codex: ".codex"
+  cursor: ".cursor"
+  gemini-cli: ".gemini"
+  github-copilot: ".copilot"
+  grok: ".grok"
+  opencode: ".config/opencode"
+  omp: ".omp"
+  pi: ".pi"

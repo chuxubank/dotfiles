@@ -35,6 +35,10 @@ run_template() {
 run_template verify/contracts
 run_template verify/model
 
+if ! python3 "$ROOT/scripts/test-integration-engine.py" "$ROOT"; then
+	failed=1
+fi
+
 if ! python3 - "$ROOT" <<'PY'; then
 import re
 import sys
@@ -62,6 +66,16 @@ for path in (root / "home/.chezmoiscripts").glob("*.py.tmpl"):
         if re.search(rf"(?:setup|teardown)-{re.escape(owner)}\.py\.tmpl$", name):
             print(
                 f"verify: integration owner {owner} has a dedicated lifecycle script: {name}",
+                file=sys.stderr,
+            )
+            failed = True
+for owner in owner_names:
+    adapter = root / "home/.chezmoitemplates" / owner
+    for filename in ("run.py", "cleanup.py"):
+        path = adapter / filename
+        if path.exists():
+            print(
+                f"verify: integration owner {owner} has a dedicated adapter: {path.relative_to(root)}",
                 file=sys.stderr,
             )
             failed = True

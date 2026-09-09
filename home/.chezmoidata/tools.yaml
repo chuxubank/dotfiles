@@ -3,9 +3,9 @@
 # providers, defaults). Services and environment groups use `tool` as
 # identity and set `owner` only when they should follow a switch.
 # Skill `when.*.tool`, plugin/mcp `tool`, and integrations `tool`
-# values are the target agent, not the owner. Tools with integrations use
-# `.chezmoitemplates/<owner>/run.py`; setup defaults on and can be disabled
-# with `integration_lifecycle.setup: false`.
+# values are the target agent, not the owner. Tools with integrations declare
+# install, uninstall, and conservative cleanup actions in integration_lifecycle;
+# the shared integration engine executes only its finite action schema.
 # Every `owner` must be a name listed here.
 #
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
@@ -107,8 +107,41 @@ tools:
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
     purge:
       - ".config/herdr/**"
-    # `herdr integration install <args>`. Agent-owned hook files cannot
-    # live in remove/purge (disabled-ignore would skip the parent).
+    # Agent-owned hook files cannot live in remove/purge because
+    # disabled-ignore would then skip the target agent's parent directory.
+    integration_lifecycle:
+      label: Herdr
+      binary: herdr
+      install: [herdr, integration, install, "{args}"]
+      uninstall: [herdr, integration, uninstall, "{args}"]
+      uninstall_disabled: true
+      skip_errors: ["not found"]
+      uninstall_all: [pi, omp, claude, codex, copilot, devin, droid, kimi,
+        opencode, kilo, hermes, qodercli, cursor, mastracode, antigravity-cli, grok]
+      cleanup:
+        needles: [herdr-agent-state.sh, herdr-agent-state.ts, herdr-agent-state.js]
+        standalone:
+          claude-code: [.claude/hooks/herdr-agent-state.sh]
+          codex: [.codex/herdr-agent-state.sh]
+          cursor: [.cursor/herdr-agent-state.sh]
+          gemini-cli: [.gemini/config/hooks/herdr-agent-state.sh]
+          github-copilot: [.copilot/hooks/herdr-agent-state.sh]
+          grok: [.grok/hooks/herdr-agent-state.sh, .grok/hooks/herdr.json]
+          opencode: [.config/opencode/plugins/herdr-agent-state.js]
+          pi: [.pi/agent/extensions/herdr-agent-state.ts]
+        json_hooks:
+          claude-code: [.claude/settings.json]
+          codex: [.codex/hooks.json]
+          cursor: [.cursor/hooks.json]
+        extras:
+          - .omp/agent/extensions/herdr-omp-agent-state.ts
+          - .config/devin/herdr-agent-state.sh
+          - .factory/hooks/herdr-agent-state.sh
+          - .kimi-code/hooks/herdr-agent-state.sh
+          - .config/kilo/plugin/herdr-agent-state.js
+          - .hermes/plugins/herdr-agent-state/__init__.py
+          - .qoder/hooks/herdr-agent-state.sh
+          - .mastracode/hooks/herdr-agent-state.sh
     integrations:
       - tool: claude-code
         args: ["claude"]
@@ -190,7 +223,26 @@ tools:
     # Orca injects hooks into agent-owned config trees. Keep these out of
     # remove/purge so disabling Orca does not ignore another tool's parent.
     integration_lifecycle:
+      label: Orca
       setup: false
+      cleanup:
+        needles: [.orca/agent-hooks/, ORCA_AGENT_HOOK_, "@orca-managed"]
+        command_fields: [command, bash]
+        standalone:
+          github-copilot: [.copilot/hooks/orca.json]
+          grok: [.grok/hooks/orca-status.json]
+          pi:
+            - .pi/agent/extensions/orca-agent-status.ts
+            - .pi/agent/extensions/orca-prefill.ts
+            - .pi/agent/extensions/orca-titlebar-spinner.ts
+        json_hooks:
+          claude-code: [.claude/settings.json, .claude/hooks.json]
+          codex: [.codex/hooks.json, .codex/hooks.json.bak]
+          cursor: [.cursor/hooks.json, .cursor/hooks.json.bak]
+        managed_blocks:
+          - path: .kimi-code/config.toml
+            start: "# >>> orca-managed-kimi-hooks"
+            end: "# <<< orca-managed-kimi-hooks <<<"
     integrations:
       - tool: claude-code
       - tool: codex
@@ -245,7 +297,43 @@ tools:
     # Agent-owned files (RTK.md, hooks) live inside other tools' dirs, so
     # they cannot be in remove/purge (disabled-ignore would skip the parent).
     integration_lifecycle:
+      label: RTK
       os: [android, darwin, linux]
+      binary: rtk
+      install: [rtk, init, "{args}"]
+      uninstall: [rtk, init, "{args}", --uninstall]
+      skip_errors: ["no such file", "not found"]
+      cleanup:
+        standalone:
+          claude-code: [.claude/RTK.md]
+          codex: [.codex/RTK.md]
+          gemini-cli: [.gemini/hooks/rtk-hook-gemini.sh, .gemini/hooks/.rtk-hook.sha256]
+          github-copilot: [.copilot/hooks/rtk-rewrite.json]
+          opencode: [.config/opencode/plugins/rtk.ts]
+          pi: [.pi/agent/extensions/rtk.ts]
+        json_hooks:
+          claude-code: [.claude/settings.json]
+          cursor: [.cursor/hooks.json]
+          gemini-cli: [.gemini/settings.json]
+        command_exact: [rtk]
+        command_prefixes: ["rtk "]
+        needles: ["rtk hook", rtk-hook-]
+        markdown_refs:
+          patterns: ['^@(?:.*/)?RTK\.md\s*$']
+          agents:
+            claude-code: [.claude/CLAUDE.md]
+            codex: [.codex/AGENTS.md]
+        marked_files:
+          gemini-cli:
+            - path: .gemini/GEMINI.md
+              contains: ["Rust Token Killer"]
+              head_contains: ["# RTK"]
+              head_chars: 120
+          github-copilot:
+            - path: .copilot/copilot-instructions.md
+              contains: ["Rust Token Killer"]
+              head_contains: ["# RTK"]
+              head_chars: 120
     integrations:
       - tool: claude-code
         args: ["--global", "--auto-patch"]
@@ -279,7 +367,21 @@ tools:
     purge:
       - ".termio/**"
     # Termio writes hooks itself when the app runs. These names are the
-    # agent dirs to strip when termio or the agent is off.
+    # agent dirs to strip when Termio or the target agent is off.
+    integration_lifecycle:
+      label: Termio
+      binary: termio
+      cleanup:
+        needles: [termio-hooks, "termio agent report", "Application Support/termio"]
+        standalone:
+          grok: [.grok/hooks/termio.json]
+          opencode: [.config/opencode/plugin/termio.js]
+          pi: [.pi/agent/extensions/termio.js]
+        json_hooks:
+          claude-code: [.claude/settings.json]
+          codex: [.codex/hooks.json]
+          cursor: [.cursor/hooks.json]
+        extras: [.config/amp/plugins/termio.ts]
     integrations:
       - tool: claude-code
       - tool: codex
@@ -309,7 +411,36 @@ tools:
       - ".config/worktrunk/**"
     # `wt config plugins <args> install|uninstall`.
     integration_lifecycle:
+      label: Worktrunk
       os: [android, darwin, linux]
+      binary: wt
+      install: [wt, config, plugins, "{args}", install, --yes]
+      uninstall: [wt, config, plugins, "{args}", uninstall, --yes]
+      uninstall_disabled: true
+      skip_errors: ["not found", "no such file", "unrecognized subcommand"]
+      target_env:
+        pi:
+          PI_CODING_AGENT_DIR: "~/.pi/agent"
+          PI_PROFILE: null
+          OMP_PROFILE: null
+        omp:
+          PI_CODING_AGENT_DIR: null
+          PI_CONFIG_DIR: null
+          PI_PROFILE: null
+          OMP_PROFILE: null
+      cleanup:
+        standalone:
+          pi:
+            - .pi/agent/extensions/worktrunk.ts
+            - .pi/agent/hooks/pre/worktrunk.ts
+      post_install:
+        pi:
+          move:
+            from: .pi/agent/hooks/pre/worktrunk.ts
+            to: .pi/agent/extensions/worktrunk.ts
+          replacements:
+            - ['import type { HookAPI } from "@oh-my-pi/pi-coding-agent/extensibility/hooks"', 'import type { ExtensionAPI } from "@earendil-works/pi-coding-agent"']
+            - [HookAPI, ExtensionAPI]
     # Worktrunk's `pi` plugin writes hooks/pre/worktrunk.ts (OMP layout).
     # Earendil Pi renamed hooks/ to extensions/, so the runner relocates
     # that file to ~/.pi/agent/extensions/worktrunk.ts after install.

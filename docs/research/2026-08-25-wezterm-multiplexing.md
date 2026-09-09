@@ -89,8 +89,8 @@ It does **not** cleanly absorb Zellij's terminal independence, session-manager U
 The current Herdr setup is more than a mux:
 
 - named agent creation by `kind` from the shared workspace declaration ([`workspaces.yaml`](../../home/.chezmoidata/workspaces.yaml));
-- integrations installed for Codex, Claude, Grok, OpenCode and other agents ([integration setup template](../../home/.chezmoitemplates/herdr/run.py));
-- agent-state hook cleanup/install lifecycle ([cleanup template](../../home/.chezmoitemplates/herdr/cleanup.py));
+- integrations for Codex, Claude, Grok, OpenCode and other agents declared in [`tools.yaml`](../../home/.chezmoidata/tools.yaml) and reconciled by the [shared integration engine](../../home/.chezmoitemplates/integrations/engine.py);
+- declarative agent-state hook cleanup/install lifecycle through the same shared engine;
 - Heeler pairing and encrypted blocked/done notifications, plus layout plugins ([Herdr plugin data](../../home/.chezmoidata/plugins/herdr.yaml));
 - live workspace/tab/pane creation followed by `herdr agent start` and workspace focus ([`herdr-layout`](../../home/bin/executable_herdr-layout.tmpl)).
 

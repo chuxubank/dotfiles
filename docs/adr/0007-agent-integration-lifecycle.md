@@ -1,35 +1,38 @@
-# Dispatch agent integrations through fixed lifecycle scripts
+# Declare agent integrations behind one lifecycle engine
 
 Tools such as RTK, Worktrunk, Herdr, Termio, and Orca install files into other
 agents' configuration trees. Listing those files in the owner's `remove` or
 `purge` paths would make `disabled-ignore` ignore the target agent's directory,
 so the owner must instead remove only its own injected entries.
 
-Per-owner chezmoi scripts caused the installed script count and execution order
-to grow with every integration owner. They also repeated enablement, platform,
-and Python checks.
+Per-owner scripts and Python adapters caused implementation count and execution
+order to grow with every owner. They also repeated enablement, platform, command,
+and cleanup logic.
 
-The repository now has two fixed lifecycle entry points:
+The repository has two fixed lifecycle entry points:
 
 - `run_before_000_00_teardown-integrations.py.tmpl` runs on every apply and
-  reconciles disabled owners. Teardown must be idempotent because an external
-  application may inject a hook again after a previous apply.
+  reconciles disabled owners. Teardown is idempotent because an external app may
+  inject a hook again after a previous apply.
 - `run_onchange_after_110_setup-integrations.py.tmpl` reconciles enabled owners
-  when its rendered owner list or adapter implementation changes.
+  when its rendered declarations or the shared engine change.
 
-A tool participates by declaring `integrations` in `tools.yaml` and providing
-`.chezmoitemplates/<owner>/run.py`. The adapter accepts `mode=setup|teardown`.
-`integration_lifecycle.setup: false` declares a cleanup-only adapter;
-`integration_lifecycle.os` limits both modes to listed operating systems.
-Adding an owner must not add another file under `.chezmoiscripts`.
+A tool participates only through `tools.yaml`: `integrations` declares target
+agents and arguments; `integration_lifecycle` declares platform support,
+commands, target environment, cleanup, and optional post-install file moves.
+`integration_lifecycle.setup: false` declares a cleanup-only owner. Shared target
+roots live in `.chezmoidata/integrations.yaml`.
 
-`integrations/owners` resolves owners for each mode, `integrations/dispatch.py`
-runs their adapters, `integrations/payload` resolves target-agent enablement,
-and `integrations/loop.py` provides the common install/uninstall loop. Vendor
-commands and exceptional transformations remain in owner adapters because they
-are real behavioral differences.
+No integration owner gets a file under `.chezmoiscripts` or a private
+`<owner>/run.py` / `<owner>/cleanup.py`. `integrations/owners` selects owners,
+`integrations/payload` resolves target enablement, and `integrations/engine.py`
+executes a finite action schema. Data cannot contain arbitrary Python.
 
-An owner adapter must be idempotent and conservative. Standalone owner files may
-be removed, but shared JSON/TOML/Markdown must be edited structurally or through
-an owner marker. Cleanup must preserve entries installed by other owners. CLI
-uninstall is best effort; local cleanup is the final invariant.
+Supported cleanup actions are standalone file removal, structural JSON hook
+filtering, marked Markdown-line removal, marker-guarded file removal, and managed
+block removal. Post-install may move one generated file while applying literal
+text replacements. New behavior should first be expressed by composing these
+actions; extending the shared engine requires a genuinely new reusable action.
+
+Cleanup must preserve entries installed by other owners. CLI uninstall is best
+effort; local conservative cleanup is the final invariant.

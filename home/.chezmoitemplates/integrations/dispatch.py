@@ -5,14 +5,19 @@
 {{- $owners := includeTemplate "integrations/owners" (merge (dict "mode" $mode) .) | fromJson -}}
 #!/usr/bin/env python3
 
-RUNNERS = {
+import json
+
+SPECS = [
 {{- range $owner := $owners }}
-    {{ $owner | quote }}: {{ includeTemplate (printf "%s/run.py" $owner) (merge (dict "mode" $mode) $) | quote }},
+    json.loads({{ includeTemplate "integrations/payload" (merge (dict "owner" $owner) $) | quote }}),
 {{- end }}
-}
+]
+MODE = {{ $mode | quote }}
+AGENT_ROOTS = json.loads({{ default dict .integration_agents | toJson | quote }})
+
+{{ includeTemplate "integrations/engine.py" }}
 
 
 if __name__ == "__main__":
-    for owner, source in RUNNERS.items():
-        namespace = {"__name__": "__main__", "__file__": "<integration:%s>" % owner}
-        exec(compile(source, namespace["__file__"], "exec"), namespace)
+    for spec in SPECS:
+        reconcile(spec, MODE, AGENT_ROOTS)
