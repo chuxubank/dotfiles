@@ -291,9 +291,9 @@ tools:
     purge:
       - ".config/worktrunk/**"
     # `wt config plugins <args> install|uninstall`.
-    # Worktrunk's `pi` plugin is the OMP/Pi hook. Default path is
-    # ~/.omp/agent/hooks/pre/worktrunk.ts; the pi row sets
-    # PI_CODING_AGENT_DIR so install/uninstall target ~/.pi/agent instead.
+    # Worktrunk's `pi` plugin writes hooks/pre/worktrunk.ts (OMP layout).
+    # Earendil Pi renamed hooks/ to extensions/, so the runner relocates
+    # that file to ~/.pi/agent/extensions/worktrunk.ts after install.
     integrations:
       - tool: claude-code
         args: ["claude"]

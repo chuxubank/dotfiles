@@ -17,6 +17,10 @@ MODE = {{ $mode | quote }}
 # `wt config plugins pi` resolves the hook via PI_CODING_AGENT_DIR, then
 # PI_CONFIG_DIR (default .omp). Named PI_PROFILE/OMP_PROFILE ignore the
 # agent-dir override. https://github.com/max-sixty/worktrunk/pull/3594
+#
+# Earendil Pi no longer loads hooks/: they were renamed to extensions/
+# (~/.pi/agent/extensions/*.ts). After wt writes hooks/pre/worktrunk.ts
+# under PI_CODING_AGENT_DIR, relocate it and retarget the import.
 PI_ENV = {
     "pi": {
         "PI_CODING_AGENT_DIR": str(HOME / ".pi" / "agent"),
@@ -30,6 +34,11 @@ PI_ENV = {
         "OMP_PROFILE": None,
     },
 }
+
+PI_HOOK = Path(".pi/agent/hooks/pre/worktrunk.ts")
+PI_EXT = Path(".pi/agent/extensions/worktrunk.ts")
+OH_MY_IMPORT = 'import type { HookAPI } from "@oh-my-pi/pi-coding-agent/extensibility/hooks"'
+EARENDIL_IMPORT = 'import type { ExtensionAPI } from "@earendil-works/pi-coding-agent"'
 
 
 def wt_bin():
@@ -73,10 +82,30 @@ def _skip(err):
     )
 
 
+def adapt_pi_hook():
+    src = HOME / PI_HOOK
+    dst = HOME / PI_EXT
+    if not src.is_file():
+        print("  skip pi: hook not installed")
+        return 0
+    text = src.read_text()
+    text = text.replace(OH_MY_IMPORT, EARENDIL_IMPORT).replace("HookAPI", "ExtensionAPI")
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if not (dst.is_file() and dst.read_text() == text):
+        dst.write_text(text)
+        print("  wrote %s" % dst)
+    src.unlink()
+    print("  removed %s" % src)
+    rmdir_empty(src.parent, HOME / ".pi")
+    return 0
+
+
 def install(item):
     proc = wt_plugins(item)
     if proc.returncode in (0, None):
         _write_proc(proc)
+        if item["tool"] == "pi":
+            return adapt_pi_hook()
         return 0
     err = (proc.stderr or "") + (proc.stdout or "")
     if _skip(err):
@@ -90,6 +119,11 @@ def install(item):
 def uninstall(item):
     proc = wt_plugins(item, uninstall=True)
     _write_proc(proc)
+    if item["tool"] == "pi":
+        for rel in (PI_EXT, PI_HOOK):
+            path = HOME / rel
+            if remove_path(path):
+                rmdir_empty(path.parent, HOME / ".pi")
     return 0
 
 
