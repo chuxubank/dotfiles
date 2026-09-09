@@ -29,8 +29,9 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Integration owners and targets must be declared tools. Detailed action
-       schema and path safety are checked by test-integration-schema.py. */ -}}
+{{- /* Integration owners and targets must be declared tools. Detailed static
+       structure is checked by integrations.schema.json; dynamic references
+       and agent-root containment by check-integration-semantics.py. */ -}}
 {{- range $name, $spec := default dict .integration_owners -}}
   {{- if not (hasKey $declared $name) -}}
     {{- fail (printf "integration: unknown owner %q" $name) -}}

@@ -24,7 +24,9 @@ moves. `lifecycle.setup: false` declares a cleanup-only owner. `tools.yaml`
 remains the source for owner enablement and self-owned remove/purge paths.
 
 No integration owner gets a file under `.chezmoiscripts` or a private
-`<owner>/run.py` / `<owner>/cleanup.py`. `integrations/owners` selects owners,
+`<owner>/run.py` / `<owner>/cleanup.py`. The YAML structure is validated by
+`schemas/integrations.schema.json`; a small semantic checker handles dynamic
+cross-references and agent-root containment. `integrations/owners` selects owners,
 `integrations/payload` resolves target enablement, and `integrations/engine.py`
 executes a finite action schema. Data cannot contain arbitrary Python.
 

@@ -33,6 +33,20 @@ for required in chezmoi shellcheck ruff; do
 	fi
 done
 
+CHECK_JSONSCHEMA_VERSION=0.38.0
+
+check_schema() {
+	if command -v uvx >/dev/null 2>&1; then
+		uvx --from "check-jsonschema==$CHECK_JSONSCHEMA_VERSION" check-jsonschema "$@"
+	elif command -v check-jsonschema >/dev/null 2>&1 &&
+		[ "$(check-jsonschema --version)" = "check-jsonschema, version $CHECK_JSONSCHEMA_VERSION" ]; then
+		check-jsonschema "$@"
+	else
+		echo "verify: uvx or check-jsonschema $CHECK_JSONSCHEMA_VERSION is required" >&2
+		return 1
+	fi
+}
+
 run_template() {
 	name=$1
 	out=
@@ -54,8 +68,19 @@ run_template() {
 run_template verify/contracts
 run_template verify/model
 
+if ! check_schema --builtin-schema vendor.github-workflows \
+	"$ROOT/.github/workflows/ci.yaml"; then
+	failed=1
+fi
+if ! check_schema --check-metaschema "$ROOT/schemas/integrations.schema.json"; then
+	failed=1
+fi
+if ! check_schema --schemafile "$ROOT/schemas/integrations.schema.json" \
+	--regex-variant python "$ROOT/home/.chezmoidata/integrations.yaml"; then
+	failed=1
+fi
 if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$ROOT/scripts/test-integration-schema.py" "$ROOT"; then
+	python3 "$ROOT/scripts/check-integration-semantics.py" "$ROOT"; then
 	failed=1
 fi
 if ! python3 "$ROOT/scripts/test-integration-engine.py" "$ROOT"; then

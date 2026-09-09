@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/integrations.schema.json
 # Shared target-agent roots for conservative empty-directory cleanup.
 integration_agents:
   claude-code: ".claude"

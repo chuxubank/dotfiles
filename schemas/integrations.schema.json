@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.local/schemas/integrations.schema.json",
+  "title": "Agent integration declarations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["integration_agents", "integration_owners"],
+  "properties": {
+    "integration_agents": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/relativePath" }
+    },
+    "integration_owners": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/owner" }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "nonEmptyStringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!~)(?!/)(?![A-Za-z]:[\\\\/])(?!\\.\\.(?:[\\\\/]|$))(?!.*[\\\\/]\\.\\.(?:[\\\\/]|$)).+$"
+    },
+    "agentPaths": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "$ref": "#/$defs/relativePath" }
+      }
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" },
+      "contains": { "const": "{args}" },
+      "minContains": 0,
+      "maxContains": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool"],
+      "properties": {
+        "tool": { "$ref": "#/$defs/name" },
+        "args": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lifecycle", "targets"],
+      "properties": {
+        "lifecycle": { "$ref": "#/$defs/lifecycle" },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/target" }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": { "$ref": "#/$defs/nonEmptyString" },
+        "setup": { "type": "boolean" },
+        "os": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["android", "darwin", "linux", "windows"] }
+        },
+        "binary": { "$ref": "#/$defs/nonEmptyString" },
+        "install": { "$ref": "#/$defs/command" },
+        "uninstall": { "$ref": "#/$defs/command" },
+        "uninstall_disabled": { "type": "boolean" },
+        "uninstall_all": { "$ref": "#/$defs/stringList" },
+        "skip_errors": { "$ref": "#/$defs/stringList" },
+        "timeout_seconds": { "type": "integer", "minimum": 1 },
+        "target_env": { "$ref": "#/$defs/targetEnv" },
+        "cleanup": { "$ref": "#/$defs/cleanup" },
+        "post_install": { "$ref": "#/$defs/postInstall" }
+      },
+      "dependentRequired": {
+        "uninstall_all": ["uninstall"],
+        "uninstall_disabled": ["uninstall"]
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["setup"],
+            "properties": { "setup": { "const": false } }
+          },
+          "then": {},
+          "else": { "required": ["binary"] }
+        }
+      ]
+    },
+    "targetEnv": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": { "type": "string", "minLength": 1 },
+        "additionalProperties": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "needles": { "$ref": "#/$defs/stringList" },
+        "command_exact": { "$ref": "#/$defs/stringList" },
+        "command_prefixes": { "$ref": "#/$defs/stringList" },
+        "command_fields": { "$ref": "#/$defs/stringList" },
+        "standalone": { "$ref": "#/$defs/agentPaths" },
+        "json_hooks": { "$ref": "#/$defs/agentPaths" },
+        "extras": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relativePath" }
+        },
+        "markdown_refs": { "$ref": "#/$defs/markdownRefs" },
+        "marked_files": { "$ref": "#/$defs/markedFiles" },
+        "managed_blocks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/managedBlock" }
+        }
+      },
+      "dependentSchemas": {
+        "json_hooks": {
+          "anyOf": [
+            { "required": ["needles"] },
+            { "required": ["command_exact"] },
+            { "required": ["command_prefixes"] }
+          ]
+        }
+      }
+    },
+    "markdownRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agents", "patterns"],
+      "properties": {
+        "agents": { "$ref": "#/$defs/agentPaths" },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "format": "regex"
+          }
+        }
+      }
+    },
+    "managedBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "start", "end"],
+      "properties": {
+        "path": { "$ref": "#/$defs/relativePath" },
+        "start": { "$ref": "#/$defs/nonEmptyString" },
+        "end": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "markedFiles": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/markedFile" }
+      }
+    },
+    "markedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "$ref": "#/$defs/relativePath" },
+        "contains": { "$ref": "#/$defs/stringList" },
+        "head_contains": { "$ref": "#/$defs/stringList" },
+        "head_chars": { "type": "integer", "minimum": 0 }
+      },
+      "anyOf": [
+        { "required": ["contains"] },
+        { "required": ["head_contains"] }
+      ]
+    },
+    "postInstall": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/postInstallRule" }
+    },
+    "postInstallRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["move"],
+      "properties": {
+        "move": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": { "$ref": "#/$defs/relativePath" },
+            "to": { "$ref": "#/$defs/relativePath" }
+          }
+        },
+        "replacements": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "prefixItems": [
+              { "type": "string" },
+              { "type": "string" }
+            ],
+            "items": false
+          }
+        }
+      }
+    }
+  }
+}

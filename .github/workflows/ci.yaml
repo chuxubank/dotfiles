@@ -17,7 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify:
+  validate:
+    name: Validate declarations and templates
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -26,6 +27,7 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update && sudo apt-get install -y zsh shellcheck
+          curl -LsSf https://astral.sh/uv/0.12.11/install.sh | sh
           curl -LsSf https://astral.sh/ruff/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
@@ -41,6 +43,8 @@ jobs:
         run: make verify
 
   clone-and-install:
+    name: Full install (Linux)
+    needs: validate
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -140,110 +144,41 @@ jobs:
       - name: Chezmoi data
         run: '"$HOME/.local/bin/chezmoi" data'
 
-  smoke:
-    name: Smoke (${{ matrix.os }})
+  apply:
+    name: Apply managed files (${{ matrix.os }})
+    needs: validate
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-latest
-          - windows-latest
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install chezmoi (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          ./install.sh --install-only
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Install chezmoi (macOS)
         if: runner.os == 'macOS'
-        run: brew install chezmoi shellcheck ruff
+        run: brew install chezmoi
 
       - name: Install chezmoi (Windows)
         if: runner.os == 'Windows'
         run: choco install chezmoi -y
 
-      - name: Init chezmoi
+      - name: Initialize source
         run: chezmoi init --source "${{ github.workspace }}"
 
-      - name: Chezmoi data
-        run: chezmoi data
+      - name: Apply managed files
+        run: >-
+          chezmoi apply --force --no-tty
+          --exclude=encrypted,scripts,externals
 
-      - name: Dry-run apply
-        run: chezmoi apply --dry-run --force --no-tty --exclude=encrypted,scripts,externals
-
-      - name: Verify
-        if: runner.os == 'macOS'
-        run: make verify
-
-  windows:
-    name: Windows
-    runs-on: windows-latest
-    timeout-minutes: 45
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: Disable git autocrlf
-        shell: pwsh
-        run: git config --global core.autocrlf input
-
-      - uses: actions/checkout@v6
-
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          install: zsh curl git unzip mingw-w64-ucrt-x86_64-python
-
-      - name: Configure env
-        run: |
-          win_home=$(cygpath -u "$USERPROFILE")
-          echo "HOME=$win_home" >> "$GITHUB_ENV"
-          echo "CARGO_HOME=$win_home/.local/share/cargo" >> "$GITHUB_ENV"
-          echo "RUSTUP_HOME=$win_home/.local/share/rustup" >> "$GITHUB_ENV"
-          echo "$(cygpath -w "$win_home/.local/bin")" >> "$GITHUB_PATH"
-          echo "$(cygpath -w "$win_home/.local/share/cargo/bin")" >> "$GITHUB_PATH"
-
-      - name: Cache rust
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.local/share/cargo
-            ~/.local/share/rustup
-          key: ${{ runner.os }}-msys2-rustup-${{ hashFiles('home/.chezmoidata/packages/rust.toml', 'home/.chezmoiscripts/run_onchange_after_100_setup-rust.sh.tmpl', 'home/.chezmoiscripts/run_onchange_before_000_install-packages.sh.tmpl') }}
-          restore-keys: |
-            ${{ runner.os }}-msys2-rustup-
-
-      - name: Install chezmoi
-        run: |
-          bin_dir="$(cygpath -u "$USERPROFILE")/.local/bin"
-          mkdir -p "$bin_dir"
-          sh -c "$(curl -fsLS https://chezmoi.io/get)" -- -b "$bin_dir"
-          export PATH="$bin_dir:$PATH"
-          chezmoi --version
-
-      - name: Init chezmoi
-        run: |
-          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:$PATH"
-          chezmoi init --source "$(cygpath -u "$GITHUB_WORKSPACE")"
-
-      - name: Apply
-        run: |
-          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
-          chezmoi apply --force --no-tty --exclude=encrypted,externals
-
-      - name: Verify integration engine
-        run: |
-          export PATH="$(cygpath -u "$USERPROFILE")/.local/bin:$PATH"
-          source_root=$(cygpath -u "$GITHUB_WORKSPACE")
-          python3 "$source_root/scripts/test-integration-schema.py" "$source_root"
-          python3 "$source_root/scripts/test-integration-engine.py" "$source_root"
-
-      - name: Verify rust
-        run: |
-          export PATH="${CARGO_HOME:+$CARGO_HOME/bin:}$PATH"
-          rustc --version
-          cargo --version
-          rustup show
+      - name: Verify target state
+        run: >-
+          chezmoi verify
+          --exclude=encrypted,scripts,externals
