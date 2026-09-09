@@ -172,6 +172,14 @@ with tempfile.TemporaryDirectory() as tmp:
     assert stdout.getvalue() == ""
     assert counter.read_text() == "x"
 
+    marker.unlink()
+    setup["targets"][0]["enabled"] = False
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.reconcile(setup, "setup", roots)
+    assert stdout.getvalue() == ""
+    assert counter.read_text() == "x"
+    assert not marker.exists()
+
 with tempfile.TemporaryDirectory() as tmp:
     engine.HOME = Path(tmp)
     lifecycle = {
