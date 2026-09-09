@@ -76,12 +76,15 @@
 {{- range $need := list
       ".config/rtk/**"
       ".local/share/rtk/**"
-      "Library/Application Support/rtk/**"
       "Library/Caches/rtk/**"
       "AppData/Local/rtk/**" -}}
   {{- if not (has $need $rtkPurge) -}}
     {{- fail (printf "rtk purge missing %q" $need) -}}
   {{- end -}}
+{{- end -}}
+
+{{- if has "Library/Application Support/rtk/**" $rtkPurge -}}
+  {{- fail "rtk purge: Application Support must alias .config, not be a second root" -}}
 {{- end -}}
 
 {{- /* Path width for remove and purge. */ -}}

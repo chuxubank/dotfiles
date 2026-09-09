@@ -231,15 +231,14 @@ tools:
       enabled: false
     remove:
       - ".config/rtk/config.toml"
-      - "Library/Application Support/rtk/config.toml"
     purge:
       # rtk init --uninstall leaves runtime data (history.db, tee/,
-      # trusted_filters.json, telemetry). Cover every dirs crate path.
+      # trusted_filters.json, telemetry). macOS Application Support is a
+      # symlink to .config/rtk, so only the canonical directory is purged.
       - ".config/rtk/**"
       - ".local/share/rtk/**"
       - ".local/state/rtk/**"
       - ".cache/rtk/**"
-      - "Library/Application Support/rtk/**"
       - "Library/Caches/rtk/**"
       - "AppData/Local/rtk/**"
     # Target agent for `rtk init`. `tool` here is the agent, not owner.

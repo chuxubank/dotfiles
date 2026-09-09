@@ -1,6 +1,0 @@
-{{- $managed := includeTemplate "rtk/config.toml" . | fromToml -}}
-{{- includeTemplate "config/merge" (dict
-  "format" "toml"
-  "input" (dig "stdin" "" .chezmoi)
-  "managed" $managed
-) -}}

@@ -1,0 +1,3 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "rtk") .) | fromJson -}}
+{{- joinPath .chezmoi.homeDir ".config" "rtk" -}}
+{{- end -}}
