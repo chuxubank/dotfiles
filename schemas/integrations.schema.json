@@ -65,7 +65,17 @@
       "required": ["tool"],
       "properties": {
         "tool": { "$ref": "#/$defs/name" },
-        "args": { "$ref": "#/$defs/stringList" }
+        "args": { "$ref": "#/$defs/stringList" },
+        "installed": { "$ref": "#/$defs/installedProbe" }
+      }
+    },
+    "installedProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "$ref": "#/$defs/relativePath" },
+        "contains": { "$ref": "#/$defs/nonEmptyStringList" }
       }
     },
     "owner": {

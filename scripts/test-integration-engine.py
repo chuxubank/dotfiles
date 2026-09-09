@@ -74,6 +74,40 @@ with tempfile.TemporaryDirectory() as tmp:
         raise AssertionError("parent traversal was accepted")
 
 with tempfile.TemporaryDirectory() as tmp:
+    engine.HOME = Path(tmp)
+    roots = {"agent": ".agent"}
+    cleanup = {"standalone": {"agent": [".agent/owned.js"]}}
+    teardown = {
+        "owner": "owner",
+        "lifecycle": {"label": "Owner", "cleanup": cleanup},
+        "targets": [{"tool": "agent", "enabled": False, "args": []}],
+    }
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.reconcile(teardown, "teardown", roots)
+    assert stdout.getvalue() == ""
+
+    owned = Path(tmp) / ".agent/owned.js"
+    owned.parent.mkdir(parents=True)
+    owned.write_text("owned")
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.reconcile(teardown, "teardown", roots)
+    output = stdout.getvalue()
+    assert "Teardown Owner" in output and "removed" in output
+
+    setup = {
+        "owner": "owner",
+        "lifecycle": {
+            "label": "Owner",
+            "binary": "integration-test-missing-binary",
+            "cleanup": cleanup,
+        },
+        "targets": [{"tool": "agent", "enabled": True, "args": []}],
+    }
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.reconcile(setup, "setup", roots)
+    assert stdout.getvalue() == ""
+
+with tempfile.TemporaryDirectory() as tmp:
     home = Path(tmp)
     engine.HOME = home
     roots = {"agent": ".agent"}
@@ -98,6 +132,45 @@ with tempfile.TemporaryDirectory() as tmp:
     target = home / ".agent/extensions/plugin.ts"
     assert target.read_text() == "NewType from new-package\n"
     assert not source.exists()
+
+    source.unlink(missing_ok=True)
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.post_install(lifecycle, {"tool": "agent"}, roots)
+    assert stdout.getvalue() == ""
+
+with tempfile.TemporaryDirectory() as tmp:
+    engine.HOME = Path(tmp)
+    roots = {"agent": ".agent"}
+    marker = Path(tmp) / ".agent/plugin.ts"
+    counter = Path(tmp) / "installs"
+    install_script = (
+        "from pathlib import Path; "
+        f"p=Path({str(marker)!r}); p.parent.mkdir(parents=True, exist_ok=True); "
+        "p.write_text('installed'); "
+        f"c=Path({str(counter)!r}); c.write_text(c.read_text()+'x' if c.exists() else 'x')"
+    )
+    setup = {
+        "owner": "owner",
+        "lifecycle": {
+            "label": "Owner",
+            "binary": sys.executable,
+            "install": [sys.executable, "-c", install_script],
+        },
+        "targets": [
+            {
+                "tool": "agent",
+                "enabled": True,
+                "args": [],
+                "installed": {"path": ".agent/plugin.ts"},
+            }
+        ],
+    }
+    engine.reconcile(setup, "setup", roots)
+    assert counter.read_text() == "x"
+    with contextlib.redirect_stdout(io.StringIO()) as stdout:
+        engine.reconcile(setup, "setup", roots)
+    assert stdout.getvalue() == ""
+    assert counter.read_text() == "x"
 
 with tempfile.TemporaryDirectory() as tmp:
     engine.HOME = Path(tmp)

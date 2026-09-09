@@ -213,11 +213,29 @@ integration_owners:
     targets:
       - tool: claude-code
         args: ["claude"]
+        installed:
+          path: .claude/plugins/installed_plugins.json
+          contains: ['"worktrunk@worktrunk"', '"scope": "user"']
       - tool: codex
         args: ["codex"]
+        installed:
+          path: .codex/config.toml
+          contains:
+            - |-
+              [plugins."worktrunk@worktrunk"]
+                  enabled = true
       - tool: opencode
         args: ["opencode"]
+        installed:
+          path: .config/opencode/plugins/worktrunk.ts
+          contains: ["Worktrunk activity tracking plugin for OpenCode"]
       - tool: omp
         args: ["pi"]
+        installed:
+          path: .omp/agent/hooks/pre/worktrunk.ts
+          contains: ["Worktrunk activity tracking hook for Pi / oh-my-pi", "HookAPI"]
       - tool: pi
         args: ["pi"]
+        installed:
+          path: .pi/agent/extensions/worktrunk.ts
+          contains: ["Worktrunk activity tracking hook for Pi / oh-my-pi", "ExtensionAPI"]

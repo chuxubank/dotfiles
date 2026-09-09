@@ -18,7 +18,8 @@
   {{- $targets = append $targets (dict
         "tool" $agent
         "args" (dig "args" (list) $target)
-        "enabled" $enabled) -}}
+        "enabled" $enabled
+        "installed" (dig "installed" dict $target)) -}}
 {{- end -}}
 {{- dict
       "owner" $name

@@ -54,6 +54,13 @@ for owner, spec in owners.items():
     unknown_targets = set(target_names) - set(agents)
     if unknown_targets:
         fail(f"{owner}: unknown targets {sorted(unknown_targets)}")
+    for target in spec["targets"]:
+        probe = target.get("installed")
+        if probe and not below(probe["path"], agents[target["tool"]]):
+            fail(
+                f"{owner}.targets.{target['tool']}.installed.path: "
+                f"{probe['path']!r} is outside {agents[target['tool']]!r}"
+            )
 
     cleanup = lifecycle.get("cleanup", {})
     for field in ("standalone", "json_hooks"):

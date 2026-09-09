@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import re
@@ -227,6 +229,30 @@ def clean_targets(cleanup, names, agent_roots, extras=False):
             strip_managed_block(home_path(rule["path"]), rule["start"], rule["end"])
 
 
+def capture_cleanup(cleanup, names, agent_roots, extras=False):
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output):
+        clean_targets(cleanup, names, agent_roots, extras=extras)
+    return output.getvalue()
+
+
+def target_installed(item):
+    probe = item.get("installed")
+    if not probe:
+        return False
+    path = home_path(probe["path"])
+    if not path.is_file():
+        return False
+    markers = probe.get("contains", [])
+    if not markers:
+        return True
+    try:
+        text = path.read_text()
+    except (OSError, UnicodeDecodeError):
+        return False
+    return all(marker in text for marker in markers)
+
+
 def expand_command(template, item):
     command = []
     for value in template:
@@ -296,7 +322,6 @@ def post_install(lifecycle, item, agent_roots):
     src = home_path(move["from"])
     dst = home_path(move["to"])
     if not src.is_file():
-        print("  skip %s: hook not installed" % item["tool"])
         return
     text = src.read_text()
     for old, new in rule.get("replacements", []):
@@ -318,24 +343,43 @@ def reconcile(spec, mode, agent_roots):
     binary = lifecycle.get("binary")
     installed = not binary or shutil.which(binary)
     names = [item["tool"] for item in targets]
+    announced = False
+
+    def announce(action):
+        nonlocal announced
+        if not announced:
+            print("󰯁 %s %s agent integrations" % (action, label))
+            announced = True
+
+    def emit_cleanup(output, action):
+        if not output:
+            return False
+        announce(action)
+        sys.stdout.write(output)
+        return True
 
     if mode == "teardown":
-        print("󰯁 Teardown %s agent integrations" % label)
         errors = []
         if installed and lifecycle.get("uninstall"):
             for item in targets:
+                announce("Teardown")
+                print("  uninstall %s" % item["tool"])
                 code = run_command(lifecycle, "uninstall", item)
                 if code not in (0, None):
                     errors.append((item["tool"], code))
             declared = {arg for item in targets for arg in item.get("args", [])}
             for target in lifecycle.get("uninstall_all", []):
                 if target not in declared:
+                    announce("Teardown")
+                    print("  uninstall %s" % target)
                     code = run_command(
                         lifecycle, "uninstall", {"tool": target, "args": [target]}
                     )
                     if code not in (0, None):
                         errors.append((target, code))
-        clean_targets(cleanup, names, agent_roots, extras=True)
+        emit_cleanup(
+            capture_cleanup(cleanup, names, agent_roots, extras=True), "Teardown"
+        )
         if errors:
             print(
                 "%s uninstall failed: %s"
@@ -348,29 +392,43 @@ def reconcile(spec, mode, agent_roots):
             raise SystemExit(1)
         return
 
-    print("󰯁 Setup %s agent integrations" % label)
     if not installed:
-        print("%s is not installed; removing leftover agent integrations" % label)
-        clean_targets(cleanup, names, agent_roots, extras=True)
+        output = capture_cleanup(cleanup, names, agent_roots, extras=True)
+        if output:
+            announce("Setup")
+            print("%s is not installed; removing leftover agent integrations" % label)
+            sys.stdout.write(output)
         return
     for item in targets:
         if item["enabled"]:
-            print("  init %s" % item["tool"])
-            code = run_command(lifecycle, "install", item)
-            if code not in (0, None):
-                raise SystemExit(code)
-            post_install(lifecycle, item, agent_roots)
+            if lifecycle.get("install") and not target_installed(item):
+                announce("Setup")
+                print("  init %s" % item["tool"])
+                code = run_command(lifecycle, "install", item)
+                if code not in (0, None):
+                    raise SystemExit(code)
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                post_install(lifecycle, item, agent_roots)
+            emit_cleanup(output.getvalue(), "Setup")
     disabled = [item for item in targets if not item["enabled"]]
     uninstall_errors = []
     if lifecycle.get("uninstall_disabled") and lifecycle.get("uninstall"):
         for item in disabled:
+            announce("Setup")
+            print("  uninstall %s" % item["tool"])
             code = run_command(lifecycle, "uninstall", item)
             if code not in (0, None):
                 uninstall_errors.append((item["tool"], code))
-    for item in disabled:
-        print("  remove %s" % item["tool"])
     if disabled:
-        clean_targets(cleanup, [item["tool"] for item in disabled], agent_roots)
+        emit_cleanup(
+            capture_cleanup(
+                cleanup,
+                [item["tool"] for item in disabled],
+                agent_roots,
+            ),
+            "Setup",
+        )
     if uninstall_errors:
         print(
             "%s uninstall failed: %s"

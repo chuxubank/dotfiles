@@ -2,13 +2,19 @@
 #!/bin/sh
 set -e
 
-echo "󰯁 Purge disabled tool runtime data"
+announced=false
 
 trash_path() {
     _path=$1
     if [ ! -e "$_path" ] && [ ! -L "$_path" ]; then
         return 0
     fi
+
+    if [ "$announced" = false ]; then
+        echo "󰯁 Purge disabled tool runtime data"
+        announced=true
+    fi
+    echo "Move disabled tool data to Trash: $_path"
 
     if command -v trash-put >/dev/null 2>&1; then
         trash-put "$_path"
@@ -31,7 +37,6 @@ APPLESCRIPT
     {{- range $pattern := dig "purge" (list) $spec }}
       {{- if hasSuffix "/**" $pattern }}
         {{- $rel := trimSuffix "/**" $pattern }}
-echo "Move disabled tool data to Trash: {{ printf "%s/%s" $.chezmoi.homeDir $rel }}"
 trash_path {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
       {{- end }}
     {{- end }}
