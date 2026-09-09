@@ -1,0 +1,3 @@
+{{- if and (ne .chezmoi.os "windows") (lookPath "python3") (includeTemplate "tool/enabled" (merge (dict "tool" "worktrunk") .) | fromJson) -}}
+{{ includeTemplate "worktrunk/run.py" (merge (dict "mode" "setup") .) -}}
+{{- end -}}
