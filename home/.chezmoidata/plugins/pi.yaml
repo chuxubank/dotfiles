@@ -76,3 +76,17 @@ plugins:
           Overlay stays out of the main transcript; inject or summarize
           back on request.
         source: npm:pi-btw
+
+      - name: pi-add-dir
+        description: >-
+          Add directories outside cwd to this session. Injects their
+          AGENTS.md/CLAUDE.md, registers skills, and includes those trees
+          in @ file autocomplete as absolute paths.
+        source: npm:@henryqw/pi-add-dir
+
+      - name: pi-switch-cwd
+        description: >-
+          /cwd relocates the session working directory. The session file
+          moves with it; tools, context files, and skills rebuild for the
+          new cwd.
+        source: npm:@yceachan/pi-switch-cwd
