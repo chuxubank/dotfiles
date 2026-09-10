@@ -260,7 +260,9 @@ def reconcile(manager):
         cleanup_errors = cleanup_before and cleanup_resources(
             manager, manager["cleanup_inventory"], manager["uninstall"]
         )
-        plugin_errors = reconcile_resources(manager, cleanup=not cleanup_before)
+        plugin_errors = False
+        if manager.get("install"):
+            plugin_errors = reconcile_resources(manager, cleanup=not cleanup_before)
     except InventoryError as err:
         print(str(err), file=sys.stderr)
         raise SystemExit(1)

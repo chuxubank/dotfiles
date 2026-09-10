@@ -15,13 +15,6 @@ plugin_managers:
       mode: string_or_field
       field: [source]
       label: pi packages
-    inventory:
-      file: .pi/agent/npm/package.json
-      path: [dependencies]
-      mode: keys
-      prefix: "npm:"
-      label: pi packages
-    install: [pi, install, "{source}"]
     uninstall: [pi, remove, "{installed}"]
 
   omp:

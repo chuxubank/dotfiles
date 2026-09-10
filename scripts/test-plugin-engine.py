@@ -102,6 +102,34 @@ with tempfile.TemporaryDirectory() as tmp:
         manager.pop("cleanup_order")
         manager.pop("cleanup_inventory")
 
+        cleanup_only = {
+            "name": "fake",
+            "label": "Fake",
+            "binary": "fake-plugin",
+            "identity": "name",
+            "cleanup_order": "before",
+            "cleanup_inventory": {
+                "file": "settings.json",
+                "path": ["packages"],
+                "mode": "string_or_field",
+                "field": ["source"],
+                "label": "old packages",
+            },
+            "uninstall": ["fake-plugin", "remove", "{installed}"],
+            "declared_plugins": [
+                {"name": "keep", "source": "keep-source", "enabled": True},
+                {"name": "never-installed", "source": "never-source", "enabled": True},
+            ],
+            "declared_marketplaces": [],
+        }
+        settings.write_text(json.dumps({"packages": ["keep", "stale-only"]}))
+        before = log.read_text()
+        with contextlib.redirect_stdout(io.StringIO()) as stdout:
+            engine.reconcile(cleanup_only)
+        assert "Remove undeclared Fake plugin: stale-only" in stdout.getvalue()
+        assert "Install" not in stdout.getvalue()
+        assert log.read_text() == before + "remove stale-only\n"
+
         data = json.loads(state.read_text())
         data["plugins"].append({"name": "stale", "enabled": True})
         state.write_text(json.dumps(data))

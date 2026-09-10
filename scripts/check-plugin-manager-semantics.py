@@ -46,7 +46,9 @@ for name, manager in managers.items():
         bad_sources = [source for source in sources if not source.startswith("npm:")]
         if bad_sources:
             fail(f"{name}: npm identities require npm: sources: {bad_sources}")
-    commands = [manager["install"], manager["uninstall"]]
+    commands = [manager["uninstall"]]
+    if manager.get("install"):
+        commands.append(manager["install"])
     if manager.get("enable"):
         commands.append(manager["enable"])
     marketplace = manager.get("marketplaces")

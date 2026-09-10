@@ -90,7 +90,7 @@
     "manager": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["phase", "label", "binary", "identity", "inventory", "install", "uninstall"],
+      "required": ["phase", "label", "binary", "identity", "uninstall"],
       "properties": {
         "phase": { "enum": ["before", "after"] },
         "label": { "$ref": "#/$defs/nonEmptyString" },
@@ -113,6 +113,10 @@
         "cleanup_order": ["cleanup_inventory"],
         "cleanup_inventory": ["cleanup_order"]
       },
+      "anyOf": [
+        { "required": ["install", "inventory"] },
+        { "required": ["cleanup_order", "cleanup_inventory"] }
+      ],
       "allOf": [
         {
           "if": { "required": ["identity_transform"] },
