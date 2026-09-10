@@ -99,8 +99,6 @@ tools:
       - ".hermes/mcp-tokens/**"
 
   herdr:
-    when:
-      enabled: false
     remove:
       - ".config/herdr/config.toml"
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
