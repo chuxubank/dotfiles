@@ -22,6 +22,19 @@ skills:
         source: RizRiyz/luvus
         owner: luvus
 
+      # Paseo bundles these and re-converges them from its own copy on daemon
+      # startup. private_dot_paseo/modify_config.json pins an empty skill
+      # selection so this stays the only writer.
+      - name:
+          - paseo
+          - paseo-advisor
+          - paseo-committee
+          - paseo-handoff
+          - paseo-help
+          - paseo-plugin
+        source: getpaseo/paseo
+        owner: paseo
+
       - name: termio
         source: termio-sh/termio
         owner: termio

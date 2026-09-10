@@ -1,0 +1,76 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* https://paseo.sh/docs/configuration
+       Paseo owns this file at runtime: `paseo daemon set-password` writes an
+       auth hash, device pairing flips relay, and the Settings UI persists
+       provider, profile, and feature choices. A modify-template so that state
+       survives apply and only the choices this repo owns are pinned.
+
+       daemon.mcp.injectIntoAgents is off upstream and is the reason to run
+       Paseo here at all: agents it launches can then spawn and coordinate
+       their own workers.
+
+       relay stays off because reachability is Tailscale's job
+       (.chezmoidata/tailscale.yaml), so the daemon never dials
+       relay.paseo.sh. Paseo offers to enable it during device pairing;
+       declining keeps this value, and a fresh home already writes false —
+       pinned anyway because a config that omitted the field keeps the legacy
+       relay-enabled behaviour.
+
+       agents.skills.selection is an empty custom list, not `all`. The skills
+       CLI owns ~/.agents/skills for every agent on this host and installs the
+       paseo-* set from getpaseo/paseo
+       (.chezmoidata/skills/providers-general.yaml). Paseo ships the same
+       skills and re-converges them from its own bundle on startup, which
+       would make two writers for one directory. An empty selection leaves its
+       converger owning nothing; startup convergence never deletes, so the
+       skills the CLI installed stay put.
+
+       worktrees.root moves worktrees out of $PASEO_HOME, so .paseo/ is pure
+       daemon state and tools.yaml can purge it wholesale. It points at the
+       shared agent-worktree parent (path.data.worktree) rather than a
+       Paseo-only directory, so every tool that can be pointed somewhere keeps
+       its checkouts in one place. Paseo keeps its hashed per-project layout
+       under this root and creates the directories on demand. Absolute so it
+       never re-resolves against PASEO_HOME.
+
+       Two tools stay out of that parent. Luvus derives worktree paths from
+       LUVUS_HOME with no setting to override, and worktrunk deliberately puts
+       worktrees beside their checkout for shell-driven work
+       (dot_config/worktrunk/config.toml).
+
+       Not pinned, deliberately:
+       - daemon.listen, daemon.cors, app.baseUrl: Paseo writes its own values
+         into a fresh home, and pinning them fights `paseo daemon start` flags.
+       - daemon.mcp.enabled: already true by default.
+       - daemon.enableTerminalAgentHooks: installing those hooks edits
+         .claude/settings.json and .codex/hooks.json, which chezmoi manages.
+         Off keeps one writer per path. */ -}}
+
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "$schema" "https://paseo.sh/schemas/paseo.config.v1.json"
+    "version" 1
+    "daemon" (dict
+      "mcp" (dict
+        "injectIntoAgents" true
+      )
+      "relay" (dict
+        "enabled" false
+      )
+    )
+    "worktrees" (dict
+      "root" (joinPath .chezmoi.homeDir .path.data.worktree "paseo")
+    )
+    "agents" (dict
+      "skills" (dict
+        "selection" (dict
+          "mode" "custom"
+          "skills" (list)
+        )
+      )
+    )
+  )
+) -}}

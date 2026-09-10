@@ -71,6 +71,7 @@ casks = [
   "monitorcontrol",
   "nextcloud",
   "openusage",
+  { name = "paseo", owner = "paseo" },
   "postman",
   "raycast",
   "sf-symbols",

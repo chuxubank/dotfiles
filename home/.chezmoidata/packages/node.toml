@@ -24,6 +24,9 @@ global = [
   { name = "@earendil-works/pi-coding-agent", owner = "pi" },
   { name = "@figma/code-connect", when.enabled.host_env = ["iv"] },
   { name = "@fission-ai/openspec", when.enabled.host_env = ["iv"] },
+  # The darwin cask ships Paseo.app with its own `paseo` binary; npm would be
+  # a second manager for the same command there.
+  { name = "@getpaseo/cli", owner = "paseo", when.disabled.os = "darwin" },
   { name = "@github/copilot", owner = "github-copilot" },
   { name = "@infinity/infinity-api-mcp", url = "git+ssh://git@git.infinityparadise.com/luorenyu/infinity-api-mcp.git", when.enabled.host_env = ["iv"] },
   { name = "@larksuite/cli", when.enabled.host_env = ["iv"] },

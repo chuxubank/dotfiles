@@ -176,6 +176,21 @@ tools:
       - ".config/Orca/**"
       - "Library/Application Support/orca/**"
 
+  # Self-hosted daemon that launches the other agent CLIs. The desktop cask
+  # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
+  paseo:
+    when:
+      disabled:
+        host_env: [ci]
+    remove:
+      - ".paseo/config.json"
+    purge:
+      # Safe to wipe wholesale: private_dot_paseo/modify_config.json points
+      # worktrees.root at the shared path.data.worktree parent, so no git
+      # worktree (and no unmerged work) lives under this tree. Keep that pin
+      # and this entry together.
+      - ".paseo/**"
+
   pi:
     when:
       disabled:
