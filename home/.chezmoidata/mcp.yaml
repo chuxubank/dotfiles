@@ -43,6 +43,7 @@ mcp:
           - --autoConnect
         timeout: 20
     - name: CodeGraph
+      owner: codegraph
       description:
         Semantic code intelligence over a local code graph. `codegraph_explore`
         answers "how does X work" / "how does X reach Y" in one call, returning

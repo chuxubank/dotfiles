@@ -30,6 +30,9 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
+  # CLI via bun; agent wiring is MCP + env. No managed dest files.
+  codegraph: {}
+
   codex:
     when:
       disabled:

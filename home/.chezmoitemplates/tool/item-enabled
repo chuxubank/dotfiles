@@ -15,7 +15,7 @@
     {{- $owner = dig "tool" "" $item -}}
   {{- end -}}
   {{- if $owner -}}
-    {{- includeTemplate "tool/enabled" (merge (dict) . (dict "tool" $owner "require" true)) -}}
+    {{- includeTemplate "tool/enabled" (mergeOverwrite (deepCopy .) (dict "tool" $owner "require" true)) -}}
   {{- else -}}
     {{- toJson true -}}
   {{- end -}}

@@ -2,7 +2,6 @@
 global = [
   "@actions/languageserver",
   "@ansible/ansible-language-server",
-  "@colbymchenry/codegraph",
   "@github/copilot-language-server",
   "@modelcontextprotocol/inspector",
   "@prettier/plugin-ruby",
@@ -21,6 +20,7 @@ global = [
   { name = "@agentclientprotocol/claude-agent-acp", owner = "claude-code" },
   { name = "@anthropic-ai/claude-code", owner = "claude-code" },
   { name = "@blowmage/cursor-agent-acp", owner = "cursor" },
+  { name = "@colbymchenry/codegraph", owner = "codegraph" },
   { name = "@earendil-works/pi-coding-agent", owner = "pi" },
   { name = "@figma/code-connect", when.enabled.host_env = ["iv"] },
   { name = "@fission-ai/openspec", when.enabled.host_env = ["iv"] },

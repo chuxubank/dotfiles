@@ -85,6 +85,13 @@
   {{- end -}}
 {{- end -}}
 
+{{- range $provider := dig "providers" (list) (default dict .mcp) -}}
+  {{- $owner := dig "owner" "" $provider -}}
+  {{- if and $owner (not (hasKey $declared $owner)) -}}
+    {{- fail (printf "mcp %s: unknown owner %q" (dig "name" "?" $provider) $owner) -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* Every owner reference is declared. Package maps must use owner, not tool. */ -}}
 {{- $pkgPaths := list
       (list "darwin" "taps")

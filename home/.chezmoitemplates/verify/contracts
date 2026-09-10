@@ -175,6 +175,25 @@
 {{- if ne (includeTemplate "tool/item-enabled" (merge (dict) $base (dict "item" (dict "name" "black") "host_env" "personal")) | fromJson) true -}}
   {{- fail "tool/item-enabled: no owner stays on" -}}
 {{- end -}}
+{{- /* mcp/when: owner is the lifecycle switch, tool is the consuming agent */ -}}
+{{- $mcpOwned := dict "name" "Owned Server" "owner" "claude-code" -}}
+{{- if ne (includeTemplate "mcp/when" (merge (dict) $base (dict "provider" $mcpOwned "tool" "pi" "host_env" "personal")) | fromJson) false -}}
+  {{- fail "mcp/when: owner claude-code off personal" -}}
+{{- end -}}
+{{- if ne (includeTemplate "mcp/when" (merge (dict) $base (dict "provider" $mcpOwned "tool" "pi" "host_env" "iv")) | fromJson) true -}}
+  {{- fail "mcp/when: owner claude-code on iv" -}}
+{{- end -}}
+{{- $mcpFree := dict "name" "Unowned Server" -}}
+{{- if ne (includeTemplate "mcp/when" (merge (dict) $base (dict "provider" $mcpFree "tool" "pi" "host_env" "personal")) | fromJson) true -}}
+  {{- fail "mcp/when: no owner stays on" -}}
+{{- end -}}
+{{- $mcpAgentGated := dict "name" "Agent Gated" "owner" "codex" "when" (dict "disabled" (dict "tool" (list "pi"))) -}}
+{{- if ne (includeTemplate "mcp/when" (merge (dict) $base (dict "provider" $mcpAgentGated "tool" "pi" "host_env" "personal")) | fromJson) false -}}
+  {{- fail "mcp/when: when.disabled.tool must still gate the consuming agent" -}}
+{{- end -}}
+{{- if ne (includeTemplate "mcp/when" (merge (dict) $base (dict "provider" $mcpAgentGated "tool" "codex" "host_env" "personal")) | fromJson) true -}}
+  {{- fail "mcp/when: owner on, other agent allowed" -}}
+{{- end -}}
 
 {{- /* package/items */ -}}
 {{- $pkgCtx := merge (dict) $base (dict

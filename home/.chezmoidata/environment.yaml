@@ -106,6 +106,7 @@ environment:
           literal: "1"
 
     - tool: codegraph
+      owner: codegraph
       variables:
         # Telemetry is on by default and `codegraph install` (which asks) never
         # runs: bun owns the CLI and chezmoi owns the agent wiring.

@@ -1,5 +1,6 @@
-{{- /* Determine whether a provider is enabled based on `when.enabled` / `when.disabled`. */ -}}
-{{- includeTemplate "when/evaluate" (dict
+{{- /* Determine whether a provider is enabled.
+       `when.*.tool` is the consuming agent. `owner` is the tools.yaml switch. */ -}}
+{{- $when := includeTemplate "when/evaluate" (dict
       "item" .provider
       "values" (dict
         "device_type" .device_type
@@ -9,4 +10,6 @@
         "mem_gb" (dig "mem_gb" 0 .)
         "disk_gb" (dig "disk_gb" 0 .)
         "tool" .tool)
-      "os_version" (dig "os_version" "" .)) -}}
+      "os_version" (dig "os_version" "" .)) | fromJson -}}
+{{- $owned := includeTemplate "tool/item-enabled" (merge (dict "item" .provider) .) | fromJson -}}
+{{- toJson (and $when $owned) -}}
