@@ -248,6 +248,29 @@
 {{- if ne (index $agentsSlugOff 0) "codex" -}}
   {{- fail "skills/when: remaining agent should be the skills CLI slug" -}}
 {{- end -}}
+
+{{- /* skills/external: owner gates protection; missing owner is rejected */ -}}
+{{- $externalOn := includeTemplate "skills/external" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skills" (dict "external" (list
+        (dict "name" "zeta" "owner" "codex")
+        (dict "name" "alpha" "owner" "codex"))))) | fromJson -}}
+{{- if or (ne (len $externalOn) 2) (ne (index $externalOn 0) "alpha") -}}
+  {{- fail (printf "skills/external: expected sorted alpha+zeta, got %s" ($externalOn | toJson)) -}}
+{{- end -}}
+{{- $externalOff := includeTemplate "skills/external" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skills" (dict "external" (list
+        (dict "name" "alpha" "owner" "claude-code"))))) | fromJson -}}
+{{- if ne (len $externalOff) 0 -}}
+  {{- fail "skills/external: disabled owner must drop the name so cleanup reaps it" -}}
+{{- end -}}
+{{- $externalEmpty := includeTemplate "skills/external" (merge (dict) $base (dict
+      "host_env" "personal"
+      "skills" (dict))) | fromJson -}}
+{{- if ne (len $externalEmpty) 0 -}}
+  {{- fail "skills/external: absent key should yield an empty list" -}}
+{{- end -}}
 {{- $agentsSlugOn := includeTemplate "skills/when" (merge (dict) $base (dict
       "host_env" "personal"
       "skill" (dict "name" "find-docs")

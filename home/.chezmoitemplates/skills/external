@@ -1,0 +1,18 @@
+{{- /* skills/external — Skill names owned by another installer, which the
+       undeclared-skill cleanup must protect but never install.
+       Entries are maps with `name` plus a required `owner` (a tools.yaml
+       switch); a disabled owner drops the name so cleanup reaps it.
+       Output: JSON array of names, sorted */ -}}
+{{- $out := list -}}
+{{- range $entry := dig "external" (list) (default dict .skills) -}}
+  {{- if ne (kindOf $entry) "map" -}}
+    {{- fail (printf "skills/external: entry must be a map, got %q" (kindOf $entry)) -}}
+  {{- end -}}
+  {{- if not (dig "owner" "" $entry) -}}
+    {{- fail (printf "skills/external: %v needs an owner" (dig "name" "?" $entry)) -}}
+  {{- end -}}
+  {{- if includeTemplate "tool/item-enabled" (mergeOverwrite (deepCopy $) (dict "item" $entry)) | fromJson -}}
+    {{- $out = append $out $entry.name -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson ($out | sortAlpha) -}}

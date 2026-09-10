@@ -79,6 +79,7 @@ casks = [
   "squirrel-app",
   { name = "stablyai/orca/orca", owner = "orca" },
   "stats",
+  { name = "terminal-browser", owner = "terminal-browser" },
   "thaw",
   { name = "termio-sh/tap/termio", owner = "termio" },
   "uuremote",

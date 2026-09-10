@@ -194,6 +194,14 @@ fi
   {{ end }}
 {{- end }}
 
+# Skills another installer owns (skills/external.yaml). Declared so the
+# cleanup below leaves them alone; never installed or updated here.
+{{- range $name := includeTemplate "skills/external" . | fromJson }}
+if (( ! ${declared[(Ie){{ $name | quote }}]} )); then
+  declared+=({{ $name | quote }})
+fi
+{{- end }}
+
 remove_undeclared cleanup_enabled installed declared \
   'skill' skills remove {} -g --yes
 

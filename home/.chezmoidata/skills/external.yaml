@@ -1,0 +1,20 @@
+# Skills another installer owns. Declared here only so the undeclared-skill
+# cleanup in run_onchange_after_200_setup-skills.sh leaves them alone; the
+# skills CLI never installs, updates, or removes them.
+#
+# A provider entry cannot express this. Providers resolve their names through
+# `skills add --list <source>`, and these skills have no such source: the
+# installer materializes them from its own payload. Declaring one as a provider
+# would fail to resolve, which switches cleanup off for every skill.
+#
+# `owner` is a tools.yaml switch and is required: when the owner is off, the
+# name stops being protected so cleanup reaps the copy its installer left.
+skills:
+  external:
+    # terminal-browser symlinks its bundled skill into ~/.agents/skills (and
+    # each agent's own skills dir) from the dist payload. Its `ensureSetup` is
+    # gated on a version receipt under .local/state/terminal-browser, so once
+    # cleanup deleted the link it would not return until the next upgrade
+    # re-ran setup.
+    - name: terminal-browser
+      owner: terminal-browser

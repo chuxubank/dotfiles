@@ -249,6 +249,21 @@ tools:
     purge:
       - ".termio/**"
 
+  # Chromium rendered into a terminal pane through the kitty graphics
+  # protocol. No managed config: it is CLI-only, and its own installer owns
+  # the bundled skill (see skills/external.yaml).
+  terminal-browser:
+    when:
+      disabled:
+        host_env: [ci]
+    purge:
+      # Only this tree is exclusively ours. The cask zaps sibling paths
+      # (.cache/terminal-browser-*, .local/share/terminal-browser-*) whose
+      # dirname is a shared tree, so purging them here would make
+      # disabled-ignore swallow .cache and .local/share. `brew zap` covers
+      # those, and the bundled skill symlinks live in shared agent trees.
+      - ".local/state/terminal-browser/**"
+
   warp:
     when:
       enabled:
