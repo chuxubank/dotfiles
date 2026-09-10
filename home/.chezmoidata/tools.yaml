@@ -119,7 +119,12 @@ tools:
       - ".luvus/modules.json"
       - ".luvus/modules/**"
       - ".luvus/sessions/**"
-      - ".luvus/worktrees/**"
+      # .luvus/worktrees/** is deliberately absent: Luvus builds worktree paths
+      # from LUVUS_HOME (src/app/mod.rs worktrees_dir_for) and has no setting
+      # to move them, so unlike Paseo and Orca it cannot point at
+      # path.data.worktree. Purging this would trash real git worktrees and any
+      # unmerged work in them. Remove them through Luvus, which also deletes
+      # the now-empty parent.
       - ".luvus/reviews/**"
 
   lody:

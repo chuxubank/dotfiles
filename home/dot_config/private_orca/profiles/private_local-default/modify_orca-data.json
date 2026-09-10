@@ -33,7 +33,7 @@
   "agentDefaultEnv" (dict
     "goose" (dict "GOOSE_MODE" "auto")
   )
-  "workspaceDir" (joinPath .chezmoi.homeDir "orca" "workspaces")
+  "workspaceDir" (joinPath .chezmoi.homeDir .path.data.worktree "orca")
   "theme" "system"
   "nestWorkspaces" true
   "autoRenameBranchFromWork" true

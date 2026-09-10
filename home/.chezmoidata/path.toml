@@ -36,6 +36,15 @@ sdkman = ".sdkman"
 [path.data]
 nutstore = "Nutstore"
 mail = ".maildir"
+# Shared parent for agent-created git worktrees. Tools that expose a
+# configurable root point at their own subdirectory here instead of hiding
+# worktrees inside their state dir, so a `purge` of that state cannot reach a
+# checkout holding unmerged work. One subdirectory per tool: each tool derives
+# its own per-repo layout underneath and must not have to agree with another's.
+# Luvus is absent on purpose — it builds worktree paths from LUVUS_HOME and has
+# no setting for this. Worktrunk is absent too: it puts worktrees beside their
+# checkout by deliberate choice (dot_config/worktrunk/config.toml).
+worktree = "Developer/Worktrees"
 rime = ".local/share/rime"
 rime-sync = "Nutstore/RimeSync"
 squirrel = "Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
