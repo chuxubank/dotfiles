@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.local/schemas/plugin-managers.schema.json",
+  "title": "Plugin lifecycle managers",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plugin_managers"],
+  "properties": {
+    "plugin_managers": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": { "$ref": "#/$defs/manager" }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!~)(?!/)(?![A-Za-z]:[\\\\/])(?!\\.\\.(?:[\\\\/]|$))(?!.*[\\\\/]\\.\\.(?:[\\\\/]|$)).+$"
+    },
+    "path": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "mode", "label"],
+      "oneOf": [
+        { "required": ["command"] },
+        { "required": ["file"] }
+      ],
+      "properties": {
+        "command": { "$ref": "#/$defs/command" },
+        "file": { "$ref": "#/$defs/relativePath" },
+        "path": { "$ref": "#/$defs/path" },
+        "mode": { "enum": ["field", "keys", "string_or_field"] },
+        "field": { "$ref": "#/$defs/path" },
+        "enabled_field": { "$ref": "#/$defs/path" },
+        "prefix": { "type": "string" },
+        "source_fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "label": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "enum": ["field", "string_or_field"] } } },
+          "then": { "required": ["field"] }
+        }
+      ]
+    },
+    "preserve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "path"],
+      "properties": {
+        "file": { "$ref": "#/$defs/relativePath" },
+        "path": { "$ref": "#/$defs/path" }
+      }
+    },
+    "marketplaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inventory", "install", "uninstall"],
+      "properties": {
+        "inventory": { "$ref": "#/$defs/inventory" },
+        "install": { "$ref": "#/$defs/command" },
+        "uninstall": { "$ref": "#/$defs/command" },
+        "preserve": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/preserve" }
+        }
+      }
+    },
+    "manager": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase", "label", "binary", "identity", "inventory", "install", "uninstall"],
+      "properties": {
+        "phase": { "enum": ["before", "after"] },
+        "label": { "$ref": "#/$defs/nonEmptyString" },
+        "binary": { "$ref": "#/$defs/nonEmptyString" },
+        "identity": { "enum": ["name", "source"] },
+        "identity_transform": { "enum": ["npm_name"] },
+        "path_prepend": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "cleanup_order": { "const": "before" },
+        "cleanup_inventory": { "$ref": "#/$defs/inventory" },
+        "inventory": { "$ref": "#/$defs/inventory" },
+        "install": { "$ref": "#/$defs/command" },
+        "enable": { "$ref": "#/$defs/command" },
+        "uninstall": { "$ref": "#/$defs/command" },
+        "marketplaces": { "$ref": "#/$defs/marketplaces" }
+      },
+      "dependentRequired": {
+        "cleanup_order": ["cleanup_inventory"],
+        "cleanup_inventory": ["cleanup_order"]
+      },
+      "allOf": [
+        {
+          "if": { "required": ["identity_transform"] },
+          "then": { "properties": { "identity": { "const": "source" } } }
+        }
+      ]
+    }
+  }
+}

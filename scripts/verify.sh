@@ -79,11 +79,25 @@ if ! check_schema --schemafile "$ROOT/schemas/integrations.schema.json" \
 	--regex-variant python "$ROOT/home/.chezmoidata/integrations.yaml"; then
 	failed=1
 fi
+if ! check_schema --check-metaschema "$ROOT/schemas/plugin-managers.schema.json"; then
+	failed=1
+fi
+if ! check_schema --schemafile "$ROOT/schemas/plugin-managers.schema.json" \
+	"$ROOT/home/.chezmoidata/plugin-managers.yaml"; then
+	failed=1
+fi
 if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
 	python3 "$ROOT/scripts/check-integration-semantics.py" "$ROOT"; then
 	failed=1
 fi
+if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
+	python3 "$ROOT/scripts/check-plugin-manager-semantics.py" "$ROOT"; then
+	failed=1
+fi
 if ! python3 "$ROOT/scripts/test-integration-engine.py" "$ROOT"; then
+	failed=1
+fi
+if ! python3 "$ROOT/scripts/test-plugin-engine.py" "$ROOT"; then
 	failed=1
 fi
 

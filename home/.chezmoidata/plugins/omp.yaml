@@ -1,9 +1,9 @@
 plugins:
   # omp-only packages (plugins/omp.yaml). The tool is implied by the
   # filename, so a plain `source` string is enough. `when` conditions work
-  # the same as elsewhere. This list is the source of truth. After apply,
-  # setup-omp-plugins `omp plugin uninstall`s undeclared npm plugins, then
-  # `omp plugin install`s anything missing.
+  # the same as elsewhere. This list is the source of truth. The shared after
+  # plugin lifecycle uninstalls undeclared npm plugins, then installs anything
+  # missing through `omp plugin`.
   #
   # Source is the npm package name passed to `omp plugin install`.
   # Marketplace plugins (`name@marketplace`) are not managed here.

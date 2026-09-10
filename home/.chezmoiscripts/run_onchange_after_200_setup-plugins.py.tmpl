@@ -1,0 +1,3 @@
+{{- if lookPath "python3" -}}
+{{ includeTemplate "plugins/dispatch.py" (merge (dict "phase" "after") .) -}}
+{{- end -}}

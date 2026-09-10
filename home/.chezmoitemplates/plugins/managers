@@ -1,0 +1,14 @@
+{{- /* plugins/managers — Enabled plugin managers selected for one phase. */ -}}
+{{- $phase := dig "phase" "" . -}}
+{{- if not (has $phase (list "before" "after")) -}}
+{{- fail "plugins/managers: phase must be before or after" -}}
+{{- end -}}
+{{- $selected := list -}}
+{{- range $name := keys (default dict .plugin_managers) | sortAlpha -}}
+  {{- $manager := index $.plugin_managers $name -}}
+  {{- $enabled := includeTemplate "tool/enabled" (merge (dict "tool" $name "require" true) $) | fromJson -}}
+  {{- if and $enabled (eq $phase $manager.phase) -}}
+    {{- $selected = append $selected $name -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $selected -}}

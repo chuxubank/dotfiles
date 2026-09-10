@@ -1,13 +1,13 @@
 plugins:
   # pi-only packages (plugins/pi.yaml). The tool is implied by the filename,
   # so a plain `source` string is enough. `when` conditions work the same as
-  # elsewhere. This list is the source of truth. Before apply,
-  # setup-pi-plugins `pi remove`s undeclared sources while they still
-  # match live settings.packages, then `pi install`s anything missing.
+  # elsewhere. This list is the source of truth. The shared before
+  # plugin lifecycle removes undeclared sources while they still match live
+  # settings.packages, then `pi install`s anything missing.
   #
-  # Sources follow pi's package spec: `npm:<pkg>[@version]`, `git:<host>/<repo>[@ref]`,
-  # or an absolute/relative local path. Versioned specs are pinned and skipped
-  # by `pi update`.
+  # Managed sources use `npm:<pkg>[@version]`; the shared inventory derives
+  # installed identities from npm/package.json. Supporting git or local sources
+  # requires a source-preserving inventory before declaring them here.
   pi:
     providers:
       - name: pi-mcp-adapter

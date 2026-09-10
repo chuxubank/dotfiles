@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=../../schemas/plugin-managers.schema.json
+# Plugin lifecycle adapters. Adding a manager must not add a chezmoi script.
+plugin_managers:
+  pi:
+    phase: before
+    label: Pi
+    binary: pi
+    identity: source
+    identity_transform: npm_name
+    path_prepend: ["~/.bun/bin"]
+    cleanup_order: before
+    cleanup_inventory:
+      file: .pi/agent/settings.json
+      path: [packages]
+      mode: string_or_field
+      field: [source]
+      label: pi packages
+    inventory:
+      file: .pi/agent/npm/package.json
+      path: [dependencies]
+      mode: keys
+      prefix: "npm:"
+      label: pi packages
+    install: [pi, install, "{source}"]
+    uninstall: [pi, remove, "{installed}"]
+
+  omp:
+    phase: after
+    label: OMP
+    binary: omp
+    identity: source
+    path_prepend: ["~/.bun/bin"]
+    inventory:
+      command: [omp, plugin, list, --json]
+      path: [npm]
+      mode: field
+      field: [name]
+      enabled_field: [enabled]
+      label: omp plugins
+    install: [omp, plugin, install, "{source}"]
+    enable: [omp, plugin, enable, "{source}"]
+    uninstall: [omp, plugin, uninstall, "{installed}"]
+
+  herdr:
+    phase: after
+    label: Herdr
+    binary: herdr
+    identity: name
+    inventory:
+      command: [herdr, plugin, list, --json]
+      path: [result, plugins]
+      mode: field
+      field: [plugin_id]
+      enabled_field: [enabled]
+      label: herdr plugins
+    install: [herdr, plugin, install, "{source}", "{ref_args}", --yes]
+    enable: [herdr, plugin, enable, "{name}"]
+    uninstall: [herdr, plugin, uninstall, "{installed}"]
+
+  grok:
+    phase: after
+    label: Grok
+    binary: grok
+    identity: name
+    inventory:
+      command: [grok, plugin, list, --json]
+      path: []
+      mode: field
+      field: [name]
+      enabled_field: [enabled]
+      label: grok plugins
+    install: [grok, plugin, install, "{source}", --trust]
+    enable: [grok, plugin, enable, "{name}"]
+    uninstall: [grok, plugin, uninstall, "{installed}", --confirm]
+    marketplaces:
+      inventory:
+        command: [grok, plugin, marketplace, list, --json]
+        path: []
+        mode: field
+        field: [name]
+        source_fields: [[source, url], [source, path]]
+        label: grok marketplaces
+      install: [grok, plugin, marketplace, add, "{source}"]
+      uninstall: [grok, plugin, marketplace, remove, "{installed}"]
+      preserve:
+        - file: .claude/settings.json
+          path: [extraKnownMarketplaces]
+        - file: .claude/plugins/known_marketplaces.json
+          path: []
