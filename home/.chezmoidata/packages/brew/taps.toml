@@ -6,6 +6,7 @@ taps = [
   { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },
   { name = "deb-sig/tap", trusted = { formula = "double-entry-generator" } },
   "jimeh/emacs-builds",
+  { name = "Jarvis322/tap", trusted = { cask = "sysdata" } },
   { name = "lycorp-jp/tap", trusted = { formula = "sim-use" }, owner = "sim-use" },
   { name = "owo-network/brew", trusted = { cask = "herdrm" }, owner = "herdr" },
   "railwaycat/emacsmacport",
