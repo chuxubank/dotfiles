@@ -64,8 +64,8 @@ defaults are in the per-tool files.
 | =Ctrl+R=                 | Reverse-search prompt history                       |
 | =Ctrl+Alt+R=             | Rename session                                      |
 | =Alt+N= / =Alt+P=        | Next/previous scoped model (Pi: also =Alt+Down/Up=) |
-| =Enter=                  | Submit; Pi follow-up queue while working            |
-| =Alt+Enter=              | Pi steer while working (swapped with Enter)         |
+| =Enter=                  | Submit; Pi steer while working                      |
+| =Alt+Enter=              | Pi follow-up while working                          |
 
 In Pi, =Alt+Up/Down=, =Alt+F=, and =Right= are shadowed while a
 =pi-autosuggestions= ghost shows at the line end; see

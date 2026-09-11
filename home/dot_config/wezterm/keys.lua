@@ -11,7 +11,7 @@ local act = wezterm.action
 -- so Ctrl+Shift+P keeps WezTerm's command palette and Ctrl+Shift+N its window.
 -- Super+Shift+P is a second palette chord. Super+N still opens a window.
 -- Alt+Enter is WezTerm's default ToggleFullScreen. Unbind it so the pane gets
--- it (Pi steer). Fullscreen uses the platform chord: macOS Ctrl+Cmd+F, same
+-- it (Pi follow-up). Fullscreen uses the platform chord: macOS Ctrl+Cmd+F, same
 -- as Ghostty, and F11 elsewhere.
 
 local keys = {}

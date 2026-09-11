@@ -16,14 +16,12 @@
        That takes alt+up from app.message.dequeue, which moves to alt+q — Pi's
        own Windows fallback for that action, unused on macOS.
 
-       Enter and Alt+Enter are swapped for the message queue. Upstream Enter
-       steers (after the current tool batch); Alt+Enter follows up (after the
-       run is idle). Here Enter follows up, Alt+Enter steers. Idle Enter still
-       submits: follow-up with no active run falls through to submit.
-
        Session rename is C-M-r so Ctrl+R stays reverse search
-       (pi-input-history). */ -}}
-{{- includeTemplate "config/merge" (dict
+       (pi-input-history).
+
+       omit() drops leftover Enter/follow-up overrides as literal dotted keys.
+       config/merge remove treats dots as nested paths, so it cannot. */ -}}
+{{- $merged := includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
@@ -36,11 +34,10 @@
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
-    "tui.input.submit" "alt+enter"
-    "app.message.followUp" "enter"
     "app.model.cycleForward" "alt+down"
     "app.model.cycleBackward" "alt+up"
     "app.message.dequeue" "alt+q"
     "app.session.rename" "ctrl+alt+r"
   )
-) -}}
+) | fromJson -}}
+{{- omit $merged "tui.input.submit" "app.message.followUp" | toPrettyJson -}}

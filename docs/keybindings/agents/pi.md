@@ -26,11 +26,6 @@ sees is `alt+down`. Pressing `M-n` / `M-p` reaches these, and `Alt+Down` /
 That takes `Alt+Up` from `app.message.dequeue`, which moves to `Alt+Q` — Pi's
 own Windows fallback for that action, unused on macOS.
 
-Enter and Alt+Enter are swapped for the message queue. Pi's default Enter
-steers (after the current tool batch); Alt+Enter follows up (after the run is
-idle). Here Enter follows up, Alt+Enter steers. Idle Enter still submits,
-because follow-up with no active run falls through to submit.
-
 ## Ghost suggestions shadow four chords
 
 `pi-autosuggestions` (declared in `home/.chezmoidata/plugins/pi.yaml`) draws a
@@ -73,8 +68,6 @@ survives regardless.
 | `Alt+N` / `Alt+Down` | Reorder a model down (selector only) | Next scoped model; ghost candidate while one shows | **Add** |
 | `Alt+P` / `Alt+Up` | Dequeue a queued message | Previous scoped model; ghost candidate while one shows | **Change** |
 | `Alt+Q` | No assignment on macOS (Windows: dequeue) | Dequeue a queued message | **Add** |
-| `Enter` | Submit; steer while working | Submit; follow-up while working | **Change** |
-| `Alt+Enter` | Follow-up while working | Steer while working | **Change** |
 | `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
 | `Right` | Cursor right | Accept ghost suggestion while one shows | **Add** |
 | `Alt+F` | Word right | Accept one ghost word while one shows | **Change** |

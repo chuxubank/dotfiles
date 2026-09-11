@@ -92,5 +92,5 @@ visible at the line end, in prose as well as in `!` bash mode. See
 
 | Keys | Current assignment |
 | --- | --- |
-| `Enter` | Submit; while working, queue a follow-up (was steer) |
-| `Alt+Enter` | While working, steer (was follow-up) |
+| `Enter` | Submit; while working, steer |
+| `Alt+Enter` | While working, follow-up |
