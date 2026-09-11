@@ -1,0 +1,46 @@
+#!/bin/sh
+# Print the repository being refreshed when chezmoi runs a git-repo external.
+#
+# chezmoi executes git-repo externals as literal `git clone`/`git pull`,
+# resolving git through $PATH at run time and reporting nothing itself (not
+# even with --verbose). Prepending this directory to PATH — done by the
+# chezmoi wrapper function in .zshrc and the Makefile apply/update targets —
+# therefore surfaces each refreshed repository in real time. Externals not
+# yet due for refresh never invoke git, so exactly the refreshed ones print.
+# This directory is not on the regular PATH, so ordinary git use, and any
+# git subcommand other than clone/pull, is passed through untouched.
+set -u
+
+self=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd) || exit 1
+
+# Drop this shim's own directory from PATH so `exec git` below cannot recurse.
+new_path=''
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+	[ "$dir" = "$self" ] && continue
+	new_path=$new_path${new_path:+:}$dir
+done
+IFS=$old_ifs
+PATH=$new_path
+export PATH
+
+if [ -t 2 ]; then
+	cyan='\033[36m' reset='\033[0m'
+else
+	cyan='' reset=''
+fi
+
+case ${1:-} in
+pull)
+	printf ">> ${cyan}pull  %s${reset}\n" "$PWD" >&2
+	;;
+clone)
+	# chezmoi passes the destination directory as the final argument.
+	dest=''
+	for dest do :; done
+	printf ">> ${cyan}clone %s${reset}\n" "$dest" >&2
+	;;
+esac
+
+exec git "$@"

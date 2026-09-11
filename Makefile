@@ -8,6 +8,10 @@ export CHEZMOI_GITHUB_ACCESS_TOKEN ?= $(shell \
 		gh auth token --hostname github.com 2>/dev/null; \
 	fi)
 
+# Surface git-repo external refreshes in real time; see the shim itself
+# (home/dot_local/libexec/chezmoi-git-shim/executable_git) for the rationale.
+GIT_SHIM := $(HOME)/.local/libexec/chezmoi-git-shim
+
 install:
 	./install.sh --install-only
 
@@ -18,7 +22,7 @@ plan:
 	chezmoi apply --dry-run --force --no-tty --verbose --exclude=encrypted,scripts,externals
 
 apply:
-	./scripts/report-externals.sh apply --init
+	PATH="$(GIT_SHIM):$$PATH" chezmoi apply --init
 
 re-add:
 	chezmoi re-add
@@ -30,7 +34,7 @@ status:
 	chezmoi status
 
 update:
-	./scripts/report-externals.sh update
+	PATH="$(GIT_SHIM):$$PATH" chezmoi update
 
 edit:
 	chezmoi edit

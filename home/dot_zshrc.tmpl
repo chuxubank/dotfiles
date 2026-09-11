@@ -204,6 +204,11 @@ fi
 
 alias bupa='brew upgrade --greedy-auto-updates'
 
+# Surface git-repo external refreshes in real time; see the shim itself
+# (~/.local/libexec/chezmoi-git-shim/git) for the rationale.
+chezmoi() {
+  PATH="$HOME/.local/libexec/chezmoi-git-shim:$PATH" command chezmoi "$@"
+}
 alias cz="chezmoi"
 alias cza="cz apply --init"
 alias czu="cz update --init -a"
