@@ -61,7 +61,7 @@ override model cycling while the main editor is focused.
 | --- | --- |
 | `Ctrl+P` / `Ctrl+N` | Previous / next line, or prompt history when the editor is empty |
 | `Ctrl+B` / `Ctrl+F` | Cursor left / right |
-| `Alt+B` / `Alt+F` | Word left / right |
+| `Alt+B` / `Alt+F` | Word left / right (Pi: `Alt+F` accepts a ghost word instead while one shows) |
 | `Ctrl+A` / `Ctrl+E` | Line start / end |
 | `Ctrl+H` / `Ctrl+D` | Delete character backward / forward |
 | `Ctrl+K` / `Ctrl+U` | Delete to line end / start |
@@ -83,6 +83,10 @@ override model cycling while the main editor is focused.
 | `Alt+P` | Previous scoped model (also `Alt+Up` in Pi) |
 | `Alt+M` / `Alt+Shift+M` | Open the model selector / pick a temporary model (OMP) |
 | `Alt+Q` | Dequeue a queued message (Pi; was `Alt+Up`) |
+
+In Pi these four chords are shadowed while a `pi-autosuggestions` ghost is
+visible at the line end, in prose as well as in `!` bash mode. See
+[Pi](pi.md#ghost-suggestions-shadow-four-chords).
 
 ## Message queue (Pi)
 

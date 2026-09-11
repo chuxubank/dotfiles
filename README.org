@@ -67,6 +67,10 @@ defaults are in the per-tool files.
 | =Enter=                  | Submit; Pi follow-up queue while working            |
 | =Alt+Enter=              | Pi steer while working (swapped with Enter)         |
 
+In Pi, =Alt+Up/Down=, =Alt+F=, and =Right= are shadowed while a
+=pi-autosuggestions= ghost shows at the line end; see
+[[file:docs/keybindings/agents/pi.md][pi.md]].
+
 ** Declared workspaces
 
 Shared workspace, tab, pane, command, and agent declarations live in

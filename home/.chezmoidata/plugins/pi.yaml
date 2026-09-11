@@ -44,6 +44,24 @@ plugins:
           current Pi session branch.
         source: npm:pi-edit-session-in-place
 
+      # Must stay ahead of pi-input-history. Both replace the editor via
+      # ctx.ui.setEditorComponent, which is a single setter (last writer wins),
+      # not a stack like addAutocompleteProvider. pi-input-history composes --
+      # it reads getEditorComponent() and wraps whatever it finds -- while this
+      # package overwrites unconditionally. Loading order follows this list, so
+      # reversing the two silently drops history seeding: the call is
+      # `editor.addToHistory?.()`, which no-ops rather than erroring. Ctrl+R is
+      # unaffected either way; it lives on registerShortcut, not the editor.
+      - name: pi-autosuggestions
+        description: >-
+          zsh-autosuggestions-style ghost completions for the ! bash mode:
+          $PATH command names, a built-in subcommand table, and live git
+          branch / npm script / make target lookups. Reaches into pi-tui
+          internals that are private in the type declarations, so a pi upgrade
+          can break it; the fix ships in a later release, which is why this is
+          not pinned.
+        source: npm:pi-autosuggestions
+
       - name: pi-input-history
         description: >-
           Persist prompt history across sessions and provide fuzzy reverse
