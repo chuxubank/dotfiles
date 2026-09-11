@@ -35,6 +35,9 @@
     clone.args = [{{ range $i, $arg := $cloneArgs }}{{ if $i }}, {{ end }}{{ $arg | quote }}{{ end }}]
 {{-     end }}
 {{-     if hasKey $repo "branch" }}
+    {{- /* The chezmoi-git-shim (home/dot_local/libexec/chezmoi-git-shim)
+           recognizes this exact `--ff-only <remote> <branch>` shape and skips
+           the refresh when the clone is not checked out on <branch>. */}}
     pull.args = ["--ff-only", {{ if hasKey $repo "upstream" }}"upstream"{{ else }}"origin"{{ end }}, {{ $repo.branch | quote }}]
 {{-     end }}
 {{ end -}}

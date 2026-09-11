@@ -1,5 +1,5 @@
 #!/bin/sh
-# Print the repository being refreshed when chezmoi runs a git-repo external.
+# Report, and where necessary police, chezmoi's git-repo external refreshes.
 #
 # chezmoi executes git-repo externals as literal `git clone`/`git pull`,
 # resolving git through $PATH at run time and reporting nothing itself (not
@@ -9,6 +9,12 @@
 # yet due for refresh never invoke git, so exactly the refreshed ones print.
 # This directory is not on the regular PATH, so ordinary git use, and any
 # git subcommand other than clone/pull, is passed through untouched.
+#
+# One policy lives here because chezmoi's external config cannot express it:
+# a `pull --ff-only <remote> <branch>` refresh (the shape rendered by
+# home/.chezmoiexternals/repositories.toml.tmpl) is skipped when the clone is
+# not checked out on <branch>. A workspace parked on a feature branch would
+# otherwise fail the fast-forward and abort the entire chezmoi run.
 set -u
 
 self=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd) || exit 1
@@ -26,13 +32,24 @@ PATH=$new_path
 export PATH
 
 if [ -t 2 ]; then
-	cyan='\033[36m' reset='\033[0m'
+	cyan='\033[36m' yellow='\033[33m' reset='\033[0m'
 else
-	cyan='' reset=''
+	cyan='' yellow='' reset=''
 fi
 
 case ${1:-} in
 pull)
+	# Refreshing along <branch> only makes sense while the clone is parked
+	# on <branch>; skip (successfully) when it is not, so mid-development
+	# checkouts are reported instead of failing the whole run.
+	if [ $# -eq 4 ] && [ "$2" = --ff-only ]; then
+		head=$(git symbolic-ref --short -q HEAD) || head='detached HEAD'
+		if [ "$head" != "$4" ]; then
+			printf ">> ${yellow}skip  %s${reset} (on %s, not %s)\n" \
+				"$PWD" "$head" "$4" >&2
+			exit 0
+		fi
+	fi
 	printf ">> ${cyan}pull  %s${reset}\n" "$PWD" >&2
 	;;
 clone)
