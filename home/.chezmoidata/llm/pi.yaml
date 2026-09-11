@@ -32,7 +32,7 @@ llm:
       # pi.yaml alias, so pick-model takes the last candidate when no
       # alias resolves.
       session_title_model:
-        - iv/deepseek-v4-flash:low
+        - iv/deepseek-v4-flash
         - xai/grok-4.6:low
       # pi-subagents defaultModel. Same split as OMP's task role: IV spends
       # company-funded terra, SuperGrok is only the personal-host fallback.
