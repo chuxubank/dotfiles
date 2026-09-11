@@ -70,7 +70,9 @@ See [ADR 0005](../adr/0005-llm-provider-aliases.md).
 
 Role targets must also appear in `enabled_models`. That list is the picker's
 allow-list, and a role pointing outside it resolves to a model the session
-cannot select.
+cannot select. Entries are generation globs (`gpt-5.6*`, `gpt-6*`,
+`claude-opus-5*`, `claude-fable-5*`, `grok-4.6*`), not whole catalogs, so older
+lines stay out while personal-host `plan`/`slow` Cursor SKUs still match.
 
 Effort suffixes are per model. `gpt-5.6-luna` has no `minimal`; its floor is
 `low`.

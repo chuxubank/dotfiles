@@ -7,9 +7,12 @@
        models as a bare id list → display name is the id.
        model_overrides → per-id metadata. When models are declared, merged into
        each row last. When models: false, emitted as OMP provider-level
-       modelOverrides. A stem with no thinking-effort or -fast suffix is
-       copied onto effort siblings (the rate does not split). -fast is a
-       price lane and stays exact.
+       modelOverrides, with billed costs copied from model_metadata (models-dev)
+       first and explicit overrides winning. model_override_prefixes duplicate
+       those keys (`cursor-` for GetUsableModels grok ids). A stem copies onto
+       thinking-effort siblings (the rate does not split). -fast is a second
+       lane: a dedicated `*-fast` key expands to `*-{effort}-fast` and wins;
+       otherwise the stem rate fills the missing fast ids.
 
        Emit only when the alias contributes a model list, an override-only
        modelOverrides map, or an endpoint we can authenticate against. A bare
@@ -67,6 +70,36 @@
     {{- end -}}
   {{- end -}}
 
+  {{- if not $declaresModels -}}
+    {{- $metadata := default dict (index $ep "model_metadata") -}}
+    {{- $fromMeta := dict -}}
+    {{- range $id, $m := $metadata -}}
+      {{- if hasKey $m "cost" -}}
+        {{- $costOv := includeTemplate "llm/cost-override" (index $m "cost") | fromJson -}}
+        {{- if gt (len $costOv) 0 -}}
+          {{- $_ := set $fromMeta $id (dict "cost" $costOv) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $overrides = mergeOverwrite $fromMeta $overrides -}}
+    {{- $prefixes := default (list) (index $ep "model_override_prefixes") -}}
+    {{- if gt (len $prefixes) 0 -}}
+      {{- $withPfx := dict -}}
+      {{- range $id, $ov := $overrides -}}
+        {{- $_ := set $withPfx $id $ov -}}
+        {{- range $pfx := $prefixes -}}
+          {{- if not (hasPrefix $pfx $id) -}}
+            {{- $pid := printf "%s%s" $pfx $id -}}
+            {{- if not (hasKey $overrides $pid) -}}
+              {{- $_ := set $withPfx $pid $ov -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $overrides = $withPfx -}}
+    {{- end -}}
+  {{- end -}}
+
   {{- $hasOverrides := and (not $declaresModels) (gt (len $overrides) 0) -}}
   {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) $hasOverrides -}}
     {{- $p := dict -}}
@@ -88,22 +121,53 @@
       {{- $_ := set $p "models" $models -}}
     {{- end -}}
     {{- if $hasOverrides -}}
-      {{- /* Stem keys cover thinking-effort siblings. An explicit sibling
-             or -fast key still wins. */ -}}
+      {{- /* Stem keys cover thinking-effort siblings in the same rate lane.
+             A dedicated *-fast key expands to *-{effort}-fast; otherwise the
+             stem rate fills missing fast ids. An explicit sibling still wins. */ -}}
       {{- $effortSuffixes := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
       {{- $expanded := dict -}}
-      {{- range $id, $ov := $overrides -}}
-        {{- $_ := set $expanded $id $ov -}}
-        {{- $stem := true -}}
-        {{- if hasSuffix "-fast" $id -}}{{- $stem = false -}}{{- end -}}
-        {{- range $suf := $effortSuffixes -}}
-          {{- if hasSuffix (printf "-%s" $suf) $id -}}{{- $stem = false -}}{{- end -}}
+      {{- range $modelId, $ov := $overrides -}}
+        {{- $_ := set $expanded $modelId $ov -}}
+      {{- end -}}
+      {{- range $modelId, $ov := $overrides -}}
+        {{- $lane := $modelId -}}
+        {{- $fast := false -}}
+        {{- if hasSuffix "-fast" $modelId -}}
+          {{- $fast = true -}}
+          {{- $lane = trimSuffix "-fast" $modelId -}}
         {{- end -}}
-        {{- if $stem -}}
+        {{- $isEffort := false -}}
+        {{- range $suf := $effortSuffixes -}}
+          {{- if hasSuffix (printf "-%s" $suf) $lane -}}{{- $isEffort = true -}}{{- end -}}
+        {{- end -}}
+        {{- if not $isEffort -}}
           {{- range $suf := $effortSuffixes -}}
-            {{- $alias := printf "%s-%s" $id $suf -}}
-            {{- if not (hasKey $overrides $alias) -}}
-              {{- $_ := set $expanded $alias $ov -}}
+            {{- $sibling := printf "%s-%s" $modelId $suf -}}
+            {{- if $fast -}}{{- $sibling = printf "%s-%s-fast" $lane $suf -}}{{- end -}}
+            {{- if not (hasKey $expanded $sibling) -}}
+              {{- $_ := set $expanded $sibling $ov -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- range $modelId, $ov := $overrides -}}
+        {{- if not (hasSuffix "-fast" $modelId) -}}
+          {{- $isEffort := false -}}
+          {{- range $suf := $effortSuffixes -}}
+            {{- if hasSuffix (printf "-%s" $suf) $modelId -}}{{- $isEffort = true -}}{{- end -}}
+          {{- end -}}
+          {{- if not $isEffort -}}
+            {{- $fastStem := printf "%s-fast" $modelId -}}
+            {{- if not (hasKey $overrides $fastStem) -}}
+              {{- if not (hasKey $expanded $fastStem) -}}
+                {{- $_ := set $expanded $fastStem $ov -}}
+              {{- end -}}
+              {{- range $suf := $effortSuffixes -}}
+                {{- $sibling := printf "%s-%s-fast" $modelId $suf -}}
+                {{- if not (hasKey $expanded $sibling) -}}
+                  {{- $_ := set $expanded $sibling $ov -}}
+                {{- end -}}
+              {{- end -}}
             {{- end -}}
           {{- end -}}
         {{- end -}}

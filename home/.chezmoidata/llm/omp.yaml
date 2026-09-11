@@ -56,21 +56,30 @@ llm:
         # @default → active model, each level requiring image input, and both
         # tiers' @default already advertises it (gpt-5.6-sol, grok-4.6). Neither
         # provider bills per image, so there is nothing to route away from.
-      # Allow-list for the picker. Role targets must be listed too, or the role
-      # resolves to a model the session cannot select.
+      # Allow-list for the picker. Generation globs, not catalogs: only the
+      # current families. `${gpt_primary}` is the default-model pin and stays
+      # selectable even if that id moves off the globs. Role targets must
+      # match too, or the role resolves to a model the session cannot select.
+      # Pin the provider on every glob.
       enabled_models:
-        - anthropic/claude-opus-5
-        - anthropic/claude-sonnet-5
+        - anthropic/claude-opus-5*
+        - anthropic/claude-sonnet-5*
         - iv-anthropic/claude-fable-5
         - openai/${gpt_primary}
-        - openai/gpt-5.6-terra
-        - openai/gpt-5.6-luna
-        - xai-oauth/grok-4.6
+        - openai/gpt-5.6*
+        - openai/gpt-6*
+        - xai-oauth/grok-4.6*
         - openai-codex/${gpt_primary}
-        - cursor/claude-opus-5-high
-        - cursor/claude-fable-5-1-medium
-        - cursor/claude-fable-5-1-high
+        - openai-codex/gpt-5.6*
+        - openai-codex/gpt-6*
         - cursor/${gpt_primary}
+        - cursor/gpt-5.6*
+        - cursor/gpt-6*
+        - cursor/claude-opus-5*
+        - cursor/claude-sonnet-5*
+        - cursor/claude-fable-5*
+        - cursor/composer-2.5*
+        - cursor/*grok-4.6*
       providers:
         openai:
           provider: iv
@@ -118,34 +127,24 @@ llm:
           provider: cursor
           models: false
           # GetUsableModels ships no pricing. Third-party ids copy first-party
-          # API list prices; Composer copies Cursor's published table
+          # list prices from models-dev (preference order below). Composer is
+          # Cursor-native, so it stays on Cursor's published table
           # (https://cursor.com/docs/models-and-pricing, 2026-09-03).
-          # Stems cover thinking-effort siblings; -fast is a separate rate.
+          # `cursor-` covers GetUsableModels grok ids. Stems cover thinking-
+          # effort siblings; a dedicated *-fast key is its own lane and expands
+          # to *-{effort}-fast, otherwise the stem rate fills missing fast ids.
+          data_set: models-dev
+          data_set_providers:
+            - anthropic
+            - openai
+            - google
+            - xai
+            - moonshotai
+            - zai
+            - deepseek
+          model_override_prefixes:
+            - cursor-
           model_overrides:
-            claude-opus-5:
-              cost:
-                input: 5
-                output: 25
-                cacheRead: 0.5
-                cacheWrite: 6.25
-            claude-fable-5-1:
-              cost:
-                input: 10
-                output: 50
-                cacheRead: 1
-                cacheWrite: 12.5
-            ${gpt_primary}:
-              cost:
-                input: 4
-                output: 20
-                cacheRead: 0.4
-                cacheWrite: 5
-                longContext:
-                  inputThreshold: 272000
-                  input: 10
-                  output: 45
-                  cacheRead: 1
-                  cacheWrite: 12.5
             composer-2.5:
               cost:
                 input: 0.5

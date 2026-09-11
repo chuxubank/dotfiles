@@ -1,0 +1,46 @@
+{{- /* llm/cost-override — Map a models.dev cost object to a pi/OMP cost patch.
+       Empty JSON object when both legs are zero, so callers can skip the row.
+       Tiers of type context become longContext; context_over_200k is the
+       fallback when no tier spells a threshold. */ -}}
+{{- $c := . -}}
+{{- $in := float64 (default 0 (index $c "input")) -}}
+{{- $out := float64 (default 0 (index $c "output")) -}}
+{{- $result := dict -}}
+{{- if or $in $out -}}
+  {{- $cost := dict
+        "input" $in
+        "output" $out
+        "cacheRead" (float64 (default 0 (index $c "cache_read")))
+        "cacheWrite" (float64 (default 0 (index $c "cache_write")))
+  -}}
+  {{- $lc := dict -}}
+  {{- if hasKey $c "tiers" -}}
+    {{- range $t := $c.tiers -}}
+      {{- $tier := default dict (index $t "tier") -}}
+      {{- if and (eq (index $tier "type") "context") (eq (len $lc) 0) -}}
+        {{- $lc = dict
+              "inputThreshold" (int (index $tier "size"))
+              "input" (float64 (default 0 (index $t "input")))
+              "output" (float64 (default 0 (index $t "output")))
+              "cacheRead" (float64 (default 0 (index $t "cache_read")))
+              "cacheWrite" (float64 (default 0 (index $t "cache_write")))
+        -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and (eq (len $lc) 0) (hasKey $c "context_over_200k") -}}
+    {{- $t := index $c "context_over_200k" -}}
+    {{- $lc = dict
+          "inputThreshold" 200000
+          "input" (float64 (default 0 (index $t "input")))
+          "output" (float64 (default 0 (index $t "output")))
+          "cacheRead" (float64 (default 0 (index $t "cache_read")))
+          "cacheWrite" (float64 (default 0 (index $t "cache_write")))
+    -}}
+  {{- end -}}
+  {{- if gt (len $lc) 0 -}}
+    {{- $_ := set $cost "longContext" $lc -}}
+  {{- end -}}
+  {{- $result = $cost -}}
+{{- end -}}
+{{- toJson $result -}}

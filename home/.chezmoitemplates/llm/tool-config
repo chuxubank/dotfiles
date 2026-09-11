@@ -21,6 +21,7 @@
            disable_strict_tools — opt out of Anthropic strict tool schemas (if set)
            compat    — provider compatibility overrides (if set)
            model_overrides — per-model metadata overrides (if set)
+           model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
            model_metadata — map of model id -> data set metadata (if resolved)
@@ -167,6 +168,11 @@
     {{- end -}}
     {{- $_ := set $resolved "model_overrides" $resolvedModelOverrides -}}
   {{- end -}}
+  {{- if hasKey $ref "model_override_prefixes" -}}
+    {{- $_ := set $resolved "model_override_prefixes" $ref.model_override_prefixes -}}
+  {{- else if hasKey $prov "model_override_prefixes" -}}
+    {{- $_ := set $resolved "model_override_prefixes" $prov.model_override_prefixes -}}
+  {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
   {{- if hasKey $ref "models_cache" -}}{{- $cacheKey = $ref.models_cache -}}
@@ -206,23 +212,28 @@
       {{- /* Canonical API mapping is relatively expensive, so request it only
              for filters that consume it rather than enriching every catalog model. */ -}}
       {{- if hasKey $flt "api" -}}{{- $_ := set $dsFetchArgs "map_api" true -}}{{- end -}}
-      {{- $metadataModels := dict -}}
-      {{- if hasKey $prov "provider" -}}
-        {{- /* A provider-scoped catalog is authoritative; do not first flatten
-               the entire data set only to discard it. */ -}}
-        {{- $_ := set $dsFetchArgs "provider" $prov.provider -}}
-        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
-        {{- if and (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $metadataModels) 0) -}}
-          {{- $sourceNames := dict -}}
-          {{- range $id, $m := $metadataModels -}}
-            {{- $name := $m.name -}}
-            {{- if not $name -}}{{- $name = $id -}}{{- end -}}
-            {{- $_ := set $sourceNames $id $name -}}
-          {{- end -}}
-          {{- $_ := set $resolved "models" $sourceNames -}}
+      {{- $dsProviders := list -}}
+      {{- if hasKey $ref "data_set_providers" -}}
+        {{- $dsProviders = $ref.data_set_providers -}}
+      {{- else if hasKey $prov "data_set_providers" -}}
+        {{- $dsProviders = $prov.data_set_providers -}}
+      {{- else if hasKey $prov "provider" -}}
+        {{- $dsProviders = list $prov.provider -}}
+      {{- end -}}
+      {{- if gt (len $dsProviders) 0 -}}
+        {{- $_ := set $dsFetchArgs "providers" $dsProviders -}}
+      {{- end -}}
+      {{- $metadataModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+      {{- if and (gt (len $dsProviders) 0) (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $metadataModels) 0) -}}
+        {{- /* A provider-scoped catalog is authoritative when this alias has
+               no endpoint of its own and did not declare models. */ -}}
+        {{- $sourceNames := dict -}}
+        {{- range $id, $m := $metadataModels -}}
+          {{- $name := $m.name -}}
+          {{- if not $name -}}{{- $name = $id -}}{{- end -}}
+          {{- $_ := set $sourceNames $id $name -}}
         {{- end -}}
-      {{- else -}}
-        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+        {{- $_ := set $resolved "models" $sourceNames -}}
       {{- end -}}
       {{- if gt (len $metadataModels) 0 -}}
         {{- $_ := set $resolved "model_metadata" $metadataModels -}}
