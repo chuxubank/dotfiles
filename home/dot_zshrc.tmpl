@@ -338,3 +338,29 @@ if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
 {{- end }}
+
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "inshellisense") .) | fromJson }}
+# inshellisense PTY wrap; must stay last. Skip Emacs/SSH. Unpack lazily from
+# the bun global cwd so Fig specs resolve (process.cwd()/node_modules).
+if [[ -z "${ISTERM}" && $- = *i* && ${+ZSH_EXECUTION_STRING} -eq 0
+      && -z "${VSCODE_RESOLVING_ENVIRONMENT}"
+      && -z "${INSIDE_EMACS}" && -z "${SSH_CONNECTION}" ]] \
+    && command -v is >/dev/null 2>&1; then
+  () {
+    local root="${BUN_INSTALL:-$HOME/.bun}/install/global"
+    local data="${XDG_DATA_HOME:-$HOME/.local/share}/inshellisense"
+    local unpacked="" pkg
+    [[ -d "$root/node_modules/@microsoft/inshellisense" ]] || return
+    [[ -r "$data/version.txt" ]] && unpacked=$(<"$data/version.txt")
+    pkg=$(command is -v 2>/dev/null) || return
+    if [[ "$unpacked" != "$pkg" ]]; then
+      (cd "$root" && command is init zsh >/dev/null)
+    fi
+    if [[ -o login ]]; then
+      command is -s zsh --login && exit
+    else
+      command is -s zsh && exit
+    fi
+  }
+fi
+{{- end }}

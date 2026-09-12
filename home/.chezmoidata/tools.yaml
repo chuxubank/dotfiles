@@ -108,6 +108,17 @@ tools:
     purge:
       - ".config/herdr/**"
 
+  # Fig-style PTY autocomplete via bun. The wrap is inlined at the end of
+  # zshrc; first interactive shell unpacks resources from the bun global cwd.
+  inshellisense:
+    when:
+      disabled:
+        host_env: [ci]
+    purge:
+      - ".inshellisense/**"
+      - ".local/share/inshellisense/**"
+      - ".config/inshellisense/**"
+
   # Amazon Kiro CLI (ex-CodeWhisperer). Shell pre/post hooks live in the
   # shared zshrc/zprofile templates and are gated there, not in remove.
   # The input-method symlink and ~/.local/bin shims sit in shared trees;
