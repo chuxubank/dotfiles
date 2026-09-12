@@ -108,6 +108,21 @@ tools:
     purge:
       - ".config/herdr/**"
 
+  # Amazon Kiro CLI (ex-CodeWhisperer). Shell pre/post hooks live in the
+  # shared zshrc/zprofile templates and are gated there, not in remove.
+  # The input-method symlink and ~/.local/bin shims sit in shared trees;
+  # the darwin setup script removes those on disable. brew zap covers the
+  # rest.
+  kiro-cli:
+    when:
+      enabled: false
+    purge:
+      - ".kiro/**"
+      - "Library/Application Support/kiro-cli/**"
+      - "Library/Caches/com.amazon.codewhisperer/**"
+      - "Library/Caches/dev.kiro.cli/**"
+      - "Library/WebKit/com.amazon.codewhisperer/**"
+
   luvus:
     remove:
       - ".luvus/config.json"

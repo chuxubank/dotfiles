@@ -1,0 +1,12 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+
+{{ if includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson -}}
+kiro-cli integrations install input-method
+{{ else -}}
+# Shared-tree leftovers brew uninstall does not remove. Exclusive trees
+# are in tools.yaml purge.
+rm -f "${HOME}/Library/Input Methods/CodeWhispererInputMethod.app"
+rm -f "${HOME}/.local/bin/kiro-cli" "${HOME}/.local/bin/kiro-cli-chat"
+{{- end }}
+{{ end -}}

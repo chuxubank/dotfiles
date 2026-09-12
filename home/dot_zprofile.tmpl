@@ -1,9 +1,11 @@
 {{- $brewBin := lookPath "brew" }}
 
 {{- if eq .chezmoi.os "darwin" }}
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson }}
 # Kiro CLI pre block. Keep at the top of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.pre.zsh"
 
+{{ end -}}
 {{ if lookPath "orb" -}}
 # Added by OrbStack: command-line tools and integration
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
@@ -31,8 +33,7 @@ export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
 export SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh"
 {{- end }}
 
-{{- if eq .chezmoi.os "darwin" }}
-
+{{- if and (eq .chezmoi.os "darwin") (includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson) }}
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zprofile.post.zsh"
 {{- end }}

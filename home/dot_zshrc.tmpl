@@ -1,8 +1,10 @@
 # chezmoi:template:line-endings=native
 
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson }}
 # Kiro CLI pre block. Keep at the top of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 
+{{ end -}}
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -332,5 +334,7 @@ alias codex="codex --yolo"
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
 {{- end }}
 
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "kiro-cli") .) | fromJson }}
 # Kiro CLI post block. Keep at the bottom of this file.
 source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
+{{- end }}

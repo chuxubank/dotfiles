@@ -63,7 +63,7 @@ casks = [
   "itsycal",
   "Jarvis322/tap/sysdata",
   "karabiner-elements",
-  "kiro-cli",
+  { name = "kiro-cli", owner = "kiro-cli" },
   "kotlin-lsp",
   "libreoffice",
   "loop",
