@@ -141,6 +141,10 @@ fi
 plugins+=(jira aws)
 {{ end -}}
 
+# zsh-autocomplete must load before oh-my-zsh's compinit/compdef.
+source_if $HOMEBREW_PREFIX/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+source_if /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+
 source_if $ZSH/oh-my-zsh.sh
 
 # plugin

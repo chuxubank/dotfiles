@@ -136,6 +136,7 @@ brews = [
   "zellij",
   "zig",
   "zsh",
+  "zsh-autocomplete",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
   { name = "RizRiyz/luvus/luvus", owner = "luvus" },

@@ -7,6 +7,7 @@ extra = [
   "librime",
   "starship",
   "wezterm",
+  "zsh-autocomplete",
   "zsh-autosuggestions",
   "zsh-syntax-highlighting",
 ]

@@ -22,6 +22,10 @@ function source_if {
     fi
 }
 
+{{ if eq .chezmoi.os "linux" -}}
+# Debian/Ubuntu /etc/zsh/zshrc calls compinit unless this is set.
+skip_global_compinit=1
+{{ end -}}
 export EMAIL={{ .email | quote }}
 export DEVICE_TYPE={{ .device_type | quote }}
 export HOST_ENV={{ .host_env | quote }}
