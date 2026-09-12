@@ -140,6 +140,12 @@ repositories:
     when: *personal_only
 
   - path: [workspace, xz]
+    dest: OpenAPI
+    url: https://github.com/OpenXingZhi/OpenAPI
+    refresh_period: 48h
+    when: *personal_only
+
+  - path: [workspace, xz]
     dest: RobotDroid
     url: https://github.com/OpenXingZhi/RobotDroid
     refresh_period: 48h
