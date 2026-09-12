@@ -48,10 +48,12 @@ llm:
         path: Personal/Tech/AI/OpenAI
         field: api-key
 
-    # Pi's built-in ChatGPT subscription provider. It has no endpoint or API
-    # key here: pi owns its OAuth flow and bundled model catalog.
+    # Pi/OMP ChatGPT subscription. Flip `when.enabled` to true to bring the
+    # alias, picker globs, and OMP provider back; false hides it everywhere.
     openai-codex:
       name: OpenAI Codex
+      when:
+        enabled: false
 
     # Hermes' built-in SuperGrok subscription provider. Hermes owns the OAuth
     # flow and model catalog, so there is no endpoint or API key here.

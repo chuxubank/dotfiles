@@ -50,14 +50,6 @@
   {{- $_ := set $result "cycle_order" $toolCfg.cycle_order -}}
 {{- end }}
 
-{{- if hasKey $toolCfg "enabled_models" }}
-  {{- $enabledModels := list -}}
-  {{- range $model := $toolCfg.enabled_models -}}
-    {{- $enabledModels = append $enabledModels (includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases)) -}}
-  {{- end -}}
-  {{- $_ := set $result "enabled_models" $enabledModels -}}
-{{- end }}
-
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}
 {{- $refs := dict -}}
 {{- if hasKey $toolCfg "providers" }}
@@ -82,33 +74,7 @@
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
 
-  {{- /* Check if provider passes when.enabled conditions */ -}}
-  {{- $enabled := true -}}
-  {{- if hasKey $prov "when" -}}
-    {{- $when := $prov.when -}}
-    {{- if hasKey $when "enabled" -}}
-      {{- $enabledCfg := $when.enabled -}}
-      {{- if hasKey $enabledCfg "host_env" -}}
-        {{- $heOk := false -}}
-        {{- range $he := $enabledCfg.host_env -}}
-          {{- if eq $ctx.host_env $he -}}{{- $heOk = true -}}{{- end -}}
-        {{- end -}}
-        {{- if not $heOk -}}{{- $enabled = false -}}{{- end -}}
-      {{- end -}}
-      {{- if hasKey $enabledCfg "roles" -}}
-        {{- $hasRole := false -}}
-        {{- if eq (kindOf $ctx.roles) "slice" -}}
-          {{- range $ur := $ctx.roles -}}
-            {{- range $r := $enabledCfg.roles -}}
-              {{- if eq $ur $r -}}{{- $hasRole = true -}}{{- end -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
-        {{- if not $hasRole -}}{{- $enabled = false -}}{{- end -}}
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
-
+  {{- $enabled := includeTemplate "when/context" (merge (dict "item" $prov) $ctx) | fromJson -}}
   {{- if $enabled -}}
 
   {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
@@ -251,6 +217,25 @@
   {{- end -}}
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
+
+{{- if hasKey $toolCfg "enabled_models" }}
+  {{- $enabledModels := list -}}
+  {{- range $model := $toolCfg.enabled_models -}}
+    {{- $resolved := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
+    {{- $keep := true -}}
+    {{- $parts := splitList "/" $resolved -}}
+    {{- if gt (len $parts) 1 -}}
+      {{- $alias := index $parts 0 -}}
+      {{- if and (hasKey $refs $alias) (not (hasKey $providers $alias)) -}}
+        {{- $keep = false -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $keep -}}
+      {{- $enabledModels = append $enabledModels $resolved -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $_ := set $result "enabled_models" $enabledModels -}}
+{{- end }}
 
 {{- /* Resolve shared model aliases before selecting a provider fallback. */ -}}
 {{- if hasKey $toolCfg "model" -}}

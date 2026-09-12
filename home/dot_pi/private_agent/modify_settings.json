@@ -16,15 +16,26 @@
 {{- $theme := "light/dark" -}}
 
 {{- /* llm.yaml states models as "<alias>/<id>"; pi splits them across
-       defaultProvider and defaultModel. */ -}}
+       defaultProvider and defaultModel. A last-candidate bundled fallback
+       (xai/grok-4.6) is not an alias, so split the slash here. */ -}}
 {{- $provider := $cfg.model_provider -}}
 {{- $model := $cfg.model_id -}}
+{{- if not $provider -}}
+  {{- $parts := splitList "/" $model -}}
+  {{- if gt (len $parts) 1 -}}
+    {{- $provider = index $parts 0 -}}
+    {{- $model = join "/" (slice $parts 1) -}}
+  {{- end -}}
+{{- end -}}
 
 {{- /* enabledModels is the Ctrl+P cycling pool. Patterns come from
        llm.yaml; unused provider/* aliases warn, so keep globs. */ -}}
 {{- $remove := list -}}
 {{- if not (hasKey $cfg "enabled_models") -}}
   {{- $remove = list "enabledModels" -}}
+{{- end -}}
+{{- if not $provider -}}
+  {{- $remove = append $remove "defaultProvider" -}}
 {{- end -}}
 
 {{- /* omp-inspired portable knobs (oh-my-pi is a fork; these are the

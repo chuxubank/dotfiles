@@ -21,6 +21,22 @@
   "security-reviewer" "@slow"
 -}}
 
+{{- $disabledProviders := list
+  "claude"
+  "claude-plugins"
+  "cline"
+  "codex"
+  "gemini"
+  "github"
+  "opencode"
+  "openrouter"
+  "vscode"
+  "windsurf"
+-}}
+{{- if not (hasKey $cfg.providers "openai-codex") -}}
+  {{- $disabledProviders = append $disabledProviders "openai-codex" -}}
+{{- end -}}
+
 {{- $managed := dict
   "advisor" (dict
     "enabled" true
@@ -31,18 +47,7 @@
   "composer" (dict
     "shape" "pi"
   )
-  "disabledProviders" (list
-    "claude"
-    "claude-plugins"
-    "cline"
-    "codex"
-    "gemini"
-    "github"
-    "opencode"
-    "openrouter"
-    "vscode"
-    "windsurf"
-  )
+  "disabledProviders" $disabledProviders
   "modelRoles" $roles
   "cycleOrder" (default (list "smol" "default" "slow") (index $cfg "cycle_order"))
   "enabledModels" (default (list) (index $cfg "enabled_models"))

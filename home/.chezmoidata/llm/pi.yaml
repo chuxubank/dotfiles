@@ -11,6 +11,7 @@ llm:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
         - openai-codex/${gpt_primary}
+        - xai/grok-4.6
       reasoning_effort: high
       # Ctrl+P cycles these patterns against whatever actually resolved.
       # Prefer globs: an alias that resolves to nothing warns at startup.
