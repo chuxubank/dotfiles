@@ -19,7 +19,7 @@ deliberately cheaper. Rationale is in
 | `slow` | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis |
 | `smol` | `openai/gpt-5.6-luna:medium` | `xai-oauth/grok-4.6:medium` | Prewalk target, background work, vibe `fast` |
 | `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.6:high` | Subagent default, vibe `good` |
-| `advisor` | `anthropic/claude-sonnet-5` | `cursor/composer-2.5-fast` | Per-turn advisor review |
+| `advisor` | `anthropic/claude-sonnet-5` | `cursor/composer-2.5` | Per-turn advisor review |
 | `tiny` | `openai/gpt-5.6-luna:low` | `xai-oauth/grok-4.6:minimal` | Titles, memory, auto-thinking, stop detection |
 | `plan` | `anthropic/claude-opus-5:xhigh` | `cursor/claude-opus-5-high` | `--plan`, architectural planning |
 
@@ -55,7 +55,7 @@ would not survive at `task`'s call volume.
 `advisor` stays on Sonnet rather than following `task` to `terra`. It reviews the
 primary's own deltas, so it is deliberately a different model family from the
 GPT-family `default`; making it cheaper by matching the reviewed family defeats
-the role. The personal fallback is Composer 2.5 Fast, which sits in Cursor's
+the role. The personal fallback is Composer 2.5, which sits in Cursor's
 first-party pool rather than SuperGrok.
 `slow` keeps `claude-fable-5` even though its $3/$18.5 on the IV alias
 is dearer on output than Opus, because that role is explicitly the thorough,

@@ -37,10 +37,10 @@ llm:
           - xai-oauth/grok-4.6:high
         # Reviews every primary turn's delta, so it wants a family other than
         # the primary's. IV spends company-funded Sonnet; the personal fallback
-        # is Composer 2.5 Fast (Cursor Models pool) rather than SuperGrok.
+        # is Composer 2.5 (Cursor Models pool) rather than SuperGrok.
         advisor:
           - anthropic/claude-sonnet-5
-          - cursor/composer-2.5-fast
+          - cursor/composer-2.5
         # Titles, memory, auto-thinking classification, unexpected-stop checks.
         # Unset would borrow @smol, which is the same model here — the point of
         # spelling it out is the lower effort.
