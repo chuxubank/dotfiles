@@ -43,9 +43,13 @@ for name, manager in managers.items():
             for provider in plugins.get("providers", [])
             if name in provider.get("sources", {})
         )
-        bad_sources = [source for source in sources if not source.startswith("npm:")]
+        bad_sources = [
+            source
+            for source in sources
+            if not source.startswith(("npm:", "git:"))
+        ]
         if bad_sources:
-            fail(f"{name}: npm identities require npm: sources: {bad_sources}")
+            fail(f"{name}: npm identities require npm: or git: sources: {bad_sources}")
     commands = [manager["uninstall"]]
     if manager.get("install"):
         commands.append(manager["install"])

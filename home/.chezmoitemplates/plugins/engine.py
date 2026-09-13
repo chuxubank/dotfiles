@@ -145,9 +145,13 @@ def preserved_marketplaces(rules):
 
 def normalize_identity(manager, value, strict=False):
     if manager.get("identity_transform") == "npm_name":
+        if value.startswith("git:"):
+            if not value[4:]:
+                raise ValueError("git identity has an empty source: %r" % value)
+            return value
         if not value.startswith("npm:"):
             if strict:
-                raise ValueError("npm identity must start with npm: %r" % value)
+                raise ValueError("package identity must start with npm: or git: %r" % value)
             return value
         spec = value[4:]
         version_at = spec.find("@", 1 if spec.startswith("@") else 0)

@@ -248,6 +248,46 @@ assert (
 )
 assert engine.normalize_identity(npm_manager, "npm:package@1.2.3") == "npm:package"
 assert engine.normalize_identity(npm_manager, "git:owner/repo") == "git:owner/repo"
+assert (
+    engine.resource_identity(
+        npm_manager, {"source": "git:github.com/earendil-works/pi-review"}
+    )
+    == "git:github.com/earendil-works/pi-review"
+)
+try:
+    engine.resource_identity(npm_manager, {"source": "git:"})
+except ValueError as err:
+    assert "empty source" in str(err)
+else:
+    raise AssertionError("empty git: identity was accepted")
+git_manager = {
+    **npm_manager,
+    "label": "Git",
+    "declared_plugins": [
+        {
+            "name": "pi-review",
+            "source": "git:github.com/earendil-works/pi-review",
+            "enabled": True,
+        }
+    ],
+}
+original_load = engine.load_inventory
+original_run = engine.run_command
+engine.load_inventory = lambda _inventory: [
+    {
+        "name": "git:github.com/earendil-works/pi-review",
+        "enabled": True,
+        "sources": [],
+    }
+]
+engine.run_command = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+    AssertionError("matching git package was removed")
+)
+try:
+    assert not engine.cleanup_resources(git_manager, {}, ["remove"])
+finally:
+    engine.load_inventory = original_load
+    engine.run_command = original_run
 pinned_manager = {
     **npm_manager,
     "label": "Pinned",

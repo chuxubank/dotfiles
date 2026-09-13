@@ -6,9 +6,10 @@ plugins:
   # plugin lifecycle only `pi remove`s undeclared sources while they still
   # match live settings.packages.
   #
-  # Managed sources use `npm:<pkg>[@version]`; the shared inventory derives
-  # installed identities from npm/package.json. Supporting git or local sources
-  # requires a source-preserving inventory before declaring them here.
+  # Managed sources are `npm:<pkg>[@version]` or `git:<host>/<path>[@ref]`.
+  # Cleanup inventory reads settings.packages, which preserves the declared
+  # source string. npm identities drop the version so a pin in settings still
+  # matches an unpinned declaration; git sources compare as written.
   pi:
     providers:
       - name: pi-mcp-adapter
@@ -108,3 +109,11 @@ plugins:
           moves with it; tools, context files, and skills rebuild for the
           new cwd.
         source: npm:@yceachan/pi-switch-cwd
+
+      - name: pi-review
+        description: >-
+          /review and /end-review: uncommitted diffs, a base branch, a commit,
+          a GitHub PR (via gh), or a folder snapshot. Prioritized findings
+          plus non-blocking human callouts. Loads REVIEW_GUIDELINES.md next
+          to .pi when present.
+        source: git:github.com/earendil-works/pi-review
