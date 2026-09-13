@@ -110,3 +110,6 @@ skills:
           - mobile-android-design
           - mobile-ios-design
         source: wshobson/agents/plugins/ui-design/skills
+
+      - name: swiftui-design-skill
+        source: wholiver/swiftui-design-skill
