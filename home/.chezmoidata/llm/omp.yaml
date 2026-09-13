@@ -36,10 +36,11 @@ llm:
           - openai/gpt-5.6-terra:high
           - xai-oauth/grok-4.6:high
         # Reviews every primary turn's delta, so it wants a family other than
-        # the primary's and a provider that does not bill per review.
+        # the primary's. IV spends company-funded Sonnet; the personal fallback
+        # is Composer 2.5 Fast (Cursor Models pool) rather than SuperGrok.
         advisor:
-          - anthropic/claude-sonnet-5:medium
-          - xai-oauth/grok-4.6:medium
+          - anthropic/claude-sonnet-5
+          - cursor/composer-2.5-fast
         # Titles, memory, auto-thinking classification, unexpected-stop checks.
         # Unset would borrow @smol, which is the same model here — the point of
         # spelling it out is the lower effort.
