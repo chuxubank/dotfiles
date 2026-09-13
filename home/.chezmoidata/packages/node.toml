@@ -1,11 +1,11 @@
 [packages.node]
 global = [
   "@actions/languageserver",
+  "@ampcode/cli",
   "@ansible/ansible-language-server",
   "@github/copilot-language-server",
   "@modelcontextprotocol/inspector",
   "@prettier/plugin-ruby",
-  "@sourcegraph/amp",
   "@usebruno/cli",
   "agent-device",
   "bash-language-server",
