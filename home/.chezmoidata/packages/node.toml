@@ -1,7 +1,6 @@
 [packages.node]
 global = [
   "@actions/languageserver",
-  "@ampcode/cli",
   "@ansible/ansible-language-server",
   "@github/copilot-language-server",
   "@modelcontextprotocol/inspector",
@@ -18,6 +17,7 @@ global = [
   "vscode-json-languageserver",
   "yaml-language-server",
   { name = "@agentclientprotocol/claude-agent-acp", owner = "claude-code" },
+  { name = "@ampcode/cli", owner = "amp", trust = true },
   { name = "@anthropic-ai/claude-code", owner = "claude-code" },
   { name = "@blowmage/cursor-agent-acp", owner = "cursor" },
   { name = "@colbymchenry/codegraph", owner = "codegraph" },
