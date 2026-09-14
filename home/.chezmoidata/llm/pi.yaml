@@ -8,7 +8,7 @@ llm:
       # it does, so the proxy is the source of truth. models-dev metadata is
       # merged in, so the enumerated entries keep real costs and limits.
       model:
-        - openai/${gpt_primary}
+        - anthropic/${gpt_primary}
         - anthropic/claude-opus-5
         - openai-codex/${gpt_primary}
         - xai/grok-4.6
@@ -22,10 +22,8 @@ llm:
         # catalog and resolved there instead, so the cycle served the wrong
         # endpoint for the same id. `${gpt_primary}` is that pin; gpt-5.6*/
         # gpt-6* are the rest of the current GPT line.
-        - openai/${gpt_primary}
         - openai/gpt-5.6*
         - openai/gpt-6*
-        - openai-codex/${gpt_primary}
         - openai-codex/gpt-5.6*
         - openai-codex/gpt-6*
         # The same three GPT ids on the cc token, which serves them over its
