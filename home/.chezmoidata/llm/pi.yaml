@@ -32,6 +32,18 @@ llm:
         # Pinned, not a `claude-fable-5*` glob: that also matches the two IV
         # aliases where the id resolves but every request fails.
         - iv-anthropic/claude-fable-5
+        # IV's open-weight lines. Pinned because pi's bundled catalogs
+        # (openrouter, opencode) ship deepseek/glm/kimi ids of their own and a
+        # bare glob resolves against the union. Only the default-token group
+        # serves these — the codex- and cc-token groups list none — so all
+        # three globs drop out with the `iv` alias off `iv` hosts.
+        #
+        # `kimi/kimi-k3*` keeps the vendor segment because that is the id the
+        # endpoint returns; llm/split-model only treats a leading segment as a
+        # provider when it names a configured alias, so `kimi/` survives.
+        - iv/deepseek-v4*
+        - iv/glm-5.3*
+        - iv/kimi/kimi-k3*
         - grok-4.6
       # @furbyhaxx/pi-session-naming title model. IV first (company-funded
       # flash); SuperGrok last. :low is the thinking suffix the plugin

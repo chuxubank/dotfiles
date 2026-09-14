@@ -66,6 +66,12 @@ llm:
         - anthropic/claude-opus-5*
         - anthropic/claude-sonnet-5*
         - iv-anthropic/claude-fable-5
+        # IV's open-weight lines, served only by the default-token group; the
+        # codex and cc groups list none of these ids. `kimi/kimi-k3*` keeps the
+        # vendor segment because that is the id the endpoint returns.
+        - iv/deepseek-v4*
+        - iv/glm-5.3*
+        - iv/kimi/kimi-k3*
         - openai/${gpt_primary}
         - openai/gpt-5.6*
         - openai/gpt-6*
