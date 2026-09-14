@@ -28,7 +28,21 @@ llm:
         - openai-codex/${gpt_primary}
         - openai-codex/gpt-5.6*
         - openai-codex/gpt-6*
+        # The same three GPT ids on the cc token, which serves them over its
+        # Anthropic front (`/v1/messages`, translated server-side; probed
+        # 2026-09-14). A second auth lane for one model, selectable by hand.
+        # Pinned, and deliberately not bare: ADR 0005's headline collision is
+        # `gpt-5.6-sol` reaching pi's bundled openrouter catalog, and this id
+        # now sits on three of our aliases, so a bare glob widens that.
+        # Cannot be a candidate-list fallback instead — `anthropic` and
+        # `openai` are both provider: iv behind one host_env gate, so
+        # pick-model resolves them together and the cc entry never wins.
+        - anthropic/gpt-5.6*
+        # Bare on purpose, like the ADR 0005 example: both globs are meant to
+        # surface the `anthropic` and `iv` copies. OMP pins its sonnet entry
+        # because a role targets one endpoint; pi has no such role.
         - claude-opus-5*
+        - claude-sonnet-5*
         # Pinned, not a `claude-fable-5*` glob: that also matches the two IV
         # aliases where the id resolves but every request fails.
         - iv-anthropic/claude-fable-5
