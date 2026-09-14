@@ -209,6 +209,23 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* mitsupi is Armin's whole kit. A string-form source would load uv,
+       auto-trust, unified-edit, btw, review, and the rest on top of the
+       packages we already declare. */ -}}
+{{- range $provider := dig "providers" (list) (dig "pi" dict .plugins) -}}
+  {{- if eq (dig "source" "" $provider) "npm:mitsupi" -}}
+    {{- $ext := dig "extensions" (list) $provider -}}
+    {{- if or (ne (len $ext) 1) (ne (index $ext 0) "extensions/control.ts") -}}
+      {{- fail "plugins.pi mitsupi: extensions must be only extensions/control.ts" -}}
+    {{- end -}}
+    {{- range $key := list "skills" "prompts" "themes" -}}
+      {{- if or (not (hasKey $provider $key)) (ne (kindOf (index $provider $key)) "slice") (gt (len (index $provider $key)) 0) -}}
+        {{- fail (printf "plugins.pi mitsupi: %s must be []" $key) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* One entry, one root. Luvus reassigns a tab to the workspace matching
        its pane's live cwd, so a second root splits the entry into two
        workspaces and no longer matches the Herdr and Zellij output. */ -}}

@@ -10,6 +10,10 @@ plugins:
   # Cleanup inventory reads settings.packages, which preserves the declared
   # source string. npm identities drop the version so a pin in settings still
   # matches an unpinned declaration; git sources compare as written.
+  #
+  # Optional `extensions` / `skills` / `prompts` / `themes` lists become the
+  # object form in settings.packages and filter what that source loads.
+  # Omit a key to load all of that type; `[]` loads none.
   pi:
     providers:
       - name: pi-mcp-adapter
@@ -133,3 +137,19 @@ plugins:
           plus non-blocking human callouts. Loads REVIEW_GUIDELINES.md next
           to .pi when present.
         source: git:github.com/earendil-works/pi-review
+
+      # mitsupi ships Armin's whole kit (uv interceptor, auto-trust,
+      # unified-edit, btw, review, …). We only want session-control; the
+      # empty lists are load-none, not "use the manifest". Start with
+      # `--session-control` so the socket and send_to_session tools bind.
+      - name: mitsupi
+        description: >-
+          Inter-session Unix sockets, send_to_session / list_sessions,
+          and /control-sessions. Opt-in per process with
+          --session-control.
+        source: npm:mitsupi
+        extensions:
+          - extensions/control.ts
+        skills: []
+        prompts: []
+        themes: []

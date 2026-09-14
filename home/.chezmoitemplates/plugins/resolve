@@ -14,6 +14,8 @@
          description — provider.description (may be absent)
          source      — tool-specific plugin identifier
          enabled     — bool (resolved via when/evaluate)
+         ref         — optional pin (herdr)
+         extensions / skills / prompts / themes — optional pi package filters
 */ -}}
 {{- $tool := .tool -}}
 {{- $plugins := default dict .plugins -}}
@@ -63,6 +65,11 @@
   {{- end -}}
   {{- if hasKey $provider "ref" -}}
     {{- $_ := set $p "ref" $provider.ref -}}
+  {{- end -}}
+  {{- range $key := list "extensions" "skills" "prompts" "themes" -}}
+    {{- if hasKey $provider $key -}}
+      {{- $_ := set $p $key (index $provider $key) -}}
+    {{- end -}}
   {{- end -}}
   {{- $out = append $out $p -}}
 {{- end -}}

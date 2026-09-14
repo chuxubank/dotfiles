@@ -177,7 +177,9 @@ set_pane_cwd() {
 
 start_named_agent() {
   local name=$1 kind=$2 pane=$3
-  luvus agent start "$name" --kind "$kind" --pane "$pane" --timeout 120
+  local extra=()
+  [[ $kind == pi ]] && extra=(-- --session-control)
+  luvus agent start "$name" --kind "$kind" --pane "$pane" --timeout 120 "${extra[@]}"
 }
 
 list_json=$(luvus workspace list) ||

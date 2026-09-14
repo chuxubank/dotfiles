@@ -1,10 +1,23 @@
 {{- /* plugins/pi — Enabled package sources as a JSON array.
        pi loads what `settings.packages` lists, so disabled entries are
-       omitted rather than written as `false`. */ -}}
+       omitted rather than written as `false`. A source with resource
+       filters is written as the object form `{source, extensions?, …}`
+       instead of a bare string. */ -}}
 {{- $out := list -}}
+{{- $filterKeys := list "extensions" "skills" "prompts" "themes" -}}
 {{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson -}}
   {{- if $p.enabled -}}
-    {{- $out = append $out $p.source -}}
+    {{- $entry := dict "source" $p.source -}}
+    {{- range $key := $filterKeys -}}
+      {{- if hasKey $p $key -}}
+        {{- $_ := set $entry $key (index $p $key) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if gt (len $entry) 1 -}}
+      {{- $out = append $out $entry -}}
+    {{- else -}}
+      {{- $out = append $out $p.source -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- toJson $out -}}

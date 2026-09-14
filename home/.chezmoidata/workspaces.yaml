@@ -16,7 +16,7 @@
 # workspace root when one is set.
 # agent + kind: start a named agent through the target mux (NAME is
 # [a-z][a-z0-9_-]{0,31}, unique among live agents). command runs in the pane
-# when agent is unset.
+# when agent is unset. kind: pi is launched with --session-control.
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
 workspace_conditions:

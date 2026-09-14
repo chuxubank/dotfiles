@@ -32,6 +32,8 @@ workspaces:
 {{- end }}
 {{- if hasKey . "command" }}
             command: {{ .command | quote }}
+{{- else if and (hasKey . "kind") (eq .kind "pi") }}
+            command: "pi --session-control"
 {{- else if hasKey . "kind" }}
             command: {{ .kind | quote }}
 {{- end }}
