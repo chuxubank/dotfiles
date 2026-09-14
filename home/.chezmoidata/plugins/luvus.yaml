@@ -1,0 +1,19 @@
+plugins:
+  # luvus-only modules (plugins/luvus.yaml). The tool is implied by the
+  # filename, so a plain `source` string is enough. `when` conditions work
+  # the same as elsewhere.
+  #
+  # `name` must be the module id from the module's own luvus-module.toml, not
+  # the repo name: `module list` reports ids, and `module enable` resolves an
+  # id or the install spec, so the id is the only identity both sides share.
+  # Source is luvus's GitHub module spec: OWNER/REPO[/SUBDIR]. Optional `ref`
+  # is passed through to `luvus module install --ref`.
+  luvus:
+    providers:
+      - name: asahiart.agent-titles
+        description: >-
+          Publish human session titles onto resumable rows in the AGENTS
+          sidebar, which Luvus itself leaves blank. Needs python3 and
+          Settings → Layout → Show agent session title (layout.agent_title,
+          pinned on in private_dot_luvus/modify_config.json).
+        source: AsahiArt/agent-titles

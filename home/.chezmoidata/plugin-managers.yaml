@@ -80,3 +80,19 @@ plugin_managers:
           path: [extraKnownMarketplaces]
         - file: .claude/plugins/known_marketplaces.json
           path: []
+
+  luvus:
+    phase: after
+    label: Luvus
+    binary: luvus
+    identity: name
+    inventory:
+      command: [luvus, module, list]
+      path: [result, modules]
+      mode: field
+      field: [id]
+      enabled_field: [enabled]
+      label: luvus modules
+    install: [luvus, module, install, "{source}", --yes]
+    enable: [luvus, module, enable, "{name}"]
+    uninstall: [luvus, module, uninstall, "{installed}"]
