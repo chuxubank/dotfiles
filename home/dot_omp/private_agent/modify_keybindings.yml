@@ -3,11 +3,10 @@
        Emacs editor chords, matching Pi. OMP has no historyPrevious/historyNext
        actions; C-p/C-n go on cursorUp/cursorDown (history when empty, line
        motion otherwise). Model cycle is M-n / M-p, the Emacs next/previous
-       pair, and NOT C-S-p / C-S-n: Luvus panes carry neither the kitty
-       keyboard protocol nor xterm modifyOtherKeys, and OMP's own chord encoder
-       folds ctrl chords through toUpperCase()&31, so Ctrl+Shift+letter
-       collapses onto plain Ctrl+letter and can never reach the agent. Alt
-       chords survive legacy encoding as ESC+<key>, but OMP matches
+       pair, and NOT C-S-p / C-S-n: those stay WezTerm's command palette and
+       new window. OMP decodes both kitty CSI-u and modifyOtherKeys on input, so
+       the shifted chord would arrive intact — this is a key-ownership choice,
+       not an encoding limit. OMP matches
        alt+<letter> and alt+shift+<letter> only — a rebound alt+<symbol> such
        as alt+. registers in /hotkeys yet never fires, so the chords must be
        letters. M-p is OMP's own selectTemporary by default, moved to M-S-m

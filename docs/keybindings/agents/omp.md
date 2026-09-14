@@ -15,15 +15,18 @@ exits (readline EOF) via `extensions/emacs-eof.ts`; with text it still
 deletes forward. Double `Ctrl+C` still exits (clear first, exit second).
 Session-picker `app.session.delete` is unchanged.
 
-Model cycle moved to `Alt+N` / `Alt+P`, the Emacs next/previous pair. OMP's
-chord encoder folds ctrl chords through `toUpperCase().charCodeAt(0) & 31`, so
-`Ctrl+Shift+P` and `Ctrl+P` both encode to `0x10`; with no kitty protocol in a
-Luvus pane to disambiguate them, the shifted chord is unreachable. The
-replacements must be letters: OMP lists a rebound `alt+<symbol>` in `/hotkeys`
-but never matches it. Verified by binding `app.model.select` to `alt+u` (fires)
-versus `alt+.` (does not); `alt+shift+<letter>` fires too. `Alt+P` is OMP's own
-`selectTemporary`, moved to `Alt+Shift+M` beside `model.select` on `Alt+M`.
-See the [shared bindings](README.md).
+Model cycle moved to `Alt+N` / `Alt+P`, the Emacs next/previous pair, matching
+the modifier hierarchy in the [shared bindings](README.md). `Ctrl+Shift+P` /
+`Ctrl+Shift+N` stay WezTerm's command palette and new window. OMP decodes both
+kitty CSI-u and modifyOtherKeys on input, so the shifted chord would arrive
+intact — the move is key ownership, not an encoding limit. The `toUpperCase()
+& 31` fold in OMP applies to its outbound chord encoder, not to input matching.
+
+The replacements must be letters: OMP lists a rebound `alt+<symbol>` in
+`/hotkeys` but never matches it. Verified by binding `app.model.select` to
+`alt+u` (fires) versus `alt+.` (does not); `alt+shift+<letter>` fires too.
+`Alt+P` is OMP's own `selectTemporary`, moved to `Alt+Shift+M` beside
+`model.select` on `Alt+M`.
 
 ## Deltas from upstream
 

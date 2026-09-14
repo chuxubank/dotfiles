@@ -20,12 +20,14 @@ Model cycle uses `Alt+N` / `Alt+P` — the Emacs next/previous pair — rather t
 Ctrl moves by character and line (`Ctrl+N` / `Ctrl+P`), Meta moves by the larger
 unit, exactly as `Ctrl+F` is a character and `Alt+F` a word.
 
-The move off `Ctrl+Shift` is forced by the input path, not preference. Luvus
-panes advertise neither the kitty keyboard protocol nor xterm modifyOtherKeys,
-and under legacy encoding `Ctrl+letter` is a caseless control byte, so
-`Ctrl+Shift+P` arrives as plain `Ctrl+P` (`0x10`) and the model cycle can never
-fire. Alt chords have a legacy form, `ESC` + the key, so they arrive intact.
-Upstream Pi already falls back to `Alt+P` on Windows for the same reason.
+`Ctrl+Shift+P` is additionally WezTerm's command palette and `Ctrl+Shift+N` its
+new window; neither is passed through. Upstream Pi also falls back to `Alt+P` on
+Windows.
+
+Note that a Luvus pane does carry the kitty keyboard protocol — measured by
+pushing flags with `CSI > 7 u` and reading back `CSI ? 7 u` — so `Ctrl+Shift+P`
+would in fact arrive intact as `shift+ctrl+p`. The Alt chords are a hierarchy and
+terminal-ownership choice, not a workaround for lost encoding.
 
 The chords are letters because OMP matches only `alt+<letter>` and
 `alt+shift+<letter>`. A rebound `alt+<symbol>` such as `alt+.` is accepted by

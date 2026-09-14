@@ -10,16 +10,15 @@ After editing, run `/reload` in Pi.
 
 `Ctrl+P` / `Ctrl+N` use `tui.editor.historyPrevious` / `historyNext`.
 
-Model cycle moved to `Alt+N` / `Alt+P`, the Emacs next/previous pair. `pi-tui`
-matches `shift+ctrl+<key>` only through kitty or modifyOtherKeys sequences and
-has no legacy fallback for it, while `alt+<key>` does fall back to `ESC` + the
-key. A Luvus pane offers neither enhanced encoding, so the shifted chord is
-unreachable there. See the [shared bindings](README.md).
+Model cycle moved to `Alt+N` / `Alt+P`, the Emacs next/previous pair, keeping
+the modifier hierarchy in the [shared bindings](README.md): Ctrl moves by
+character and line, Meta by the larger unit. `Ctrl+Shift+P` is also WezTerm's
+command palette, which is not passed through.
 
 The action IDs are `alt+n` / `alt+p`, the same as OMP. The arrow ids `alt+down` /
-`alt+up` match `M-n` / `M-p` under legacy encoding only, via `pi-tui`'s
-`LEGACY_SEQUENCE_KEY_IDS`; under the kitty keyboard protocol they match nothing.
-The letter ids match both encodings.
+`alt+up` match `M-n` / `M-p` only under legacy `ESC`+key encoding, via `pi-tui`'s
+`LEGACY_SEQUENCE_KEY_IDS`; under kitty or modifyOtherKeys they match nothing.
+The letter ids match all three encodings.
 
 That takes `Alt+Up` from `app.message.dequeue`, which moves to `Alt+Q` — Pi's
 own Windows fallback for that action, unused on macOS. It does not move back:

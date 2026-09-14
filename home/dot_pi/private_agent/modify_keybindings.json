@@ -1,16 +1,14 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- /* pi keybindings — schema: @earendil-works/pi-coding-agent/docs/keybindings.md
        Emacs editor chords. Model cycle is M-n / M-p, the Emacs next/previous
-       pair, and NOT C-S-p / C-S-n: Luvus panes advertise neither the kitty
-       keyboard protocol nor xterm modifyOtherKeys, and pi-tui only matches
-       shift+ctrl+<key> through those two encodings, with no legacy fallback.
-       Alt chords do have one (ESC+<key>), so they survive.
+       pair, and NOT C-S-p / C-S-n: those stay WezTerm's command palette and
+       new window — a key-ownership choice, not an encoding limit.
 
        The action IDs are alt+n/alt+p, the same as OMP. pi-tui's
        LEGACY_SEQUENCE_KEY_IDS aliases ESC n to alt+down and ESC p to alt+up
        (keys.js), so the arrow ids match M-n/M-p under legacy encoding only —
-       under the kitty keyboard protocol they match nothing. The letter ids
-       match both encodings.
+       under kitty or modifyOtherKeys they match nothing. The letter ids match
+       all three encodings.
 
        That takes alt+up from app.message.dequeue, which moves to alt+q — Pi's
        own Windows fallback for that action, unused on macOS. It does not move

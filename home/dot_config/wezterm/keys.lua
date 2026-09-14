@@ -5,10 +5,11 @@ local act = wezterm.action
 -- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 -- Ctrl+R is passed through for Pi reverse search; Super+R still reloads.
--- Ctrl+Shift+P/N are NOT passed through: Luvus panes support neither the kitty
--- keyboard protocol nor modifyOtherKeys, so Ctrl+Shift+letter collapses onto
--- Ctrl+letter and can never reach Pi/OMP. Model cycle is Alt+N / Alt+P instead,
--- so Ctrl+Shift+P keeps WezTerm's command palette and Ctrl+Shift+N its window.
+-- Ctrl+Shift+P/N are NOT passed through: they stay WezTerm's command palette and
+-- new window. Model cycle is Alt+N / Alt+P in the agents instead, matching the
+-- Emacs modifier hierarchy. (A Luvus pane does carry the kitty keyboard
+-- protocol, so Ctrl+Shift+letter would reach the agent intact; this is a
+-- key-ownership choice, not an encoding limit.)
 -- Super+Shift+P is a second palette chord. Super+N still opens a window.
 -- Alt+Enter is WezTerm's default ToggleFullScreen. Unbind it so the pane gets
 -- it (Pi follow-up). Fullscreen uses the platform chord: macOS Ctrl+Cmd+F, same
