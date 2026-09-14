@@ -63,7 +63,7 @@ defaults are in the per-tool files.
 | =Ctrl+J= / =Shift+Enter= | New line                                            |
 | =Ctrl+R=                 | Reverse-search prompt history                       |
 | =Ctrl+Alt+R=             | Rename session                                      |
-| =Alt+N= / =Alt+P=        | Next/previous scoped model (Pi: also =Alt+Down/Up=) |
+| =Alt+N= / =Alt+P=        | Next/previous scoped model                          |
 | =Enter=                  | Submit; Pi steer while working                      |
 | =Alt+Enter=              | Pi follow-up while working                          |
 

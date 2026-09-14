@@ -6,15 +6,15 @@
        shift+ctrl+<key> through those two encodings, with no legacy fallback.
        Alt chords do have one (ESC+<key>), so they survive.
 
-       The action IDs say alt+down/alt+up rather than alt+n/alt+p, unlike OMP,
-       and that is not a typo: pi-tui's LEGACY_SEQUENCE_KEY_IDS aliases ESC n to
-       the key id alt+down and ESC p to alt+up (keys.js), because Emacs M-n/M-p
-       and the down/up arrows are the same motion. Binding alt+n here registers
-       but never fires — the event Pi sees is alt+down. Pressing M-n/M-p is what
-       reaches these, and Alt+arrow works too.
+       The action IDs are alt+n/alt+p, the same as OMP. pi-tui's
+       LEGACY_SEQUENCE_KEY_IDS aliases ESC n to alt+down and ESC p to alt+up
+       (keys.js), so the arrow ids match M-n/M-p under legacy encoding only —
+       under the kitty keyboard protocol they match nothing. The letter ids
+       match both encodings.
 
        That takes alt+up from app.message.dequeue, which moves to alt+q — Pi's
-       own Windows fallback for that action, unused on macOS.
+       own Windows fallback for that action, unused on macOS. It does not move
+       back: legacy ESC p carries both alt+up and alt+p.
 
        Session rename is C-M-r so Ctrl+R stays reverse search
        (pi-input-history).
@@ -34,8 +34,8 @@
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
-    "app.model.cycleForward" "alt+down"
-    "app.model.cycleBackward" "alt+up"
+    "app.model.cycleForward" "alt+n"
+    "app.model.cycleBackward" "alt+p"
     "app.message.dequeue" "alt+q"
     "app.session.rename" "ctrl+alt+r"
   )

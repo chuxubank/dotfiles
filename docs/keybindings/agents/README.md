@@ -31,19 +31,9 @@ The chords are letters because OMP matches only `alt+<letter>` and
 `alt+shift+<letter>`. A rebound `alt+<symbol>` such as `alt+.` is accepted by
 the config parser and listed by `/hotkeys`, but never fires.
 
-The same physical chord needs a different action ID in each agent, so the two
-config files deliberately disagree:
-
-| Agent | `cycleForward` | `cycleBackward` |
-| --- | --- | --- |
-| OMP | `alt+n` | `alt+p` |
-| Pi | `alt+down` | `alt+up` |
-
-`pi-tui`'s `LEGACY_SEQUENCE_KEY_IDS` aliases `ESC n` to the key id `alt+down`
-and `ESC p` to `alt+up`, since Emacs `M-n` / `M-p` and the down/up arrows are the
-same motion. Binding `alt+n` in Pi registers but never fires. OMP has no such
-alias and needs the letter IDs. Either way `M-n` / `M-p` is what you press; in Pi
-`Alt+Down` / `Alt+Up` also work.
+Both agents use the same action IDs, `alt+n` / `alt+p`. Pi's config used the
+arrow ids `alt+down` / `alt+up` until they turned out to match only under legacy
+encoding; see [Pi](pi.md).
 
 `Alt+P` is OMP's own `app.model.selectTemporary` by default, moved to
 `Alt+Shift+M` beside `app.model.select` on `Alt+M`. In Pi, `Alt+Up` is
@@ -79,8 +69,8 @@ override model cycling while the main editor is focused.
 
 | Keys | Current assignment |
 | --- | --- |
-| `Alt+N` | Next scoped model (also `Alt+Down` in Pi) |
-| `Alt+P` | Previous scoped model (also `Alt+Up` in Pi) |
+| `Alt+N` | Next scoped model |
+| `Alt+P` | Previous scoped model |
 | `Alt+M` / `Alt+Shift+M` | Open the model selector / pick a temporary model (OMP) |
 | `Alt+Q` | Dequeue a queued message (Pi; was `Alt+Up`) |
 

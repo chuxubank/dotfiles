@@ -16,15 +16,14 @@ has no legacy fallback for it, while `alt+<key>` does fall back to `ESC` + the
 key. A Luvus pane offers neither enhanced encoding, so the shifted chord is
 unreachable there. See the [shared bindings](README.md).
 
-The action IDs are `alt+down` / `alt+up`, not `alt+n` / `alt+p` as in OMP.
-`pi-tui`'s `LEGACY_SEQUENCE_KEY_IDS` aliases `ESC n` to the key id `alt+down`
-and `ESC p` to `alt+up`, because Emacs `M-n` / `M-p` and the down/up arrows are
-the same motion. Binding `alt+n` here registers but never fires — the event Pi
-sees is `alt+down`. Pressing `M-n` / `M-p` reaches these, and `Alt+Down` /
-`Alt+Up` work as well.
+The action IDs are `alt+n` / `alt+p`, the same as OMP. The arrow ids `alt+down` /
+`alt+up` match `M-n` / `M-p` under legacy encoding only, via `pi-tui`'s
+`LEGACY_SEQUENCE_KEY_IDS`; under the kitty keyboard protocol they match nothing.
+The letter ids match both encodings.
 
 That takes `Alt+Up` from `app.message.dequeue`, which moves to `Alt+Q` — Pi's
-own Windows fallback for that action, unused on macOS.
+own Windows fallback for that action, unused on macOS. It does not move back:
+legacy `ESC p` carries both `alt+up` and `alt+p`.
 
 ## Ghost suggestions shadow four chords
 
@@ -35,10 +34,13 @@ visible those chords do not reach the actions below:
 
 | Keys | Assignment here | While a ghost shows |
 | --- | --- | --- |
-| `Alt+Up` / `M-p` | Previous scoped model | Previous ghost candidate |
-| `Alt+Down` / `M-n` | Next scoped model | Next ghost candidate |
+| `Alt+P` / `M-p` | Previous scoped model | Previous ghost candidate |
+| `Alt+N` / `M-n` | Next scoped model | Next ghost candidate |
 | `Alt+F` | Word right | Accept one ghost word |
 | `Right` | Cursor right | Accept the whole ghost |
+
+The package matches `alt+up` / `alt+down`, so this shadowing applies under legacy
+encoding only.
 
 The guard is `activeGhost() && cursorAtLineEnd()`, so the chords return to their
 normal actions with no ghost on screen or with the cursor away from the line end
@@ -65,8 +67,8 @@ survives regardless.
 | `Ctrl+H` | No delete-backward binding | Delete character backward | **Add** |
 | `Ctrl+R` | Rename session | Reverse-search prompt history | **Change** |
 | `Ctrl+Shift+P` | Cycle backward | Not bound; unreachable inside a Luvus pane | **Delete** |
-| `Alt+N` / `Alt+Down` | Reorder a model down (selector only) | Next scoped model; ghost candidate while one shows | **Add** |
-| `Alt+P` / `Alt+Up` | Dequeue a queued message | Previous scoped model; ghost candidate while one shows | **Change** |
+| `Alt+N` | Reorder a model down (selector only) | Next scoped model; ghost candidate while one shows | **Add** |
+| `Alt+P` | Dequeue a queued message | Previous scoped model; ghost candidate while one shows | **Change** |
 | `Alt+Q` | No assignment on macOS (Windows: dequeue) | Dequeue a queued message | **Add** |
 | `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
 | `Right` | Cursor right | Accept ghost suggestion while one shows | **Add** |
