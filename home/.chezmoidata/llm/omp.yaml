@@ -65,6 +65,12 @@ llm:
       enabled_models:
         - anthropic/claude-opus-5*
         - anthropic/claude-sonnet-5*
+        # The cc token's copy of sol/terra/luna, which that group serves over
+        # its Anthropic front (`/v1/messages`, translated server-side; probed
+        # 2026-09-14). A second auth lane for the same three models, selectable
+        # by hand. Pinned like every other glob here; `openai/gpt-5.6*` below
+        # is the codex-token lane for the same ids.
+        - anthropic/gpt-5.6*
         - iv-anthropic/claude-fable-5
         # IV's open-weight lines, served only by the default-token group; the
         # codex and cc groups list none of these ids. `kimi/kimi-k3*` keeps the
