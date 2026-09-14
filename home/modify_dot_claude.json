@@ -1,0 +1,23 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Claude Code owns this file (onboarding state, project history, userID);
+       manage only mcpServers and theme and leave the rest untouched.
+       Empty output when the tool is off removes the dest file, and when the
+       file is absent it keeps chezmoi from creating Claude's state file. */ -}}
+
+{{- $in := trim (dig "stdin" "" .chezmoi) -}}
+{{- if and
+      (includeTemplate "tool/enabled" (merge (dict "tool" "claude-code") .) | fromJson)
+      (gt (len $in) 0) -}}
+  {{- $servers := includeTemplate "mcp/anthropic" (merge (dict "tool" "claude-code") .) | fromJson -}}
+  {{- $managed := dict
+    "mcpServers" $servers
+    "theme" (ternary "dark" "light" .isDarkMode)
+  -}}
+  {{- includeTemplate "config/merge" (dict
+    "format" "json"
+    "input" $in
+    "managed" $managed
+    "replace" (dict "mcpServers" $servers)
+  ) -}}
+{{- end -}}
