@@ -113,6 +113,12 @@ repositories:
     refresh_period: 4h
     when: *personal_or_iv
 
+  - path: [workspace, iv]
+    dest: cosmos
+    url: git@git.infinityparadise.com:backend/cosmos.git
+    refresh_period: 4h
+    when: *personal_or_iv
+
   # path.workspace.opentactic
   - path: [workspace, opentactic]
     dest: OpenTactic
