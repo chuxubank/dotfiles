@@ -17,4 +17,5 @@ mas = [
   { id = 640199958, name = "Apple Developer" },
   { id = 6447957425, name = "Immersive Translate" },
   { id = 937984704, name = "Amphetamine" },
+  { id = 944848654, name = "网易云音乐", when.enabled = { host_env = ["personal", "iv"], disk_gb.min = 256 } },
 ]

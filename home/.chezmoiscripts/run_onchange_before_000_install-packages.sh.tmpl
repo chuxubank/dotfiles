@@ -50,6 +50,8 @@ termux_remove() {
 sync_open_packages "$STATE_DIR/packages.termux" "termux package" termux_remove
 
 {{ else if eq .chezmoi.os "darwin" -}}
+# Homebrew 7 replaced the deprecated global trust bypass with per-item trust.
+unset HOMEBREW_NO_REQUIRE_TAP_TRUST
 brew bundle --quiet --force-cleanup --no-upgrade --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF

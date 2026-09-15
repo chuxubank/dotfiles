@@ -117,7 +117,6 @@ casks = [
   { name = "mongodb-compass", when.enabled.host_env = ["aa"] },
   { name = "mos", when.enabled.host_env = ["personal", "iv"] },
   { name = "neovide-app", when.enabled.disk_gb.min = 256 },
-  { name = "neteasemusic", when.enabled = { host_env = ["personal", "iv"], disk_gb.min = 256 } },
   { name = "netnewswire", when.enabled.disk_gb.min = 256 },
   { name = "notion", when.enabled.disk_gb.min = 256 },
   { name = "obsidian", when.enabled.disk_gb.min = 256 },
