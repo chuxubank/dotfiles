@@ -121,7 +121,8 @@ tools:
   # zshrc; first interactive shell unpacks resources from the bun global cwd.
   inshellisense:
     when:
-      enabled: false
+      disabled:
+        host_env: [ci]
     purge:
       - ".inshellisense/**"
       - ".local/share/inshellisense/**"
