@@ -142,6 +142,13 @@ tools:
       - "Library/Caches/dev.kiro.cli/**"
       - "Library/WebKit/com.amazon.codewhisperer/**"
 
+  lark-project-cli:
+    when:
+      enabled:
+        host_env: [iv]
+    # The package postinstall registers its bundled Meegle plugin skills.
+    # Keep this switch aligned with packages/node.toml and skills/external.yaml.
+
   luvus:
     remove:
       - ".luvus/config.json"

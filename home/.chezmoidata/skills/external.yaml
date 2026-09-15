@@ -11,6 +11,16 @@
 # name stops being protected so cleanup reaps the copy its installer left.
 skills:
   external:
+    # @lark-project/cli registers these bundled skills from its postinstall.
+    # lpm only manages plugin engineering; feishu-projects remains the separate
+    # business-data skill for work items, views, schedules, and similar APIs.
+    - name: meegle-plugin
+      owner: lark-project-cli
+    - name: meegle-plugin-backend
+      owner: lark-project-cli
+    - name: meegle-plugin-cli
+      owner: lark-project-cli
+
     # terminal-browser symlinks its bundled skill into ~/.agents/skills (and
     # each agent's own skills dir) from the dist payload. Its `ensureSetup` is
     # gated on a version receipt under .local/state/terminal-browser, so once
