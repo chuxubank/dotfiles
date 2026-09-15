@@ -18,20 +18,22 @@
 # parent that disabled-ignore derives is never a shared tree. A managed file
 # in a shared tree (e.g. bin/) belongs in neither list: gate its template on
 # tool/enabled and it renders empty, which chezmoi removes on its own.
+tool_conditions:
+  disabled: &disabled {enabled: false}
+  non_ci: &non_ci {disabled: {host_env: [ci]}}
+  iv_only: &iv_only {enabled: {host_env: [iv]}}
+
 tools:
   # CLI via bun. No managed dest files.
   amp:
-    when:
-      enabled: false
+    when: *disabled
     purge:
       - ".amp/**"
       - ".config/amp/**"
       - ".local/share/amp/**"
 
   claude-code:
-    when:
-      enabled:
-        host_env: [iv]
+    when: *iv_only
     remove:
       - ".claude/settings.json"
       - ".claude/statusline.sh"
@@ -43,9 +45,7 @@ tools:
   codegraph: {}
 
   codex:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".codex/config.toml"
       - ".codex/model-catalog.json"
@@ -53,9 +53,7 @@ tools:
       - ".codex/**"
 
   cursor:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".cursor/mcp.json"
       - ".cursor/cli-config.json"
@@ -63,17 +61,14 @@ tools:
       - ".cursor/**"
 
   gemini-cli:
-    when:
-      enabled: false
+    when: *disabled
     remove:
       - ".gemini/antigravity-cli/mcp_config.json"
     purge:
       - ".gemini/**"
 
   goose:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".config/goose/config.yaml"
     purge:
@@ -87,15 +82,12 @@ tools:
       - ".grok/**"
 
   github-copilot:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     purge:
       - ".copilot/**"
 
   hermes:
-    when:
-      enabled: false
+    when: *disabled
     remove:
       - ".hermes/config.yaml"
       - ".hermes/SOUL.md"
@@ -120,9 +112,7 @@ tools:
   # Fig-style PTY autocomplete via bun. The wrap is inlined at the end of
   # zshrc; first interactive shell unpacks resources from the bun global cwd.
   inshellisense:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     purge:
       - ".inshellisense/**"
       - ".local/share/inshellisense/**"
@@ -134,8 +124,7 @@ tools:
   # the darwin setup script removes those on disable. brew zap covers the
   # rest.
   kiro-cli:
-    when:
-      enabled: false
+    when: *disabled
     purge:
       - ".kiro/**"
       - "Library/Application Support/kiro-cli/**"
@@ -144,9 +133,7 @@ tools:
       - "Library/WebKit/com.amazon.codewhisperer/**"
 
   lark-project-cli:
-    when:
-      enabled:
-        host_env: [iv]
+    when: *iv_only
     # The package postinstall registers its bundled Meegle plugin skills.
     # Keep this switch aligned with packages/node.toml and skills/external.yaml.
 
@@ -170,15 +157,12 @@ tools:
       - ".luvus/reviews/**"
 
   lody:
-    when:
-      enabled: false
+    when: *disabled
     purge:
       - ".lody/**"
 
   omp:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".omp/agent/config.yml"
       - ".omp/agent/keybindings.yml"
@@ -189,15 +173,12 @@ tools:
       - ".omp/**"
 
   openclaw:
-    when:
-      enabled: false
+    when: *disabled
     purge:
       - ".openclaw/**"
 
   opencode:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".config/opencode/opencode.json"
       - ".config/opencode/tui.json"
@@ -206,8 +187,7 @@ tools:
       - ".local/share/opencode/**"
 
   orca:
-    when:
-      enabled: false
+    when: *disabled
     remove:
       - ".config/orca/profiles/local-default/orca-data.json"
     purge:
@@ -221,9 +201,7 @@ tools:
   # Self-hosted daemon that launches the other agent CLIs. The desktop cask
   # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
   paseo:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".paseo/config.json"
     purge:
@@ -234,9 +212,7 @@ tools:
       - ".paseo/**"
 
   pi:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".pi/agent/models.json"
       - ".pi/agent/settings.json"
@@ -250,17 +226,14 @@ tools:
       - ".config/pi/**"
 
   rclone:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".config/rclone/rclone.conf"
     purge:
       - ".config/rclone/**"
 
   rtk:
-    when:
-      enabled: false
+    when: *disabled
     remove:
       - ".config/rtk/config.toml"
     purge:
@@ -275,17 +248,13 @@ tools:
       - "AppData/Local/rtk/**"
 
   sentry:
-    when:
-      enabled:
-        host_env: [iv]
+    when: *iv_only
 
   sim-use:
-    when:
-      enabled: false
+    when: *disabled
 
   termio:
-    when:
-      enabled: false
+    when: *disabled
     remove:
       - ".termio/settings.json"
     purge:
@@ -295,9 +264,7 @@ tools:
   # protocol. No managed config: it is CLI-only, and its own installer owns
   # the bundled skill (see skills/external.yaml).
   terminal-browser:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     purge:
       # Only this tree is exclusively ours. The cask zaps sibling paths
       # (.cache/terminal-browser-*, .local/share/terminal-browser-*) whose
@@ -318,9 +285,7 @@ tools:
       - ".warp/**"
 
   worktrunk:
-    when:
-      disabled:
-        host_env: [ci]
+    when: *non_ci
     remove:
       - ".config/worktrunk/config.toml"
     purge:
@@ -328,8 +293,7 @@ tools:
 
   # Live shell completion plugin loaded before oh-my-zsh.
   zsh-autocomplete:
-    when:
-      enabled: false
+    when: *disabled
 
   talkify:
     when:
