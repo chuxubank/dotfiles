@@ -1,0 +1,4 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "inshellisense") .) | fromJson -}}
+# Gruvbox selection surface; remaining colors inherit from the terminal.
+activeSuggestionBackgroundColor = {{ ternary "#504945" "#d5c4a1" .isDarkMode | quote }}
+{{- end -}}
