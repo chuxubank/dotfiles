@@ -325,6 +325,11 @@ tools:
     purge:
       - ".config/worktrunk/**"
 
+  # Live shell completion plugin loaded before oh-my-zsh.
+  zsh-autocomplete:
+    when:
+      enabled: false
+
   talkify:
     when:
       enabled:

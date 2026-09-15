@@ -22,7 +22,7 @@ function source_if {
     fi
 }
 
-{{ if eq .chezmoi.os "linux" -}}
+{{ if and (eq .chezmoi.os "linux") (includeTemplate "tool/enabled" (merge (dict "tool" "zsh-autocomplete") .) | fromJson) -}}
 # Debian/Ubuntu /etc/zsh/zshrc calls compinit unless this is set.
 skip_global_compinit=1
 {{ end -}}
