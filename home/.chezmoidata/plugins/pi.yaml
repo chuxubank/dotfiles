@@ -76,6 +76,22 @@ plugins:
           reference clickable in history.
         source: npm:pi-image-view
 
+      - name: pi-tool-call-markers
+        description: >-
+          Compact, width-safe collapsed tool rows, grouped calls, visible edit
+          diffs, subagent plans, and display-only merged thinking blocks. Uses
+          guarded private Pi rendering adapters; Ctrl+O keeps native details.
+        source: npm:@pi-kaush/pi-tool-call-markers@0.3.1
+
+      # Keep after pi-autosuggestions and pi-input-history: content-layout
+      # wraps the editor component already installed by earlier packages.
+      - name: pi-content-layout
+        description: >-
+          Inset the conversation surface and style active and submitted prompts
+          as matching blocks. Complements pi-tool-call-markers without taking
+          ownership of tool execution rows.
+        source: npm:@pi-kaush/pi-content-layout@0.1.9
+
       - name: pi-undo-redo
         description: >-
           Undo/redo conversation checkpoints and the workspace files those
