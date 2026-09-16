@@ -3,9 +3,11 @@ skills:
     30-personal:
       - name: feishu-projects
         source: chuxubank/skills
-        when:
-          enabled:
-            host_env: iv
+        owner: feishu-projects
+
+      - name: meegle
+        source: larksuite/meegle-cli
+        owner: meegle-cli
 
       - name: grok-subagent
         source: chuxubank/skills

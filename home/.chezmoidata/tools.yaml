@@ -132,10 +132,20 @@ tools:
       - "Library/Caches/dev.kiro.cli/**"
       - "Library/WebKit/com.amazon.codewhisperer/**"
 
+  # Feishu Project MCP and its agent skill share this lifecycle switch. Keep
+  # both declarations managed while the Meegle CLI replaces them at runtime.
+  feishu-projects:
+    when: *disabled
+
   lark-project-cli:
     when: *iv_only
     # The package postinstall registers its bundled Meegle plugin skills.
     # Keep this switch aligned with packages/node.toml and skills/external.yaml.
+
+  # Business-data CLI and its official skill. This is separate from the lpm
+  # plugin-development CLI and from the Feishu Project MCP integration.
+  meegle-cli:
+    when: *iv_only
 
   luvus:
     remove:

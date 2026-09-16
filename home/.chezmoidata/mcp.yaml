@@ -101,12 +101,10 @@ mcp:
         timeout: 20
         tool_timeout: 30
     - name: Feishu
+      owner: feishu-projects
       description:
         The Feishu Project MCP Server connects AI tools to Feishu's Project.
         Make project management more convenient.
-      when:
-        enabled:
-          host_env: iv
       execution:
         type: http
         uri: "https://project.feishu.cn/mcp_server/v1"
