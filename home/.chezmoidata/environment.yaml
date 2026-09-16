@@ -142,6 +142,18 @@ environment:
         JIRA_URL:
           literal: https://aaecosystem.atlassian.net
 
+    # The OpenAPI token stays in the encrypted ~/.authinfo.gpg entry for
+    # project.feishu.cn and is resolved through Emacs auth-source.
+    - tool: feishu-project
+      when:
+        enabled:
+          host_env: [iv]
+      variables:
+        FEISHU_PROJECT_KEY:
+          literal: ga2dwb
+        FEISHU_PROJECT_USER_KEY:
+          literal: "7613186206829956303"
+
     - tool: org
       variables:
         ORG_DIR:
