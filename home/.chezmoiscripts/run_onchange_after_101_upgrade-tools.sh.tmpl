@@ -88,7 +88,7 @@ fi
 
 echo "Upgrade emacs packages"
 upgrade_emacs() {
-{{ template "emacs/upgrade-packages.sh" . }}
+{{ template "emacs/package-sync-upgrade.sh" . }}
 }
 if ! upgrade_emacs; then
   print -u2 -- "Could not upgrade emacs packages"

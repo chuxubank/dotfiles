@@ -5,5 +5,5 @@ set -eu
 # emacs-version: {{ template "emacs/version" . }}
 
 echo "󰯁 {{ template "emacs/version" . }}: recompile packages"
-{{ template "emacs/recompile-packages.sh" . }}
+{{ template "emacs/package-recompile.sh" . }}
 {{ end -}}
