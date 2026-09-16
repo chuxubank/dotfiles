@@ -97,6 +97,7 @@ brews = [
   "reddix",
   "repo",
   "ripgrep",
+  "tgrep",
   "rsync",
   { name = "rtk", owner = "rtk" },
   "ruby",
