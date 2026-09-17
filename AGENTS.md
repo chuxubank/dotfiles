@@ -21,6 +21,17 @@ serves multiple consumers or owns an independent contract worth testing. A
 template that only forwards arguments, performs one local filter, or lightly
 reshapes data for one target belongs at the call site.
 
+## Chezmoi script retry boundaries
+
+A `run_onchange` script is chezmoi's success-recording and retry unit. Split
+independently retryable work into separate scripts by ecosystem or transaction
+domain; keep ordered or dependent commands together. Put foundational, stable
+work before slower or failure-prone work, because a failed script can prevent
+later scripts from running in that apply. Prefer these native script boundaries
+over custom checkpoint state. Validate changes by rendering each affected
+template, checking its shell syntax and success/failure exit status, and running
+`make verify`; do not invoke the real operations during validation.
+
 ## External repo definitions
 
 `home/.chezmoidata/path.toml` owns path strings only.
