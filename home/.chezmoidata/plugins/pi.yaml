@@ -13,7 +13,8 @@ plugins:
   #
   # Optional `extensions` / `skills` / `prompts` / `themes` lists become the
   # object form in settings.packages and filter what that source loads.
-  # Omit a key to load all of that type; `[]` loads none.
+  # Omit a key to load all of that type; `[]` loads none. `trust: true` adds
+  # an enabled npm source to Bun's trustedDependencies for lifecycle scripts.
   pi:
     providers:
       - name: pi-mcp-adapter
@@ -30,6 +31,7 @@ plugins:
           Desktop computer-use tools for Pi on macOS, Windows, and Linux.
           macOS requires Accessibility and Screen Recording permissions.
         source: npm:@injaneity/pi-computer-use
+        trust: true
 
       - name: pi-subagents
         description: >-

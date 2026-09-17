@@ -13,6 +13,14 @@ configuration files as the source of truth and keep the summary concise.
 
 Run `make verify` after modifying keyboard configuration or its documentation.
 
+## Template boundaries
+
+Inline single-consumer rendering and transformation logic in its target
+file, including `modify_` templates. Extract an `includeTemplate` only when it
+serves multiple consumers or owns an independent contract worth testing. A
+template that only forwards arguments, performs one local filter, or lightly
+reshapes data for one target belongs at the call site.
+
 ## External repo definitions
 
 `home/.chezmoidata/path.toml` owns path strings only.

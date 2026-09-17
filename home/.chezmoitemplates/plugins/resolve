@@ -15,6 +15,7 @@
          source      — tool-specific plugin identifier
          enabled     — bool (resolved via when/evaluate)
          ref         — optional pin (herdr)
+         trust       — optional Bun lifecycle-script trust (Pi npm packages)
          extensions / skills / prompts / themes — optional pi package filters
 */ -}}
 {{- $tool := .tool -}}
@@ -65,6 +66,9 @@
   {{- end -}}
   {{- if hasKey $provider "ref" -}}
     {{- $_ := set $p "ref" $provider.ref -}}
+  {{- end -}}
+  {{- if hasKey $provider "trust" -}}
+    {{- $_ := set $p "trust" $provider.trust -}}
   {{- end -}}
   {{- range $key := list "extensions" "skills" "prompts" "themes" -}}
     {{- if hasKey $provider $key -}}

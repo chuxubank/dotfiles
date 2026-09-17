@@ -209,6 +209,19 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* Pi package lifecycle trust is declarative but Bun-specific: only npm
+       package sources can appear in trustedDependencies. */ -}}
+{{- range $provider := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson -}}
+  {{- if hasKey $provider "trust" -}}
+    {{- if ne (kindOf $provider.trust) "bool" -}}
+      {{- fail (printf "plugins.pi %s: trust must be boolean" $provider.name) -}}
+    {{- end -}}
+    {{- if not (hasPrefix "npm:" $provider.source) -}}
+      {{- fail (printf "plugins.pi %s: trust requires npm source, got %q" $provider.name $provider.source) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* mitsupi is Armin's whole kit. A string-form source would load uv,
        auto-trust, unified-edit, btw, review, and the rest on top of the
        packages we already declare. */ -}}

@@ -1,0 +1,26 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Pi owns dependencies in this package.json. Keep them intact while
+       deriving reviewed lifecycle-script trust from plugins/pi.yaml. */ -}}
+{{- $trusted := list -}}
+{{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson -}}
+  {{- if and $p.enabled (dig "trust" false $p) -}}
+    {{- if not (hasPrefix "npm:" $p.source) -}}
+      {{- fail (printf "pi npm package trust requires npm source, got %q" $p.source) -}}
+    {{- end -}}
+    {{- $name := trimPrefix "npm:" $p.source -}}
+    {{- $name = regexReplaceAll "@[^/@]+$" $name "" -}}
+    {{- if not $name -}}
+      {{- fail (printf "pi npm package trust has empty package in %q" $p.source) -}}
+    {{- end -}}
+    {{- $trusted = append $trusted $name -}}
+  {{- end -}}
+{{- end -}}
+{{- $trusted = $trusted | uniq -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "trustedDependencies" $trusted
+  )
+) -}}
