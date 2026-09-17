@@ -1,0 +1,19 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade Rust tools"
+
+source "$HOME/.zshenv"
+export PATH="${CARGO_HOME:+$CARGO_HOME/bin:}$HOME/.local/bin:$PATH"
+{{ template "script/upgrade" . }}
+
+if command -v rustup >/dev/null; then
+  run_upgrade rustup rustup update stable
+fi
+
+if command -v cargo-install-update >/dev/null; then
+  run_upgrade cargo cargo install-update -a -g
+fi
+
+finish_upgrades
+{{ end -}}

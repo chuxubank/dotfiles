@@ -1,0 +1,13 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") (includeTemplate "tool/enabled" (merge (dict "tool" "hermes") .) | fromJson) -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade Hermes"
+
+source "$HOME/.zshenv"
+export PATH="$HOME/.local/bin:$PATH"
+
+if command -v hermes >/dev/null; then
+  echo "Upgrade hermes"
+  hermes update --yes
+fi
+{{ end -}}

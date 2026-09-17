@@ -1,0 +1,27 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade Bun tools"
+
+source "$HOME/.zshenv"
+export BUN_INSTALL="${BUN_INSTALL:-$HOME/{{ .path.tool.bun }}}"
+export PATH="$BUN_INSTALL/bin:$HOME/.local/bin:$PATH"
+
+if ! command -v bun >/dev/null; then
+  exit 0
+fi
+
+{{ template "script/upgrade" . }}
+
+run_upgrade bun bun upgrade
+run_upgrade 'bun globals' bun update -g --latest
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "opencode") .) | fromJson }}
+opencode_postinstall="$BUN_INSTALL/install/global/node_modules/opencode-ai/postinstall.mjs"
+if [[ -f $opencode_postinstall ]]; then
+  run_upgrade 'opencode postinstall' node "$opencode_postinstall"
+fi
+{{- end }}
+run_upgrade playwright bunx playwright install chromium
+
+finish_upgrades
+{{ end -}}

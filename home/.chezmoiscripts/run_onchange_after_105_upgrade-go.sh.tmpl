@@ -1,0 +1,12 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade Go binaries"
+
+source "$HOME/.zshenv"
+export PATH="${GOBIN:+$GOBIN:}$HOME/.local/bin:$PATH"
+
+if command -v gup >/dev/null; then
+  gup update
+fi
+{{ end -}}

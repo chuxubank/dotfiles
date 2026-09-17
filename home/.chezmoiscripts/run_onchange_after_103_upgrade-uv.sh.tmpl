@@ -1,0 +1,21 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade uv tools"
+
+source "$HOME/.zshenv"
+export PATH="$HOME/.local/bin:$PATH"
+
+if ! command -v uv >/dev/null; then
+  exit 0
+fi
+
+{{ template "script/upgrade" . }}
+
+if ! command -v brew >/dev/null || ! brew list uv &>/dev/null; then
+  run_upgrade 'uv self' uv self update
+fi
+run_upgrade 'uv tools' uv tool upgrade --all
+
+finish_upgrades
+{{ end -}}

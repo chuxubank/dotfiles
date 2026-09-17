@@ -1,0 +1,12 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade Emacs packages"
+
+source "$HOME/.zshenv"
+upgrade_emacs() {
+{{ template "emacs/package-sync-upgrade.sh" . }}
+}
+
+upgrade_emacs
+{{ end -}}

@@ -1,0 +1,15 @@
+had_errors=false
+
+run_upgrade() {
+  local label=$1
+  shift
+  echo "Upgrade $label"
+  if ! "$@"; then
+    print -u2 -- "Could not upgrade $label"
+    had_errors=true
+  fi
+}
+
+finish_upgrades() {
+  ! $had_errors
+}

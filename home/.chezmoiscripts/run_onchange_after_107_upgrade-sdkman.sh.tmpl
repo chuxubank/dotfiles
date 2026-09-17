@@ -1,0 +1,13 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade SDKMAN"
+
+source "$HOME/.zshenv"
+SDKMAN_DIR="${SDKMAN_DIR:-$HOME/{{ .path.tool.sdkman }}}"
+
+if [[ -s $SDKMAN_DIR/bin/sdkman-init.sh ]]; then
+  source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  sdk selfupdate
+fi
+{{ end -}}

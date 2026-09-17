@@ -1,0 +1,35 @@
+{{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade system packages"
+
+source "$HOME/.zshenv"
+{{ template "script/upgrade" . }}
+
+{{ template "gpg/functions.sh" . }}
+
+gpg_before=$(gpg_version)
+
+if command -v brew >/dev/null; then
+  run_upgrade brew brew upgrade
+fi
+
+{{ if eq .chezmoi.os "android" -}}
+run_upgrade termux pkg upgrade -y
+{{ else if and (eq .chezmoi.os "linux") (lookPath "apt-get") -}}
+echo "Upgrade apt"
+if ! sudo apt-get update -y; then
+  print -u2 -- "Could not update apt"
+  had_errors=true
+elif ! sudo apt-get upgrade -y; then
+  print -u2 -- "Could not upgrade apt"
+  had_errors=true
+fi
+{{ else if and (eq .chezmoi.os "linux") (lookPath "pacman") -}}
+run_upgrade pacman sudo pacman -Syu --noconfirm
+{{ end -}}
+
+gpg_kill_if_updated "$gpg_before"
+
+finish_upgrades
+{{ end -}}
