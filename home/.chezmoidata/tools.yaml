@@ -305,6 +305,19 @@ tools:
   zsh-autocomplete:
     when: *disabled
 
+  # After Effects .aep parsers. Independent switches; no managed dest files.
+  # aep-parser is PolyForm Noncommercial, so personal hosts only.
+  aep-parser:
+    when:
+      enabled:
+        host_env: [personal]
+
+  dot-aep:
+    when: *non_ci
+
+  py-aep:
+    when: *non_ci
+
   talkify:
     when:
       enabled:

@@ -3,4 +3,5 @@ go = [
   "gitcode.com/dscli/dscli@latest",
   "github.com/chrishrb/go-grip@latest",
   "github.com/nao1215/gup@latest",
+  { name = "github.com/yueli-fx/aep-parser/cmd/aep@latest", owner = "aep-parser" },
 ]

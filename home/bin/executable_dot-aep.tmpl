@@ -1,0 +1,5 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "dot-aep") .) | fromJson -}}
+#!/bin/sh
+# cargo install --example dump publishes the binary as `dump`.
+exec "${CARGO_HOME:-$HOME/.local/share/cargo}/bin/dump" "$@"
+{{- end -}}

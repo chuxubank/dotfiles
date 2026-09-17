@@ -10,6 +10,7 @@ tools = [
   "kimi-cli",
   "my-cookies",
   "pymobiledevice3",
+  { name = "py-aep", owner = "py-aep" },
   "pygments",
   "pylint",
   "python-lsp-server",
