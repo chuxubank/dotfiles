@@ -8,6 +8,9 @@ skills:
       - name: meegle
         source: larksuite/meegle-cli
         owner: meegle-cli
+        when:
+          enabled:
+            host_env: iv
 
       - name: grok-subagent
         source: chuxubank/skills

@@ -25,3 +25,5 @@ plugins:
           pinned in private_dot_luvus/modify_config.json, while production
           policy settings remain unmanaged until they exist authoritatively.
         source: AsahiArt/luvus-worktrunk-provider
+        when:
+          disabled: true
