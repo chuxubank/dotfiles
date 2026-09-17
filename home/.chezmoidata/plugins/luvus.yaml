@@ -16,4 +16,12 @@ plugins:
           sidebar, which Luvus itself leaves blank. Needs python3 and
           Settings → Layout → Show agent session title (layout.agent_title,
           pinned on in private_dot_luvus/modify_config.json).
-        source: AsahiArt/agent-titles
+        source: AsahiArt/luvus-agent-titles
+
+      - name: asahiart.worktrunk
+        description: >-
+          Provide Luvus worktree creation and removal through Worktrunk. The
+          module manifest requires Luvus 0.15.0 or newer; provider selection is
+          pinned in private_dot_luvus/modify_config.json, while production
+          policy settings remain unmanaged until they exist authoritatively.
+        source: AsahiArt/luvus-worktrunk-provider

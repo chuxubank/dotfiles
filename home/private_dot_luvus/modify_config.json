@@ -11,6 +11,10 @@
        check_updates is off because Homebrew owns the binary
        (RizRiyz/luvus/luvus in packages/brew/brews.toml).
 
+       Worktree operations use the production asahiart.worktrunk provider.
+       Its module policy settings remain unmanaged until an authoritative
+       production settings file exists.
+
        direct_keybindings mirrors Herdr's `alt+1..9` workspace switching
        (dot_config/herdr/config.toml) because Herdr, Zellij, and Luvus are one
        mux layer and never run together. Luvus's own default for these is
@@ -28,6 +32,9 @@
     "theme" "terminal"
     "prefix" "ctrl+;"
     "check_updates" false
+    "worktree" (dict
+      "provider" "asahiart.worktrunk"
+    )
     "direct_keybindings" (dict
       "jump_workspace_1" "alt+1"
       "jump_workspace_2" "alt+2"
