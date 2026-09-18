@@ -63,6 +63,65 @@ bun_tool_installed() {
     (( ${installed_bun[(Ie)$tool_name]} ))
 }
 
+# bun remove -g rewrites package.json/lockfile but leaves optional native
+# packages in the shared global node_modules. That tree is not tool-owned,
+# so it cannot go on tools.yaml purge; drop names absent from the lockfile.
+prune_bun_global_leftovers() {
+    local global_dir="$BUN_INSTALL/install/global"
+    local nm="$global_dir/node_modules"
+    local lock="$global_dir/bun.lock"
+    local name child scope
+    local -a keep
+
+    $cleanup_enabled || return 0
+    [[ -d $nm && -f $lock ]] || return 0
+
+    keep=()
+    while IFS= read -r name; do
+        [[ -n $name ]] && keep+=("$name")
+    done < <(awk '
+      /^    "[^"]+": \[/ {
+        n = $0
+        sub(/^    "/, "", n)
+        sub(/": \[.*/, "", n)
+        if (n ~ /^@/) {
+          rest = n
+          sub(/^@[^\/]+\//, "", rest)
+          if (rest == n || rest ~ /\//) next
+        } else if (n ~ /\//) next
+        print n
+      }
+    ' "$lock")
+
+    if (( ${#keep[@]} == 0 )); then
+        print -u2 -- "Could not parse bun lockfile packages; skipping leftover prune"
+        had_errors=true
+        return 1
+    fi
+
+    for child in "$nm"/*; do
+        [[ -e $child ]] || continue
+        name="${child##*/}"
+        [[ $name == .* || $name == @* ]] && continue
+        if (( ! ${keep[(Ie)$name]} )); then
+            echo "Removing leftover bun package: $name"
+            rm -rf "$child" || had_errors=true
+        fi
+    done
+    for scope in "$nm"/@*; do
+        [[ -d $scope ]] || continue
+        for child in "$scope"/*; do
+            [[ -e $child ]] || continue
+            name="${scope##*/}/${child##*/}"
+            if (( ! ${keep[(Ie)$name]} )); then
+                echo "Removing leftover bun package: $name"
+                rm -rf "$child" || had_errors=true
+            fi
+        done
+        rmdir "$scope" 2>/dev/null || true
+    done
+}
+
 load_installed_bun || true
 
 if $inventory_ready; then
@@ -93,6 +152,7 @@ load_installed_bun || true
 if $inventory_ready; then
   remove_undeclared cleanup_enabled installed_bun declared_bun \
     'bun tool' bun remove -g
+  prune_bun_global_leftovers
 fi
 
 {{- if lookPath "openspec" }}
