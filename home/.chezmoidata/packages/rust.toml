@@ -5,6 +5,9 @@ cargo = [
   # fast-forward of upstream; see repositories.yaml.
   { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git", branch = "codex/gpg-source-provider" },
   { name = "dot-aep", git = "https://github.com/virtualritz/dot-aep", example = "dump", owner = "dot-aep" },
+  # The npm wrapper resolves upstream's released platform binary, so build the
+  # fork directly to include its Rust changes.
+  { name = "lsp-proxy", git = "https://github.com/cat-emacs/lsp-proxy.git", branch = "feat/project-activation" },
   { name = "lukaj", when.enabled.os = "darwin" },
   "mermaid-rs-renderer",
   "rust-script",
