@@ -10,7 +10,8 @@ After editing, run `/reload` in Pi.
 
 `Ctrl+P` / `Ctrl+N` use `tui.editor.historyPrevious` / `historyNext`.
 
-Model cycle moved to `Alt+N` / `Alt+P`, the Emacs next/previous pair, keeping
+Model selection moves from Pi's `Ctrl+L` default to `Alt+M`, matching OMP.
+Model cycle remains on `Alt+N` / `Alt+P`, the Emacs next/previous pair, keeping
 the modifier hierarchy in the [shared bindings](README.md): Ctrl moves by
 character and line, Meta by the larger unit. `Ctrl+Shift+P` is also WezTerm's
 command palette, which is not passed through.
@@ -66,6 +67,8 @@ survives regardless.
 | `Ctrl+H` | No delete-backward binding | Delete character backward | **Add** |
 | `Ctrl+R` | Rename session | Reverse-search prompt history | **Change** |
 | `Ctrl+Shift+P` | Cycle backward | Not bound; unreachable inside a Luvus pane | **Delete** |
+| `Ctrl+L` | Open the model selector | Not bound | **Delete** |
+| `Alt+M` | No assignment | Open the model selector | **Add** |
 | `Alt+N` | Reorder a model down (selector only) | Next scoped model; ghost candidate while one shows | **Add** |
 | `Alt+P` | Dequeue a queued message | Previous scoped model; ghost candidate while one shows | **Change** |
 | `Alt+Q` | No assignment on macOS (Windows: dequeue) | Dequeue a queued message | **Add** |

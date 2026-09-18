@@ -37,8 +37,10 @@ Both agents use the same action IDs, `alt+n` / `alt+p`. Pi's config used the
 arrow ids `alt+down` / `alt+up` until they turned out to match only under legacy
 encoding; see [Pi](pi.md).
 
+Both agents open the model selector with `Alt+M`. Pi's upstream default for
+`app.model.select` is `Ctrl+L`; the current assignment deliberately replaces it.
 `Alt+P` is OMP's own `app.model.selectTemporary` by default, moved to
-`Alt+Shift+M` beside `app.model.select` on `Alt+M`. In Pi, `Alt+Up` is
+`Alt+Shift+M` beside the shared selector chord. In Pi, `Alt+Up` is
 `app.message.dequeue`, moved to `Alt+Q` — Pi's own Windows fallback for it.
 
 Because `Ctrl+Shift+P` cannot reach the agent, WezTerm keeps its own command
@@ -73,7 +75,8 @@ override model cycling while the main editor is focused.
 | --- | --- |
 | `Alt+N` | Next scoped model |
 | `Alt+P` | Previous scoped model |
-| `Alt+M` / `Alt+Shift+M` | Open the model selector / pick a temporary model (OMP) |
+| `Alt+M` | Open the model selector |
+| `Alt+Shift+M` | Pick a temporary model (OMP) |
 | `Alt+Q` | Dequeue a queued message (Pi; was `Alt+Up`) |
 
 In Pi these four chords are shadowed while a `pi-autosuggestions` ghost is
