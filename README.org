@@ -65,6 +65,7 @@ defaults are in the per-tool files.
 | =Ctrl+Alt+R=             | Rename session                                      |
 | =Alt+M=                  | Open model selector                                  |
 | =Alt+N= / =Alt+P=        | Next/previous scoped model                          |
+| =Alt+D/T/U/L/A=          | /tree filter: default/no-tools/user/labeled/all     |
 | =Enter=                  | Submit; Pi steer while working                      |
 | =Alt+Enter=              | Pi follow-up while working                          |
 

@@ -49,6 +49,14 @@ palette on it; `Super+Shift+P` is a second palette chord.
 `Ctrl+P` in `/resume` still toggles path display. History bindings only
 override model cycling while the main editor is focused.
 
+`/tree` filter modes use `Alt+D/T/U/L/A` rather than Pi's `Ctrl+D/T/U/L/A`
+defaults. The letters are the same mnemonic (default, no-tools, user-only,
+labeled-only, all); the modifier is Meta because Ctrl stays on the Emacs
+editor set (`Ctrl+A/D/U`) and thinking toggle (`Ctrl+T`). OMP hardcodes the
+Alt chords in the overlay and does not expose filter action ids, so Alt is
+the only shared assignment the config can reach. `Ctrl+O` / `Ctrl+Shift+O`
+still cycle the filter on both agents.
+
 ## Emacs editor
 
 | Keys | Current assignment |
@@ -82,6 +90,17 @@ override model cycling while the main editor is focused.
 In Pi these four chords are shadowed while a `pi-autosuggestions` ghost is
 visible at the line end, in prose as well as in `!` bash mode. See
 [Pi](pi.md#ghost-suggestions-shadow-four-chords).
+
+## Session tree (`/tree`)
+
+| Keys | Current assignment |
+| --- | --- |
+| `Alt+D` | Default tree filter |
+| `Alt+T` | Hide tool results |
+| `Alt+U` | User messages only |
+| `Alt+L` | Labeled entries only |
+| `Alt+A` | All entries |
+| `Ctrl+O` / `Ctrl+Shift+O` | Cycle tree filter forward / backward |
 
 ## Message queue (Pi)
 

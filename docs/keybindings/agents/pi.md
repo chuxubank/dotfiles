@@ -16,6 +16,10 @@ the modifier hierarchy in the [shared bindings](README.md): Ctrl moves by
 character and line, Meta by the larger unit. `Ctrl+Shift+P` is also WezTerm's
 command palette, which is not passed through.
 
+`/tree` filters move from Pi's `Ctrl+D/T/U/L/A` defaults to `Alt+D/T/U/L/A`,
+matching OMP's hardcoded overlay chords. Ctrl stays on the Emacs editor set
+and thinking toggle. Cycle remains `Ctrl+O` / `Ctrl+Shift+O` on both agents.
+
 The action IDs are `alt+n` / `alt+p`, the same as OMP. The arrow ids `alt+down` /
 `alt+up` match `M-n` / `M-p` only under legacy `ESC`+key encoding, via `pi-tui`'s
 `LEGACY_SEQUENCE_KEY_IDS`; under kitty or modifyOtherKeys they match nothing.
@@ -73,6 +77,8 @@ survives regardless.
 | `Alt+P` | Dequeue a queued message | Previous scoped model; ghost candidate while one shows | **Change** |
 | `Alt+Q` | No assignment on macOS (Windows: dequeue) | Dequeue a queued message | **Add** |
 | `Ctrl+Alt+R` | No assignment (`Ctrl+R` renamed sessions) | Rename session | **Change** |
+| `Alt+D/T/U/L/A` | No assignment | Tree filters in `/tree` (were `Ctrl+D/T/U/L/A`) | **Add** |
+| `Ctrl+D/T/U/L/A` | Tree filters in `/tree` | Not bound in `/tree` | **Delete** |
 | `Right` | Cursor right | Accept ghost suggestion while one shows | **Add** |
 | `Alt+F` | Word right | Accept one ghost word while one shows | **Change** |
 | `Ctrl+Right` | No assignment | Accept one ghost word while one shows | **Add** |

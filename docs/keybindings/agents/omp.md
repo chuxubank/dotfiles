@@ -28,6 +28,11 @@ The replacements must be letters: OMP lists a rebound `alt+<symbol>` in
 `Alt+P` is OMP's own `selectTemporary`, moved to `Alt+Shift+M` beside
 `model.select` on `Alt+M`.
 
+`/tree` filter chords are `Alt+D/T/U/L/A` (default, no-tools, user-only,
+labeled-only, all), hardcoded in the overlay rather than keybinding ids, so
+`keybindings.yml` cannot remap them. Pi is rebound to the same Alt set; see
+the [shared bindings](README.md).
+
 ## Deltas from upstream
 
 | Keys | OMP default | Current assignment | Status |

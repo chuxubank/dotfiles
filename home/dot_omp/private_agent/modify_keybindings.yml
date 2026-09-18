@@ -12,7 +12,9 @@
        letters. M-p is OMP's own selectTemporary by default, moved to M-S-m
        next to model.select on M-m. Session rename is C-M-r so Ctrl+R stays
        reverse search. Unbind app.exit so Ctrl+D never quits. Double Ctrl+C
-       still exits. */ -}}
+       still exits. /tree filter chords (M-d/t/u/l/a) are hardcoded in the
+       overlay, not keybinding ids, so they cannot be remapped here. Pi is
+       rebound to the same Alt set. */ -}}
 {{- includeTemplate "config/merge" (dict
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)

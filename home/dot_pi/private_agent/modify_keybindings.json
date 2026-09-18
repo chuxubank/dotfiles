@@ -18,6 +18,12 @@
        (pi-input-history). Model selection moves from Pi's C-l default to M-m,
        matching OMP.
 
+       Tree filters move from Pi's C-d/t/u/l/a defaults to M-d/t/u/l/a,
+       matching OMP's hardcoded /tree chords. Ctrl stays on the Emacs editor
+       set (C-a/d/u) and thinking toggle (C-t). OMP does not expose these as
+       keybinding ids, so Alt is the only shared assignment the config can
+       reach.
+
        omit() drops leftover Enter/follow-up overrides as literal dotted keys.
        config/merge remove treats dots as nested paths, so it cannot. */ -}}
 {{- $merged := includeTemplate "config/merge" (dict
@@ -38,6 +44,11 @@
     "app.model.cycleBackward" "alt+p"
     "app.message.dequeue" "alt+q"
     "app.session.rename" "ctrl+alt+r"
+    "app.tree.filter.default" "alt+d"
+    "app.tree.filter.noTools" "alt+t"
+    "app.tree.filter.userOnly" "alt+u"
+    "app.tree.filter.labeledOnly" "alt+l"
+    "app.tree.filter.all" "alt+a"
   )
 ) | fromJson -}}
 {{- omit $merged "tui.input.submit" "app.message.followUp" | toPrettyJson -}}
