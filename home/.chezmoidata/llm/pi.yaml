@@ -8,7 +8,7 @@ llm:
       # it does, so the proxy is the source of truth. models-dev metadata is
       # merged in, so the enumerated entries keep real costs and limits.
       model:
-        - anthropic/${gpt_primary}
+        - openai/${gpt_primary}
         - anthropic/claude-opus-5
         - openai-codex/${gpt_primary}
         - xai/grok-4.6
@@ -53,7 +53,7 @@ llm:
         # `kimi/kimi-k3*` keeps the vendor segment because that is the id the
         # endpoint returns; llm/split-model only treats a leading segment as a
         # provider when it names a configured alias, so `kimi/` survives.
-        - iv/deepseek-v4*
+        - iv/deepseek-v4.1*
         - iv/glm-5.3*
         - iv/kimi/kimi-k3*
         - grok-4.6
