@@ -358,7 +358,7 @@ if [[ -z "${ISTERM}" && $- = *i* && ${+ZSH_EXECUTION_STRING} -eq 0
     local root="${BUN_INSTALL:-$HOME/.bun}/install/global"
     local data="${XDG_DATA_HOME:-$HOME/.local/share}/inshellisense"
     local unpacked="" pkg
-    [[ -d "$root/node_modules/@microsoft/inshellisense" ]] || return
+    [[ -d "$root/node_modules/@chuxubank/inshellisense" ]] || return
     [[ -r "$data/version.txt" ]] && unpacked=$(<"$data/version.txt")
     pkg=$(command is -v 2>/dev/null) || return
     if [[ "$unpacked" != "$pkg" ]]; then
