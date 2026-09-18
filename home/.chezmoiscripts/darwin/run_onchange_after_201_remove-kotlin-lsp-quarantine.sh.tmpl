@@ -1,0 +1,25 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+set -eu
+
+# Re-render when the installed Cask version changes: {{ if lookPath "brew" }}{{ output "sh" "-c" "brew list --cask --versions kotlin-lsp 2>/dev/null || true" | trim }}{{ else }}not-installed{{ end }}
+command -v brew >/dev/null 2>&1 || exit 0
+
+link="$(brew --prefix)/bin/kotlin-lsp"
+[ -e "$link" ] || exit 0
+
+target=$(realpath "$link")
+root=$(dirname "$target")
+caskroom=$(realpath "$(brew --caskroom)/kotlin-lsp")
+
+case "$root" in
+	"$caskroom"/*) ;;
+	*)
+		echo "Refusing to remove quarantine outside $caskroom: $root" >&2
+		exit 1
+		;;
+esac
+
+echo "󰯁 Remove kotlin-lsp quarantine: $root"
+xattr -dr com.apple.quarantine "$root"
+{{ end -}}
