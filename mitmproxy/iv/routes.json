@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "pattern": "/iv/collection/list-saves\\?(?=[^#]*\\btab=9(?:&|$))",
+    "file": "legacy_web_card.json",
+    "delay_seconds": 0
+  }
+]

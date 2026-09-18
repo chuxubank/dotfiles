@@ -1,0 +1,26 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "data": [
+      {
+        "id": 9000000014,
+        "msg_id": "mitmproxy-legacy-web-card",
+        "content_type": 14,
+        "content": "",
+        "created_at": "2026-01-01T00:00:00+08:00",
+        "card": {
+          "cover_url": null,
+          "width": 1,
+          "height": 1,
+          "title": "旧 HTTP(S) Card · WebView 测试",
+          "open_url": "https://example.com/?source=legacy-card-mitmproxy"
+        }
+      }
+    ],
+    "pagination": {
+      "marker": "",
+      "has_more": false
+    }
+  }
+}
