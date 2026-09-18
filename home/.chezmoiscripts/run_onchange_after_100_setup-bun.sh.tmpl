@@ -67,6 +67,7 @@ bun_tool_installed() {
 # packages in the shared global node_modules. That tree is not tool-owned,
 # so it cannot go on tools.yaml purge; drop names absent from the lockfile.
 prune_bun_global_leftovers() {
+    setopt local_options null_glob
     local global_dir="$BUN_INSTALL/install/global"
     local nm="$global_dir/node_modules"
     local lock="$global_dir/bun.lock"
