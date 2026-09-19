@@ -15,9 +15,9 @@ deliberately cheaper. Rationale is in
 
 | Role | `iv` host | Other hosts | Consumed by |
 | --- | --- | --- | --- |
-| `default` | `openai/gpt-5.6-sol:high` | `xai-oauth/grok-4.6:high` | Primary session; `*` selector |
+| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/cursor-grok-4.6-fast:high` | Primary session; `*` selector |
 | `slow` | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis |
-| `smol` | `openai/gpt-5.6-luna:medium` | `xai-oauth/grok-4.6:medium` | Prewalk target, background work, vibe `fast` |
+| `smol` | `openai/gpt-5.6-luna:medium` | `cursor/composer-2.5-fast` | Prewalk target, background work, vibe `fast` |
 | `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.6:high` | Subagent default, vibe `good` |
 | `advisor` | `anthropic/claude-sonnet-5` | `cursor/composer-2.5` | Per-turn advisor review |
 | `tiny` | `openai/gpt-5.6-luna:low` | `xai-oauth/grok-4.6:minimal` | Titles, memory, auto-thinking, stop detection |
@@ -56,7 +56,9 @@ would not survive at `task`'s call volume.
 primary's own deltas, so it is deliberately a different model family from the
 GPT-family `default`; making it cheaper by matching the reviewed family defeats
 the role. The personal fallback is Composer 2.5, which sits in Cursor's
-first-party pool rather than SuperGrok.
+first-party pool rather than SuperGrok. Personal `default` is Cursor Grok 4.6
+Fast; `smol` is Composer 2.5 Fast, the speed SKU, not advisor's standard
+Composer.
 `slow` keeps `claude-fable-5` even though its $3/$18.5 on the IV alias
 is dearer on output than Opus, because that role is explicitly the thorough,
 infrequent one.

@@ -1,12 +1,13 @@
 llm:
   tools:
     omp:
-      # Primary session prefers IV, then SuperGrok, then ChatGPT/Codex OAuth,
-      # then Cursor. `openai`/`anthropic` are IV aliases (same as Pi); the
-      # ChatGPT subscription is `openai-codex`.
+      # Primary session prefers IV, then Cursor Grok 4.6 Fast, then SuperGrok,
+      # then ChatGPT/Codex OAuth. `openai`/`anthropic` are IV aliases (same as
+      # Pi); the ChatGPT subscription is `openai-codex`.
       model:
         - anthropic/${gpt_primary}
         - anthropic/claude-opus-5
+        - cursor/cursor-grok-4.6-fast
         - xai-oauth/grok-4.6
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-high
@@ -23,9 +24,10 @@ llm:
           - cursor/claude-fable-5-1-medium:medium
         # Prewalk target and background worker. Luna's thinking floor is `low`,
         # so the IV pick is a big model held at a low-ish effort rather than a
-        # small model pushed hard.
+        # small model pushed hard. Personal takes Composer 2.5 Fast.
         smol:
           - openai/gpt-5.6-luna:medium
+          - cursor/composer-2.5-fast
           - xai-oauth/grok-4.6:medium
         # Every subagent's default, and the system's heaviest output producer.
         # Terra is the reason this is not Sonnet: same input price as Sol at
@@ -55,8 +57,9 @@ llm:
           - cursor/claude-opus-5-high
         # No `vision` role on purpose. inspect_image falls back @vision →
         # @default → active model, each level requiring image input, and both
-        # tiers' @default already advertises it (gpt-5.6-sol, grok-4.6). Neither
-        # provider bills per image, so there is nothing to route away from.
+        # tiers' @default already advertises it (gpt-5.6-sol,
+        # cursor-grok-4.6-fast). Neither provider bills per image, so there is
+        # nothing to route away from.
       # Allow-list for the picker. Generation globs, not catalogs: only the
       # current families. `${gpt_primary}` is the default-model pin and stays
       # selectable even if that id moves off the globs. Role targets must
