@@ -73,13 +73,15 @@ See [ADR 0005](../adr/0005-llm-provider-aliases.md).
 Role targets must also appear in `enabled_models`. That list is the picker's
 allow-list, and a role pointing outside it resolves to a model the session
 cannot select. Entries are generation globs (`gpt-5.6*`, `gpt-6*`,
-`claude-opus-5*`, `claude-fable-5*`, `grok-4.6*`, `deepseek-v4*`, `glm-5.3*`,
-`kimi/kimi-k3*`), not whole catalogs, so older lines stay out while
-personal-host `plan`/`slow` Cursor SKUs still match. The last three are
-`iv`-pinned and carry no role: they are manual picks, and they drop out with the
-alias on non-`iv` hosts. `kimi/kimi-k3*` keeps its vendor segment because the
-endpoint returns the id that way; a leading segment counts as a provider only
-when it names a configured alias.
+`claude-opus-5*`, `claude-fable-5*`, `grok-4.6*`, `muse-spark-1.3*`,
+`gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
+catalogs, so older lines stay out while personal-host `plan`/`slow` Cursor SKUs
+still match. `deepseek-v4*`, `glm-5.3*`, and `kimi/kimi-k3*` are `iv`-pinned
+and carry no role: they are manual picks, and they drop out with the alias on
+non-`iv` hosts. `muse-spark-1.3*`, `gemini-3.8-flash*`, and `cursor/default`
+(Auto) are Cursor-pinned manual picks. `kimi/kimi-k3*` keeps its vendor segment because the endpoint
+returns the id that way; a leading segment counts as a provider only when it
+names a configured alias.
 
 Effort suffixes are per model. `gpt-5.6-luna` has no `minimal`; its floor is
 `low`.
