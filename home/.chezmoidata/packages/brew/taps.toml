@@ -1,6 +1,6 @@
 [packages.darwin]
 taps = [
-  { name = "AnInsomniacy/motrix-next", trusted = { cask = "motrix-next" } },
+  { name = "AnInsomniacy/rayburst", trusted = { cask = "rayburst" } },
   { name = "achannarasappa/tap", trusted = { formula = "ticker" } },
   { name = "beeftornado/rmtree", trusted = { command = "rmtree" } },
   { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },

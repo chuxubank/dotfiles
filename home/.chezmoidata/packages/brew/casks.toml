@@ -1,6 +1,6 @@
 [packages.darwin]
 casks = [
-  "AnInsomniacy/motrix-next/motrix-next",
+  "AnInsomniacy/rayburst/rayburst",
   "android-ndk",
   "android-studio",
   "anki",
