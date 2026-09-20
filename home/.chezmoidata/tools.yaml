@@ -109,10 +109,11 @@ tools:
     purge:
       - ".config/herdr/**"
 
-  # Fig-style PTY autocomplete via bun. The wrap is inlined at the end of
-  # zshrc; first interactive shell unpacks resources from the bun global cwd.
+  # Fig-style PTY autocomplete. Disabled because its Node readline proxy blocks
+  # Kitty keyboard protocol query/set/push/pop sequences, breaking enhanced
+  # keyboard input in terminal multiplexers such as Luvus and Herdr.
   inshellisense:
-    when: *non_ci
+    when: *disabled
     purge:
       - ".inshellisense/**"
       - ".local/share/inshellisense/**"
