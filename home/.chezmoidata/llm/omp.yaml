@@ -145,9 +145,9 @@ llm:
           provider: cursor
           models: false
           # GetUsableModels ships no pricing. Third-party ids copy first-party
-          # list prices from models-dev (preference order below). Composer is
-          # Cursor-native, so it stays on Cursor's published table
-          # (https://cursor.com/docs/models-and-pricing, 2026-09-03).
+          # list prices from models-dev (preference order below). Composer and
+          # Grok 4.6 Fast are Cursor-native, so they stay on Cursor's published
+          # table (https://cursor.com/docs/models-and-pricing, 2026-09-21).
           # `cursor-` covers GetUsableModels grok ids. Stems cover thinking-
           # effort siblings; a dedicated *-fast key is its own lane and expands
           # to *-{effort}-fast, otherwise the stem rate fills missing fast ids.
@@ -175,4 +175,10 @@ llm:
                 input: 3
                 output: 15
                 cacheRead: 0.5
+                cacheWrite: 0
+            grok-4.6-fast:
+              cost:
+                input: 4
+                output: 12
+                cacheRead: 1
                 cacheWrite: 0
