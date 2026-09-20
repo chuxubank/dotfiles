@@ -39,7 +39,9 @@ llm:
           - xai-oauth/grok-4.6:high
         # Reviews every primary turn's delta, so it wants a family other than
         # the primary's. IV spends company-funded Sonnet; the personal fallback
-        # is Composer 2.5 (Cursor Models pool) rather than SuperGrok.
+        # is standard Composer 2.5 (Cursor Models pool), not Fast. Fast is
+        # smol's interactive lane; a late review still lands on the current
+        # primary, so the extra rate does not change what the agent sees.
         advisor:
           - anthropic/claude-sonnet-5
           - cursor/composer-2.5

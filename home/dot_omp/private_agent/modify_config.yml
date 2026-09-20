@@ -45,13 +45,23 @@
     "enabled" true
   )
   "composer" (dict
-    "shape" "pi"
+    "shape" "claude"
+    "tokenRate" true
+  )
+  "display" (dict
+    "cacheMissMarker" true
+    "showTokenUsage" true
   )
   "disabledProviders" $disabledProviders
   "modelRoles" $roles
   "cycleOrder" (default (list "smol" "default" "slow") (index $cfg "cycle_order"))
   "enabledModels" (default (list) (index $cfg "enabled_models"))
   "symbolPreset" "nerd"
+  "statusLine" (dict
+    "preset" "custom"
+    "leftSegments" (list "vim" "model" "mode" "path" "git" "pr" "session_name")
+    "rightSegments" (list "token_total" "cache_read" "cache_write" "cache_hit" "cost" "context_pct")
+  )
   "task" (dict
     "batch" true
     "eager" "preferred"

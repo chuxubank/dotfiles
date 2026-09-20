@@ -56,9 +56,11 @@ would not survive at `task`'s call volume.
 primary's own deltas, so it is deliberately a different model family from the
 GPT-family `default`; making it cheaper by matching the reviewed family defeats
 the role. The personal fallback is Composer 2.5, which sits in Cursor's
-first-party pool rather than SuperGrok. Personal `default` is Cursor Grok 4.6
-Fast; `smol` is Composer 2.5 Fast, the speed SKU, not advisor's standard
-Composer.
+first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
+`smol`'s interactive execution lane ($3/$15); advisor reviews in the background
+and a late note still lands on the current primary, so the cheaper standard
+rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.6 Fast.
+
 `slow` keeps `claude-fable-5` even though its $3/$18.5 on the IV alias
 is dearer on output than Opus, because that role is explicitly the thorough,
 infrequent one.
