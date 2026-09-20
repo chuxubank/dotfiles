@@ -127,7 +127,7 @@ workspaces:
           - path: [workspace, asahiart]
             dest: Luvia
             agent: luvia
-            kind: pi
+            kind: omp
             focus: true
 
   - name: XingZhi
