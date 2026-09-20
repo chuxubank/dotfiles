@@ -2,8 +2,6 @@
 #!/bin/zsh
 
 echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
-xcode-select --install
-sudo xcodebuild -license accept
 
 # make sure spotlight index on to let mas work
 # sudo mdutil -Eai on

@@ -1,0 +1,24 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+set -eu
+
+# Re-render when the active developer tools change.
+# Developer directory: {{ output "sh" "-c" "xcode-select -p 2>/dev/null || echo not-installed" | trim }}
+# Xcode version: {{ output "sh" "-c" "if version=$(xcodebuild -version 2>/dev/null); then printf '%s' \"$version\" | tr '\\n' ' '; else echo unavailable; fi" | trim }}
+
+if ! developer_dir=$(xcode-select -p 2>/dev/null); then
+  echo "Developer tools are not installed; skipping Xcode license acceptance" >&2
+  exit 0
+fi
+
+case "$developer_dir" in
+  *.app/Contents/Developer) ;;
+  *)
+    echo "Full Xcode is not active; skipping Xcode license acceptance"
+    exit 0
+    ;;
+esac
+
+echo "󰯁 Accept Xcode license"
+sudo xcodebuild -license accept
+{{ end -}}

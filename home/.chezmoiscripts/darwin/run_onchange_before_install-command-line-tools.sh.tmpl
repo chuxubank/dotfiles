@@ -1,0 +1,12 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/zsh
+set -eu
+
+# Re-render when the active developer directory changes: {{ output "sh" "-c" "xcode-select -p 2>/dev/null || echo not-installed" | trim }}
+if xcode-select -p >/dev/null 2>&1; then
+  exit 0
+fi
+
+echo "󰯁 Request Command Line Tools installation"
+xcode-select --install
+{{ end -}}
