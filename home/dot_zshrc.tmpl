@@ -154,6 +154,30 @@ source_if $ZSH/oh-my-zsh.sh
 # plugin
 zstyle ':omz:plugins:alias-finder' autoload yes
 
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "carapace") .) | fromJson }}
+# Add Carapace's specs to Zsh completion without reintroducing the disabled
+# inshellisense PTY bridge. This must run after compinit and before fzf-tab.
+if command -v carapace >/dev/null 2>&1; then
+  export CARAPACE_BRIDGES='zsh,fish,bash'
+  source <(command carapace _carapace)
+fi
+{{- end }}
+
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "fzf-tab") .) | fromJson }}
+# fzf-tab replaces only the native completion menu. Load it after compinit but
+# before plugins that wrap ZLE widgets, especially autosuggestions/highlighting.
+zstyle ':completion:*' menu no
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:*' fzf-flags --height=70% --layout=reverse --border
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'command ls -la --color=always $realpath 2>/dev/null || command ls -laG $realpath'
+zstyle ':fzf-tab:complete:git-(checkout|switch):*' sort false
+zstyle ':fzf-tab:complete:git-(checkout|switch):*' fzf-preview 'command git log --oneline --decorate --color=always $word 2>/dev/null | command head -100'
+source_if $HOMEBREW_PREFIX/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh
+source_if /usr/share/zsh/plugins/fzf-tab-git/fzf-tab.plugin.zsh
+source_if /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+{{- end }}
+
 source_if $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if $HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 

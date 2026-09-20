@@ -32,6 +32,12 @@ tools:
       - ".config/amp/**"
       - ".local/share/amp/**"
 
+  # Multi-shell completion provider. Configuration is ready, but fzf-tab is
+  # the preferred completion UI; enable this separately when its specs are
+  # wanted in addition to native Zsh completions.
+  carapace:
+    when: *disabled
+
   claude-code:
     when: *iv_only
     remove:
@@ -66,6 +72,10 @@ tools:
       - ".gemini/antigravity-cli/mcp_config.json"
     purge:
       - ".gemini/**"
+
+  # Fuzzy UI for Zsh's native completion system. Unlike PTY wrappers, this
+  # stays inside ZLE and does not interfere with terminal protocols.
+  fzf-tab: {}
 
   goose:
     when: *non_ci

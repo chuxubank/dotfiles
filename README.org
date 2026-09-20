@@ -24,6 +24,7 @@ The complete per-tool bindings are documented in
 | Herdr   | [[file:docs/keybindings/herdr.md][docs/keybindings/herdr.md]]     |
 | Zellij  | [[file:docs/keybindings/zellij.md][docs/keybindings/zellij.md]]   |
 | Luvus   | [[file:docs/keybindings/luvus.md][docs/keybindings/luvus.md]]     |
+| Zsh     | [[file:docs/keybindings/zsh.md][docs/keybindings/zsh.md]]         |
 
 *** Shared bindings
 
@@ -36,6 +37,8 @@ The complete per-tool bindings are documented in
 | =Ctrl+;= then =1…9=     | Herdr/Zellij/Luvus mux tab selection      |
 | =Super+Arrow=           | Herdr/Zellij pane focus                   |
 | =Super+Ctrl+F=          | Ghostty/WezTerm fullscreen (macOS)        |
+| =Tab=                   | Zsh fzf-tab completion menu               |
+| =<= / =>=               | fzf-tab previous/next completion group    |
 
 ** In-pane agent key map
 

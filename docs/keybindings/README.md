@@ -19,6 +19,7 @@ changes:
 - [Herdr](herdr.md)
 - [Zellij](zellij.md)
 - [Luvus](luvus.md)
+- [Zsh and fzf-tab](zsh.md)
 
 ### Shared bindings
 
@@ -31,6 +32,8 @@ changes:
 | `Ctrl+;` | Pane input / tool-specific | Herdr/Zellij/Luvus prefix | **Add** |
 | `Ctrl+1…9` | Herdr/Zellij mux tab selection | No direct mux binding | **Delete** |
 | `Ctrl+;` then `1…9` | No shared default | Herdr/Zellij/Luvus mux tab selection | **Add** |
+| `Tab` | Open the standard Zsh completion menu | Open/select in the fzf-tab completion menu | **Change** |
+| `<` / `>` | Insert literal characters outside completion | Select the previous/next fzf-tab group while its menu is open | **Add** |
 
 See the tool-specific documents for the exact default and current binding
 lists. “Default” means the upstream application default where it is available;
