@@ -5,7 +5,7 @@ llm:
       # then ChatGPT/Codex OAuth. `openai`/`anthropic` are IV aliases (same as
       # Pi); the ChatGPT subscription is `openai-codex`.
       model:
-        - anthropic/${gpt_primary}
+        - openai/${gpt_primary}
         - anthropic/claude-opus-5
         - cursor/cursor-grok-4.6-fast
         - xai-oauth/grok-4.6
