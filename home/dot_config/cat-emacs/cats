@@ -79,6 +79,7 @@
  :ai
  copilot
  vibe
+ gptel
  (agent-shell :cat (sidebar bookmark manager macext))
  mcp
 
