@@ -145,12 +145,11 @@ llm:
           provider: cursor
           models: false
           # GetUsableModels ships no pricing. Third-party ids copy first-party
-          # list prices from models-dev (preference order below). Composer and
-          # Grok 4.6 Fast are Cursor-native, so they stay on Cursor's published
-          # table (https://cursor.com/docs/models-and-pricing, 2026-09-21).
+          # list prices from models-dev (preference order below). Fast keys are
+          # only the lanes `enabled_models` or a role can pick; prices from
+          # https://cursor.com/docs/models-and-pricing (2026-09-21).
           # `cursor-` covers GetUsableModels grok ids. Stems cover thinking-
-          # effort siblings; a dedicated *-fast key is its own lane and expands
-          # to *-{effort}-fast, otherwise the stem rate fills missing fast ids.
+          # effort siblings. A dedicated *-fast key expands to *-{effort}-fast.
           data_set: models-dev
           data_set_providers:
             - anthropic
@@ -182,3 +181,45 @@ llm:
                 output: 12
                 cacheRead: 1
                 cacheWrite: 0
+            claude-opus-5-fast:
+              cost:
+                input: 10
+                output: 50
+                cacheRead: 1
+                cacheWrite: 12.5
+            gpt-5.6-luna-fast:
+              cost:
+                input: 0.4
+                output: 2.4
+                cacheRead: 0.04
+                cacheWrite: 0.5
+                longContext:
+                  inputThreshold: 272000
+                  input: 0.8
+                  output: 3.6
+                  cacheRead: 0.08
+                  cacheWrite: 1
+            gpt-5.6-sol-fast:
+              cost:
+                input: 8
+                output: 40
+                cacheRead: 0.8
+                cacheWrite: 10
+                longContext:
+                  inputThreshold: 272000
+                  input: 16
+                  output: 60
+                  cacheRead: 1.6
+                  cacheWrite: 20
+            gpt-5.6-terra-fast:
+              cost:
+                input: 4
+                output: 24
+                cacheRead: 0.4
+                cacheWrite: 5
+                longContext:
+                  inputThreshold: 272000
+                  input: 8
+                  output: 36
+                  cacheRead: 0.8
+                  cacheWrite: 10

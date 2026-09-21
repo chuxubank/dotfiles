@@ -11,8 +11,8 @@
        first and explicit overrides winning. model_override_prefixes duplicate
        those keys (`cursor-` for GetUsableModels grok ids). A stem copies onto
        thinking-effort siblings (the rate does not split). -fast is a second
-       lane: a dedicated `*-fast` key expands to `*-{effort}-fast` and wins;
-       otherwise the stem rate fills the missing fast ids.
+       lane: a dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
+       Missing Fast ids stay unpriced; the stem rate is not copied onto them.
 
        Emit only when the alias contributes a model list, an override-only
        modelOverrides map, or an endpoint we can authenticate against. A bare
@@ -122,8 +122,8 @@
     {{- end -}}
     {{- if $hasOverrides -}}
       {{- /* Stem keys cover thinking-effort siblings in the same rate lane.
-             A dedicated *-fast key expands to *-{effort}-fast; otherwise the
-             stem rate fills missing fast ids. An explicit sibling still wins. */ -}}
+             A dedicated *-fast key expands to *-{effort}-fast. Missing Fast
+             ids stay unpriced. An explicit sibling still wins. */ -}}
       {{- $effortSuffixes := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
       {{- $expanded := dict -}}
       {{- range $modelId, $ov := $overrides -}}
@@ -146,28 +146,6 @@
             {{- if $fast -}}{{- $sibling = printf "%s-%s-fast" $lane $suf -}}{{- end -}}
             {{- if not (hasKey $expanded $sibling) -}}
               {{- $_ := set $expanded $sibling $ov -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
-      {{- end -}}
-      {{- range $modelId, $ov := $overrides -}}
-        {{- if not (hasSuffix "-fast" $modelId) -}}
-          {{- $isEffort := false -}}
-          {{- range $suf := $effortSuffixes -}}
-            {{- if hasSuffix (printf "-%s" $suf) $modelId -}}{{- $isEffort = true -}}{{- end -}}
-          {{- end -}}
-          {{- if not $isEffort -}}
-            {{- $fastStem := printf "%s-fast" $modelId -}}
-            {{- if not (hasKey $overrides $fastStem) -}}
-              {{- if not (hasKey $expanded $fastStem) -}}
-                {{- $_ := set $expanded $fastStem $ov -}}
-              {{- end -}}
-              {{- range $suf := $effortSuffixes -}}
-                {{- $sibling := printf "%s-%s-fast" $modelId $suf -}}
-                {{- if not (hasKey $expanded $sibling) -}}
-                  {{- $_ := set $expanded $sibling $ov -}}
-                {{- end -}}
-              {{- end -}}
             {{- end -}}
           {{- end -}}
         {{- end -}}
