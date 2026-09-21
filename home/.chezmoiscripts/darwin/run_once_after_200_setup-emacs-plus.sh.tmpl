@@ -4,7 +4,8 @@
 if brew list --cask emacs-plus-app &>/dev/null; then
     brew reinstall --cask emacs-plus-app
 
-    ln -s /Applications/Emacs.app/Contents/Resources/site-lisp/subdirs.el {{ joinPath .path.usr "share" "emacs" "site-lisp" }} || true
+    mkdir -p {{ joinPath .path.usr "share" "emacs" "site-lisp" }}
+    ln -sfn /Applications/Emacs.app/Contents/Resources/site-lisp/subdirs.el {{ joinPath .path.usr "share" "emacs" "site-lisp" "subdirs.el" }}
     ln -s /Applications/Emacs.app/Contents/Resources/include/emacs-module.h {{ joinPath .path.usr "include" "emacs-module.h" }} || true
 fi
 {{ end -}}
