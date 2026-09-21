@@ -88,17 +88,6 @@ workspaces:
             kind: pi
             focus: true
 
-  - name: agentia
-    when:
-      enabled: false
-    tabs:
-      - label: agentia
-        panes:
-          - path: [workspace, iv]
-            dest: agentia
-            agent: agentia
-            kind: pi
-
   - name: OpenTactic
     when: *personal_only
     tabs:
@@ -107,7 +96,7 @@ workspaces:
           - path: [workspace, opentactic]
             dest: OpenTactic
             agent: open-tactic
-            kind: pi
+            kind: omp
 
   - name: AsahiArt
     when: *personal_only
@@ -116,7 +105,7 @@ workspaces:
         panes:
           - path: [workspace, asahiart]
             agent: asahiart
-            kind: pi
+            kind: omp
             focus: true
 
   - name: Luvia
@@ -137,5 +126,5 @@ workspaces:
         panes:
           - path: [workspace, xz]
             agent: main
-            kind: pi
+            kind: omp
             focus: true
