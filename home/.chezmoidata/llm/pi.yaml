@@ -9,31 +9,19 @@ llm:
         - openai-codex/${gpt_primary}
         - xai/grok-4.6
       reasoning_effort: high
-      # Ctrl+P patterns. Pin the provider when a model id exists in more than
-      # one catalog; bundled xAI is selected explicitly below.
       enabled_models:
-        # Codex surface on the IV codex token; pinning avoids Pi's bundled
-        # openrouter copy of the same ids.
-        - openai/gpt-5.6*
-        - openai/gpt-6*
-        - openai-codex/gpt-5.6*
-        - openai-codex/gpt-6*
-        # Same models through the IV Anthropic surface on the cc token.
-        # Keep this provider-pinned rather than treating it as a fallback.
-        - anthropic/gpt-5.6*
-        # Bare on purpose: expose both IV copies of these Claude models.
+        - grok-4.6*
+        - gpt-5.6*
+        - gpt-6*
         - claude-opus-5*
         - claude-sonnet-5*
         # This id is pinned because the other IV aliases cannot serve it.
         - iv-anthropic/claude-fable-5
-        # IV-only open-weight models; pinning avoids same-id bundled catalogs.
-        # The vendor prefix in kimi/kimi-k3* is part of the model id.
-        - iv/qwen3.8*
-        - iv/gemini-3.8*
-        - iv/deepseek-v4.1*
-        - iv/glm-5.3*
-        - iv/kimi/kimi-k3*
-        - xai/grok-4.6*
+        - qwen3.8*
+        - gemini-3.8*
+        - deepseek-v4.1*
+        - glm-5.3*
+        - kimi/kimi-k3*
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       session_title_model:
         - iv/deepseek-v4-flash
