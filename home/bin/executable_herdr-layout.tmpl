@@ -178,8 +178,8 @@ apply_{{ $ws.name | replace " " "_" }}() {
   pane=$(json_field '.result.pane.pane_id' "$created")
   prev=$pane
 {{- end }}
-{{- if hasKey $p "agent" }}
-  start_named_agent {{ $p.agent | quote }} {{ $p.kind | quote }} "$pane"
+{{- if and (hasKey $p "name") (hasKey $p "kind") }}
+  start_named_agent {{ $p.name | quote }} {{ $p.kind | quote }} "$pane"
 {{- else if hasKey $p "command" }}
   herdr pane run "$pane" {{ $p.command | quote }} >/dev/null
 {{- end }}

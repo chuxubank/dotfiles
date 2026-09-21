@@ -14,9 +14,9 @@
 #
 # cwd accepts ~ and absolute paths. relative paths resolve from the
 # workspace root when one is set.
-# agent + kind: start a named agent through the target mux (NAME is
-# [a-z][a-z0-9_-]{0,31}, unique among live agents). command runs in the pane
-# when agent is unset. kind: pi is launched with --session-control.
+# name + kind: start a named process through the target mux; name must match
+# [a-z][a-z0-9_-]{0,31} and be unique among live names. command runs in the
+# pane when name and kind are unset. kind: pi is launched with --session-control.
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
 workspace_conditions:
@@ -37,7 +37,7 @@ workspaces:
       - label: chezmoi
         panes:
           - cwd: ~/.local/share/chezmoi
-            agent: chezmoi
+            name: chezmoi
             kind: pi
             focus: true
 
@@ -47,7 +47,7 @@ workspaces:
         panes:
           - path: [workspace, oss]
             dest: luvus
-            agent: luvus
+            name: luvus
             kind: pi
             focus: true
 
@@ -56,7 +56,7 @@ workspaces:
       - label: emacs
         panes:
           - path: [personal, emacs]
-            agent: emacs
+            name: emacs
             kind: pi
 
   - name: proxy
@@ -64,7 +64,7 @@ workspaces:
       - label: proxy
         panes:
           - path: [personal, proxy]
-            agent: proxy
+            name: proxy
             kind: pi
             focus: true
 
@@ -73,7 +73,7 @@ workspaces:
       - label: skills
         panes:
           - path: [personal, skills]
-            agent: skills
+            name: skills
             kind: pi
             focus: true
 
@@ -84,7 +84,7 @@ workspaces:
         panes:
           - path: [workspace, iv]
             dest: ivc
-            agent: ivc
+            name: ivc
             kind: pi
             focus: true
 
@@ -95,7 +95,7 @@ workspaces:
         panes:
           - path: [workspace, opentactic]
             dest: OpenTactic
-            agent: open-tactic
+            name: open-tactic
             kind: omp
 
   - name: AsahiArt
@@ -104,7 +104,7 @@ workspaces:
       - label: asahiart
         panes:
           - path: [workspace, asahiart]
-            agent: asahiart
+            name: asahiart
             kind: omp
             focus: true
 
@@ -115,7 +115,7 @@ workspaces:
         panes:
           - path: [workspace, asahiart]
             dest: Luvia
-            agent: luvia
+            name: luvia
             kind: omp
             focus: true
 
@@ -125,6 +125,6 @@ workspaces:
       - label: xingzhi
         panes:
           - path: [workspace, xz]
-            agent: main
+            name: main
             kind: omp
             focus: true

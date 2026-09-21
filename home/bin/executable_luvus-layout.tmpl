@@ -247,8 +247,8 @@ apply_{{ $wi }}() {
     set_pane_cwd "$pane" "$cwd" || return
   fi
 {{- end }}
-{{- if hasKey $p "agent" }}
-  start_named_agent {{ $p.agent | quote }} {{ $p.kind | quote }} "$pane" || return
+{{- if and (hasKey $p "name") (hasKey $p "kind") }}
+  start_named_agent {{ $p.name | quote }} {{ $p.kind | quote }} "$pane" || return
 {{- else if hasKey $p "command" }}
   luvus pane run "$pane" {{ $p.command | quote }} >/dev/null || return
 {{- end }}
