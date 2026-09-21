@@ -6,6 +6,7 @@ casks = [
   "anki",
   "appcleaner",
   "basictex",
+  "cap",
   "blackhole-16ch",
   { name = "block-goose", owner = "goose" },
   "chatgpt",
