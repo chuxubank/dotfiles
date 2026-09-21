@@ -8,7 +8,9 @@
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
-    "summaryModel" "xai/grok-4.6"
+    "summaryModel" (includeTemplate "llm/resolve-model-alias" (dict
+      "model" "xai/${grok_primary}"
+      "aliases" (default dict .llm.models)))
     "workflow" "auto-summary"
     "autoOpenBrowser" false)
 ) -}}

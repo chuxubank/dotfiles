@@ -15,12 +15,12 @@ deliberately cheaper. Rationale is in
 
 | Role | `iv` host | Other hosts | Consumed by |
 | --- | --- | --- | --- |
-| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/cursor-grok-4.6-fast:high` | Primary session; `*` selector |
+| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/cursor-grok-4.7-fast:high` | Primary session; `*` selector |
 | `slow` | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis |
 | `smol` | `openai/gpt-5.6-luna:medium` | `cursor/composer-2.5-fast` | Prewalk target, background work, vibe `fast` |
-| `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.6:high` | Subagent default, vibe `good` |
+| `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.7:high` | Subagent default, vibe `good` |
 | `advisor` | `anthropic/claude-sonnet-5` | `cursor/composer-2.5` | Per-turn advisor review |
-| `tiny` | `openai/gpt-5.6-luna:low` | `xai-oauth/grok-4.6:minimal` | Titles, memory, auto-thinking, stop detection |
+| `tiny` | `openai/gpt-5.6-luna:low` | `xai-oauth/grok-4.7:minimal` | Titles, memory, auto-thinking, stop detection |
 | `plan` | `anthropic/claude-opus-5:xhigh` | `cursor/claude-opus-5-high` | `--plan`, architectural planning |
 
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
@@ -59,7 +59,7 @@ the role. The personal fallback is Composer 2.5, which sits in Cursor's
 first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
 `smol`'s interactive execution lane ($3/$15); advisor reviews in the background
 and a late note still lands on the current primary, so the cheaper standard
-rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.6 Fast.
+rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.7 Fast.
 
 `slow` keeps `claude-fable-5` even though its $3/$18.5 on the IV alias
 is dearer on output than Opus, because that role is explicitly the thorough,
@@ -77,7 +77,7 @@ See [ADR 0005](../adr/0005-llm-provider-aliases.md).
 Role targets must also appear in `enabled_models`. That list is the picker's
 allow-list, and a role pointing outside it resolves to a model the session
 cannot select. Entries are generation globs (`gpt-5.6*`, `gpt-6*`,
-`claude-opus-5*`, `claude-fable-5*`, `grok-4.6*`, `muse-spark-1.3*`,
+`claude-opus-5*`, `claude-fable-5*`, `grok-4.7*`, `muse-spark-1.3*`,
 `gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
 catalogs, so older lines stay out while personal-host `plan`/`slow` Cursor SKUs
 still match. `deepseek-v4*`, `glm-5.3*`, and `kimi/kimi-k3*` are `iv`-pinned

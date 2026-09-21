@@ -7,10 +7,10 @@ llm:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
         - openai-codex/${gpt_primary}
-        - xai/grok-4.6
+        - xai/${grok_primary}
       reasoning_effort: high
       enabled_models:
-        - grok-4.6*
+        - ${grok_primary}*
         - gpt-5.6*
         - gpt-6*
         - claude-opus-5*
@@ -25,11 +25,11 @@ llm:
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       session_title_model:
         - iv/deepseek-v4-flash
-        - xai/grok-4.6:low
+        - xai/${grok_primary}:low
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       subagent_model:
         - openai/gpt-5.6-terra
-        - xai/grok-4.6
+        - xai/${grok_primary}
       providers:
         openai:
           provider: iv

@@ -3,7 +3,7 @@ llm:
     hermes:
       model:
         - iv-codex/${gpt_primary}
-        - xai-oauth/grok-4.6
+        - xai-oauth/${grok_primary}
       reasoning_effort: high
       providers:
         # OpenAI-compatible API providers are emitted as named Hermes custom

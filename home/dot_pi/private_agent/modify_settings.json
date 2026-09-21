@@ -17,7 +17,8 @@
 
 {{- /* llm.yaml states models as "<alias>/<id>"; pi splits them across
        defaultProvider and defaultModel. A last-candidate bundled fallback
-       (xai/grok-4.6) is not an alias, so split the slash here. */ -}}
+       (xai/${grok_primary}) is not an alias, so split the slash here. */ -}}
+{{- $aliases := default dict .llm.models -}}
 {{- $provider := $cfg.model_provider -}}
 {{- $model := $cfg.model_id -}}
 {{- if not $provider -}}
@@ -69,13 +70,19 @@
   {{- $_ := set $managed "defaultProvider" $provider -}}
 {{- end -}}
 {{- /* subagents.defaultModel comes from llm/pi.yaml subagent_model. */ -}}
-{{- $subagentCandidates := default (list "xai/grok-4.6") (index (index .llm.tools "pi") "subagent_model") -}}
+{{- $subagentCandidates := list -}}
+{{- range $candidate := default (list "xai/${grok_primary}") (index (index .llm.tools "pi") "subagent_model") -}}
+  {{- $subagentCandidates = append $subagentCandidates (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $aliases)) -}}
+{{- end -}}
 {{- $subagentModel := includeTemplate "llm/pick-model" (dict "models" $subagentCandidates "providers" $cfg.providers) -}}
 {{- $_ := set $managed "subagents" (dict "defaultModel" $subagentModel) -}}
 {{- /* session.titleGeneration is @furbyhaxx/pi-session-naming. useTags
        false is a plain description, not feat(scope): …. Model comes from
        llm/pi.yaml session_title_model and already carries :thinking. */ -}}
-{{- $titleCandidates := default (list "xai/grok-4.6:low") (index (index .llm.tools "pi") "session_title_model") -}}
+{{- $titleCandidates := list -}}
+{{- range $candidate := default (list "xai/${grok_primary}:low") (index (index .llm.tools "pi") "session_title_model") -}}
+  {{- $titleCandidates = append $titleCandidates (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $aliases)) -}}
+{{- end -}}
 {{- $titleModel := includeTemplate "llm/pick-model" (dict "models" $titleCandidates "providers" $cfg.providers) -}}
 {{- $_ := set $managed "session" (dict
   "titleGeneration" (dict
