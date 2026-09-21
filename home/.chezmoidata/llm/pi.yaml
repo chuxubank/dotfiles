@@ -53,6 +53,8 @@ llm:
         # `kimi/kimi-k3*` keeps the vendor segment because that is the id the
         # endpoint returns; llm/split-model only treats a leading segment as a
         # provider when it names a configured alias, so `kimi/` survives.
+        - iv/qwen3.8*
+        - iv/gemini-3.8*
         - iv/deepseek-v4.1*
         - iv/glm-5.3*
         - iv/kimi/kimi-k3*
