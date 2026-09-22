@@ -92,3 +92,14 @@ Prefer leaving a role unset over assigning what its fallback chain would reach
 anyway; an assignment earns its place by changing the model or the effort.
 Effort levels are per model, so a fallback cannot assume its IV sibling's level.
 The rationale is in `docs/adr/0006-omp-model-role-tiers.md`.
+
+## OMP catalog overlays
+
+When `models: false`, OMP copies the models.dev card onto the exact model
+id through `model-config/omp`. Keep list prices visible on SuperGrok and
+Cursor: those are subscriptions, but the catalog numbers are still the
+comparison the role table uses. Do not add a field-allowlist or a $0
+special case for subscriptions. Effort-sibling and `cursor-` copies take
+only `cost`, so a live name or window is not replaced by the first-party
+stem. Explicit `model_overrides` still win. The rationale is in
+`docs/adr/0009-omp-models-dev-overlays.md`.

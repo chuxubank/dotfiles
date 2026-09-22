@@ -140,6 +140,11 @@ llm:
         xai-oauth:
           provider: xai-oauth
           models: false
+          # SuperGrok discovery returns bare ids. models.dev supplies the
+          # first-party card, including list prices — same overlay as Cursor.
+          data_set: models-dev
+          data_set_providers:
+            - xai
         openai-codex:
           provider: openai-codex
           models: false

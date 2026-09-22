@@ -355,4 +355,41 @@
   {{- fail (printf "workspace/items: ci should omit every entry, got %s" ($ciWorkspaces | toJson)) -}}
 {{- end -}}
 
+{{- /* model-config/omp: models.dev row → OMP patch, including Grok minimal. */ -}}
+{{- $grokOverride := includeTemplate "model-config/omp" (dict
+      "name" "Grok 4.7"
+      "reasoning" true
+      "reasoning_options" (list (dict "type" "effort" "values" (list "low" "medium" "high" "xhigh")))
+      "modalities" (dict "input" (list "text" "image" "pdf"))
+      "limit" (dict "context" 500000 "output" 500000)
+      "cost" (dict "input" 2 "output" 6 "cache_read" 0.5)
+      "tool_call" true) | fromJson -}}
+{{- if ne $grokOverride.name "Grok 4.7" -}}
+  {{- fail (printf "model-config/omp: name %q" $grokOverride.name) -}}
+{{- end -}}
+{{- if ne $grokOverride.reasoning true -}}
+  {{- fail "model-config/omp: reasoning" -}}
+{{- end -}}
+{{- if or (ne $grokOverride.thinking.mode "effort") (ne (index $grokOverride.thinking.efforts 0) "minimal") (ne (index $grokOverride.thinking.effortMap "minimal") "low") -}}
+  {{- fail (printf "model-config/omp: thinking %s" ($grokOverride.thinking | toJson)) -}}
+{{- end -}}
+{{- if not (has "image" $grokOverride.input) -}}
+  {{- fail (printf "model-config/omp: input %s" ($grokOverride.input | toJson)) -}}
+{{- end -}}
+{{- if or (ne $grokOverride.contextWindow 500000) (ne $grokOverride.maxTokens 500000) -}}
+  {{- fail (printf "model-config/omp: limits %v/%v" $grokOverride.contextWindow $grokOverride.maxTokens) -}}
+{{- end -}}
+{{- if or (ne (float64 $grokOverride.cost.input) 2.0) (ne (float64 $grokOverride.cost.cacheRead) 0.5) -}}
+  {{- fail (printf "model-config/omp: cost %s" ($grokOverride.cost | toJson)) -}}
+{{- end -}}
+{{- if ne $grokOverride.supportsTools true -}}
+  {{- fail "model-config/omp: supportsTools" -}}
+{{- end -}}
+{{- $grok43 := includeTemplate "model-config/omp" (dict
+      "name" "Grok 4.3"
+      "reasoning_options" (list (dict "type" "effort" "values" (list "none" "low" "medium" "high")))) | fromJson -}}
+{{- if or (has "none" $grok43.thinking.efforts) (not (has "minimal" $grok43.thinking.efforts)) -}}
+  {{- fail (printf "model-config/omp: drop none %s" ($grok43.thinking | toJson)) -}}
+{{- end -}}
+
 ok

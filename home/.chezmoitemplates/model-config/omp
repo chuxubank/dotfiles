@@ -1,0 +1,83 @@
+{{- /* model-config/omp — Project a models.dev row to an OMP modelOverrides patch.
+       Input: one models.dev model object.
+       Output: JSON object of OMP override fields. Empty object if nothing maps.
+
+       thinking.mode follows reasoning_options[].type. models.dev often omits
+       `minimal` on Grok while OMP's bundled grok-4.6 row kept it as an alias
+       for `low`; the same map is added so `:minimal` roles still resolve.
+       OMP's efforts enum has no `none`; unknown values are dropped so one
+       bad models.dev row cannot reject the whole models.yml. */ -}}
+{{- $m := . -}}
+{{- $result := dict -}}
+
+{{- if index $m "name" -}}
+  {{- $_ := set $result "name" $m.name -}}
+{{- end -}}
+
+{{- if hasKey $m "reasoning" -}}
+  {{- $_ := set $result "reasoning" (eq true (index $m "reasoning")) -}}
+{{- end -}}
+
+{{- $allowedEfforts := dict "minimal" true "low" true "medium" true "high" true "xhigh" true "max" true -}}
+{{- $mode := "" -}}
+{{- $efforts := list -}}
+{{- range $opt := default (list) (index $m "reasoning_options") -}}
+  {{- if and (eq (index $opt "type") "effort") (eq (len $efforts) 0) -}}
+    {{- $mode = "effort" -}}
+    {{- range $e := default (list) (index $opt "values") -}}
+      {{- if hasKey $allowedEfforts $e -}}
+        {{- $efforts = append $efforts $e -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if and $mode (gt (len $efforts) 0) -}}
+  {{- $hasMinimal := false -}}
+  {{- $hasLow := false -}}
+  {{- range $e := $efforts -}}
+    {{- if eq $e "minimal" -}}{{- $hasMinimal = true -}}{{- end -}}
+    {{- if eq $e "low" -}}{{- $hasLow = true -}}{{- end -}}
+  {{- end -}}
+  {{- if and (not $hasMinimal) $hasLow -}}
+    {{- $efforts = concat (list "minimal") $efforts -}}
+  {{- end -}}
+  {{- $thinking := dict "mode" $mode "efforts" $efforts -}}
+  {{- if and (not $hasMinimal) $hasLow -}}
+    {{- $_ := set $thinking "effortMap" (dict "minimal" "low") -}}
+  {{- end -}}
+  {{- $_ := set $result "thinking" $thinking -}}
+{{- end -}}
+
+{{- $input := list -}}
+{{- if hasKey $m "modalities" -}}
+  {{- range $mod := default (list) (index $m.modalities "input") -}}
+    {{- if or (eq $mod "text") (eq $mod "image") -}}
+      {{- $input = append $input $mod -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $input) 0 -}}
+  {{- $_ := set $result "input" $input -}}
+{{- end -}}
+
+{{- if hasKey $m "limit" -}}
+  {{- if hasKey $m.limit "context" -}}
+    {{- $_ := set $result "contextWindow" (int (index $m.limit "context")) -}}
+  {{- end -}}
+  {{- if hasKey $m.limit "output" -}}
+    {{- $_ := set $result "maxTokens" (int (index $m.limit "output")) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if hasKey $m "cost" -}}
+  {{- $costOv := includeTemplate "llm/cost-override" (index $m "cost") | fromJson -}}
+  {{- if gt (len $costOv) 0 -}}
+    {{- $_ := set $result "cost" $costOv -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if hasKey $m "tool_call" -}}
+  {{- $_ := set $result "supportsTools" (eq true (index $m "tool_call")) -}}
+{{- end -}}
+
+{{- toJson $result -}}
