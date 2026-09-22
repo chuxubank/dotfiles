@@ -15,7 +15,7 @@ deliberately cheaper. Rationale is in
 
 | Role | `iv` host | Other hosts | Consumed by |
 | --- | --- | --- | --- |
-| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/cursor-grok-4.7-fast:high` | Primary session; `*` selector |
+| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/grok-4.7-high-fast:high` | Primary session; `*` selector |
 | `slow` | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis |
 | `smol` | `openai/gpt-5.6-luna:medium` | `cursor/composer-2.5-fast` | Prewalk target, background work, vibe `fast` |
 | `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.7:high` | Subagent default, vibe `good` |
@@ -31,9 +31,11 @@ those three.
 `vision` and `commit` carry no assignment.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
-input at each level, and both tiers' `default` already advertises it. Neither
-provider bills per image, so there is nothing to route away from. `commit`
-falls through to the active model, which is what that flow wants.
+input at each level. IV's `default` (`gpt-5.6-sol`) advertises it. Personal
+`default` (`cursor/grok-4.7-high-fast`) is text-only in the current Cursor
+catalog, so a photo falls through to the active model. Neither provider bills
+per image. `commit` falls through to the active model, which is what that
+flow wants.
 
 Setting a role that would resolve to the same model as its fallback is only
 worth it for a different effort level — that is the whole content of `tiny`

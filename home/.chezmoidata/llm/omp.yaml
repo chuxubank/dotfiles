@@ -7,7 +7,7 @@ llm:
       model:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
-        - cursor/cursor-${grok_primary}-fast
+        - cursor/${grok_primary}-high-fast
         - xai-oauth/${grok_primary}
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-high
@@ -58,10 +58,11 @@ llm:
           - anthropic/claude-opus-5:xhigh
           - cursor/claude-opus-5-high
         # No `vision` role on purpose. inspect_image falls back @vision →
-        # @default → active model, each level requiring image input, and both
-        # tiers' @default already advertises it (gpt-5.6-sol,
-        # cursor-${grok_primary}-fast). Neither provider bills per image, so there is
-        # nothing to route away from.
+        # @default → active model, each level requiring image input. IV's
+        # @default (gpt-5.6-sol) advertises it. Personal @default
+        # (cursor/${grok_primary}-high-fast) is text-only in the current
+        # Cursor catalog, so a photo falls through to the active model.
+        # Neither provider bills per image.
       # Allow-list for the picker. Generation globs, not catalogs: only the
       # current families. `${gpt_primary}` and `${grok_primary}` are the
       # default-model pins and stay selectable even if those ids move off
