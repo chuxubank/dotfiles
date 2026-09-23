@@ -13,15 +13,15 @@ entry. IV is company-funded and spends effort freely; the fallback stays
 deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
-| Role | `iv` host | Other hosts | Consumed by |
-| --- | --- | --- | --- |
-| `default` | `anthropic/gpt-5.6-sol:high` | `cursor/grok-4.7-high-fast:high` | Primary session; `*` selector |
-| `slow` | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis |
-| `smol` | `openai/gpt-5.6-luna:medium` | `cursor/composer-2.5-fast` | Prewalk target, background work, vibe `fast` |
-| `task` | `openai/gpt-5.6-terra:high` | `xai-oauth/grok-4.7:high` | Subagent default, vibe `good` |
-| `advisor` | `anthropic/claude-sonnet-5` | `cursor/composer-2.5` | Per-turn advisor review |
-| `tiny` | `openai/gpt-5.6-luna:low` | `xai-oauth/grok-4.7:minimal` | Titles, memory, auto-thinking, stop detection |
-| `plan` | `anthropic/claude-opus-5:xhigh` | `cursor/claude-opus-5-high` | `--plan`, architectural planning |
+| Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
+|-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
+| `default` | `anthropic/gpt-5.6-sol:high`       | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
+| `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis                   |
+| `smol`    | `openai/gpt-5.6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
+| `task`    | `openai/gpt-5.6-terra:high`        | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
+| `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
+| `tiny`    | `openai/gpt-5.6-luna:low`          | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
+| `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-high`             | `--plan`, architectural planning              |
 
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
 those three.
@@ -98,9 +98,9 @@ Effort suffixes are per model. `gpt-5.6-luna` has no `minimal`; its floor is
 than model ids, so per-agent routing re-resolves per host through the table
 above instead of needing a second tier list.
 
-| Agent | Model | Why |
-| --- | --- | --- |
-| `scout` | `@smol` | Read-only research |
-| `sonic` | `@smol` | Mechanical, low-reasoning by definition |
-| `security-reviewer` | `@slow` | Depth is the point |
-| everything else | `@task` | Bundled default |
+| Agent               | Model   | Why                                     |
+|---------------------|---------|-----------------------------------------|
+| `scout`             | `@smol` | Read-only research                      |
+| `sonic`             | `@smol` | Mechanical, low-reasoning by definition |
+| `security-reviewer` | `@slow` | Depth is the point                      |
+| everything else     | `@task` | Bundled default                         |
