@@ -154,9 +154,11 @@ llm:
           # GetUsableModels ships no pricing. Third-party ids copy first-party
           # list prices from models-dev (preference order below). Fast keys are
           # only the lanes `enabled_models` or a role can pick; prices from
-          # https://cursor.com/docs/models-and-pricing (2026-09-21).
-          # `cursor-` covers GetUsableModels grok ids. Stems cover thinking-
-          # effort siblings. A dedicated *-fast key expands to *-{effort}-fast.
+          # https://cursor.com/docs/models-and-pricing and
+          # https://cursor.com/docs/models/claude-opus-5-5 (2026-09-23).
+          # `cursor-` covers GetUsableModels grok ids. Stems cover effort
+          # siblings and Claude thinking compounds. A dedicated *-fast key
+          # expands to *-{effort}-fast.
           data_set: models-dev
           data_set_providers:
             - anthropic
@@ -194,6 +196,21 @@ llm:
                 output: 50
                 cacheRead: 1
                 cacheWrite: 12.5
+            # Not in models.dev. Cursor still serves this id.
+            claude-opus-5-5:
+              cost:
+                input: 4
+                output: 20
+                cacheRead: 0.2
+                cacheWrite: 5
+            # Input/output are the published Fast rates (2x). Cache scales
+            # by the same factor; Cursor does not list Fast cache separately.
+            claude-opus-5-5-fast:
+              cost:
+                input: 8
+                output: 40
+                cacheRead: 0.4
+                cacheWrite: 10
             gpt-5.6-luna-fast:
               cost:
                 input: 0.4

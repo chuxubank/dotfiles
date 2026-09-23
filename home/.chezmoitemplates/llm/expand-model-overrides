@@ -1,0 +1,69 @@
+{{- /* llm/expand-model-overrides — Fan modelOverrides out to sibling ids.
+       Input: { overrides: dict, prefixes: list }
+       Output: JSON dict.
+
+       Cost-only copies. An existing key is never replaced:
+       - prefixes (`cursor-` + id)
+       - one effort suffix on a stem (`-high`, `-thinking`, ...)
+       - Claude thinking compounds `{stem}-thinking-{effort}` and
+         `{stem}-{effort}-thinking`, including the `*-fast` twin
+       - a dedicated `*-fast` key expands to `*-{effort}-fast`.
+         It does not price the non-fast ids. */ -}}
+{{- $in := . -}}
+{{- $overrides := default dict (index $in "overrides") -}}
+{{- $prefixes := default (list) (index $in "prefixes") -}}
+{{- $efforts := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
+
+{{- $base := dict -}}
+{{- range $id, $ov := $overrides -}}
+  {{- $_ := set $base $id $ov -}}
+  {{- $costCopy := dict -}}
+  {{- if hasKey $ov "cost" -}}{{- $costCopy = dict "cost" $ov.cost -}}{{- end -}}
+  {{- if gt (len $costCopy) 0 -}}
+    {{- range $pfx := $prefixes -}}
+      {{- if not (hasPrefix $pfx $id) -}}
+        {{- $pid := printf "%s%s" $pfx $id -}}
+        {{- if not (hasKey $base $pid) -}}{{- $_ := set $base $pid $costCopy -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $expanded := dict -}}
+{{- range $id, $ov := $base -}}
+  {{- $_ := set $expanded $id $ov -}}
+{{- end -}}
+{{- range $id, $ov := $base -}}
+  {{- $costCopy := dict -}}
+  {{- if hasKey $ov "cost" -}}{{- $costCopy = dict "cost" $ov.cost -}}{{- end -}}
+  {{- if gt (len $costCopy) 0 -}}
+    {{- $lane := $id -}}
+    {{- $fast := false -}}
+    {{- if hasSuffix "-fast" $id -}}
+      {{- $fast = true -}}
+      {{- $lane = trimSuffix "-fast" $id -}}
+    {{- end -}}
+    {{- $isEffort := false -}}
+    {{- range $suf := $efforts -}}
+      {{- if hasSuffix (printf "-%s" $suf) $lane -}}{{- $isEffort = true -}}{{- end -}}
+    {{- end -}}
+    {{- if not $isEffort -}}
+      {{- range $suf := $efforts -}}
+        {{- $sibling := printf "%s-%s" $lane $suf -}}
+        {{- if $fast -}}{{- $sibling = printf "%s-fast" $sibling -}}{{- end -}}
+        {{- if not (hasKey $expanded $sibling) -}}{{- $_ := set $expanded $sibling $costCopy -}}{{- end -}}
+        {{- if and (hasPrefix "claude-" $lane) (ne $suf "thinking") -}}
+          {{- $thinkFirst := printf "%s-thinking-%s" $lane $suf -}}
+          {{- $thinkLast := printf "%s-%s-thinking" $lane $suf -}}
+          {{- if $fast -}}
+            {{- $thinkFirst = printf "%s-fast" $thinkFirst -}}
+            {{- $thinkLast = printf "%s-fast" $thinkLast -}}
+          {{- end -}}
+          {{- if not (hasKey $expanded $thinkFirst) -}}{{- $_ := set $expanded $thinkFirst $costCopy -}}{{- end -}}
+          {{- if not (hasKey $expanded $thinkLast) -}}{{- $_ := set $expanded $thinkLast $costCopy -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- toJson $expanded -}}

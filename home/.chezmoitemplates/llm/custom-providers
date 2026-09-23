@@ -9,9 +9,10 @@
        each row last. When models: false, OMP emits provider-level
        modelOverrides: model-config/omp copies the models-dev card onto the
        exact id first, including list prices; explicit overrides win.
-       Prefixes (`cursor-`) and thinking-effort siblings copy only `cost` —
-       those keys exist so a rate follows the stem. -fast is a second lane:
-       a dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
+       llm/expand-model-overrides then copies `cost` onto sibling ids:
+       `cursor-` prefixes, effort suffixes, and Claude
+       `{stem}-thinking-{effort}` compounds.
+       A dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
        Missing Fast ids stay unpriced; the stem rate is not copied onto them.
 
        Emit only when the alias contributes a model list, an override-only
@@ -81,24 +82,9 @@
       {{- end -}}
       {{- $overrides = mergeOverwrite $fromMeta $overrides -}}
     {{- end -}}
-    {{- $prefixes := default (list) (index $ep "model_override_prefixes") -}}
-    {{- if gt (len $prefixes) 0 -}}
-      {{- $withPfx := dict -}}
-      {{- range $id, $ov := $overrides -}}
-        {{- $_ := set $withPfx $id $ov -}}
-        {{- $costCopy := dict -}}
-        {{- if hasKey $ov "cost" -}}{{- $costCopy = dict "cost" $ov.cost -}}{{- end -}}
-        {{- range $pfx := $prefixes -}}
-          {{- if and (gt (len $costCopy) 0) (not (hasPrefix $pfx $id)) -}}
-            {{- $pid := printf "%s%s" $pfx $id -}}
-            {{- if not (hasKey $overrides $pid) -}}
-              {{- $_ := set $withPfx $pid $costCopy -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
-      {{- end -}}
-      {{- $overrides = $withPfx -}}
-    {{- end -}}
+    {{- $overrides = includeTemplate "llm/expand-model-overrides" (dict
+          "overrides" $overrides
+          "prefixes" (default (list) (index $ep "model_override_prefixes"))) | fromJson -}}
   {{- end -}}
 
   {{- $hasOverrides := and (not $declaresModels) (gt (len $overrides) 0) -}}
@@ -122,41 +108,7 @@
       {{- $_ := set $p "models" $models -}}
     {{- end -}}
     {{- if $hasOverrides -}}
-      {{- /* Stem keys cover thinking-effort siblings in the same rate lane.
-             A dedicated *-fast key expands to *-{effort}-fast. Missing Fast
-             ids stay unpriced. An explicit sibling still wins. Copies take
-             only cost so a first-party name does not overwrite a live lane. */ -}}
-      {{- $effortSuffixes := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
-      {{- $expanded := dict -}}
-      {{- range $modelId, $ov := $overrides -}}
-        {{- $_ := set $expanded $modelId $ov -}}
-      {{- end -}}
-      {{- range $modelId, $ov := $overrides -}}
-        {{- $costCopy := dict -}}
-        {{- if hasKey $ov "cost" -}}{{- $costCopy = dict "cost" $ov.cost -}}{{- end -}}
-        {{- if gt (len $costCopy) 0 -}}
-          {{- $lane := $modelId -}}
-          {{- $fast := false -}}
-          {{- if hasSuffix "-fast" $modelId -}}
-            {{- $fast = true -}}
-            {{- $lane = trimSuffix "-fast" $modelId -}}
-          {{- end -}}
-          {{- $isEffort := false -}}
-          {{- range $suf := $effortSuffixes -}}
-            {{- if hasSuffix (printf "-%s" $suf) $lane -}}{{- $isEffort = true -}}{{- end -}}
-          {{- end -}}
-          {{- if not $isEffort -}}
-            {{- range $suf := $effortSuffixes -}}
-              {{- $sibling := printf "%s-%s" $modelId $suf -}}
-              {{- if $fast -}}{{- $sibling = printf "%s-%s-fast" $lane $suf -}}{{- end -}}
-              {{- if not (hasKey $expanded $sibling) -}}
-                {{- $_ := set $expanded $sibling $costCopy -}}
-              {{- end -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
-      {{- end -}}
-      {{- $_ := set $p "modelOverrides" $expanded -}}
+      {{- $_ := set $p "modelOverrides" $overrides -}}
     {{- end -}}
     {{- $_ := set $providers $alias $p -}}
   {{- end -}}

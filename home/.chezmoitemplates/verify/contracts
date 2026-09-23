@@ -392,4 +392,38 @@
   {{- fail (printf "model-config/omp: drop none %s" ($grok43.thinking | toJson)) -}}
 {{- end -}}
 
+
+{{- /* llm/expand-model-overrides: effort siblings, thinking compounds, Fast lanes. */ -}}
+{{- $expanded := includeTemplate "llm/expand-model-overrides" (dict
+      "prefixes" (list "cursor-")
+      "overrides" (dict
+        "claude-opus-5" (dict "cost" (dict "input" 5 "output" 25))
+        "claude-opus-5-high" (dict "cost" (dict "input" 99 "output" 99))
+        "claude-opus-5-fast" (dict "cost" (dict "input" 10 "output" 50))
+        "claude-fable-5" (dict "name" "Fable 5" "cost" (dict "input" 10 "output" 50))
+        "claude-opus-5-5" (dict "cost" (dict "input" 4 "output" 20))
+        "claude-opus-5-5-fast" (dict "cost" (dict "input" 8 "output" 40))
+        "lane-fast" (dict "cost" (dict "input" 1 "output" 2)))) | fromJson -}}
+{{- if ne (index $expanded "claude-fable-5").name "Fable 5" -}}
+  {{- fail "expand-model-overrides: full card lost" -}}
+{{- end -}}
+{{- if ne (float64 (index $expanded "claude-opus-5-high").cost.input) 99.0 -}}
+  {{- fail "expand-model-overrides: explicit effort lost" -}}
+{{- end -}}
+{{- if or (ne (float64 (index $expanded "claude-opus-5-thinking-max").cost.input) 5.0) (ne (float64 (index $expanded "claude-opus-5-thinking-max-fast").cost.input) 10.0) -}}
+  {{- fail "expand-model-overrides: thinking compound" -}}
+{{- end -}}
+{{- if ne (float64 (index $expanded "claude-fable-5-thinking-high").cost.input) 10.0 -}}
+  {{- fail "expand-model-overrides: fable thinking" -}}
+{{- end -}}
+{{- if or (ne (float64 (index $expanded "claude-opus-5-5-high").cost.input) 4.0) (ne (float64 (index $expanded "claude-opus-5-5-high-fast").cost.input) 8.0) -}}
+  {{- fail "expand-model-overrides: opus 5.5" -}}
+{{- end -}}
+{{- if or (hasKey $expanded "lane-high") (ne (float64 (index $expanded "lane-high-fast").cost.input) 1.0) -}}
+  {{- fail "expand-model-overrides: fast priced the standard lane" -}}
+{{- end -}}
+{{- if ne (float64 (index $expanded "cursor-claude-fable-5-high").cost.input) 10.0 -}}
+  {{- fail "expand-model-overrides: cursor prefix" -}}
+{{- end -}}
+
 ok

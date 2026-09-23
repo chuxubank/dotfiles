@@ -13,3 +13,7 @@ siblings and `model_override_prefixes` still copy only `cost`, because those
 keys exist so a rate follows the stem — not so a first-party name overwrites a
 live Fast lane. An explicit `model_overrides` entry still wins, which is how
 Cursor Fast stays on the Cursor docs rate rather than the xAI list price.
+
+Cursor's thinking variants are their own ids (`claude-opus-5-thinking-max`).
+Those copies are cost-only too. A Fast rate still requires an explicit `*-fast`
+key; the standard rate is not reused for it.
