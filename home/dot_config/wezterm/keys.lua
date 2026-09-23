@@ -5,6 +5,8 @@ local act = wezterm.action
 -- Ctrl+Shift+Arrow keeps WezTerm pane navigation; Super+Arrow passes to the mux.
 -- Ctrl+Tab / Ctrl+Shift+Tab stay as terminal-native next/previous tab.
 -- Ctrl+R is passed through for Pi reverse search; Super+R still reloads.
+-- Ctrl+Shift+F is passed through for Pi transcript search; Cmd+F still searches
+-- WezTerm scrollback on macOS.
 -- Ctrl+Shift+P/N are NOT passed through: they stay WezTerm's command palette and
 -- new window. Model cycle is Alt+N / Alt+P in the agents instead, matching the
 -- Emacs modifier hierarchy. (A Luvus pane does carry the kitty keyboard
@@ -29,6 +31,7 @@ passthrough("t", "CTRL|SHIFT")
 passthrough("T", "CMD|SHIFT")
 passthrough("w", "CTRL|SHIFT")
 passthrough("r", "CTRL")
+passthrough("f", "CTRL|SHIFT")
 passthrough("[", "CMD|SHIFT")
 passthrough("]", "CMD|SHIFT")
 passthrough("PageUp", "CTRL")

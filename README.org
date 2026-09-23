@@ -37,6 +37,7 @@ The complete per-tool bindings are documented in
 | =Ctrl+;= then =1…9=     | Herdr/Zellij/Luvus mux tab selection      |
 | =Super+Arrow=           | Herdr/Zellij pane focus                   |
 | =Super+Ctrl+F=          | Ghostty/WezTerm fullscreen (macOS)        |
+| =Ctrl+Shift+F=          | Pi rendered-transcript search             |
 | =Tab=                   | Zsh fzf-tab completion menu               |
 | =<= / =>=               | fzf-tab previous/next completion group    |
 

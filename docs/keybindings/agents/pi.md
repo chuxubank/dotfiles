@@ -8,6 +8,11 @@ in-pane application. The upstream default list is in Pi's
 [keybindings.md](https://github.com/earendil-works/pi-coding-agent/blob/main/docs/keybindings.md).
 After editing, run `/reload` in Pi.
 
+`Ctrl+Shift+F` keeps Pi's upstream `tui.altScreen.search` assignment for
+searching the rendered transcript. WezTerm's conflicting scrollback-search
+default is disabled so the chord reaches Pi; on macOS, use `Super+F` to search
+WezTerm scrollback.
+
 `Ctrl+P` / `Ctrl+N` use `tui.editor.historyPrevious` / `historyNext`.
 
 Model selection moves from Pi's `Ctrl+L` default to `Alt+M`, matching OMP.
@@ -70,6 +75,7 @@ survives regardless.
 | `Ctrl+N` | No editor history binding | Next prompt history | **Add** |
 | `Ctrl+H` | No delete-backward binding | Delete character backward | **Add** |
 | `Ctrl+R` | Rename session | Reverse-search prompt history | **Change** |
+| `Ctrl+Shift+F` | Search the rendered transcript | Search the rendered transcript; passed through by WezTerm | Unchanged |
 | `Ctrl+Shift+P` | Cycle backward | Not bound; unreachable inside a Luvus pane | **Delete** |
 | `Ctrl+L` | Open the model selector | Not bound | **Delete** |
 | `Alt+M` | No assignment | Open the model selector | **Add** |

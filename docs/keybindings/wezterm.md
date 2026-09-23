@@ -41,6 +41,7 @@ receive mux commands after the `Ctrl+;` prefix.
 | `Super+Shift+[` / `Super+Shift+]` | Select the previous/next tab | Unbound; kept free for the mux | **Delete** |
 | `Ctrl+Shift+Z` | Toggle pane zoom | Unbound; passed to the pane | **Delete** |
 | `Ctrl+R` | Reload configuration | Unbound; passed to the pane (Pi reverse search) | **Delete** |
+| `Ctrl+Shift+F` | Search WezTerm scrollback | Unbound; passed to the pane (Pi transcript search; use `Super+F` for WezTerm scrollback on macOS) | **Delete** |
 | `Ctrl+Shift+P` | Command palette | Command palette (kept; cannot reach a Luvus pane) | Unchanged |
 | `Ctrl+Shift+N` | Spawn window | Spawn window (kept; cannot reach a Luvus pane) | Unchanged |
 | `Ctrl+Shift+B` | No assignment | Toggle window opacity | **Add** |
