@@ -1,6 +1,12 @@
 skills:
   provider_groups:
     30-personal:
+      - name: bugfix-delivery
+        source: chuxubank/skills
+        when:
+          enabled:
+            host_env: iv
+
       - name: feishu-projects
         source: chuxubank/skills
         owner: feishu-projects
