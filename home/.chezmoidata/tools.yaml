@@ -19,9 +19,9 @@
 # in a shared tree (e.g. bin/) belongs in neither list: gate its template on
 # tool/enabled and it renders empty, which chezmoi removes on its own.
 tool_conditions:
-  disabled: &disabled {enabled: false}
-  non_ci: &non_ci {disabled: {host_env: [ci]}}
-  iv_only: &iv_only {enabled: {host_env: [iv]}}
+  disabled: &disabled { enabled: false }
+  non_ci: &non_ci { disabled: { host_env: [ci] } }
+  iv_only: &iv_only { enabled: { host_env: [iv] } }
 
 tools:
   # CLI via bun. No managed dest files.
@@ -39,7 +39,7 @@ tools:
     when: *disabled
 
   claude-code:
-    when: *iv_only
+    when: *disabled
     remove:
       - ".claude/settings.json"
       - ".claude/statusline.sh"
