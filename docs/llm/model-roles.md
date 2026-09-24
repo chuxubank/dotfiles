@@ -15,7 +15,7 @@ deliberately cheaper. Rationale is in
 
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
-| `default` | `anthropic/gpt-5.6-sol:high`       | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
+| `default` | `openai/gpt-6-sol:high`            | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
 | `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis                   |
 | `smol`    | `openai/gpt-5.6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
 | `task`    | `openai/gpt-5.6-terra:high`        | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
@@ -31,7 +31,7 @@ those three.
 `vision` and `commit` carry no assignment.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
-input at each level. IV's `default` (`gpt-5.6-sol`) advertises it. Personal
+input at each level. IV's `default` (`gpt-6-sol`) advertises it. Personal
 `default` (`cursor/grok-4.7-high-fast`) is text-only in the current Cursor
 catalog, so a photo falls through to the active model. Neither provider bills
 per image. `commit` falls through to the active model, which is what that
@@ -43,12 +43,13 @@ against `smol` on the IV tier.
 
 ## Why these models
 
-Cost separates models the catalog otherwise presents as equivalent. `sol` and
-`terra` are identical on context (372K), max output (128K), and effort levels,
-and both cost $1.5 in — but `terra` is $2 out against `sol`'s $12. `task` is the
-heaviest output producer in the system, one subagent per delegated slice, so it
-takes `terra`. Its smaller context than Sonnet's 1M is affordable because each
-subagent starts on a fresh context rather than inheriting the parent's.
+`default` tracks the shared `gpt_primary` pin and now uses `gpt-6-sol`. `task`
+stays on `gpt-5.6-terra`: within the 5.6 family, `sol` and `terra` are identical
+on context (372K), max output (128K), and effort levels, and both cost $1.5 in —
+but `terra` is $2 out against `sol`'s $12. `task` is the heaviest output
+producer in the system, one subagent per delegated slice, so it takes the
+cheap-output sibling. Its smaller context than Sonnet's 1M is affordable because
+each subagent starts on a fresh context rather than inheriting the parent's.
 
 `plan` runs about once per session and is the one place where the best available
 reasoning outranks price, so it takes `claude-opus-5` at $6/$30 — a rate that

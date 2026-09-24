@@ -59,7 +59,7 @@ llm:
           - cursor/claude-opus-5-high
         # No `vision` role on purpose. inspect_image falls back @vision →
         # @default → active model, each level requiring image input. IV's
-        # @default (gpt-5.6-sol) advertises it. Personal @default
+        # @default (gpt-6-sol) advertises it. Personal @default
         # (cursor/${grok_primary}-high-fast) is text-only in the current
         # Cursor catalog, so a photo falls through to the active model.
         # Neither provider bills per image.
