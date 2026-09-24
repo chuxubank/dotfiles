@@ -19,9 +19,13 @@ llm:
       # hosts and stay deliberately cheaper. Grok has no IV entry, so SuperGrok
       # is only ever a fallback. Cycle is OMP's default: smol → default → slow.
       default_models:
+        # Thorough and infrequent (--slow, security-reviewer). IV keeps
+        # fable on iv-anthropic: the cc group 404s that id. Personal takes
+        # Opus 5.5, one Cursor id with an effort ladder rather than a
+        # per-effort SKU, and stays at :medium.
         slow:
           - iv-anthropic/claude-fable-5:high
-          - cursor/claude-fable-5-1-medium:medium
+          - cursor/claude-opus-5-5:medium
         # Prewalk target and background worker. Luna's thinking floor is `low`,
         # so the IV pick is a big model held at a low-ish effort rather than a
         # small model pushed hard. Personal takes Composer 2.5 Fast.

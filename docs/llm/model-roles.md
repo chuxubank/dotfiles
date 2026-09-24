@@ -16,7 +16,7 @@ deliberately cheaper. Rationale is in
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
 | `default` | `openai/gpt-6-sol:high`            | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
-| `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-fable-5-1-medium:medium` | `--slow`, thorough analysis                   |
+| `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
 | `smol`    | `openai/gpt-5.6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
 | `task`    | `openai/gpt-5.6-terra:high`        | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
 | `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
@@ -64,9 +64,11 @@ first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
 and a late note still lands on the current primary, so the cheaper standard
 rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.7 Fast.
 
-`slow` keeps `claude-fable-5` even though its $3/$18.5 on the IV alias
-is dearer on output than Opus, because that role is explicitly the thorough,
-infrequent one.
+`slow` stays `claude-fable-5` on IV, at `:high`, because that role is the
+thorough, infrequent one and the cc group 404s the id — it only resolves on
+`iv-anthropic`. The personal fallback is `cursor/claude-opus-5-5:medium`
+($4/$20). Cursor serves that as one id with an effort ladder, not a per-effort
+SKU, so the suffix is `:medium` rather than an `-medium` id.
 
 ## Constraints
 
@@ -82,9 +84,11 @@ allow-list, and a role pointing outside it resolves to a model the session
 cannot select. Entries are generation globs (`gpt-5.6*`, `gpt-6*`,
 `claude-opus-5*`, `claude-fable-5*`, `grok-4.7*`, `muse-spark-1.3*`,
 `gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
-catalogs, so older lines stay out while personal-host `plan`/`slow` Cursor SKUs
-still match. `deepseek-v4*`, `glm-5.3*`, and `kimi/kimi-k3*` are `iv`-pinned
-and carry no role: they are manual picks, and they drop out with the alias on
+catalogs, so older lines stay out while personal-host `plan` and `slow` still
+match `claude-opus-5*`. IV `slow` is the exact `iv-anthropic/claude-fable-5`
+pin; `cursor/claude-fable-5*` stays a manual pick. `deepseek-v4*`,
+`glm-5.3*`, and `kimi/kimi-k3*` are `iv`-pinned and carry no role: they are
+manual picks, and they drop out with the alias on
 non-`iv` hosts. `muse-spark-1.3*`, `gemini-3.8-flash*`, and `cursor/default`
 (Auto) are Cursor-pinned manual picks. `kimi/kimi-k3*` keeps its vendor segment because the endpoint
 returns the id that way; a leading segment counts as a provider only when it
