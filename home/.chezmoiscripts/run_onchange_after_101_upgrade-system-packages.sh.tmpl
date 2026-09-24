@@ -12,6 +12,11 @@ gpg_before=$(gpg_version)
 
 if command -v brew >/dev/null; then
   run_upgrade brew brew upgrade
+  echo "Clean Homebrew cache"
+  if ! brew cleanup --prune=all -s; then
+    print -u2 -- "Could not clean Homebrew cache"
+    had_errors=true
+  fi
 fi
 
 {{ if eq .chezmoi.os "android" -}}
