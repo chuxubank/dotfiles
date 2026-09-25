@@ -31,11 +31,11 @@ those three.
 `vision` and `commit` carry no assignment.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
-input at each level. IV's `default` (`gpt-6-sol`) advertises it. Personal
-`default` (`cursor/grok-4.7-high-fast`) is text-only in the current Cursor
-catalog, so a photo falls through to the active model. Neither provider bills
-per image. `commit` falls through to the active model, which is what that
-flow wants.
+input at each level. Both tiers' `default` advertise it: IV through `gpt-6-sol`,
+and personal through `cursor/grok-4.7-high-fast`. Cursor's bundled Grok 4.7
+effort ids are text-only; the Fast lane copies image input from the `grok-4.7`
+card onto those siblings. Neither provider bills per image. `commit` falls
+through to the active model, which is what that flow wants.
 
 Setting a role that would resolve to the same model as its fallback is only
 worth it for a different effort level — that is the whole content of `tiny`

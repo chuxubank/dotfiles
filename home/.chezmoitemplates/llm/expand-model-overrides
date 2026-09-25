@@ -2,13 +2,20 @@
        Input: { overrides: dict, prefixes: list }
        Output: JSON dict.
 
-       Cost-only copies. An existing key is never replaced:
+       Cost copies. An existing key is never replaced:
        - prefixes (`cursor-` + id)
        - one effort suffix on a stem (`-high`, `-thinking`, ...)
        - Claude thinking compounds `{stem}-thinking-{effort}` and
          `{stem}-{effort}-thinking`, including the `*-fast` twin
        - a dedicated `*-fast` key expands to `*-{effort}-fast`.
-         It does not price the non-fast ids. */ -}}
+         It does not price the non-fast ids.
+
+       Image input follows a stem only when that stem has a dedicated
+       `*-fast` key. The fast lane is the same model at another rate, and
+       Cursor's Grok effort ids are text-only, so those siblings would
+       otherwise hide the stem card's image input. Stems with no fast key
+       stay cost-only: their live catalog modalities are left alone. A
+       named card is not copied onto the fast id. */ -}}
 {{- $in := . -}}
 {{- $overrides := default dict (index $in "overrides") -}}
 {{- $prefixes := default (list) (index $in "prefixes") -}}
@@ -34,9 +41,9 @@
   {{- $_ := set $expanded $id $ov -}}
 {{- end -}}
 {{- range $id, $ov := $base -}}
-  {{- $costCopy := dict -}}
-  {{- if hasKey $ov "cost" -}}{{- $costCopy = dict "cost" $ov.cost -}}{{- end -}}
-  {{- if gt (len $costCopy) 0 -}}
+  {{- $patch := dict -}}
+  {{- if hasKey $ov "cost" -}}{{- $_ := set $patch "cost" $ov.cost -}}{{- end -}}
+  {{- if gt (len $patch) 0 -}}
     {{- $lane := $id -}}
     {{- $fast := false -}}
     {{- if hasSuffix "-fast" $id -}}
@@ -48,10 +55,26 @@
       {{- if hasSuffix (printf "-%s" $suf) $lane -}}{{- $isEffort = true -}}{{- end -}}
     {{- end -}}
     {{- if not $isEffort -}}
+      {{- $stemId := $lane -}}
+      {{- range $pfx := $prefixes -}}
+        {{- if hasPrefix $pfx $stemId -}}
+          {{- $stemId = trimPrefix $pfx $stemId -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if and (hasKey $base $stemId) (hasKey $base (printf "%s-fast" $stemId)) -}}
+        {{- $stem := index $base $stemId -}}
+        {{- if hasKey $stem "input" -}}
+          {{- $image := false -}}
+          {{- range $mod := $stem.input -}}
+            {{- if eq $mod "image" -}}{{- $image = true -}}{{- end -}}
+          {{- end -}}
+          {{- if $image -}}{{- $_ := set $patch "input" $stem.input -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
       {{- range $suf := $efforts -}}
         {{- $sibling := printf "%s-%s" $lane $suf -}}
         {{- if $fast -}}{{- $sibling = printf "%s-fast" $sibling -}}{{- end -}}
-        {{- if not (hasKey $expanded $sibling) -}}{{- $_ := set $expanded $sibling $costCopy -}}{{- end -}}
+        {{- if not (hasKey $expanded $sibling) -}}{{- $_ := set $expanded $sibling $patch -}}{{- end -}}
         {{- if and (hasPrefix "claude-" $lane) (ne $suf "thinking") -}}
           {{- $thinkFirst := printf "%s-thinking-%s" $lane $suf -}}
           {{- $thinkLast := printf "%s-%s-thinking" $lane $suf -}}
@@ -59,8 +82,8 @@
             {{- $thinkFirst = printf "%s-fast" $thinkFirst -}}
             {{- $thinkLast = printf "%s-fast" $thinkLast -}}
           {{- end -}}
-          {{- if not (hasKey $expanded $thinkFirst) -}}{{- $_ := set $expanded $thinkFirst $costCopy -}}{{- end -}}
-          {{- if not (hasKey $expanded $thinkLast) -}}{{- $_ := set $expanded $thinkLast $costCopy -}}{{- end -}}
+          {{- if not (hasKey $expanded $thinkFirst) -}}{{- $_ := set $expanded $thinkFirst $patch -}}{{- end -}}
+          {{- if not (hasKey $expanded $thinkLast) -}}{{- $_ := set $expanded $thinkLast $patch -}}{{- end -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}

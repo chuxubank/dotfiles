@@ -13,7 +13,9 @@
        `cursor-` prefixes, effort suffixes, and Claude
        `{stem}-thinking-{effort}` compounds.
        A dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
-       Missing Fast ids stay unpriced; the stem rate is not copied onto them.
+       That fast lane also copies the stem's image input onto those
+       siblings. Missing Fast ids stay unpriced; the stem rate is not
+       copied onto them.
 
        Emit only when the alias contributes a model list, an override-only
        modelOverrides map, or an endpoint we can authenticate against. A bare
