@@ -26,6 +26,13 @@ plugins:
           it fails to load against the retired @mariozechner build.
         source: npm:pi-mcp-adapter
 
+      - name: pi-cursor-sdk
+        description: >-
+          Cursor models inside Pi through @cursor/sdk. Local agent loop
+          by default. Save a Cursor SDK API key with /login or
+          CURSOR_API_KEY; Cursor desktop login is not reused.
+        source: npm:pi-cursor-sdk
+
       - name: pi-computer-use
         description: >-
           Desktop computer-use tools for Pi on macOS, Windows, and Linux.
