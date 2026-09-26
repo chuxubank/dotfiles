@@ -21,6 +21,8 @@
            disable_strict_tools — opt out of Anthropic strict tool schemas (if set)
            compat    — provider compatibility overrides (if set)
            model_overrides — per-model metadata overrides (if set)
+           rates     — shared rate table from llm.rates (if set)
+           project   — id projection name (if set)
            model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
@@ -138,6 +140,21 @@
     {{- $_ := set $resolved "model_override_prefixes" $ref.model_override_prefixes -}}
   {{- else if hasKey $prov "model_override_prefixes" -}}
     {{- $_ := set $resolved "model_override_prefixes" $prov.model_override_prefixes -}}
+  {{- end -}}
+  {{- if hasKey $ref "rates" -}}
+    {{- $table := index (default dict (index $ctx.llm "rates")) $ref.rates -}}
+    {{- if not $table -}}
+      {{- fail (printf "llm rates: unknown table %q" $ref.rates) -}}
+    {{- end -}}
+    {{- $resolvedRates := dict -}}
+    {{- range $model, $override := $table -}}
+      {{- $resolvedModel := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
+      {{- $_ := set $resolvedRates $resolvedModel $override -}}
+    {{- end -}}
+    {{- $_ := set $resolved "rates" $resolvedRates -}}
+  {{- end -}}
+  {{- if hasKey $ref "project" -}}
+    {{- $_ := set $resolved "project" $ref.project -}}
   {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}

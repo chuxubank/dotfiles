@@ -26,6 +26,20 @@ deliberately cheaper. Rationale is in
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
 those three.
 
+Pi uses the same candidate order and the same Cursor families, but
+`pi-cursor-sdk` ids are not these SKUs. Personal `default` is
+`cursor/grok-4.7@500k:fast`: 500k is the SDK's default window, and that
+variant is already reasoning high. Pi cannot set Grok's `reasoning_effort`.
+`claude-opus-5-high` is `cursor/claude-opus-5@1m`. Composer Fast is
+`cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
+the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
+is `cursor/claude-opus-5-5@1m`. Pi has no `slow` role, so that id is only on
+the picker allow-list. Prices are one table, `llm.rates.cursor` in
+`home/.chezmoidata/llm/cursor.yaml`. OMP expands those stems to SKU siblings.
+Pi projects the same cards onto extension ids. `longContext` becomes
+`cost.tiers`. The unsuffixed Pi id bills the fast card when that is the SDK
+default (Grok, Composer); `:slow` bills the stem.
+
 ## Deliberately unset
 
 `vision` and `commit` carry no assignment.

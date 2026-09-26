@@ -14,9 +14,12 @@ copy only `cost`, because those keys exist so a rate follows the stem — not
 so a first-party name overwrites a live Fast lane. Image `input` is the
 exception when the stem has a dedicated `*-fast` key: that lane is the same
 model, and Cursor's Grok 4.7 effort ids ship as text-only, so the stem card's
-image input is copied onto those siblings. An explicit `model_overrides`
-entry still wins, which is how Cursor Fast stays on the Cursor docs rate
-rather than the xAI list price.
+image input is copied onto those siblings. Explicit rate keys in
+`llm/cursor.yaml` replace the models.dev price, which is how Cursor Fast
+stays on the Cursor docs rate rather than the xAI list price. A provider
+`model_overrides` entry still wins over that table. Pi reads the same stem
+cards and projects cost onto `pi-cursor-sdk` ids (`@window`, `:fast`,
+`:slow`). It does not copy names, windows, or thinking ladders onto those ids.
 
 Cursor's thinking variants are their own ids (`claude-opus-5-thinking-max`).
 Those copies are cost-only too, plus image input when the stem's fast lane

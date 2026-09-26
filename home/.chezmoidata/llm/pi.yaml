@@ -1,13 +1,20 @@
 llm:
   tools:
     pi:
-      # IV aliases enumerate models because the proxy catalog differs from Pi's
-      # bundled catalog; subscription providers keep models: false.
+      # Same candidate order as omp.yaml. IV aliases enumerate models because
+      # the proxy catalog differs from Pi's bundled catalog; subscription
+      # providers keep models: false. Cursor ids are pi-cursor-sdk's, not
+      # OMP SKUs. `${grok_primary}-high-fast` is `${grok_primary}@500k:fast`:
+      # 500k is the SDK default window and that variant is already reasoning
+      # high. Pi cannot set Grok's reasoning_effort. `claude-opus-5-high` is
+      # `claude-opus-5@1m`; effort follows reasoning_effort.
       model:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
-        - openai-codex/${gpt_primary}
+        - cursor/${grok_primary}@500k:fast
         - xai/${grok_primary}
+        - openai-codex/${gpt_primary}
+        - cursor/claude-opus-5@1m
       reasoning_effort: high
       enabled_models:
         - ${grok_primary}*
@@ -22,6 +29,19 @@ llm:
         - deepseek-v4.1*
         - glm-5.3*
         - kimi/kimi-k3*
+        # Cursor families from omp.yaml. Unscoped globs above already match
+        # the shared stems. These add the Cursor-only families and pin Auto.
+        # `cursor/gpt-6*` waits: Pi warns on an unmatched pattern, and the
+        # SDK catalog has no gpt-6 id yet. OMP still lists that glob.
+        - cursor/gpt-5.6*
+        - cursor/claude-opus-5*
+        - cursor/claude-sonnet-5*
+        - cursor/claude-fable-5*
+        - cursor/composer-2.5*
+        - cursor/*${grok_primary}*
+        - cursor/*muse-spark-1.3*
+        - cursor/*gemini-3.8-flash*
+        - cursor/default
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       session_title_model:
         - iv/deepseek-v4-flash
@@ -61,3 +81,21 @@ llm:
         opencode:
           provider: opencode
           models: false
+        # pi-cursor-sdk owns the catalog and the API key. models: false keeps
+        # that list. Rates and the models.dev cards are shared with OMP
+        # (llm/cursor.yaml); project rewrites stems onto this extension's ids.
+        cursor:
+          provider: cursor
+          models: false
+          rates: cursor
+          project: pi-cursor
+          data_set: models-dev
+          data_set_providers:
+            - anthropic
+            - openai
+            - google
+            - meta
+            - xai
+            - moonshotai
+            - zai
+            - deepseek

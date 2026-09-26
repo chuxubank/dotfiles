@@ -1,0 +1,21 @@
+{{- /* llm/pi-cost — Map an OMP cost object to Pi's cost shape.
+       Input: cost dict, with optional longContext.
+       Output: JSON cost. longContext becomes one cost.tiers row. */ -}}
+{{- $c := . -}}
+{{- $out := dict
+      "input" (float64 (default 0 (index $c "input")))
+      "output" (float64 (default 0 (index $c "output")))
+      "cacheRead" (float64 (default 0 (index $c "cacheRead")))
+      "cacheWrite" (float64 (default 0 (index $c "cacheWrite")))
+-}}
+{{- if hasKey $c "longContext" -}}
+  {{- $lc := index $c "longContext" -}}
+  {{- $_ := set $out "tiers" (list (dict
+        "inputTokensAbove" (int (index $lc "inputThreshold"))
+        "input" (float64 (default 0 (index $lc "input")))
+        "output" (float64 (default 0 (index $lc "output")))
+        "cacheRead" (float64 (default 0 (index $lc "cacheRead")))
+        "cacheWrite" (float64 (default 0 (index $lc "cacheWrite")))
+  )) -}}
+{{- end -}}
+{{- toJson $out -}}

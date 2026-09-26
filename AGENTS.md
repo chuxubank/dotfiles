@@ -105,5 +105,6 @@ a dedicated `*-fast` key also copies its image `input` onto those siblings.
 Claude thinking compounds (`{stem}-thinking-{effort}` and `{id}-thinking`) stay
 on that same rate.
 Explicit `model_overrides` still win. Fast rates come only from a `*-fast`
-key. The rationale is in
+key, and those keys live once in `home/.chezmoidata/llm/cursor.yaml`. Pi
+projects that same stem map onto its extension ids. The rationale is in
 `docs/adr/0009-omp-models-dev-overlays.md`.
