@@ -8,7 +8,10 @@
        `:slow`. `:fast` bills the `*-fast` card. `:slow` bills the stem.
        The unsuffixed id bills the fast card only when `default_fast` is
        set, because the SDK keeps that flag when it swaps context.
-       A fast stem with no `*-fast` card fails. Alias ids are not emitted. */ -}}
+       A fast stem with no `*-fast` card fails. A stem with neither card
+       is skipped: the models.dev catalog is not on every machine, and a
+       missing list price must not reject the priced ids. Alias ids are
+       not emitted. */ -}}
 {{- $overrides := default dict (index . "overrides") -}}
 {{- $models := default dict (index . "models") -}}
 {{- $out := dict -}}
@@ -28,7 +31,7 @@
     {{- fail (printf "llm/pi-cursor-costs: %s has no %s card" $stem $fastKey) -}}
   {{- end -}}
   {{- if and (eq (len $standard) 0) (eq (len $fast) 0) -}}
-    {{- fail (printf "llm/pi-cursor-costs: %s has no price" $stem) -}}
+    {{- continue -}}
   {{- end -}}
   {{- $defaultFast := false -}}
   {{- if hasKey $shape "default_fast" -}}{{- $defaultFast = index $shape "default_fast" -}}{{- end -}}
