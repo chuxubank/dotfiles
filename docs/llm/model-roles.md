@@ -19,10 +19,10 @@ deliberately cheaper. Rationale is in
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
 | `default` | `openai/gpt-6-sol:high`            | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
 | `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
-| `smol`    | `openai/gpt-5.6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
-| `task`    | `openai/gpt-5.6-terra:high`        | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
+| `smol`    | `openai/gpt-6-luna:medium`         | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
+| `task`    | `openai/gpt-6-sol:medium`          | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
 | `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
-| `tiny`    | `openai/gpt-5.6-luna:low`          | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
+| `tiny`    | `openai/gpt-6-luna:low`            | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
 | `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-high`             | `--plan`, architectural planning              |
 
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
@@ -54,27 +54,23 @@ card onto those siblings. Neither provider bills per image. `commit` falls
 through to the active model, which is what that flow wants.
 
 Setting a role that would resolve to the same model as its fallback is only
-worth it for a different effort level — that is the whole content of `tiny`
-against `smol` on the IV tier.
+worth it for a different effort level. On the IV tier that is `tiny` against
+`smol`, and `task` against `default`.
 
 ## Why these models
 
-`default` tracks the shared `gpt_primary` pin and now uses `gpt-6-sol`. `task`
-stays on `gpt-5.6-terra`: within the 5.6 family, `sol` and `terra` are identical
-on context (372K), max output (128K), and effort levels, and both cost $1.5 in —
-but `terra` is $2 out against `sol`'s $12. `task` is the heaviest output
-producer in the system, one subagent per delegated slice, so it takes the
-cheap-output sibling. Its smaller context than Sonnet's 1M is affordable because
-each subagent starts on a fresh context rather than inheriting the parent's.
+`default` tracks the shared `gpt_primary` pin, `gpt-6-sol` at `:high`. `task`
+uses the same id at `:medium`. GPT-6 ships astra, sol, and luna; Sol is the
+balanced coding model at $2 in and $10 out. The personal fallback stays
+`xai-oauth/grok-4.7:high`. Each subagent starts on a fresh context.
 
 `plan` runs about once per session and is the one place where the best available
 reasoning outranks price, so it takes `claude-opus-5` at $6/$30 — a rate that
 would not survive at `task`'s call volume.
 
-`advisor` stays on Sonnet rather than following `task` to `terra`. It reviews the
-primary's own deltas, so it is deliberately a different model family from the
-GPT-family `default`; making it cheaper by matching the reviewed family defeats
-the role. The personal fallback is Composer 2.5, which sits in Cursor's
+`advisor` stays on Sonnet. It reviews the primary's own deltas, so it is a
+different model family from the GPT-family `default`. The personal fallback is
+Composer 2.5, which sits in Cursor's
 first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
 `smol`'s interactive execution lane ($3/$15); advisor reviews in the background
 and a late note still lands on the current primary, so the cheaper standard
@@ -90,14 +86,14 @@ SKU, so the suffix is `:medium` rather than an `-medium` id.
 
 Pin the provider on any model id more than one alias can serve; a bare id
 resolves against the union of every alias's catalog and can silently reach the
-wrong endpoint. `gpt-5.6-luna` is served by `anthropic`, `iv`, and `openai`, so
-it is written `openai/gpt-5.6-luna` — the `anthropic` alias is the
-Anthropic-typed surface on the cc token and must not carry OpenAI-shaped models.
+wrong endpoint. `gpt-6-luna` is written `openai/gpt-6-luna`. The `anthropic`
+alias is the cc token's Anthropic surface, and its allow-list is Claude ids.
+GPT ids stay on `openai/gpt-6*`.
 See [ADR 0005](../adr/0005-llm-provider-aliases.md).
 
 Role targets must also appear in `enabled_models`. That list is the picker's
 allow-list, and a role pointing outside it resolves to a model the session
-cannot select. Entries are generation globs (`gpt-5.6*`, `gpt-6*`,
+cannot select. Entries are generation globs (`gpt-6*`,
 `claude-opus-5*`, `claude-fable-5*`, `grok-4.7*`, `muse-spark-1.3*`,
 `gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
 catalogs, so older lines stay out while personal-host `plan` and `slow` still
@@ -110,8 +106,8 @@ non-`iv` hosts. `muse-spark-1.3*`, `gemini-3.8-flash*`, and `cursor/default`
 returns the id that way; a leading segment counts as a provider only when it
 names a configured alias.
 
-Effort suffixes are per model. `gpt-5.6-luna` has no `minimal`; its floor is
-`low`.
+Effort suffixes are per model. `gpt-6-luna` has no `minimal`; its ladder
+starts at `none`, and `tiny` stays at `:low`.
 
 ## Subagents
 

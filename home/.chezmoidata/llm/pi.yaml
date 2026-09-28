@@ -18,7 +18,6 @@ llm:
       reasoning_effort: high
       enabled_models:
         - ${grok_primary}*
-        - gpt-5.6*
         - gpt-6*
         - claude-opus-5*
         - claude-sonnet-5*
@@ -31,9 +30,9 @@ llm:
         - kimi/kimi-k3*
         # Cursor families from omp.yaml. Unscoped globs above already match
         # the shared stems. These add the Cursor-only families and pin Auto.
-        # `cursor/gpt-6*` waits: Pi warns on an unmatched pattern, and the
-        # SDK catalog has no gpt-6 id yet. OMP still lists that glob.
-        - cursor/gpt-5.6*
+        # Pi warns on this glob until the SDK catalog lists a gpt-6 id.
+        # OMP lists the same pattern.
+        - cursor/gpt-6*
         - cursor/claude-opus-5*
         - cursor/claude-sonnet-5*
         - cursor/claude-fable-5*
@@ -48,7 +47,7 @@ llm:
         - xai/${grok_primary}:low
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       subagent_model:
-        - openai/gpt-5.6-terra
+        - openai/gpt-6-sol
         - xai/${grok_primary}
       providers:
         openai:
