@@ -460,12 +460,13 @@
 
 {{- /* Live projection uses the shared rate table. Stem list prices come from
       models.dev and are absent on CI, so only cards in llm/cursor.yaml are checked here. */ -}}
-{{- $ompCursor := index (includeTemplate "llm/custom-providers" (merge (dict "tool" "omp") .) | fromJson) "cursor" "modelOverrides" -}}
+{{- /* The cursor provider is off on iv; check both projections off-iv. */ -}}
+{{- $ompCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
 {{- $ompFast := index $ompCursor "grok-4.7-high-fast" -}}
 {{- if or (not $ompFast) (ne (float64 $ompFast.cost.input) 4.0) (ne (float64 (index $ompCursor "composer-2.5").cost.input) 0.5) (ne (float64 (index $ompCursor "composer-2.5-fast").cost.input) 3.0) -}}
   {{- fail "cursor rates: omp projection" -}}
 {{- end -}}
-{{- $piCursor := index (includeTemplate "llm/custom-providers" (merge (dict "tool" "pi") .) | fromJson) "cursor" "modelOverrides" -}}
+{{- $piCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
 {{- if or (hasKey $piCursor "grok-4.7-high-fast") (ne (float64 (index $piCursor "grok-4.7@500k:fast").cost.input) 4.0) (ne (float64 (index $piCursor "composer-2.5").cost.input) 3.0) (ne (float64 (index $piCursor "composer-2.5:slow").cost.input) 0.5) (ne (float64 (index $piCursor "claude-opus-5-5@1m:fast").cost.input) 8.0) (ne (float64 (index $piCursor "claude-opus-5-5@1m").cost.input) 4.0) (ne (float64 (index (index (index $piCursor "gpt-5.6-luna@1m:fast").cost.tiers 0) "input")) 0.8) -}}
   {{- fail "cursor rates: pi projection" -}}
 {{- end -}}

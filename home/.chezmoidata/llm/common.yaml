@@ -62,9 +62,14 @@ llm:
       name: xAI OAuth
 
     # OMP's built-in Cursor subscription provider. It has no endpoint or API
-    # key here: omp owns its OAuth flow and bundled model catalog.
+    # key here: omp owns its OAuth flow and bundled model catalog. Pi reaches
+    # it through pi-cursor-sdk. Off on iv: the alias, its role candidates,
+    # and cursor/* picker globs drop out for both tools.
     cursor:
       name: Cursor
+      when:
+        disabled:
+          host_env: ["iv"]
 
     google:
       name: Google

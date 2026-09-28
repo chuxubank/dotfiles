@@ -9,7 +9,9 @@ Every role is a candidate list. The renderer picks the first entry whose
 provider alias resolved on this host, so one table covers both tiers: the IV
 aliases (`openai`, `anthropic`, `iv-anthropic`, `iv`) are gated on
 `host_env: [iv]` and drop out elsewhere, leaving the personal-subscription
-entry. IV is company-funded and spends effort freely; the fallback stays
+entry. The `cursor` provider is the reverse: disabled on iv, so no Cursor
+model reaches the IV tier or its picker. IV is company-funded and spends
+effort freely; the fallback stays
 deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 

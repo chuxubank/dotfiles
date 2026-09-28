@@ -30,8 +30,12 @@ plugins:
         description: >-
           Cursor models inside Pi through @cursor/sdk. Local agent loop
           by default. Save a Cursor SDK API key with /login or
-          CURSOR_API_KEY; Cursor desktop login is not reused.
+          CURSOR_API_KEY; Cursor desktop login is not reused. Off on iv,
+          matching the cursor provider in llm/common.yaml.
         source: npm:pi-cursor-sdk
+        when:
+          disabled:
+            host_env: [iv]
 
       - name: pi-computer-use
         description: >-
