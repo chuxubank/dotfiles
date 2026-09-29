@@ -39,15 +39,11 @@ llm:
         enabled:
           host_env: ["iv"]
 
+    # Codex's built-in ChatGPT-login provider. No endpoint, key, or model
+    # cache: the OpenAI API is not used. Codex skips this alias when writing
+    # model_providers, so only the alias itself matters.
     openai:
       name: OpenAI
-      base_url: "https://api.openai.com"
-      model_caches:
-        openai-models-api:
-          auth_field: api-key
-      auth:
-        path: Personal/Tech/AI/OpenAI
-        field: api-key
 
     # Pi/OMP ChatGPT subscription. Flip `when.enabled` to true to bring the
     # alias, picker globs, and OMP provider back; false hides it everywhere.
