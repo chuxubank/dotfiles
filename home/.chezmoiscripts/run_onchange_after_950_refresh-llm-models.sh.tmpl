@@ -3,7 +3,9 @@ set -eu
 
 echo "{{ template "week" . }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
-had_errors=false
+# Best effort: a failed refresh keeps the previous cache and only warns.
+# The week stamp above reruns this script weekly, and exiting non-zero here
+# would abort the rest of chezmoi apply over a stale catalog.
 
 fetch_model_response() {
   output_file=$1
@@ -94,15 +96,10 @@ if ! refresh_models \
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
   {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}; then
-  printf 'failed to refresh provider=%s cache=%s url=%s\n' \
+  printf 'warning: failed to refresh provider=%s cache=%s url=%s\n' \
     {{ $providerName | quote }} {{ $cacheKey | quote }} {{ $endpoint.url | quote }} >&2
-  had_errors=true
 fi
 {{ end }}
 {{ end }}
 {{ end }}
 {{ end }}
-
-if [ "$had_errors" = true ]; then
-  exit 1
-fi
