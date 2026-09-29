@@ -3,7 +3,7 @@
 echo "󰯁 Setup go"
 
 [[ -e $HOME/.zshenv ]] && source "$HOME/.zshenv"
-export PATH="$GOBIN:$PATH"
+export PATH="${GOBIN:+$GOBIN:}$PATH"
 
 if ! command -v go >/dev/null; then
   print -u2 -- "go is not installed; skipping go package setup"

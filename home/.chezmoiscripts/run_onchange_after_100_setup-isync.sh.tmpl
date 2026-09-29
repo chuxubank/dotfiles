@@ -2,15 +2,31 @@
 #!/bin/sh
 
 echo "󰯁 Setup isync and mu"
-mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/qq
-mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/gmail
+had_errors=false
+
+if ! mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/qq; then
+	had_errors=true
+fi
+if ! mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/gmail; then
+	had_errors=true
+fi
 echo "Sync all emails..."
-mbsync -a
+if ! mbsync -a; then
+	had_errors=true
+fi
 {{- if not (stat (joinPath .chezmoi.homeDir ".cache" "mu")) }}
 echo "Init mu..."
-mu init --ignored-address=/.*no.*reply.*/ --maildir={{ joinPath .chezmoi.homeDir .path.data.mail }} --my-address={{ .email }}
+if ! mu init --ignored-address=/.*no.*reply.*/ --maildir={{ joinPath .chezmoi.homeDir .path.data.mail }} --my-address={{ .email }}; then
+	had_errors=true
+fi
 {{- end }}
 echo "Call mu index..."
-mu index
+if ! mu index; then
+	had_errors=true
+fi
+
+if [ "$had_errors" = true ]; then
+	exit 1
+fi
 
 {{ end -}}

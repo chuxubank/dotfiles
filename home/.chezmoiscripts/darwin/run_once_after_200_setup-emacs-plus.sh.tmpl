@@ -1,5 +1,6 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
+set -e
 
 if brew list --cask emacs-plus-app &>/dev/null; then
     brew reinstall --cask emacs-plus-app

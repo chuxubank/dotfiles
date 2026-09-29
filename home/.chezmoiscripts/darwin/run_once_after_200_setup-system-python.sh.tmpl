@@ -1,5 +1,6 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
+set -e
 
 /Applications/Xcode.app/Contents/Developer/usr/bin/python3 -m pip install --upgrade pip
 

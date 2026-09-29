@@ -39,10 +39,18 @@ _desired='{{ template "package/lines" (dict "ctx" . "path" (list "termux" "repo"
 {{ template "package/lines" (dict "ctx" . "path" (list "termux" "pkg")) }}'
 _all='{{ template "package/lines-all" (dict "ctx" . "path" (list "termux" "repo")) }}
 {{ template "package/lines-all" (dict "ctx" . "path" (list "termux" "pkg")) }}'
-pkg install -y \
+if ! pkg install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "termux" "repo")) }}
-pkg install -y \
+then
+	echo "Could not install termux repositories" >&2
+	had_errors=true
+fi
+if ! pkg install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "termux" "pkg")) }}
+then
+	echo "Could not install termux packages" >&2
+	had_errors=true
+fi
 termux_remove() {
 	dpkg-query -W "$1" >/dev/null 2>&1 || return 0
 	pkg uninstall -y "$1"
@@ -50,17 +58,39 @@ termux_remove() {
 sync_open_packages "$STATE_DIR/packages.termux" "termux package" termux_remove
 
 {{ else if eq .chezmoi.os "darwin" -}}
-brew bundle --quiet --force-cleanup --no-upgrade --file=- <<EOF
+if ! command -v brew >/dev/null 2>&1; then
+	for brew_path in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+		if [ -x "$brew_path" ]; then
+			eval "$("$brew_path" shellenv)"
+			break
+		fi
+	done
+fi
+if ! command -v brew >/dev/null 2>&1; then
+	echo "Homebrew is required for package installation" >&2
+	had_errors=true
+elif ! brew bundle --quiet --force-cleanup --no-upgrade --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
+then
+	echo "Could not install Homebrew packages" >&2
+	had_errors=true
+fi
 
 {{ else if eq .chezmoi.os "linux" }}
 {{ if lookPath "apt-get" }}
 _desired='{{ template "package/lines" (dict "ctx" . "path" (list "apt" "pkg")) }}'
 _all='{{ template "package/lines-all" (dict "ctx" . "path" (list "apt" "pkg")) }}'
-sudo apt-get update -y
-sudo apt-get install -y \
+if ! sudo apt-get update -y; then
+	echo "Could not update apt package metadata" >&2
+	had_errors=true
+fi
+if ! sudo apt-get install -y \
     {{ template "package/args" (dict "ctx" . "path" (list "apt" "pkg")) }}
+then
+	echo "Could not install apt packages" >&2
+	had_errors=true
+fi
 apt_remove() {
 	dpkg-query -W "$1" >/dev/null 2>&1 || return 0
 	sudo apt-get remove -y "$1"
@@ -72,9 +102,13 @@ _desired='{{ template "package/lines" (dict "ctx" . "path" (list "pacman" "core"
 {{ template "package/lines" (dict "ctx" . "path" (list "pacman" "extra")) }}'
 _all='{{ template "package/lines-all" (dict "ctx" . "path" (list "pacman" "core")) }}
 {{ template "package/lines-all" (dict "ctx" . "path" (list "pacman" "extra")) }}'
-sudo pacman -Sy --needed --noconfirm \
+if ! sudo pacman -Sy --needed --noconfirm \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "core")) }} \
     {{ template "package/args" (dict "ctx" . "path" (list "pacman" "extra")) }}
+then
+	echo "Could not install pacman packages" >&2
+	had_errors=true
+fi
 pacman_remove() {
 	pacman -Q "$1" >/dev/null 2>&1 || return 0
 	sudo pacman -Rns --noconfirm "$1"

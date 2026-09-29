@@ -1,0 +1,13 @@
+{{ if not (eq .host_env "ci") -}}
+#!/bin/zsh
+
+echo "󰯁 Setup Nutstore directory"
+
+nutstore_dir="$HOME/{{ .path.data.nutstore }}"
+if [[ -d $nutstore_dir ]]; then
+    echo "✅ Nutstore dir exists."
+elif ! mkdir -p "$nutstore_dir"; then
+    print -u2 -- "Could not create Nutstore directory: $nutstore_dir"
+    exit 1
+fi
+{{ end -}}

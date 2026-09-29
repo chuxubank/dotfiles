@@ -4,12 +4,28 @@ set -o pipefail
 
 echo "󰯁 Setup sdkman"
 
+if [[ -e $HOME/.zshenv ]] && ! source "$HOME/.zshenv"; then
+  print -u2 -- "Could not source $HOME/.zshenv"
+  exit 1
+fi
+export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/{{ .path.tool.sdkman }}}"
+
+case "$SDKMAN_DIR" in
+    "$HOME"|/|""|.|..|*/../*|*/..|~*|[^/]*)
+        print -u2 -- "Refusing to remove unsafe SDKMAN_DIR: ${SDKMAN_DIR:-<empty>}"
+        exit 1
+        ;;
+esac
+
 {{ includeTemplate "script/reconcile" }}
 
 SDKMAN_INIT="$SDKMAN_DIR/bin/sdkman-init.sh"
 
 if [ ! -s "$SDKMAN_INIT" ]; then
-    rm -rf "$SDKMAN_DIR"
+    if ! rm -rf -- "$SDKMAN_DIR"; then
+        print -u2 -- "Could not remove incomplete sdkman directory: $SDKMAN_DIR"
+        exit 1
+    fi
     if ! curl -fsSL "https://get.sdkman.io?rcupdate=false" | bash; then
         print -u2 -- "Could not install sdkman"
         exit 1
@@ -20,7 +36,10 @@ if [[ ! -s $SDKMAN_INIT ]]; then
     print -u2 -- "sdkman init script is missing after installation"
     exit 1
 fi
-source "$SDKMAN_INIT"
+if ! source "$SDKMAN_INIT"; then
+  print -u2 -- "Could not source sdkman init script"
+  exit 1
+fi
 
 {{- $items := includeTemplate "package/items" (dict "ctx" . "path" (list "sdkman")) | fromJson }}
 declared_sdk=(
@@ -82,7 +101,9 @@ if $cleanup_enabled; then
   done
 fi
 
-sdk flush
+if ! sdk flush; then
+  had_errors=true
+fi
 
 if $had_errors; then
   exit 1

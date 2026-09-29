@@ -157,7 +157,9 @@ if $inventory_ready; then
 fi
 
 {{- if lookPath "openspec" }}
-openspec completion install
+if ! openspec completion install; then
+    had_errors=true
+fi
 {{- end }}
 
 if $had_errors; then

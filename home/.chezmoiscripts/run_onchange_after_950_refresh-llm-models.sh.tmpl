@@ -3,6 +3,7 @@ set -eu
 
 echo "{{ template "week" . }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
+had_errors=false
 
 fetch_model_response() {
   output_file=$1
@@ -45,15 +46,21 @@ refresh_models() {
   case "$auth_mode" in
     none) ;;
     bearer|query:*)
-      token=$({{ joinPath .chezmoi.homeDir "bin" "pass-field" | quote }} "$pass_path" "$pass_field")
+      if ! token=$({{ joinPath .chezmoi.homeDir "bin" "pass-field" | quote }} "$pass_path" "$pass_field"); then
+        return 1
+      fi
       ;;
     *) return 2 ;;
   esac
 
   cache_dir=${cache_file%/*}
   [ "$cache_dir" = "$cache_file" ] && cache_dir=.
-  mkdir -p "$cache_dir"
-  tmp_file=$(mktemp "$cache_dir/.models.XXXXXX")
+  if ! mkdir -p "$cache_dir"; then
+    return 1
+  fi
+  if ! tmp_file=$(mktemp "$cache_dir/.models.XXXXXX"); then
+    return 1
+  fi
   trap 'rm -f "$tmp_file"' 0 HUP INT TERM
 
   if ! fetch_model_response "$tmp_file" "$url" "$auth_mode" "${token-}"; then
@@ -68,7 +75,11 @@ refresh_models() {
     trap - 0 HUP INT TERM
     return 1
   fi
-  mv "$tmp_file" "$cache_file"
+  if ! mv "$tmp_file" "$cache_file"; then
+    rm -f "$tmp_file"
+    trap - 0 HUP INT TERM
+    return 1
+  fi
   trap - 0 HUP INT TERM
 }
 
@@ -83,10 +94,15 @@ if ! refresh_models \
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
   {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}; then
-  printf 'warning: failed to refresh provider=%s cache=%s url=%s\n' \
+  printf 'failed to refresh provider=%s cache=%s url=%s\n' \
     {{ $providerName | quote }} {{ $cacheKey | quote }} {{ $endpoint.url | quote }} >&2
+  had_errors=true
 fi
 {{ end }}
 {{ end }}
 {{ end }}
 {{ end }}
+
+if [ "$had_errors" = true ]; then
+  exit 1
+fi

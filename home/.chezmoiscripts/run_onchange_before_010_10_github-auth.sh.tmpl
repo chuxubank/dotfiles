@@ -1,0 +1,15 @@
+{{ if not (eq .host_env "ci") -}}
+#!/bin/zsh
+
+echo "󰯁 Authenticate GitHub"
+
+if gh auth status >/dev/null 2>&1; then
+    echo "✅ Already logged in to GitHub."
+else
+    echo "⚠️ Not logged in. Logging into GitHub..."
+    if ! gh auth login; then
+        print -u2 -- "Could not log in to GitHub"
+        exit 1
+    fi
+fi
+{{ end -}}

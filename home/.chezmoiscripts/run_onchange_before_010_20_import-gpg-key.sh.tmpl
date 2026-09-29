@@ -1,0 +1,40 @@
+{{ if not (eq .host_env "ci") -}}
+#!/bin/zsh
+
+echo "󰯁 Import GPG key"
+
+if ! secret_keys=$(gpg --list-secret-keys); then
+    print -u2 -- "Could not list GPG secret keys"
+    exit 1
+fi
+
+if grep -q '^sec' <<<"$secret_keys"; then
+    echo "✅ Gpg secret key found."
+else
+    echo "❌ No gpg secret key found."
+    if ! autoload -Uz compinit || ! compinit; then
+        print -u2 -- "Could not initialize GPG key-path completion"
+        exit 1
+    fi
+    while true; do
+        key_file=""
+        echo "🔑 Please enter the path to your GPG private key file: "
+        if ! vared -c -p "> " key_file; then
+            print -u2 -- "Could not read GPG private key path"
+            exit 1
+        fi
+        key_file=${key_file/#\~/$HOME}
+        if [[ -f $key_file ]]; then
+            echo "📥 Importing GPG key from $key_file..."
+            if gpg --import "$key_file"; then
+                echo "✅ Key imported successfully!"
+                break
+            fi
+            print -u2 -- "Could not import GPG key from $key_file"
+            exit 1
+        else
+            echo "⚠️ File not found. Please enter a valid path."
+        fi
+    done
+fi
+{{ end -}}

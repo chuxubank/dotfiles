@@ -1,5 +1,6 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/bin/zsh
+set -e
 echo "Setup firewall:"
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add $(which mosh-server)
