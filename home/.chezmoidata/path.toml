@@ -28,7 +28,6 @@ example = "Developer/Example"
 [path.tool]
 bun = ".bun"
 emacs-site-lisp = ".local/share/emacs/site-lisp"
-isyncrc = ".config/isyncrc"
 plum = ".config/plum"
 raycast = ".config/raycast"
 sdkman = ".sdkman"

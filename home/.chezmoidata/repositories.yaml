@@ -19,7 +19,7 @@ repositories:
   # path.personal
   - path: [personal, pass]
     url: https://github.com/chuxubank/pass
-    refresh_period: 4h
+    refresh_period: 24h
     when: *non_ci
 
   - path: [personal, beancount]
@@ -35,7 +35,7 @@ repositories:
 
   - path: [personal, keyboard]
     url: https://github.com/chuxubank/keyboard-config
-    refresh_period: 4h
+    refresh_period: 24h
     when: *non_ci
 
   - path: [personal, emacs]
@@ -50,12 +50,12 @@ repositories:
 
   - path: [personal, org-roam]
     url: https://github.com/chuxubank/org-roam
-    refresh_period: 4h
+    refresh_period: 24h
     when: *non_ci
 
   - path: [personal, blog]
     url: https://github.com/chuxubank/chuxubank.github.io
-    refresh_period: 4h
+    refresh_period: 24h
     when: *non_ci
 
   - path: [personal, skills]
@@ -67,7 +67,7 @@ repositories:
   - path: [workspace, asahiart]
     dest: Arborist
     url: https://github.com/AsahiArt/Arborist
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   - path: [workspace, asahiart]
@@ -79,25 +79,25 @@ repositories:
   - path: [workspace, asahiart]
     dest: font-subset-gradle-plugin
     url: https://github.com/AsahiArt/font-subset-gradle-plugin
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   - path: [workspace, asahiart]
     dest: org-parser
     url: https://github.com/AsahiArt/org-parser
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   - path: [workspace, asahiart]
     dest: quote0-school-calendar
     url: https://github.com/AsahiArt/quote0-school-calendar
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   - path: [workspace, asahiart]
     dest: tree-sitter-template
     url: https://github.com/AsahiArt/tree-sitter-template
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   # path.workspace.iv
@@ -123,7 +123,7 @@ repositories:
   - path: [workspace, opentactic]
     dest: OpenTactic
     url: https://github.com/OpenTactic/OpenTactic
-    refresh_period: 4h
+    refresh_period: 24h
     when: *personal_only
 
   # path.workspace.xz source trees

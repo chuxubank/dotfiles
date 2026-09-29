@@ -31,6 +31,8 @@ defaults/previous allocation.
 | --- | --- | --- | --- |
 | `Ctrl+Shift+T` | Terminal/mux tab command | Unbound; passed to the pane | **Delete** |
 | `Ctrl+Shift+W` | Terminal/mux close command | Unbound; passed to the pane | **Delete** |
+| `Super+D` | Split the terminal surface | Unbound; kept free for the mux/pane layer | **Delete** |
+| `Super+Shift+D` | Split the terminal surface | Unbound; kept free for the mux/pane layer | **Delete** |
 | `Alt+1…9` | Terminal shortcut, if provided by the platform build | Unbound; Herdr selects workspaces | **Delete** |
 | `Super+Alt+Arrow` | Terminal/mux pane command | Unbound; mux owns pane navigation | **Delete** |
 | `Super+Ctrl+Arrow` | Terminal/mux pane command | Unbound; reserved for pane applications | **Delete** |

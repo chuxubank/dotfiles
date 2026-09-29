@@ -1,6 +1,8 @@
 # Memory & Storage Capacity `when` Conditions Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Status:** Implemented — `b1432e9`, `65155d5`, `1bec40b`, `0480f27`; end-to-end checkpoint `46c1450`.
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Let items (skills, MCP providers) gate on host physical memory (`mem_gb`) and system storage capacity (`disk_gb`) via `when.enabled`/`when.disabled` min/max thresholds.
 
@@ -29,7 +31,7 @@
 - Consumes: nothing.
 - Produces: template `when/range`, input `dict "value" <int> "rule" <map with optional min/max>`, output JSON bool. `value == 0` -> `true` (lenient). Missing bound = unbounded on that side.
 
-- [ ] **Step 1: Write the helper template**
+- [x] **Step 1: Write the helper template**
 
 Create `home/.chezmoitemplates/when/range`:
 
@@ -58,7 +60,7 @@ Create `home/.chezmoitemplates/when/range`:
 {{- toJson $result -}}
 ```
 
-- [ ] **Step 2: Verify pass/fail cases**
+- [x] **Step 2: Verify pass/fail cases**
 
 Run:
 ```bash
@@ -75,7 +77,7 @@ done
 ```
 Expected (one per line): `true`, `false`, `false`, `true`, `false`, `true`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -94,7 +96,7 @@ git commit -m "feat(when): add numeric range matcher for capacity conditions"
 - Consumes: `when/range` (Task 1), existing `when/match`.
 - Produces: `when/check` unchanged signature; when a rule (under `enabled`/`disabled` for the given key) is a map containing `min` or `max`, it delegates to `when/range`; otherwise `when/match`.
 
-- [ ] **Step 1: Update the enabled branch**
+- [x] **Step 1: Update the enabled branch**
 
 In `home/.chezmoitemplates/when/check`, replace the enabled-map block:
 
@@ -118,7 +120,7 @@ with:
     {{- end -}}
 ```
 
-- [ ] **Step 2: Update the disabled branch**
+- [x] **Step 2: Update the disabled branch**
 
 Replace the disabled-map block:
 
@@ -142,7 +144,7 @@ with:
     {{- end -}}
 ```
 
-- [ ] **Step 3: Verify numeric routing + no regression on existing rules**
+- [x] **Step 3: Verify numeric routing + no regression on existing rules**
 
 Run:
 ```bash
@@ -160,7 +162,7 @@ chezmoi execute-template '{{ includeTemplate "when/check" (dict "item" (dict "wh
 ```
 Expected (one per line): `true`, `false`, `true`, `true`, `true`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -179,7 +181,7 @@ git commit -m "feat(when): route min/max rules to numeric range matcher"
 - Consumes: `when/check` (Task 2). Reads `.mem_gb` / `.disk_gb` from root context (provided by Task 4).
 - Produces: `when/context` now ANDs in `mem_gb` and `disk_gb` checks.
 
-- [ ] **Step 1: Add the two checks**
+- [x] **Step 1: Add the two checks**
 
 In `home/.chezmoitemplates/when/context`, after the `$rolesOk` line and before the final `toJson`, add:
 
@@ -200,7 +202,7 @@ to:
 {{- toJson (and $hostEnvOk $deviceTypeOk $osOk $rolesOk $memOk $diskOk) -}}
 ```
 
-- [ ] **Step 2: Verify context gating**
+- [x] **Step 2: Verify context gating**
 
 Run:
 ```bash
@@ -216,7 +218,7 @@ chezmoi execute-template '{{ includeTemplate "when/context" (dict "item" (dict "
 ```
 Expected (one per line): `true`, `false`, `true`, `true`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -235,7 +237,7 @@ git commit -m "feat(when): gate items on mem_gb and disk_gb"
 - Consumes: nothing.
 - Produces: `[data].mem_gb` and `[data].disk_gb` as integers, readable as `.mem_gb` / `.disk_gb` in all templates.
 
-- [ ] **Step 1: Compute the values**
+- [x] **Step 1: Compute the values**
 
 In `home/.chezmoi.toml.tmpl`, after the `{{- $os := .chezmoi.os -}}` line (currently line 23), add:
 
@@ -252,7 +254,7 @@ In `home/.chezmoi.toml.tmpl`, after the `{{- $os := .chezmoi.os -}}` line (curre
 {{- end -}}
 ```
 
-- [ ] **Step 2: Emit the data fields**
+- [x] **Step 2: Emit the data fields**
 
 In the `[data]` block, after the `isDarkMode` line, add:
 
@@ -261,7 +263,7 @@ In the `[data]` block, after the `isDarkMode` line, add:
     disk_gb = {{ $diskGb }}
 ```
 
-- [ ] **Step 3: Verify config renders with correct values**
+- [x] **Step 3: Verify config renders with correct values**
 
 Run:
 ```bash
@@ -277,7 +279,7 @@ chezmoi execute-template '{{ atoi (output "sh" "-c" "df -k / 2>/dev/null | awk (
 ```
 Expected: `24` for memory.
 
-- [ ] **Step 4: Regenerate config and confirm live data**
+- [x] **Step 4: Regenerate config and confirm live data**
 
 Run:
 ```bash
@@ -287,7 +289,7 @@ chezmoi data --format=json | grep -E '"mem_gb"|"disk_gb"'
 ```
 Expected: `"mem_gb": 24` and `"disk_gb": 926`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -306,7 +308,7 @@ git commit -m "feat(chezmoi): detect mem_gb and disk_gb capacity data"
 - Consumes: all prior tasks.
 - Produces: confidence that skill/MCP resolution is unaffected and capacity gating works live.
 
-- [ ] **Step 1: Confirm existing skill resolution unchanged**
+- [x] **Step 1: Confirm existing skill resolution unchanged**
 
 Run:
 ```bash
@@ -315,7 +317,7 @@ chezmoi cat home/.chezmoiscripts/run_onchange_after_200_setup-skills.sh.tmpl 2>&
 ```
 Expected: renders without template errors; agent lists resolve as before.
 
-- [ ] **Step 2: Live capacity-gated resolution smoke test**
+- [x] **Step 2: Live capacity-gated resolution smoke test**
 
 Run (uses live `.mem_gb`):
 ```bash
@@ -325,7 +327,7 @@ chezmoi execute-template '{{ includeTemplate "when/context" (merge (dict "item" 
 ```
 Expected: `true` then `false` (this host has 24 GB).
 
-- [ ] **Step 3: Dry-run apply to confirm no unintended changes**
+- [x] **Step 3: Dry-run apply to confirm no unintended changes**
 
 Run:
 ```bash
@@ -334,7 +336,7 @@ chezmoi apply --dry-run --verbose 2>&1 | head -40
 ```
 Expected: no template errors; only the config-data change (if any) shows, no unrelated churn.
 
-- [ ] **Step 4: Commit (if any docs/notes updated)**
+- [x] **Step 4: Commit (if any docs/notes updated)**
 
 ```bash
 cd ~/.local/share/chezmoi

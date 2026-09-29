@@ -1,5 +1,0 @@
-{{- if eq .chezmoi.os "darwin" -}}
-{{ includeTemplate "service/register-darwin" . }}
-{{- else if eq .chezmoi.os "linux" -}}
-{{ includeTemplate "service/register-linux" . }}
-{{- end -}}

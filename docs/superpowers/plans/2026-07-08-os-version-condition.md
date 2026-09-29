@@ -1,6 +1,8 @@
 # OS Version Range `when` Condition Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Status:** Implemented — `8fc4eab`, `3005329`, `eada6d0`, `7d700ce`; end-to-end checkpoint `d698701`.
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Let the `os` `when` condition gate on an OS version semver constraint via a map form `os: {type: <name>, version: <constraint>}`, keeping scalar/list forms unchanged.
 
@@ -29,7 +31,7 @@
 - Consumes: nothing.
 - Produces: template `when/semver`, input `dict "value" <string> "rule" <constraint string>`, output JSON bool. `value == ""` -> `true`; else `semverCompare rule value`.
 
-- [ ] **Step 1: Write the helper template**
+- [x] **Step 1: Write the helper template**
 
 Create `home/.chezmoitemplates/when/semver`:
 
@@ -47,7 +49,7 @@ Create `home/.chezmoitemplates/when/semver`:
 {{- toJson $result -}}
 ```
 
-- [ ] **Step 2: Verify cases**
+- [x] **Step 2: Verify cases**
 
 Run:
 ```bash
@@ -63,7 +65,7 @@ done
 ```
 Expected (one per line): `true`, `false`, `true`, `false`, `true`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -82,7 +84,7 @@ git commit -m "feat(when): add semver matcher for os version conditions"
 - Consumes: `when/semver` (Task 1), existing `when/match`.
 - Produces: `when/check` gains optional `os_version` input. For key `os` with a map rule, evaluates `type` (via `when/match` against `.value`) AND `version` (via `when/semver` against `os_version`). Scalar/list `os` rules and all other keys unchanged.
 
-- [ ] **Step 1: Read the current enabled/disabled map blocks**
+- [x] **Step 1: Read the current enabled/disabled map blocks**
 
 Run:
 ```bash
@@ -91,7 +93,7 @@ cat home/.chezmoitemplates/when/check
 ```
 Note the current structure: after Task 2 of the capacity plan, the enabled and disabled branches each route map-with-min/max to `when/range`, else `when/match`.
 
-- [ ] **Step 2: Add os-map handling to the enabled branch**
+- [x] **Step 2: Add os-map handling to the enabled branch**
 
 In `home/.chezmoitemplates/when/check`, the enabled map branch currently reads:
 
@@ -128,7 +130,7 @@ Replace it with (adds an `os`-map case before the min/max case):
 
 Note: `.os_version` here refers to the `when/check` input dict; it is supplied by `when/context` in Task 3. `default ""` keeps it safe when absent.
 
-- [ ] **Step 3: Add os-map handling to the disabled branch**
+- [x] **Step 3: Add os-map handling to the disabled branch**
 
 The disabled map branch currently reads:
 
@@ -165,7 +167,7 @@ Replace it with (adds `os`-map case; disabled means "blocked when it matches", s
     {{- end -}}
 ```
 
-- [ ] **Step 4: Verify os routing + no regression**
+- [x] **Step 4: Verify os routing + no regression**
 
 Run:
 ```bash
@@ -189,7 +191,7 @@ chezmoi execute-template '{{ includeTemplate "when/check" (dict "item" (dict "wh
 ```
 Expected (one per line): `true`, `true`, `true`, `false`, `true`, `false`, `true`, `false`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -208,7 +210,7 @@ git commit -m "feat(when): support os map form with version constraint"
 - Consumes: `when/check` (Task 2). Reads `.os_version` from root context (Task 4).
 - Produces: the existing `os` check now also passes `os_version`.
 
-- [ ] **Step 1: Update the os check line**
+- [x] **Step 1: Update the os check line**
 
 In `home/.chezmoitemplates/when/context`, the current line:
 
@@ -222,7 +224,7 @@ Replace with:
 {{- $osOk := includeTemplate "when/check" (dict "item" .item "key" "os" "value" .chezmoi.os "os_version" (dig "os_version" "" .)) | fromJson -}}
 ```
 
-- [ ] **Step 2: Verify context gating**
+- [x] **Step 2: Verify context gating**
 
 Run:
 ```bash
@@ -238,7 +240,7 @@ chezmoi execute-template '{{ includeTemplate "when/context" (dict "item" (dict "
 ```
 Expected (one per line): `true`, `false`, `true`, `true`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -257,7 +259,7 @@ git commit -m "feat(when): feed os_version into os condition check"
 - Consumes: nothing.
 - Produces: `[data].os_version` (string), readable as `.os_version`.
 
-- [ ] **Step 1: Compute the value**
+- [x] **Step 1: Compute the value**
 
 In `home/.chezmoi.toml.tmpl`, after the `$diskGb` detection block added by the capacity plan (right before `{{- if $interactive }}`), add:
 
@@ -274,7 +276,7 @@ In `home/.chezmoi.toml.tmpl`, after the `$diskGb` detection block added by the c
 {{- end -}}
 ```
 
-- [ ] **Step 2: Emit the data field**
+- [x] **Step 2: Emit the data field**
 
 In the `[data]` block, after the `disk_gb` line, add:
 
@@ -282,7 +284,7 @@ In the `[data]` block, after the `disk_gb` line, add:
     os_version = {{ $osVersion | quote }}
 ```
 
-- [ ] **Step 3: Verify detection fragment**
+- [x] **Step 3: Verify detection fragment**
 
 Run:
 ```bash
@@ -291,7 +293,7 @@ chezmoi execute-template '{{ output "sh" "-c" "sw_vers -productVersion 2>/dev/nu
 ```
 Expected: `26.5.2` (darwin host).
 
-- [ ] **Step 4: Regenerate config and confirm live data**
+- [x] **Step 4: Regenerate config and confirm live data**
 
 Run:
 ```bash
@@ -301,7 +303,7 @@ chezmoi data --format=json | grep '"os_version"'
 ```
 Expected: `"os_version": "26.5.2"`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd ~/.local/share/chezmoi
@@ -319,7 +321,7 @@ git commit -m "feat(chezmoi): detect os_version data"
 **Interfaces:**
 - Consumes: all prior tasks.
 
-- [ ] **Step 1: Live os-version gated resolution**
+- [x] **Step 1: Live os-version gated resolution**
 
 Run (uses live `.os_version`):
 ```bash
@@ -329,7 +331,7 @@ chezmoi execute-template '{{ includeTemplate "when/context" (merge (dict "item" 
 ```
 Expected: `true` then `false` (host is darwin 26.5.2).
 
-- [ ] **Step 2: Existing skills script renders**
+- [x] **Step 2: Existing skills script renders**
 
 Run:
 ```bash
@@ -339,7 +341,7 @@ echo "exit: $?"
 ```
 Expected: renders without template errors, exit 0.
 
-- [ ] **Step 3: Dry-run apply clean**
+- [x] **Step 3: Dry-run apply clean**
 
 Run:
 ```bash
@@ -348,7 +350,7 @@ chezmoi apply --dry-run 2>&1 | head -30; echo "exit: $?"
 ```
 Expected: no template errors, exit 0.
 
-- [ ] **Step 4: Commit verification checkpoint**
+- [x] **Step 4: Commit verification checkpoint**
 
 ```bash
 cd ~/.local/share/chezmoi

@@ -10,6 +10,7 @@
 [{{ joinPath $ext $plugin.file | quote }}]
     type = "file"
     url = {{ $url | quote }}
+    refreshPeriod = "168h"
 {{-   end }}
 {{- end }}
 {{- end -}}
