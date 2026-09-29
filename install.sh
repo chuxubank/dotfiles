@@ -4,6 +4,20 @@
 # -u: exit on unset variables
 set -eu
 
+script_path=$0
+case $script_path in
+*/*) ;;
+*) script_path=$(command -v "$script_path" 2>/dev/null || printf '%s/%s\n' "$PWD" "$script_path") ;;
+esac
+while [ -L "$script_path" ]; do
+	link=$(readlink "$script_path")
+	case $link in
+	/*) script_path=$link ;;
+	*) script_path=$(dirname "$script_path")/$link ;;
+	esac
+done
+script_dir=$(cd -P -- "$(dirname -- "$script_path")" && pwd -P)
+
 usage() {
 	cat <<'EOF'
 usage: install.sh [--install-only] [--init] [--apply]
@@ -60,8 +74,6 @@ if ! chezmoi="$(command -v chezmoi)"; then
 	sh -c "${chezmoi_install_script}" -- -b "${bin_dir}"
 	unset chezmoi_install_script bin_dir
 fi
-
-script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
 
 if [ "$do_init" -eq 0 ] && [ "$do_apply" -eq 0 ]; then
 	exit 0

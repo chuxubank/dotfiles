@@ -3,6 +3,11 @@ set -eu
 
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 CHEZMOI_SOURCE=${CHEZMOI_SOURCE:-$ROOT}
+if ! SOURCE=$(CDPATH='' cd -- "$CHEZMOI_SOURCE" && pwd -P); then
+	echo "verify: CHEZMOI_SOURCE is not a readable directory: $CHEZMOI_SOURCE" >&2
+	exit 1
+fi
+CHEZMOI_SOURCE=$SOURCE
 failed=0
 
 tmpdir=$(mktemp -d)
@@ -24,9 +29,9 @@ cm() {
 	chezmoi --persistent-state "$state" --cache "$cache" "$@"
 }
 
-cd "$ROOT"
+cd "$SOURCE"
 
-for required in chezmoi shellcheck ruff; do
+for required in bash chezmoi python3 shellcheck ruff zsh; do
 	if ! command -v "$required" >/dev/null 2>&1; then
 		echo "verify: $required is not on PATH" >&2
 		exit 1
@@ -69,39 +74,39 @@ run_template verify/contracts
 run_template verify/model
 
 if ! check_schema --builtin-schema vendor.github-workflows \
-	"$ROOT/.github/workflows/ci.yaml"; then
+	"$SOURCE/.github/workflows/ci.yaml"; then
 	failed=1
 fi
-if ! check_schema --check-metaschema "$ROOT/schemas/integrations.schema.json"; then
+if ! check_schema --check-metaschema "$SOURCE/schemas/integrations.schema.json"; then
 	failed=1
 fi
-if ! check_schema --schemafile "$ROOT/schemas/integrations.schema.json" \
-	--regex-variant python "$ROOT/home/.chezmoidata/integrations.yaml"; then
+if ! check_schema --schemafile "$SOURCE/schemas/integrations.schema.json" \
+	--regex-variant python "$SOURCE/home/.chezmoidata/integrations.yaml"; then
 	failed=1
 fi
-if ! check_schema --check-metaschema "$ROOT/schemas/plugin-managers.schema.json"; then
+if ! check_schema --check-metaschema "$SOURCE/schemas/plugin-managers.schema.json"; then
 	failed=1
 fi
-if ! check_schema --schemafile "$ROOT/schemas/plugin-managers.schema.json" \
-	"$ROOT/home/.chezmoidata/plugin-managers.yaml"; then
-	failed=1
-fi
-if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$ROOT/scripts/check-integration-semantics.py" "$ROOT"; then
+if ! check_schema --schemafile "$SOURCE/schemas/plugin-managers.schema.json" \
+	"$SOURCE/home/.chezmoidata/plugin-managers.yaml"; then
 	failed=1
 fi
 if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$ROOT/scripts/check-plugin-manager-semantics.py" "$ROOT"; then
+	python3 "$SOURCE/scripts/check-integration-semantics.py" "$SOURCE"; then
 	failed=1
 fi
-if ! python3 "$ROOT/scripts/test-integration-engine.py" "$ROOT"; then
+if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
+	python3 "$SOURCE/scripts/check-plugin-manager-semantics.py" "$SOURCE"; then
 	failed=1
 fi
-if ! python3 "$ROOT/scripts/test-plugin-engine.py" "$ROOT"; then
+if ! python3 "$SOURCE/scripts/test-integration-engine.py" "$SOURCE"; then
+	failed=1
+fi
+if ! python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"; then
 	failed=1
 fi
 
-if ! python3 - "$ROOT" <<'PY'; then
+if ! python3 - "$SOURCE" <<'PY'; then
 import re
 import sys
 from pathlib import Path
@@ -179,11 +184,11 @@ check_shell() {
 	src=$2
 	file=$3
 	if [ "$interp" = sh ]; then
-		sh -n "$file" || {
-			echo "verify: sh -n failed: $src" >&2
+		bash -n "$file" || {
+			echo "verify: bash -n failed: $src" >&2
 			mark_syntax_failed
 		}
-	elif command -v "$interp" >/dev/null 2>&1; then
+	else
 		"$interp" -n "$file" || {
 			echo "verify: $interp -n failed: $src" >&2
 			mark_syntax_failed
@@ -203,19 +208,67 @@ check_shell() {
 check_python() {
 	src=$1
 	file=$2
-	if command -v python3 >/dev/null 2>&1; then
-		if ! python3 -W error::SyntaxWarning -W error::DeprecationWarning -c \
-			'import sys; compile(open(sys.argv[1], "rb").read(), sys.argv[2], "exec")' \
-			"$file" "$src"; then
-			echo "verify: python3 compile failed: $src" >&2
-			mark_syntax_failed
-		fi
+	if ! python3 -W error::SyntaxWarning -W error::DeprecationWarning -m py_compile \
+		"$file"; then
+		echo "verify: python3 py_compile failed: $src" >&2
+		mark_syntax_failed
 	fi
 	if ! ruff check --quiet --select E9,F63,F7,F82 \
 		--stdin-filename "${src%.tmpl}" - <"$file"; then
 		echo "verify: ruff failed: $src" >&2
 		mark_syntax_failed
 	fi
+}
+
+check_python_heredocs() {
+	src=$1
+	file=$2
+	if ! blocks=$(python3 - "$file" "$tmpdir" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+source = Path(sys.argv[1])
+outdir = Path(sys.argv[2])
+heredoc = re.compile(
+    r"(?<![\w.-])python3?(?![\w.-])[^\n<]*<<-?[ \t]*"
+    r"(?:'([^']+)'|\"([^\"]+)\"|\\([^ \t\r\n]+))"
+)
+lines = source.read_text(encoding="utf-8").splitlines(keepends=True)
+block = 0
+for line_number, line in enumerate(lines):
+    if line.lstrip().startswith("#"):
+        continue
+    match = heredoc.search(line)
+    if not match:
+        continue
+    delimiter = next(value for value in match.groups() if value is not None)
+    strip_tabs = "<<-" in line[match.start() : match.end()]
+    body = []
+    for body_line in lines[line_number + 1 :]:
+        candidate = body_line.rstrip("\r\n")
+        if (candidate.lstrip("\t") if strip_tabs else candidate) == delimiter:
+            break
+        body.append(body_line)
+    else:
+        raise SystemExit(
+            f"verify: unclosed quoted Python heredoc in {source}:{line_number + 1}"
+        )
+    block += 1
+    path = outdir / f"python-heredoc-{block}.py"
+    path.write_text("".join(body), encoding="utf-8")
+    print(path)
+PY
+	); then
+		echo "verify: Python heredoc extraction failed: $src" >&2
+		mark_syntax_failed
+		return
+	fi
+	block=0
+	for heredoc in $blocks; do
+		block=$((block + 1))
+		check_python "$src Python heredoc $block" "$heredoc"
+	done
 }
 
 check_by_shebang() {
@@ -225,12 +278,15 @@ check_by_shebang() {
 	case $first in
 	'#!'*zsh*)
 		check_shell zsh "$src" "$file"
+		check_python_heredocs "$src" "$file"
 		;;
 	'#!'*bash*)
 		check_shell bash "$src" "$file"
+		check_python_heredocs "$src" "$file"
 		;;
 	'#!/bin/sh'* | '#!/usr/bin/env sh'*)
 		check_shell sh "$src" "$file"
+		check_python_heredocs "$src" "$file"
 		;;
 	'#!'*python*)
 		check_python "$src" "$file"
@@ -238,26 +294,93 @@ check_by_shebang() {
 	esac
 }
 
-find home/.chezmoiscripts home/bin -type f -name '*.tmpl' 2>/dev/null | sort |
-	while IFS= read -r tmpl; do
-		if ! rendered=$(cm execute-template --source "$CHEZMOI_SOURCE" <"$tmpl"); then
+render_dir="$tmpdir/rendered-templates"
+mkdir -p "$render_dir"
+if ! python3 - "$SOURCE" "$state" "$cache" "$render_dir" <<'PY'; then
+import concurrent.futures
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+source, state, cache, render_dir = map(Path, sys.argv[1:])
+templates = sorted((source / "home").rglob("*.tmpl"))
+
+
+def render(index_and_template):
+    index, template = index_and_template
+    worker = render_dir / str(index)
+    worker.mkdir()
+    worker_state = worker / "chezmoistate.boltdb"
+    if state.exists():
+        shutil.copy2(state, worker_state)
+    result = subprocess.run(
+        [
+            "chezmoi",
+            "--persistent-state",
+            str(worker_state),
+            "--cache",
+            str(worker / "cache"),
+            "execute-template",
+            "--source",
+            str(source),
+        ],
+        input=template.read_bytes(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    (worker / "output").write_bytes(result.stdout)
+    (worker / "stderr").write_bytes(result.stderr)
+    return index, template.relative_to(source).as_posix(), result.returncode
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    results = list(executor.map(render, enumerate(templates)))
+
+with (render_dir / "manifest").open("w", encoding="utf-8") as manifest:
+    for index, template, status in results:
+        print(index, template, status, sep="\t", file=manifest)
+PY
+	echo "verify: could not render executable templates" >&2
+	failed=1
+fi
+
+if [ -f "$render_dir/manifest" ]; then
+while IFS='	' read -r index tmpl status; do
+	case ${tmpl##*/} in
+	executable_* | run_*) is_candidate=1 ;;
+	*)
+		if grep -q '#!' "$tmpl"; then
+			is_candidate=1
+		else
+			is_candidate=0
+		fi
+		;;
+	esac
+	out="$render_dir/$index/output"
+	if [ "$status" -ne 0 ]; then
+		if [ "$is_candidate" -eq 1 ]; then
 			echo "verify: template failed: $tmpl" >&2
+			cat "$render_dir/$index/stderr" >&2
 			mark_syntax_failed
-			continue
 		fi
-		stripped=$(printf '%s' "$rendered" | tr -d '[:space:]')
-		if [ -z "$stripped" ]; then
-			if [ -n "$rendered" ]; then
-				echo "verify: disabled script is not 0 bytes: $tmpl" >&2
-				mark_syntax_failed
-			fi
-			continue
+		continue
+	fi
+	stripped=$(tr -d '[:space:]' <"$out")
+	[ -n "$stripped" ] || continue
+	first=$(sed -n '/[^[:space:]]/{p;q;}' "$out")
+	case $first in
+	'#!'*) ;;
+	*)
+		if [ "$is_candidate" -eq 1 ]; then
+			echo "verify: executable template has no shebang: $tmpl" >&2
+			mark_syntax_failed
 		fi
-		out="$tmpdir/script"
-		printf '%s\n' "$rendered" >"$out"
-		first=$(printf '%s\n' "$rendered" | sed -n '/[^[:space:]]/{p;q;}')
-		check_by_shebang "$tmpl" "$out" "$first"
-	done
+		continue
+		;;
+	esac
+	check_by_shebang "$tmpl" "$out" "$first"
+done <"$render_dir/manifest"
+fi
 
 find . \
 	-name .git -prune -o \
