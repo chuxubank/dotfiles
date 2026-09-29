@@ -20,7 +20,15 @@
   {{- $type := "" -}}
   {{- if hasKey . "type" -}}{{- $type = .type -}}{{- end -}}
   {{- if $file -}}
-    {{- $raw = output "sh" "-c" (printf "test -r '%s' && cat '%s' 2>/dev/null || echo '{}'" $file $file) | trim | fromJson -}}
+    {{- /* Read the absolute path directly. Check a read bit first so missing
+           and permissionless cache files retain the empty-result fallback. */ -}}
+    {{- $fileStat := stat $file -}}
+    {{- if and $fileStat (or
+          (ge (mod (div $fileStat.mode 64) 8) 4)
+          (ge (mod (div $fileStat.mode 8) 8) 4)
+          (ge (mod $fileStat.mode 8) 4)) -}}
+      {{- $raw = include $file | trim | fromJson -}}
+    {{- end -}}
   {{- else -}}
     {{- $fetchURL := printf "%s/api.json" $baseURL -}}
     {{- $raw = includeTemplate "http/get-json" (dict "url" $fetchURL "label" (printf "llm/fetch-data-set:%s" $type) "timeout" 3) | fromJson -}}
@@ -31,40 +39,28 @@
   {{- end -}}
   {{- if eq $type "models-dev" -}}
     {{- /* models.dev response: { provider_id: { id, name, api, models: { model_id: { name, cost, ... } } } } */ -}}
-    {{- if gt (len $targetProvs) 0 -}}
+    {{- $sourceProviders := $raw -}}
+    {{- $firstWins := gt (len $targetProvs) 0 -}}
+    {{- if $firstWins -}}
       {{- /* Preference order: first-listed source keeps the id. */ -}}
+      {{- $sourceProviders = list -}}
       {{- range $pid := $targetProvs -}}
-        {{- if hasKey $raw $pid -}}
-          {{- $p := index $raw $pid -}}
-          {{- if hasKey $p "models" -}}
-            {{- range $mid, $m := $p.models -}}
-              {{- if not (hasKey $models $mid) -}}
-                {{- if and (hasKey $ "map_api") $.map_api -}}
-                  {{- $model := deepCopy $m -}}
-                  {{- $api := includeTemplate "llm/model-api" (dict "type" $type "provider" $p "model" $m) | trim -}}
-                  {{- if $api -}}{{- $_ := set $model "api" $api -}}{{- end -}}
-                  {{- $_ := set $models $mid $model -}}
-                {{- else -}}
-                  {{- $_ := set $models $mid $m -}}
-                {{- end -}}
-              {{- end -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
+        {{- if hasKey $raw $pid -}}{{- $sourceProviders = append $sourceProviders (dict "id" $pid "provider" (index $raw $pid)) -}}{{- end -}}
       {{- end -}}
-    {{- else -}}
-      {{- /* Unfiltered flatten is last-wins, matching the historical union. */ -}}
-      {{- range $pid, $p := $raw -}}
-        {{- if hasKey $p "models" -}}
-          {{- range $mid, $m := $p.models -}}
+    {{- end -}}
+    {{- range $source := $sourceProviders -}}
+      {{- $p := $source -}}
+      {{- if $firstWins -}}{{- $p = $source.provider -}}{{- end -}}
+      {{- if hasKey $p "models" -}}
+        {{- range $mid, $m := $p.models -}}
+          {{- if or (not $firstWins) (not (hasKey $models $mid)) -}}
+            {{- $model := $m -}}
             {{- if and (hasKey $ "map_api") $.map_api -}}
-              {{- $model := deepCopy $m -}}
+              {{- $model = deepCopy $m -}}
               {{- $api := includeTemplate "llm/model-api" (dict "type" $type "provider" $p "model" $m) | trim -}}
               {{- if $api -}}{{- $_ := set $model "api" $api -}}{{- end -}}
-              {{- $_ := set $models $mid $model -}}
-            {{- else -}}
-              {{- $_ := set $models $mid $m -}}
             {{- end -}}
+            {{- $_ := set $models $mid $model -}}
           {{- end -}}
         {{- end -}}
       {{- end -}}

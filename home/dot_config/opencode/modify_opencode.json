@@ -12,38 +12,29 @@
     {{- $_ := set $provDict "options" (dict "baseURL" (printf "%s/v1" $ep.base_url)) -}}
   {{- end }}
 
-  {{- /* Static models → use as-is; models: false → skip; otherwise fetch */ -}}
+  {{- /* Static models → use as-is; models: false → skip; otherwise fetch. */ -}}
   {{- $models := dict -}}
-  {{- $modelMetadata := dict -}}
-  {{- if hasKey $ep "model_metadata" }}
-    {{- $modelMetadata = $ep.model_metadata -}}
-  {{- end }}
-  {{- $modelFilter := dict -}}
-  {{- if hasKey $ep "model_filter" }}
-    {{- $modelFilter = $ep.model_filter -}}
-  {{- end }}
-  {{- if hasKey $ep "models" }}
-    {{- if ne (kindOf $ep.models) "bool" }}
-      {{- range $id, $name := $ep.models }}
-        {{- $model := dict "name" $name -}}
-        {{- if hasKey $modelMetadata $id -}}
-          {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
-        {{- end -}}
-        {{- $model = includeTemplate "model-config/opencode" $model | fromJson -}}
-        {{- $_ := set $models $id $model -}}
-      {{- end }}
-    {{- end }}
-  {{- else }}
-    {{- $fetched := includeTemplate "llm/fetch-models" $ep | fromJson -}}
-    {{- range $id, $name := $fetched }}
-      {{- $model := dict "name" $name -}}
-      {{- if hasKey $modelMetadata $id -}}
-        {{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}
-      {{- end -}}
-      {{- $model = includeTemplate "model-config/opencode" $model | fromJson -}}
-      {{- $_ := set $models $id $model -}}
-    {{- end }}
-  {{- end }}
+  {{- $modelMetadata := default dict (index $ep "model_metadata") -}}
+  {{- $modelFilter := default dict (index $ep "model_filter") -}}
+  {{- $source := dict -}}
+  {{- if hasKey $ep "models" -}}
+    {{- if ne (kindOf $ep.models) "bool" -}}{{- $source = $ep.models -}}{{- end -}}
+  {{- else -}}
+    {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+  {{- end -}}
+  {{- range $id, $name := $source -}}
+    {{- $model := dict "name" $name -}}
+    {{- if hasKey $modelMetadata $id -}}{{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}{{- end -}}
+    {{- /* Inline OpenCode's single-consumer schema allowlist projection. */ -}}
+    {{- $projected := dict -}}
+    {{- range $key := list "id" "name" "family" "release_date" "attachment" "reasoning" "temperature" "tool_call" "interleaved" "cost" "limit" "modalities" "status" "provider" "options" "headers" "variants" -}}
+      {{- if hasKey $model $key -}}{{- $_ := set $projected $key (index $model $key) -}}{{- end -}}
+    {{- end -}}
+    {{- if and (hasKey $model "experimental") (eq (kindOf $model.experimental) "bool") -}}
+      {{- $_ := set $projected "experimental" $model.experimental -}}
+    {{- end -}}
+    {{- $_ := set $models $id $projected -}}
+  {{- end -}}
   {{- if and (gt (len $modelFilter) 0) (gt (len $modelMetadata) 0) -}}
     {{- $filteredMetadata := includeTemplate "llm/filter-models" (dict "models" $modelMetadata "filter" $modelFilter) | fromJson -}}
     {{- range $id, $_ := $models -}}

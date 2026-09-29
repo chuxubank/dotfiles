@@ -72,6 +72,9 @@
 {{- /* Resolve each provider reference */ -}}
 {{- $ctx := . -}}
 {{- $providers := dict -}}
+{{- /* Data sets are shared by several aliases (for example, the models.dev
+       OpenAI-compatible surfaces). Cache the parsed map for this render. */ -}}
+{{- $dataSetMemo := dict -}}
 {{- range $alias, $ref := $refs }}
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
@@ -206,7 +209,14 @@
       {{- if gt (len $dsProviders) 0 -}}
         {{- $_ := set $dsFetchArgs "providers" $dsProviders -}}
       {{- end -}}
-      {{- $metadataModels := includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+      {{- $dataSetKey := $dsFetchArgs | toJson -}}
+      {{- $metadataModels := dict -}}
+      {{- if hasKey $dataSetMemo $dataSetKey -}}
+        {{- $metadataModels = index $dataSetMemo $dataSetKey -}}
+      {{- else -}}
+        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+        {{- $_ := set $dataSetMemo $dataSetKey $metadataModels -}}
+      {{- end -}}
       {{- if and (gt (len $dsProviders) 0) (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $metadataModels) 0) -}}
         {{- /* A provider-scoped catalog is authoritative when this alias has
                no endpoint of its own and did not declare models. */ -}}
@@ -234,6 +244,11 @@
   {{- end -}}
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
+{{- /* pick-model and split-model only test alias membership. includeTemplate
+       cost grows with its argument, and resolved providers carry parsed
+       catalog metadata, so hand them a keys-only set. */ -}}
+{{- $aliasSet := dict -}}
+{{- range $alias, $_ := $providers -}}{{- $_ := set $aliasSet $alias true -}}{{- end -}}
 
 {{- if hasKey $toolCfg "enabled_models" }}
   {{- $enabledModels := list -}}
@@ -262,11 +277,11 @@
     {{- range $candidate := $toolCfg.model -}}
       {{- $models = append $models (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
     {{- end -}}
-    {{- $model = includeTemplate "llm/pick-model" (dict "models" $models "providers" $providers) -}}
+    {{- $model = includeTemplate "llm/pick-model" (dict "models" $models "providers" $aliasSet) -}}
   {{- else -}}
     {{- $model = includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
   {{- end -}}
-  {{- $selection := includeTemplate "llm/split-model" (dict "model" $model "providers" $providers) | fromJson -}}
+  {{- $selection := includeTemplate "llm/split-model" (dict "model" $model "providers" $aliasSet) | fromJson -}}
   {{- $_ := set $result "model" $model -}}
   {{- $_ := set $result "model_provider" $selection.provider -}}
   {{- $_ := set $result "model_id" $selection.model -}}
@@ -279,11 +294,11 @@
     {{- range $candidate := $toolCfg.small_model -}}
       {{- $smallModels = append $smallModels (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
     {{- end -}}
-    {{- $smallModel = includeTemplate "llm/pick-model" (dict "models" $smallModels "providers" $providers) -}}
+    {{- $smallModel = includeTemplate "llm/pick-model" (dict "models" $smallModels "providers" $aliasSet) -}}
   {{- else -}}
     {{- $smallModel = includeTemplate "llm/resolve-model-alias" (dict "model" $smallModel "aliases" $modelAliases) -}}
   {{- end -}}
-  {{- $selection := includeTemplate "llm/split-model" (dict "model" $smallModel "providers" $providers) | fromJson -}}
+  {{- $selection := includeTemplate "llm/split-model" (dict "model" $smallModel "providers" $aliasSet) | fromJson -}}
   {{- $_ := set $result "small_model" $smallModel -}}
   {{- $_ := set $result "small_model_provider" $selection.provider -}}
   {{- $_ := set $result "small_model_id" $selection.model -}}
@@ -300,7 +315,7 @@
       {{- range $candidate := $spec -}}
         {{- $candidates = append $candidates (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $modelAliases)) -}}
       {{- end -}}
-      {{- $picked = includeTemplate "llm/pick-model" (dict "models" $candidates "providers" $providers) -}}
+      {{- $picked = includeTemplate "llm/pick-model" (dict "models" $candidates "providers" $aliasSet) -}}
     {{- else -}}
       {{- $picked = includeTemplate "llm/resolve-model-alias" (dict "model" $picked "aliases" $modelAliases) -}}
     {{- end -}}

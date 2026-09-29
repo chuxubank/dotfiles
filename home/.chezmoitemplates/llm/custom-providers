@@ -74,7 +74,39 @@
       {{- if hasKey $overrides $id -}}
         {{- $model = mergeOverwrite $model (deepCopy (index $overrides $id)) -}}
       {{- end -}}
-      {{- $models = append $models (includeTemplate "model-config/pi" $model | fromJson) -}}
+      {{- /* Inline Pi's single-consumer ProviderModelConfig projection. */ -}}
+      {{- $cost := dict "input" 0.0 "output" 0.0 "cacheRead" 0.0 "cacheWrite" 0.0 -}}
+      {{- if hasKey $model "cost" -}}
+        {{- $c := $model.cost -}}
+        {{- $_ := set $cost "input" (float64 (default 0 (index $c "input"))) -}}
+        {{- $_ := set $cost "output" (float64 (default 0 (index $c "output"))) -}}
+        {{- $_ := set $cost "cacheRead" (float64 (default 0 (index $c "cache_read"))) -}}
+        {{- $_ := set $cost "cacheWrite" (float64 (default 0 (index $c "cache_write"))) -}}
+      {{- end -}}
+      {{- $input := list -}}
+      {{- if hasKey $model "modalities" -}}
+        {{- range $modality := default (list) (index $model.modalities "input") -}}
+          {{- if or (eq $modality "text") (eq $modality "image") -}}{{- $input = append $input $modality -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if not $input -}}{{- $input = list "text" -}}{{- end -}}
+      {{- $contextWindow := 128000 -}}
+      {{- $maxTokens := 8192 -}}
+      {{- if hasKey $model "limit" -}}
+        {{- $limits := $model.limit -}}
+        {{- $contextWindow = int (default $contextWindow (index $limits "context")) -}}
+        {{- $maxTokens = int (default $maxTokens (index $limits "output")) -}}
+      {{- end -}}
+      {{- $models = append $models (dict
+        "id" $model.id
+        "name" (default $model.id (index $model "name"))
+        "api" $model.api
+        "reasoning" (eq true (index $model "reasoning"))
+        "input" $input
+        "cost" $cost
+        "contextWindow" $contextWindow
+        "maxTokens" $maxTokens
+      ) -}}
     {{- end -}}
   {{- end -}}
 
