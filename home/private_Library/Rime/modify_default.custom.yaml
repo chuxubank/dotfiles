@@ -1,0 +1,33 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- $schemaList := list
+	(dict "schema" "rime_ice")
+	(dict "schema" "double_pinyin_flypy")
+-}}
+{{- $bindings := list
+	(dict "when" "composing" "accept" "Control+p" "send" "Up")
+	(dict "when" "composing" "accept" "Control+n" "send" "Down")
+	(dict "when" "composing" "accept" "Control+b" "send" "Left")
+	(dict "when" "composing" "accept" "Control+f" "send" "Right")
+	(dict "when" "composing" "accept" "Control+a" "send" "Home")
+	(dict "when" "composing" "accept" "Control+e" "send" "End")
+	(dict "when" "composing" "accept" "Control+d" "send" "Delete")
+	(dict "when" "composing" "accept" "Control+h" "send" "BackSpace")
+	(dict "when" "composing" "accept" "Control+g" "send" "Escape")
+	(dict "when" "composing" "accept" "Control+bracketleft" "send" "Escape")
+	(dict "when" "composing" "accept" "Control+y" "send" "Page_Up")
+	(dict "when" "composing" "accept" "Alt+v" "send" "Page_Up")
+	(dict "when" "composing" "accept" "Control+v" "send" "Page_Down")
+-}}
+{{- /* Keep Plum's generated __patch block byte-for-byte; chezmoi owns only
+     the main patch so Plum can recognize and update its recipe output. */ -}}
+{{- $parts := splitList "\n__patch:" .chezmoi.stdin -}}
+{{- $config := fromYaml (index $parts 0) -}}
+{{- $managed := $config
+	| setValueAtPath "patch.schema_list" $schemaList
+	| setValueAtPath "patch.key_binder/bindings/+" $bindings
+	| toYaml -}}
+{{- if gt (len $parts) 1 -}}
+  {{- printf "%s\n__patch:%s" $managed (index $parts 1) -}}
+{{- else -}}
+  {{- $managed -}}
+{{- end -}}

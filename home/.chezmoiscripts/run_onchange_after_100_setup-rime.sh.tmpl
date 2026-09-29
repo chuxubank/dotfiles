@@ -24,10 +24,23 @@ fi
 
 echo "󰯁 Update rime with {{ output "git" "-C" $plum_dir "rev-parse" "HEAD" }}"
 export rime_dir=""
+{{- if eq .chezmoi.os "darwin" }}
+# Migrate the marker written by the old schema=flypy recipe. The Rime
+# installer owns this generated __patch block; remove only its obsolete
+# recipe section before letting the installer write the replacement.
+rime_config="$HOME/Library/Rime/default.custom.yaml"
+if [ -f "$rime_config" ] && grep -q '^# Rx: iDvel/rime-ice:others/recipes/config:schema=flypy {$' "$rime_config"; then
+	awk '
+		/^# Rx: iDvel\/rime-ice:others\/recipes\/config:schema=flypy \{$/ { skip=1; next }
+		skip && /^# }$/ { skip=0; next }
+		!skip { print }
+	' "$rime_config" > "$rime_config.new" && mv "$rime_config.new" "$rime_config"
+fi
+{{- end }}
 if ! bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/full; then
 	had_errors=true
 fi
-if ! bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/config:schema=flypy; then
+if ! bash {{ joinPath $plum_dir "rime-install" }} iDvel/rime-ice:others/recipes/config:schema=double_pinyin_flypy; then
 	had_errors=true
 fi
 
