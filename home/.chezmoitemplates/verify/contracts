@@ -195,6 +195,25 @@
   {{- fail "mcp/when: owner on, other agent allowed" -}}
 {{- end -}}
 
+{{- /* mcp/pi: Pi built-in schema, not the adapter's millisecond/disabled keys. */ -}}
+{{- $piMcpCtx := merge (dict) $base (dict
+      "tool" "pi"
+      "host_env" "personal"
+      "mcp" (dict "providers" (list
+        (dict "name" "Local Test" "description" "local" "execution" (dict "type" "stdio" "cmd" "local-test" "timeout" 20 "tool_timeout" 60))
+        (dict "name" "Remote Test" "description" "remote" "when" (dict "disabled" true) "execution" (dict "type" "http" "uri" "https://example.com/mcp" "timeout" 20))
+        (dict "name" "SSE Test" "description" "legacy" "execution" (dict "type" "sse" "uri" "http://localhost:1234/sse" "timeout" 20))))) -}}
+{{- $piMcp := includeTemplate "mcp/pi" $piMcpCtx | fromJson -}}
+{{- $piServers := $piMcp.mcpServers -}}
+{{- $local := index $piServers "local-test" -}}
+{{- $remote := index $piServers "remote-test" -}}
+{{- if or (ne (len $piServers) 2) (ne $local.command "local-test") (ne $local.timeout 60) (not $local.enabled) (hasKey $local "requestTimeoutMs") -}}
+  {{- fail (printf "mcp/pi: invalid stdio config %s" ($piServers | toJson)) -}}
+{{- end -}}
+{{- if or (ne $remote.url "https://example.com/mcp") (ne $remote.timeout 20) $remote.enabled (hasKey $remote "disabled") (hasKey $piServers "sse-test") -}}
+  {{- fail (printf "mcp/pi: invalid HTTP/SSE config %s" ($piServers | toJson)) -}}
+{{- end -}}
+
 {{- /* package/items */ -}}
 {{- $pkgCtx := merge (dict) $base (dict
       "host_env" "personal"

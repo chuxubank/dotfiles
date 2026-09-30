@@ -17,15 +17,6 @@ plugins:
   # an enabled npm source to Bun's trustedDependencies for lifecycle scripts.
   pi:
     providers:
-      - name: pi-mcp-adapter
-        description: >-
-          MCP client for pi, exposed as one proxy tool instead of hundreds of
-          tool definitions. pi ships no built-in MCP, so this is what makes
-          mcp.yaml reachable. Reads <pi agent dir>/mcp.json.
-          Needs the @earendil-works pi (>= 2.11 peers on @earendil-works/pi-ai);
-          it fails to load against the retired @mariozechner build.
-        source: npm:pi-mcp-adapter
-
       - name: pi-cursor-sdk
         description: >-
           Cursor models inside Pi through @cursor/sdk. Local agent loop

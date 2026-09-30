@@ -201,6 +201,8 @@ mcp:
             path: Personal/Tech/Google
             field: goose-map-api-key
     - name: JetBrains MCP
+      # Pi's built-in MCP does not support legacy SSE; mcp/pi skips this entry.
+      # Replace /sse with a verified streamable HTTP endpoint when available.
       description: The server proxies requests from client to JetBrains IDE.
       execution:
         type: sse
