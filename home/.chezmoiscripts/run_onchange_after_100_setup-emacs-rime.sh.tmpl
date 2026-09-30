@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+
+{{- $plum_dir := joinPath .chezmoi.homeDir .path.tool.plum }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- if not (stat $plum_dir) }}
+
+echo "󰯁 Skip Emacs librime: {{ $plum_dir }} is not installed yet"
+{{- else }}
+
+echo "󰯁 Update librime for Emacs usage"
+export rime_dir={{ joinPath .chezmoi.homeDir .path.data.rime | quote }}
+{{ joinPath $plum_dir "rime-install" | quote }} double-pinyin
+{{ joinPath $plum_dir "rime-install" | quote }} emoji:customize:schema=luna_pinyin
+{{ joinPath $plum_dir "rime-install" | quote }} emoji:customize:schema=double_pinyin_flypy
+{{- end }}
+{{- end }}
