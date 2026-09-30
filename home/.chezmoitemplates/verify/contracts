@@ -1,6 +1,37 @@
 {{- /* verify/contracts — Self-contained checks for resolver interfaces.
        fail() aborts chezmoi execute-template on mismatch. */ -}}
 
+{{- /* environment/zsh-static: Windows renders MSYS2 paths, not drive-letter
+       PATH entries; literals and path-list separators keep their meaning. */ -}}
+{{- $winEnv := mergeOverwrite (deepCopy .) (dict
+      "chezmoi" (dict "os" "windows" "homeDir" "C:/Users/test")
+      "environment" (dict "static" (list
+        (dict "tool" "rust" "variables" (dict
+          "CARGO_HOME" (dict "home" (list ".local" "share" "cargo"))
+          "RUSTUP_HOME" (dict "home" (list ".local" "share" "rustup")))
+          "path" (list (dict "home" (list ".local" "share" "cargo" "bin"))))
+        (dict "tool" "misc" "variables" (dict
+          "URL" (dict "literal" "https://example.com/a:b")
+          "PATH_LIST" (dict "pathList" (list
+            (dict "home" (list "one")) (dict "home" (list "two")))
+            "trailingSeparator" true)))))) -}}
+{{- /* Windows CI runs real cygpath; on other hosts test rendering separately. */ -}}
+{{- if eq .chezmoi.os "windows" -}}
+  {{- $winZsh := includeTemplate "environment/zsh-static" $winEnv -}}
+  {{- $cargo := output "cygpath" "-u" "C:/Users/test/.local/share/cargo" | trim -}}
+  {{- $bin := output "cygpath" "-u" "C:/Users/test/.local/share/cargo/bin" | trim -}}
+  {{- $one := output "cygpath" "-u" "C:/Users/test/one" | trim -}}
+  {{- $two := output "cygpath" "-u" "C:/Users/test/two" | trim -}}
+  {{- if or
+        (not (contains (printf "export CARGO_HOME=%s" ($cargo | quote)) $winZsh))
+        (not (contains "export URL=\"https://example.com/a:b\"" $winZsh))
+        (not (contains (printf "export PATH_LIST=%s" ((printf "%s:%s:" $one $two) | quote)) $winZsh))
+        (not (contains ($bin | quote) $winZsh))
+        (contains "C:/Users/test/.local/share/cargo/bin" $winZsh) -}}
+    {{- fail "environment/zsh-static: Windows shell path conversion" -}}
+  {{- end -}}
+{{- end -}}
+
 {{- /* when/range: ints and JSON float64 */ -}}
 {{- if ne (includeTemplate "when/range" (dict "value" 10 "rule" (dict "min" 8)) | fromJson) true -}}
   {{- fail "when/range: 10 >= 8" -}}

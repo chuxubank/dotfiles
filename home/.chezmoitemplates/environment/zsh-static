@@ -18,6 +18,18 @@
       {{- end -}}
       {{- $_ := set $variables $name $tool.tool -}}
       {{- $value := includeTemplate "environment/value" (dict "ctx" $ctx "item" $item) -}}
+      {{- if and (eq $ctx.chezmoi.os "windows") (eq (kindOf $item) "map") (hasKey $item "pathList") -}}
+        {{- $parts := list -}}
+        {{- range $part := $item.pathList -}}
+          {{- $path := includeTemplate "environment/value" (dict "ctx" $ctx "item" $part) -}}
+          {{- $parts = append $parts (output "cygpath" "-u" (replace "\\" "/" $path) | trim) -}}
+        {{- end -}}
+        {{- $separator := dig "separator" ":" $item -}}
+        {{- $value = join $separator $parts -}}
+        {{- if dig "trailingSeparator" false $item -}}{{- $value = printf "%s%s" $value $separator -}}{{- end -}}
+      {{- else if and (eq $ctx.chezmoi.os "windows") (eq (kindOf $item) "map") (not (hasKey $item "literal")) -}}
+        {{- $value = output "cygpath" "-u" (replace "\\" "/" $value) | trim -}}
+      {{- end -}}
       {{- $lines = append $lines (printf "export %s=%s" $name ($value | quote)) -}}
     {{- end -}}
     {{- $lines = append $lines "" -}}
@@ -31,7 +43,11 @@
 typeset -ga dotfiles_static_path
 dotfiles_static_path=(
 {{- range $paths }}
+  {{- if eq $ctx.chezmoi.os "windows" }}
+  {{ output "cygpath" "-u" (replace "\\" "/" .) | trim | quote }}
+  {{- else }}
   {{ . | quote }}
+  {{- end }}
 {{- end }}
 )
 typeset -U path PATH

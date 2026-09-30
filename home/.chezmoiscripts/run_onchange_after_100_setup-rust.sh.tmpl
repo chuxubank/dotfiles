@@ -2,26 +2,9 @@
 
 echo "󰯁 Setup rust"
 
-{{/* Use environment.static for Rust paths. Forward slashes so Windows/MSYS2
-       shells do not treat backslashes as escapes. */ -}}
-{{- $cargoHome := "" -}}
-{{- $rustupHome := "" -}}
-{{- $cargoBin := "" -}}
-{{- range $tool := .environment.static -}}
-{{- if eq $tool.tool "rust" -}}
-{{- $cargoHome = includeTemplate "environment/value" (dict "ctx" $ "item" $tool.variables.CARGO_HOME) -}}
-{{- $rustupHome = includeTemplate "environment/value" (dict "ctx" $ "item" $tool.variables.RUSTUP_HOME) -}}
-{{- range $p := $tool.path -}}
-{{- $cargoBin = includeTemplate "environment/value" (dict "ctx" $ "item" $p) -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-{{- if or (eq $cargoHome "") (eq $rustupHome "") (eq $cargoBin "") -}}
-{{- fail "rust CARGO_HOME, RUSTUP_HOME, or cargo bin path missing from environment.static" -}}
-{{- end -}}
-export CARGO_HOME={{ $cargoHome | replace "\\" "/" | quote }}
-export RUSTUP_HOME={{ $rustupHome | replace "\\" "/" | quote }}
-export PATH={{ $cargoBin | replace "\\" "/" | quote }}:$PATH
+# zsh loads ~/.zshenv, which provides Rust paths from environment.yaml.
+: "${CARGO_HOME:?Rust environment missing from ~/.zshenv}"
+: "${RUSTUP_HOME:?Rust environment missing from ~/.zshenv}"
 
 {{ includeTemplate "script/reconcile" }}
 
