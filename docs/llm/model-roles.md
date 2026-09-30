@@ -1,7 +1,9 @@
 # OMP model roles
 
 `home/.chezmoidata/llm/omp.yaml` is the source of truth; this file is the
-summary. A role is a named model slot OMP resolves at each call site, not a
+summary. The shared primary model is `${gpt_primary}`, declared once in
+`home/.chezmoidata/llm/common.yaml`; references below intentionally keep that
+alias so changing the primary does not require editing this document. A role is a named model slot OMP resolves at each call site, not a
 model name. `home/dot_omp/private_agent/modify_config.yml` renders the data
 file's `default_models` into `modelRoles` in `~/.omp/agent/config.yml`.
 
@@ -17,10 +19,10 @@ deliberately cheaper. Rationale is in
 
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
-| `default` | `openai/gpt-6-sol:high`            | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
+| `default` | `openai/${gpt_primary}:high`        | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
 | `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
 | `smol`    | `openai/gpt-6-luna:medium`         | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
-| `task`    | `openai/gpt-6-sol:medium`          | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
+| `task`    | `openai/${gpt_primary}:medium`      | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
 | `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
 | `tiny`    | `openai/gpt-6-luna:low`            | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
 | `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-high`             | `--plan`, architectural planning              |
@@ -47,7 +49,7 @@ default (Grok, Composer); `:slow` bills the stem.
 `vision` and `commit` carry no assignment.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
-input at each level. Both tiers' `default` advertise it: IV through `gpt-6-sol`,
+input at each level. Both tiers' `default` advertise it: IV through `${gpt_primary}`,
 and personal through `cursor/grok-4.7-high-fast`. Cursor's bundled Grok 4.7
 effort ids are text-only; the Fast lane copies image input from the `grok-4.7`
 card onto those siblings. Neither provider bills per image. `commit` falls
@@ -59,10 +61,9 @@ worth it for a different effort level. On the IV tier that is `tiny` against
 
 ## Why these models
 
-`default` tracks the shared `gpt_primary` pin, `gpt-6-sol` at `:high`. `task`
-uses the same id at `:medium`. GPT-6 ships astra, sol, and luna; Sol is the
-balanced coding model at $2 in and $10 out. The personal fallback stays
-`xai-oauth/grok-4.7:high`. Each subagent starts on a fresh context.
+`default` tracks the shared `gpt_primary` pin at `:high`. `task` uses the
+same id at `:medium`, and Pi's `subagent_model` tracks the same pin. The personal fallback stays `xai-oauth/grok-4.7:high`. Each
+subagent starts on a fresh context.
 
 `plan` runs about once per session and is the one place where the best available
 reasoning outranks price, so it takes `claude-opus-5` at $6/$30 — a rate that

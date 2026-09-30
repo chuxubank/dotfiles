@@ -36,7 +36,7 @@ llm:
         # Same Sol id as default, at medium. The personal fallback stays
         # SuperGrok at :high. Each subagent starts on a fresh context.
         task:
-          - openai/gpt-6-sol:medium
+          - openai/${gpt_primary}:medium
           - xai-oauth/${grok_primary}:high
         # Reviews every primary turn's delta, so it wants a family other than
         # the primary's. IV spends company-funded Sonnet; the personal fallback

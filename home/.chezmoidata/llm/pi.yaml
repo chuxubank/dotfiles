@@ -47,7 +47,7 @@ llm:
         - xai/${grok_primary}:low
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       subagent_model:
-        - openai/gpt-6-sol
+        - openai/${gpt_primary}
         - xai/${grok_primary}
       providers:
         openai:
