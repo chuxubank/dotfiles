@@ -10,6 +10,10 @@
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
 # tool is off. purge: runtime data (login state, history, caches); applied
 # only when policies.purge_disabled_tools is on.
+# plugin_upgrades: weekly commands, executed in order after plugin reconciliation.
+# for_each: enabled_plugins expands {source} from plugin declarations.
+# All enabled tools share one weekly chezmoi success/retry unit; individual
+# command failures are collected rather than stopping later upgrades.
 # A trailing /** wipes directory contents. The directory itself is ignored
 # in the source state so apply does not recreate it (ignore of that exact
 # path would also block .chezmoiremove). Managed files at the dest root
@@ -40,6 +44,10 @@ tools:
 
   claude-code:
     when: *disabled
+    plugin_upgrades:
+      - command: [claude, plugin, marketplace, update]
+      - command: [claude, plugin, update, "{source}"]
+        for_each: enabled_plugins
     remove:
       - ".claude/settings.json"
       - ".claude/statusline.sh"
@@ -52,6 +60,8 @@ tools:
 
   codex:
     when: *non_ci
+    plugin_upgrades:
+      - command: [codex, plugin, marketplace, upgrade]
     remove:
       - ".codex/config.toml"
       - ".codex/model-catalog.json"
@@ -85,6 +95,9 @@ tools:
       - ".config/goose/**"
 
   grok:
+    plugin_upgrades:
+      - command: [grok, plugin, marketplace, update]
+      - command: [grok, plugin, update]
     remove:
       - ".grok/config.toml"
       - ".grok/trusted_folders.toml"
@@ -184,6 +197,12 @@ tools:
 
   omp:
     when: *non_ci
+    plugin_upgrades:
+      - command: [omp, plugin, marketplace, update]
+      # This upgrades marketplace plugins only; npm plugins need --force.
+      - command: [omp, plugin, upgrade]
+      - command: [omp, plugin, install, "{source}", --force]
+        for_each: enabled_plugins
     remove:
       - ".omp/agent/config.yml"
       - ".omp/agent/keybindings.yml"
@@ -234,6 +253,8 @@ tools:
 
   pi:
     when: *non_ci
+    plugin_upgrades:
+      - command: [pi, update, --extensions]
     remove:
       - ".pi/agent/models.json"
       - ".pi/agent/settings.json"

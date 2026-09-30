@@ -67,6 +67,25 @@ for name, manager in managers.items():
         if unknown:
             fail(f"{name}: unknown command placeholders {sorted(unknown)}")
 
+for name, spec in tools.items():
+    steps = spec.get("plugin_upgrades", [])
+    for step in steps:
+        command = step.get("command")
+        if not isinstance(command, list) or not command or not all(
+            isinstance(arg, str) and arg for arg in command
+        ):
+            fail(f"{name}: plugin upgrade command must be a nonempty argument list")
+        binary = managers.get(name, {}).get("binary", "claude" if name == "claude-code" else name)
+        if command[0] != binary:
+            fail(f"{name}: plugin upgrade must invoke its own binary")
+        expansion = step.get("for_each")
+        if expansion not in (None, "enabled_plugins"):
+            fail(f"{name}: unsupported plugin upgrade expansion {expansion!r}")
+        if ("{source}" in command) != (expansion == "enabled_plugins"):
+            fail(f"{name}: {{source}} requires enabled_plugins expansion")
+        if any("{" in arg or "}" in arg for arg in command if arg != "{source}"):
+            fail(f"{name}: unknown plugin upgrade placeholder")
+
 scripts = root / "home/.chezmoiscripts"
 fixed = {
     "run_onchange_before_190_reconcile-plugins.py.tmpl",

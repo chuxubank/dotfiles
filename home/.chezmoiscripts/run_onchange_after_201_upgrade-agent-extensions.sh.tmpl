@@ -1,0 +1,31 @@
+{{- if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
+#!/usr/bin/env zsh
+
+echo "{{ template "week" . }} 󰯁 Upgrade agent extensions"
+
+source "$HOME/.zshenv"
+export BUN_INSTALL="${BUN_INSTALL:-$HOME/{{ .path.tool.bun }}}"
+export PATH="$BUN_INSTALL/bin:$HOME/.local/bin:$PATH"
+
+{{ template "script/upgrade" . }}
+{{- range $tool := keys .tools | sortAlpha }}
+  {{- $spec := index $.tools $tool -}}
+  {{- if and (hasKey $spec "plugin_upgrades") (includeTemplate "tool/enabled" (merge (dict "tool" $tool) $) | fromJson) }}
+if command -v {{ (index (index $spec.plugin_upgrades 0).command 0) | quote }} >/dev/null; then
+    {{- range $step := $spec.plugin_upgrades }}
+      {{- if hasKey $step "for_each" }}
+        {{- if ne $step.for_each "enabled_plugins" -}}{{- fail (printf "unknown plugin upgrade expansion for %s" $tool) -}}{{- end -}}
+        {{- range $plugin := includeTemplate "plugins/resolve" (merge (dict "tool" $tool) $) | fromJson }}
+          {{- if $plugin.enabled }}
+  run_upgrade {{ printf "%s plugin %s" $tool $plugin.source | quote }}{{ range $arg := $step.command }} {{ if eq $arg "{source}" }}{{ $plugin.source | quote }}{{ else }}{{ $arg | quote }}{{ end }}{{ end }}
+          {{- end }}
+        {{- end }}
+      {{- else }}
+  run_upgrade {{ printf "%s plugins" $tool | quote }}{{ range $arg := $step.command }} {{ $arg | quote }}{{ end }}
+      {{- end }}
+    {{- end }}
+fi
+  {{- end }}
+{{- end }}
+finish_upgrades
+{{- end -}}
