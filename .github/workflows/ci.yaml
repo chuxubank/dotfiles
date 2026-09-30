@@ -265,7 +265,7 @@ jobs:
           path: |
             ~/.local/share/cargo
             ~/.local/share/rustup
-          key: ${{ runner.os }}-msys2-rustup-${{ hashFiles('home/.chezmoidata/packages/rust.toml', 'home/.chezmoiscripts/run_onchange_after_100_setup-rust.sh.tmpl', 'home/.chezmoiscripts/run_onchange_before_000_install-packages.sh.tmpl') }}
+          key: ${{ runner.os }}-msys2-rustup-${{ hashFiles('home/.chezmoidata/packages/msys2.toml', 'home/.chezmoidata/packages/rust.toml', 'home/.chezmoiscripts/run_onchange_after_100_setup-rust.sh.tmpl') }}
           restore-keys: |
             ${{ runner.os }}-msys2-rustup-
 

@@ -11,4 +11,5 @@ msys = [
 ]
 ucrt64 = [
   "nodejs",
+  "rustup",
 ]
