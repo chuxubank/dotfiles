@@ -13,7 +13,8 @@ skills:
     - name: hermes-agent
       owner: hermes
     - kimi-code-cli
-    - kiro-cli
+    - name: kiro-cli
+      owner: kiro-cli
     - name: openclaw
       owner: openclaw
     - opencode
