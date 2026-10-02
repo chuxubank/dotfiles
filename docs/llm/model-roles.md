@@ -35,7 +35,7 @@ SKU and is unaffected. See
 | `task`    | `openai/${gpt_primary}:medium`      | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
 | `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
 | `tiny`    | `openai/gpt-6-luna:low`            | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
-| `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-high`             | `--plan`, architectural planning              |
+| `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-1m:high`          | `--plan`, architectural planning              |
 
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
 those three.
@@ -48,14 +48,13 @@ default window is 500k (`cursor/grok-4.7@500k:fast`), which is OMP's
 (ADR 0009). OMP only keeps that window while
 `extendedContext` is on; `modify_config.yml` sets it. Off clamps Cursor to
 the bundled long-context threshold, 256k. Pi cannot set Grok's `reasoning_effort`.
-`claude-opus-5-high` is `cursor/claude-opus-5@1m`. Composer Fast is
+OMP's `claude-opus-5-1m` is `cursor/claude-opus-5@1m`. Composer Fast is
 `cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
 the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
 is `cursor/claude-opus-5-5@1m`. Pi has no `slow` role, so that id is only on
-the picker allow-list. Prices, windows, and picker globs are one catalog,
-`llm.catalogs.cursor` in `home/.chezmoidata/llm/cursor.yaml`. OMP expands
-those stems to SKU siblings, including each stem's `omp_windows` ids.
-Pi projects the same cards onto extension ids. `longContext` becomes
+the picker allow-list. OMP prices Cursor from its own catalog. Pi's
+prices are `llm.catalogs.cursor` in `home/.chezmoidata/llm/cursor.yaml`,
+projected onto extension ids. `longContext` becomes
 `cost.tiers`. The unsuffixed Pi id bills the fast card when that is the SDK
 default (Grok, Composer); `:slow` bills the stem.
 
@@ -65,9 +64,8 @@ default (Grok, Composer); `:slow` bills the stem.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
 input at each level. Both tiers' `default` advertise it: IV through `${gpt_primary}`,
-and personal through `cursor/grok-4.7-500k-fast`. Cursor's bundled Grok 4.7
-effort ids and the `500k-fast` SKU are text-only; the Fast lane copies image
-input from the `grok-4.7` card onto those siblings. Neither provider bills per image. `commit` falls
+and personal through `cursor/grok-4.7-500k-fast`, which OMP's Cursor
+catalog lists with image input. Neither provider bills per image. `commit` falls
 through to the active model, which is what that flow wants.
 
 Setting a role that would resolve to the same model as its fallback is only

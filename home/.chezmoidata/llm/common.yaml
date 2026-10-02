@@ -92,6 +92,19 @@ llm:
     # and cursor/* picker globs drop out for both tools.
     cursor:
       name: Cursor
+      # Picker globs, appended as `<alias>/<glob>` to the enabled_models of
+      # every tool with a cursor alias. Pi warns on gpt-6* until the SDK
+      # lists a gpt-6 id.
+      enabled_models:
+        - gpt-6*
+        - claude-opus-5*
+        - claude-sonnet-5*
+        - claude-fable-5*
+        - composer-2.5*
+        - "*${grok_primary}*"
+        - "*muse-spark-1.3*"
+        - "*gemini-3.8-flash*"
+        - default
       when:
         disabled:
           host_env: ["iv"]

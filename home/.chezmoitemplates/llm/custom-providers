@@ -10,14 +10,12 @@
        models.dev card, then the `catalog` rates (llm.catalogs), then this
        provider's model_overrides. Each later layer wins.
        OMP then runs llm/expand-model-overrides, which copies `cost` onto
-       sibling ids: `cursor-` prefixes, effort suffixes, and Claude
+       sibling ids: `model_override_prefixes`, effort suffixes, and Claude
        `{stem}-thinking-{effort}` compounds.
        A dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
        That fast lane also copies the stem's image input onto those
-       siblings. A catalog stem's `omp_windows` land on
-       `{stem}-{window}-fast` the same way. Missing Fast ids stay
-       unpriced; the stem rate is not copied onto them. With `live_ids`, only
-       ids the provider serves survive, plus the synthesized window ids.
+       siblings. Missing Fast ids stay unpriced; the stem rate is not
+       copied onto them.
        Pi with a catalog skips that expansion. It keeps cost only and
        rewrites each stem onto pi-cursor-sdk ids (`@window`, `:fast`,
        `:slow`). longContext becomes cost.tiers. Names, windows, and
@@ -131,22 +129,7 @@
     {{- else if eq $tool "omp" -}}
       {{- $overrides = includeTemplate "llm/expand-model-overrides" (dict
             "overrides" $stem
-            "prefixes" (default (list) (index $ep "model_override_prefixes"))
-            "contexts" (default dict (index $ep "context_windows"))) | fromJson -}}
-      {{- if hasKey $ep "live_ids" -}}
-        {{- $keep := dict -}}
-        {{- range $id := $ep.live_ids -}}{{- $_ := set $keep $id true -}}{{- end -}}
-        {{- range $stemId, $windows := default dict (index $ep "context_windows") -}}
-          {{- range $window := $windows -}}
-            {{- $_ := set $keep (printf "%s-%s-fast" $stemId $window) true -}}
-          {{- end -}}
-        {{- end -}}
-        {{- $live := dict -}}
-        {{- range $id, $ov := $overrides -}}
-          {{- if hasKey $keep $id -}}{{- $_ := set $live $id $ov -}}{{- end -}}
-        {{- end -}}
-        {{- $overrides = $live -}}
-      {{- end -}}
+            "prefixes" (default (list) (index $ep "model_override_prefixes"))) | fromJson -}}
     {{- else -}}
       {{- $overrides = $explicit -}}
     {{- end -}}

@@ -7,7 +7,7 @@ llm:
       # OMP SKUs. Personal default is `${grok_primary}@256k:fast`: Cursor's
       # run registry rejects the SDK's advertised 500k window (see
       # docs/adr/0009-omp-models-dev-overlays.md). Pi cannot set Grok's
-      # reasoning_effort. `claude-opus-5-high` is `claude-opus-5@1m`; effort
+      # reasoning_effort. OMP's `claude-opus-5-1m` is `claude-opus-5@1m`; effort
       # follows reasoning_effort.
       model:
         - openai/${gpt_primary}
@@ -29,7 +29,7 @@ llm:
         - deepseek-v4.1*
         - glm-5.3*
         - kimi/kimi-k3*
-        # cursor/* globs come from llm.catalogs.cursor.
+        # cursor/* globs come from llm.providers.cursor.
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       session_title_model:
         - iv/deepseek-v4-flash
@@ -54,9 +54,9 @@ llm:
         opencode:
           provider: opencode
           models: false
-        # pi-cursor-sdk owns the catalog and the API key. models: false keeps
-        # that list. llm.catalogs.cursor (shared with OMP) is projected onto
-        # this extension's ids.
+        # pi-cursor-sdk owns the catalog and the API key but prices every
+        # model at $0. models: false keeps its list; llm.catalogs.cursor
+        # supplies the prices.
         cursor:
           provider: cursor
           models: false

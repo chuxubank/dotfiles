@@ -1,16 +1,14 @@
 llm:
-  # Model catalogs shared by every tool whose provider sets `catalog: <name>`.
-  # One entry per models.dev stem holds everything this repo knows about it;
-  # llm/tool-config resolves it and llm/custom-providers projects it per tool.
+  # Price catalogs for providers whose tool ships no pricing. A provider
+  # opts in with `catalog: <name>`; llm/tool-config resolves it.
   catalogs:
+    # Pi only. pi-cursor-sdk discovers Cursor models at $0, so these cards
+    # are projected onto its ids (llm/pi-cursor-costs). OMP's bundled Cursor
+    # catalog already prices every served id, Fast lanes and context SKUs
+    # included, and gets no overlay.
     cursor:
-      # GetUsableModels ships no pricing. Stems copy the first-party
-      # models.dev card from these providers, in preference order.
-      provider: cursor
-      # Live id list, refreshed by the LLM model refresh script. When it is
-      # present, OMP drops expanded overrides for ids Cursor does not serve;
-      # `omp_windows` ids are synthesized by OMP and always kept.
-      ids_cache: cursor-model-ids
+      # Standard rates copy the first-party models.dev card from these
+      # providers, in preference order.
       data_set: models-dev
       data_set_providers:
         - anthropic
@@ -21,34 +19,15 @@ llm:
         - moonshotai
         - zai
         - deepseek
-      # OMP only: GetUsableModels also lists grok ids as `cursor-<id>`.
-      model_override_prefixes:
-        - cursor-
-      # Picker globs, appended as `<alias>/<glob>` to each tool's
-      # enabled_models. Pi warns on gpt-6* until the SDK lists a gpt-6 id.
-      enabled_models:
-        - gpt-6*
-        - claude-opus-5*
-        - claude-sonnet-5*
-        - claude-fable-5*
-        - composer-2.5*
-        - "*${grok_primary}*"
-        - "*muse-spark-1.3*"
-        - "*gemini-3.8-flash*"
-        - default
       # Per stem, every key optional:
       #   cost    — standard rate; replaces the models.dev list price.
-      #   fast    — Cursor docs Fast rate. OMP prices `<stem>-fast` and
-      #             `<stem>-<effort>-fast`; Pi registers `:fast` and `:slow`.
+      #   fast    — Cursor docs Fast rate; registers `:fast` and `:slow`.
       #             The standard rate is never reused for Fast.
       #   pi_contexts     — pi-cursor-sdk windows, emitted as `<stem>@<window>`.
       #   pi_default_fast — the unsuffixed Pi id keeps the SDK's fast flag
       #                     (context is swapped, fast is not), so it bills
       #                     `fast`; `:slow` bills the stem.
-      #   omp_windows     — windows that are their own OMP id,
-      #                     `<stem>-<window>-fast`, priced from `fast`. The
-      #                     unsuffixed stem is the default window.
-      # longContext is OMP's field; Pi emits it as cost.tiers. Alias ids
+      # longContext is emitted as cost.tiers. Alias ids
       # (composer, fable, gpt-5.6, muse) stay unpriced.
       #
       # Fast list prices: https://cursor.com/docs/models-and-pricing and
@@ -62,7 +41,6 @@ llm:
             cacheWrite: 0
           pi_contexts: ["256k", "500k"]
           pi_default_fast: true
-          omp_windows: ["500k"]
         composer-2.5:
           cost:
             input: 0.5

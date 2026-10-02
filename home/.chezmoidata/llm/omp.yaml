@@ -12,7 +12,7 @@ llm:
         - cursor/${grok_primary}-500k-fast
         - xai-oauth/${grok_primary}
         - openai-codex/${gpt_primary}
-        - cursor/claude-opus-5-high
+        - cursor/claude-opus-5-1m:high
       reasoning_effort: high
       # OMP roles, not model names. Same keys on every host; each list picks
       # the first candidate whose provider resolved here. IV is company-funded,
@@ -59,7 +59,7 @@ llm:
         # $6/$30 — worth it at this call frequency, not at task's.
         plan:
           - anthropic/claude-opus-5:xhigh
-          - cursor/claude-opus-5-high
+          - cursor/claude-opus-5-1m:high
         # No `vision` role on purpose. inspect_image falls back @vision →
         # @default → active model, each level requiring image input. Both
         # defaults advertise it, so a photo stays on @default. Neither
@@ -83,7 +83,7 @@ llm:
         - openai/gpt-6*
         - xai-oauth/${grok_primary}*
         - openai-codex/gpt-6*
-        # cursor/* globs come from llm.catalogs.cursor.
+        # cursor/* globs come from llm.providers.cursor.
       provider_sets: [iv]
       providers:
         # The default token's Anthropic front is stricter than the cc-auth
@@ -109,12 +109,8 @@ llm:
         openai-codex:
           provider: openai-codex
           models: false
-        # Prices, windows, and picker globs: llm.catalogs.cursor in
-        # llm/cursor.yaml. Stems expand onto effort siblings, Claude thinking
-        # compounds, and `cursor-` ids; a Fast card also carries the stem's
-        # image input, so Cursor's text-only Grok ids still advertise vision.
-        # A model_overrides key here still wins.
+        # OMP's bundled Cursor catalog prices every served id, including Fast
+        # lanes and context SKUs such as `grok-4.7-500k-fast`; no overlay.
         cursor:
           provider: cursor
           models: false
-          catalog: cursor

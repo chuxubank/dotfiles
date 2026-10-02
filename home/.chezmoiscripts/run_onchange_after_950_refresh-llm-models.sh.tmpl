@@ -85,25 +85,6 @@ refresh_models() {
   trap - 0 HUP INT TERM
 }
 
-{{- range $name, $catalog := default dict .llm.catalogs }}
-{{- if hasKey $catalog "ids_cache" }}
-{{- $provider := index $.llm.providers $catalog.provider }}
-{{- if includeTemplate "when/evaluate" (dict "item" $provider "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson }}
-# OMP owns {{ $catalog.provider }} auth and discovery, so its catalog is the id
-# list. Ids OMP synthesizes at request time (context windows) are not in it.
-ids_file={{ joinPath $.chezmoi.homeDir (index $.path.cache $catalog.ids_cache) | quote }}
-if command -v omp >/dev/null 2>&1 && mkdir -p "${ids_file%/*}" \
-  && omp models {{ $catalog.provider }} --json 2>/dev/null \
-    | jq -e '[.models[].id] | unique | select(length > 0)' >"$ids_file.tmp"; then
-  mv "$ids_file.tmp" "$ids_file"
-else
-  rm -f "$ids_file.tmp"
-  printf 'warning: failed to refresh catalog=%s ids\n' {{ $name | quote }} >&2
-fi
-{{- end }}
-{{- end }}
-{{- end }}
-
 {{ range $providerName, $provider := .llm.providers }}
 {{ if and (hasKey $provider "model_caches") (includeTemplate "when/evaluate" (dict "item" $provider "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson) }}
 {{ range $cacheKey, $cache := $provider.model_caches }}

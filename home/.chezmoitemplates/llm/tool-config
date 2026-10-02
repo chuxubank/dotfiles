@@ -23,11 +23,8 @@
            model_overrides — per-model metadata overrides (if set)
            rates     — stem → {cost}, plus `<stem>-fast` → {cost}, from the
                        `catalog` (if set)
-           context_windows — stem → OMP window ids, from the catalog
            catalog_models — stem → {fast?, pi_contexts?, pi_default_fast?},
                        from the catalog
-           live_ids  — ids the provider serves, from the catalog's
-                       ids_cache (only when that file exists)
            model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
@@ -43,11 +40,10 @@
                       type: anthropic             — optional type override
                       auth_field: cc-auth-token   — optional auth override
                       catalog: cursor             — llm.catalogs entry; its
-                                                    data_set, data_set_providers,
-                                                    and model_override_prefixes
-                                                    are defaults for the ref, and
-                                                    its enabled_models globs are
-                                                    appended as <alias>/<glob>
+                                                    data_set and
+                                                    data_set_providers are
+                                                    defaults for the ref
+       A provider's `enabled_models` globs are appended as <alias>/<glob>.
           Sets:   provider_sets: [iv]             — aliases from llm.provider_sets;
                                                     a same-named `providers`
                                                     entry is deep-merged on top
@@ -109,7 +105,7 @@
     {{- if not $catalog -}}
       {{- fail (printf "llm catalogs: unknown catalog %q" $ref.catalog) -}}
     {{- end -}}
-    {{- $ref = merge (deepCopy $ref) (pick $catalog "data_set" "data_set_providers" "model_override_prefixes") -}}
+    {{- $ref = merge (deepCopy $ref) (pick $catalog "data_set" "data_set_providers") -}}
   {{- end -}}
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
@@ -181,28 +177,15 @@
   {{- end -}}
   {{- if hasKey $catalog "models" -}}
     {{- $rates := dict -}}
-    {{- $windows := dict -}}
     {{- $shapes := dict -}}
     {{- range $model, $entry := $catalog.models -}}
       {{- $stem := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
       {{- if hasKey $entry "cost" -}}{{- $_ := set $rates $stem (dict "cost" $entry.cost) -}}{{- end -}}
       {{- if hasKey $entry "fast" -}}{{- $_ := set $rates (printf "%s-fast" $stem) (dict "cost" $entry.fast) -}}{{- end -}}
-      {{- if hasKey $entry "omp_windows" -}}{{- $_ := set $windows $stem $entry.omp_windows -}}{{- end -}}
       {{- $_ := set $shapes $stem (pick $entry "fast" "pi_contexts" "pi_default_fast") -}}
     {{- end -}}
     {{- $_ := set $resolved "rates" $rates -}}
-    {{- $_ := set $resolved "context_windows" $windows -}}
     {{- $_ := set $resolved "catalog_models" $shapes -}}
-    {{- if hasKey $catalog "ids_cache" -}}
-      {{- $idsFile := index $ctx.path.cache $catalog.ids_cache -}}
-      {{- if not (hasPrefix "/" $idsFile) -}}{{- $idsFile = joinPath $ctx.chezmoi.homeDir $idsFile -}}{{- end -}}
-      {{- if stat $idsFile -}}
-        {{- $ids := include $idsFile | trim | fromJson -}}
-        {{- if and (eq (kindOf $ids) "slice") (gt (len $ids) 0) -}}
-          {{- $_ := set $resolved "live_ids" $ids -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
   {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
@@ -298,8 +281,9 @@
 {{- if hasKey $toolCfg "enabled_models" }}
   {{- $patterns := $toolCfg.enabled_models -}}
   {{- range $alias, $ref := $refs -}}
-    {{- if hasKey $ref "catalog" -}}
-      {{- range $glob := default (list) (index (index $catalogs $ref.catalog) "enabled_models") -}}
+    {{- $prov := index $llmProviders $ref.provider -}}
+    {{- if hasKey $providers $alias -}}
+      {{- range $glob := default (list) (index $prov "enabled_models") -}}
         {{- $patterns = append $patterns (printf "%s/%s" $alias $glob) -}}
       {{- end -}}
     {{- end -}}

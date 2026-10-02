@@ -96,21 +96,18 @@ The rationale is in `docs/adr/0006-omp-model-role-tiers.md`.
 ## OMP catalog overlays
 
 When `models: false`, OMP copies the models.dev card onto the exact model
-id through `model-config/omp`. Keep list prices visible on SuperGrok and
-Cursor: those are subscriptions, but the catalog numbers are still the
-comparison the role table uses. Do not add a field-allowlist or a $0
-special case for subscriptions. Effort-sibling and `cursor-` copies take `cost`,
-so a live name or window is not replaced by the first-party stem. A stem with
-a dedicated `*-fast` key also copies its image `input` onto those siblings.
-Context-window ids are not derived: declare them as `omp_windows` on the stem,
-and the fast lane is copied onto `{stem}-{window}-fast`.
-Claude thinking compounds (`{stem}-thinking-{effort}` and `{id}-thinking`) stay
-on that same rate.
-Everything known about a Cursor stem — standard `cost`, `fast` rate, Pi
-`pi_contexts`/`pi_default_fast`, OMP `omp_windows` — lives on one entry in
-`llm.catalogs.cursor` (`home/.chezmoidata/llm/cursor.yaml`), together with the
-models.dev provider list and the picker globs. Tool providers opt in with
-`catalog: cursor`; do not restate those fields per tool. Explicit
-`model_overrides` still win. Fast rates come only from `fast`. Pi projects that
-same stem map onto its extension ids. The rationale is in
+id through `model-config/omp` (SuperGrok today). Keep list prices visible on
+subscriptions: the catalog numbers are still the comparison the role table
+uses. Do not add a field-allowlist or a $0 special case for subscriptions.
+Effort-sibling copies take `cost`, so a live name or window is not replaced
+by the first-party stem.
+
+OMP's Cursor provider gets no overlay: its bundled catalog plus live
+discovery already price every served id, including Fast lanes and context
+SKUs (`grok-4.7-500k-fast`, `claude-opus-5-1m`). Overlaying models.dev
+there replaced Cursor's windows with the vendor API's. Pi's `pi-cursor-sdk`
+prices everything at $0, so `llm.catalogs.cursor`
+(`home/.chezmoidata/llm/cursor.yaml`) carries the Cursor rates Pi projects
+onto its ids; Fast rates come only from `fast`. Cursor picker globs live on
+`llm.providers.cursor.enabled_models`. The rationale is in
 `docs/adr/0009-omp-models-dev-overlays.md`.
