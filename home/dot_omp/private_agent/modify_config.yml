@@ -37,7 +37,13 @@
   {{- $disabledProviders = append $disabledProviders "openai-codex" -}}
 {{- end -}}
 
+{{- /* Extended Context stays on. Off clamps every non-xai-oauth model to
+       cost.longContext.inputThreshold, and Cursor's bundled grok-4.7*-fast
+       rule sets that threshold at 256000, so grok-4.7-500k-fast displays
+       256k. xai-oauth is exempt and already shows 500k. Above 256k, Fast
+       bills the long-context rate. */ -}}
 {{- $managed := dict
+  "extendedContext" true
   "advisor" (dict
     "enabled" true
   )
