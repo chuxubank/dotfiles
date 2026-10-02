@@ -32,8 +32,9 @@ those three.
 
 Pi uses the same candidate order and the same Cursor families, but
 `pi-cursor-sdk` ids are not these SKUs. Personal `default` is
-`cursor/grok-4.7@500k:fast`: 500k is the SDK's default window, and that
-variant is already reasoning high. Pi cannot set Grok's `reasoning_effort`.
+`cursor/grok-4.7@256k:fast`: the Fast lane on the 256k window. The SDK
+default window is 500k (`cursor/grok-4.7@500k:fast`), which is OMP's
+`cursor/grok-4.7-high-fast`. Pi cannot set Grok's `reasoning_effort`.
 `claude-opus-5-high` is `cursor/claude-opus-5@1m`. Composer Fast is
 `cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
 the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
@@ -75,7 +76,7 @@ Composer 2.5, which sits in Cursor's
 first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
 `smol`'s interactive execution lane ($3/$15); advisor reviews in the background
 and a late note still lands on the current primary, so the cheaper standard
-rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.7 Fast.
+rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.7 Fast at 256k.
 
 `slow` stays `claude-fable-5` on IV, at `:high`, because that role is the
 thorough, infrequent one and the cc group 404s the id — it only resolves on
