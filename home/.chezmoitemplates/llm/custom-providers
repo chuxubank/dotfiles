@@ -7,17 +7,17 @@
        models as a bare id list → display name is the id.
        model_overrides → per-id metadata. When models are declared, merged into
        each row last. When models: false, one stem map is built: the
-       models.dev card, then the shared `rates` table, then this provider's
-       model_overrides. Each later layer wins.
+       models.dev card, then the `catalog` rates (llm.catalogs), then this
+       provider's model_overrides. Each later layer wins.
        OMP then runs llm/expand-model-overrides, which copies `cost` onto
        sibling ids: `cursor-` prefixes, effort suffixes, and Claude
        `{stem}-thinking-{effort}` compounds.
        A dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
        That fast lane also copies the stem's image input onto those
-       siblings. `contexts` from the provider's `context_windows` table
-       lands on `{stem}-{window}-fast` the same way. Missing Fast ids stay
+       siblings. A catalog stem's `omp_windows` land on
+       `{stem}-{window}-fast` the same way. Missing Fast ids stay
        unpriced; the stem rate is not copied onto them.
-       project: pi-cursor skips that expansion. It keeps cost only and
+       Pi with a catalog skips that expansion. It keeps cost only and
        rewrites each stem onto pi-cursor-sdk ids (`@window`, `:fast`,
        `:slow`). longContext becomes cost.tiers. Names, windows, and
        thinking ladders stay on the extension.
@@ -112,17 +112,13 @@
   {{- end -}}
 
   {{- if not $declaresModels -}}
-    {{- $project := "" -}}
-    {{- if hasKey $ep "project" -}}{{- $project = $ep.project -}}{{- end -}}
-    {{- if and $project (ne $project "pi-cursor") -}}
-      {{- fail (printf "llm/custom-providers: unknown id project %q" $project) -}}
-    {{- end -}}
+    {{- $piCatalog := and (eq $tool "pi") (hasKey $ep "catalog_models") -}}
     {{- $explicit := $overrides -}}
     {{- if hasKey $ep "rates" -}}
       {{- $explicit = mergeOverwrite (deepCopy $ep.rates) $explicit -}}
     {{- end -}}
     {{- $stem := $explicit -}}
-    {{- if or (eq $tool "omp") (eq $project "pi-cursor") -}}
+    {{- if or (eq $tool "omp") $piCatalog -}}
       {{- $fromMeta := dict -}}
       {{- range $id, $m := default dict (index $ep "model_metadata") -}}
         {{- $full := includeTemplate "model-config/omp" $m | fromJson -}}
@@ -130,16 +126,8 @@
       {{- end -}}
       {{- $stem = mergeOverwrite $fromMeta $explicit -}}
     {{- end -}}
-    {{- if eq $project "pi-cursor" -}}
-      {{- $piModels := dict -}}
-      {{- range $id, $shape := default dict $.llm.cursor_pi -}}
-        {{- $resolved := includeTemplate "llm/resolve-model-alias" (dict "model" $id "aliases" $.llm.models) -}}
-        {{- $_ := set $piModels $resolved $shape -}}
-      {{- end -}}
-      {{- if eq (len $piModels) 0 -}}
-        {{- fail "llm/custom-providers: cursor_pi is empty" -}}
-      {{- end -}}
-      {{- $overrides = includeTemplate "llm/pi-cursor-costs" (dict "overrides" $stem "models" $piModels) | fromJson -}}
+    {{- if $piCatalog -}}
+      {{- $overrides = includeTemplate "llm/pi-cursor-costs" (dict "overrides" $stem "models" $ep.catalog_models) | fromJson -}}
     {{- else if eq $tool "omp" -}}
       {{- $overrides = includeTemplate "llm/expand-model-overrides" (dict
             "overrides" $stem

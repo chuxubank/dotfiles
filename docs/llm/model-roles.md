@@ -51,9 +51,9 @@ the bundled long-context threshold, 256k. Pi cannot set Grok's `reasoning_effort
 `cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
 the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
 is `cursor/claude-opus-5-5@1m`. Pi has no `slow` role, so that id is only on
-the picker allow-list. Prices are one table, `llm.rates.cursor` in
-`home/.chezmoidata/llm/cursor.yaml`. OMP expands those stems to SKU siblings.
-Context-window ids come from `llm.context_windows` in that file.
+the picker allow-list. Prices, windows, and picker globs are one catalog,
+`llm.catalogs.cursor` in `home/.chezmoidata/llm/cursor.yaml`. OMP expands
+those stems to SKU siblings, including each stem's `omp_windows` ids.
 Pi projects the same cards onto extension ids. `longContext` becomes
 `cost.tiers`. The unsuffixed Pi id bills the fast card when that is the SDK
 default (Grok, Composer); `:slow` bills the stem.

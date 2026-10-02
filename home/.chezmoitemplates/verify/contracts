@@ -484,8 +484,8 @@
         "composer-2.5" (dict "cost" (dict "input" 0.5 "output" 2.5 "cacheRead" 0.2 "cacheWrite" 0))
         "composer-2.5-fast" (dict "cost" (dict "input" 3 "output" 15 "cacheRead" 0.5 "cacheWrite" 0)))
       "models" (dict
-        "grok-4.7" (dict "contexts" (list "256k" "500k") "fast" true "default_fast" true)
-        "composer-2.5" (dict "fast" true "default_fast" true)
+        "grok-4.7" (dict "pi_contexts" (list "256k" "500k") "fast" (dict "input" 4) "pi_default_fast" true)
+        "composer-2.5" (dict "fast" (dict "input" 3) "pi_default_fast" true)
         "missing-stem" (dict))) | fromJson -}}
 {{- if or (ne (float64 (index $projected "grok-4.7@500k:fast").cost.input) 4.0) (hasKey (index $projected "grok-4.7@500k:fast").cost "tiers") (ne (len (index $projected "grok-4.7@500k:fast")) 1) -}}
   {{- fail "pi-cursor-costs: fast lane" -}}
@@ -523,7 +523,7 @@
   {{- fail "expand-model-overrides: context window invented" -}}
 {{- end -}}
 
-{{- /* Live projection uses the shared rate table. Stem list prices come from
+{{- /* Live projection uses llm.catalogs.cursor. Stem list prices come from
       models.dev and are absent on CI, so only cards in llm/cursor.yaml are checked here. */ -}}
 {{- /* The cursor provider is off on iv; check both projections off-iv. */ -}}
 {{- $ompProviders := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}

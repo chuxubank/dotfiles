@@ -1,135 +1,141 @@
 llm:
-  # Cursor prices shared by OMP and Pi. Keys are models.dev stems, or
-  # `<stem>-fast` for the Cursor docs Fast rate. A stem omitted here keeps
-  # its models.dev card. OMP expands these onto SKU siblings
-  # (`-high`, `-high-fast`, `cursor-`). Context-window ids are
-  # `context_windows`, not effort suffixes. Pi projects the same cards onto
-  # pi-cursor-sdk ids; see cursor_pi. longContext is OMP's field — Pi
-  # emits it as cost.tiers.
-  #
-  # Fast list prices: https://cursor.com/docs/models-and-pricing and
-  # https://cursor.com/docs/models/claude-opus-5-5 (2026-09-23).
-  rates:
+  # Model catalogs shared by every tool whose provider sets `catalog: <name>`.
+  # One entry per models.dev stem holds everything this repo knows about it;
+  # llm/tool-config resolves it and llm/custom-providers projects it per tool.
+  catalogs:
     cursor:
-      composer-2.5:
-        cost:
-          input: 0.5
-          output: 2.5
-          cacheRead: 0.2
-          cacheWrite: 0
-      composer-2.5-fast:
-        cost:
-          input: 3
-          output: 15
-          cacheRead: 0.5
-          cacheWrite: 0
-      ${grok_primary}-fast:
-        cost:
-          input: 4
-          output: 12
-          cacheRead: 1
-          cacheWrite: 0
-      claude-opus-5-fast:
-        cost:
-          input: 10
-          output: 50
-          cacheRead: 1
-          cacheWrite: 12.5
-      # Not in models.dev. Cursor still serves this id.
-      claude-opus-5-5:
-        cost:
-          input: 4
-          output: 20
-          cacheRead: 0.2
-          cacheWrite: 5
-      # Input/output are the published Fast rates (2x). Cache scales by the
-      # same factor; Cursor does not list Fast cache separately.
-      claude-opus-5-5-fast:
-        cost:
-          input: 8
-          output: 40
-          cacheRead: 0.4
-          cacheWrite: 10
-      gpt-5.6-luna-fast:
-        cost:
-          input: 0.4
-          output: 2.4
-          cacheRead: 0.04
-          cacheWrite: 0.5
-          longContext:
-            inputThreshold: 272000
-            input: 0.8
-            output: 3.6
-            cacheRead: 0.08
-            cacheWrite: 1
-      gpt-5.6-sol-fast:
-        cost:
-          input: 8
-          output: 40
-          cacheRead: 0.8
-          cacheWrite: 10
-          longContext:
-            inputThreshold: 272000
-            input: 16
-            output: 60
-            cacheRead: 1.6
-            cacheWrite: 20
-      gpt-5.6-terra-fast:
-        cost:
-          input: 4
-          output: 24
-          cacheRead: 0.4
-          cacheWrite: 5
-          longContext:
-            inputThreshold: 272000
+      # GetUsableModels ships no pricing. Stems copy the first-party
+      # models.dev card from these providers, in preference order.
+      data_set: models-dev
+      data_set_providers:
+        - anthropic
+        - openai
+        - google
+        - meta
+        - xai
+        - moonshotai
+        - zai
+        - deepseek
+      # OMP only: GetUsableModels also lists grok ids as `cursor-<id>`.
+      model_override_prefixes:
+        - cursor-
+      # Picker globs, appended as `<alias>/<glob>` to each tool's
+      # enabled_models. Pi warns on gpt-6* until the SDK lists a gpt-6 id.
+      enabled_models:
+        - gpt-6*
+        - claude-opus-5*
+        - claude-sonnet-5*
+        - claude-fable-5*
+        - composer-2.5*
+        - "*${grok_primary}*"
+        - "*muse-spark-1.3*"
+        - "*gemini-3.8-flash*"
+        - default
+      # Per stem, every key optional:
+      #   cost    — standard rate; replaces the models.dev list price.
+      #   fast    — Cursor docs Fast rate. OMP prices `<stem>-fast` and
+      #             `<stem>-<effort>-fast`; Pi registers `:fast` and `:slow`.
+      #             The standard rate is never reused for Fast.
+      #   pi_contexts     — pi-cursor-sdk windows, emitted as `<stem>@<window>`.
+      #   pi_default_fast — the unsuffixed Pi id keeps the SDK's fast flag
+      #                     (context is swapped, fast is not), so it bills
+      #                     `fast`; `:slow` bills the stem.
+      #   omp_windows     — windows that are their own OMP id,
+      #                     `<stem>-<window>-fast`, priced from `fast`. The
+      #                     unsuffixed stem is the default window.
+      # longContext is OMP's field; Pi emits it as cost.tiers. Alias ids
+      # (composer, fable, gpt-5.6, muse) stay unpriced.
+      #
+      # Fast list prices: https://cursor.com/docs/models-and-pricing and
+      # https://cursor.com/docs/models/claude-opus-5-5 (2026-09-23).
+      models:
+        ${grok_primary}:
+          fast:
+            input: 4
+            output: 12
+            cacheRead: 1
+            cacheWrite: 0
+          pi_contexts: ["256k", "500k"]
+          pi_default_fast: true
+          omp_windows: ["500k"]
+        composer-2.5:
+          cost:
+            input: 0.5
+            output: 2.5
+            cacheRead: 0.2
+            cacheWrite: 0
+          fast:
+            input: 3
+            output: 15
+            cacheRead: 0.5
+            cacheWrite: 0
+          pi_default_fast: true
+        claude-opus-5:
+          fast:
+            input: 10
+            output: 50
+            cacheRead: 1
+            cacheWrite: 12.5
+          pi_contexts: ["300k", "1m"]
+        # Not in models.dev. Cursor still serves this id. Fast input/output
+        # are the published 2x; cache scales by the same factor because
+        # Cursor does not list Fast cache separately.
+        claude-opus-5-5:
+          cost:
+            input: 4
+            output: 20
+            cacheRead: 0.2
+            cacheWrite: 5
+          fast:
             input: 8
-            output: 36
+            output: 40
+            cacheRead: 0.4
+            cacheWrite: 10
+          pi_contexts: ["300k", "1m"]
+        gpt-5.6-luna:
+          fast:
+            input: 0.4
+            output: 2.4
+            cacheRead: 0.04
+            cacheWrite: 0.5
+            longContext:
+              inputThreshold: 272000
+              input: 0.8
+              output: 3.6
+              cacheRead: 0.08
+              cacheWrite: 1
+          pi_contexts: ["272k", "1m"]
+        gpt-5.6-sol:
+          fast:
+            input: 8
+            output: 40
             cacheRead: 0.8
             cacheWrite: 10
-
-  # pi-cursor-sdk id grammar for the stems above, plus list-price families
-  # the picker can select. contexts become `@<window>`. fast registers
-  # `:fast` and `:slow`. default_fast means the unsuffixed id keeps the
-  # SDK's default fast flag (context is swapped, fast is not): Grok and
-  # Composer bill the fast card, and `:slow` bills the stem. Alias ids
-  # (composer, fable, gpt-5.6, muse) stay unpriced.
-  cursor_pi:
-    ${grok_primary}:
-      contexts: ["256k", "500k"]
-      fast: true
-      default_fast: true
-    composer-2.5:
-      fast: true
-      default_fast: true
-    claude-opus-5:
-      contexts: ["300k", "1m"]
-      fast: true
-    claude-opus-5-5:
-      contexts: ["300k", "1m"]
-      fast: true
-    gpt-5.6-luna:
-      contexts: ["272k", "1m"]
-      fast: true
-    gpt-5.6-sol:
-      contexts: ["272k", "1m"]
-      fast: true
-    gpt-5.6-terra:
-      contexts: ["272k", "1m"]
-      fast: true
-    claude-fable-5:
-      contexts: ["300k", "1m"]
-    claude-sonnet-5:
-      contexts: ["300k", "1m"]
-    muse-spark-1.3:
-      contexts: ["300k", "1m"]
-    gemini-3.8-flash: {}
-
-  # OMP ids that embed a context window. expand-model-overrides cannot
-  # derive these from effort suffixes. A provider sets `context_windows:
-  # cursor`; the fast lane is copied onto `{stem}-{window}-fast` (cost, and
-  # image input when the stem has a dedicated `*-fast` key). Only windows
-  # that are their own model id belong here — the unsuffixed stem stays the
-  # default window. Pi uses `@window` instead; see cursor_pi.
-  context_windows:
-    cursor:
-      ${grok_primary}: ["500k"]
+            longContext:
+              inputThreshold: 272000
+              input: 16
+              output: 60
+              cacheRead: 1.6
+              cacheWrite: 20
+          pi_contexts: ["272k", "1m"]
+        gpt-5.6-terra:
+          fast:
+            input: 4
+            output: 24
+            cacheRead: 0.4
+            cacheWrite: 5
+            longContext:
+              inputThreshold: 272000
+              input: 8
+              output: 36
+              cacheRead: 0.8
+              cacheWrite: 10
+          pi_contexts: ["272k", "1m"]
+        # List price only; listed so Pi projects the models.dev card.
+        claude-fable-5:
+          pi_contexts: ["300k", "1m"]
+        claude-sonnet-5:
+          pi_contexts: ["300k", "1m"]
+        muse-spark-1.3:
+          pi_contexts: ["300k", "1m"]
+        gemini-3.8-flash: {}

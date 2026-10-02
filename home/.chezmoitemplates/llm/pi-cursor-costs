@@ -1,17 +1,17 @@
 {{- /* llm/pi-cursor-costs — Project stem price cards onto pi-cursor-sdk ids.
        Input: overrides — stem map (models.dev card + explicit rates, not
                           expanded to SKU siblings)
-              models    — stem → { contexts?, fast?, default_fast? }
+              models    — stem → { fast?, pi_contexts?, pi_default_fast? }
+                          (llm.catalogs model entries)
        Output: JSON dict of extension id → { cost }.
 
-       A context becomes `@<window>`. `fast` also registers `:fast` and
-       `:slow`. `:fast` bills the `*-fast` card. `:slow` bills the stem.
-       The unsuffixed id bills the fast card only when `default_fast` is
+       A context becomes `@<window>`. A `fast` card also registers `:fast`
+       and `:slow`. `:fast` bills the `*-fast` card. `:slow` bills the stem.
+       The unsuffixed id bills the fast card only when `pi_default_fast` is
        set, because the SDK keeps that flag when it swaps context.
-       A fast stem with no `*-fast` card fails. A stem with neither card
-       is skipped: the models.dev catalog is not on every machine, and a
-       missing list price must not reject the priced ids. Alias ids are
-       not emitted. */ -}}
+       A stem with neither card is skipped: the models.dev catalog is not
+       on every machine, and a missing list price must not reject the
+       priced ids. Alias ids are not emitted. */ -}}
 {{- $overrides := default dict (index . "overrides") -}}
 {{- $models := default dict (index . "models") -}}
 {{- $out := dict -}}
@@ -25,19 +25,14 @@
   {{- if and (hasKey $overrides $fastKey) (hasKey (index $overrides $fastKey) "cost") -}}
     {{- $fast = includeTemplate "llm/pi-cost" (index (index $overrides $fastKey) "cost") | fromJson -}}
   {{- end -}}
-  {{- $hasFast := false -}}
-  {{- if hasKey $shape "fast" -}}{{- $hasFast = index $shape "fast" -}}{{- end -}}
-  {{- if and $hasFast (eq (len $fast) 0) -}}
-    {{- fail (printf "llm/pi-cursor-costs: %s has no %s card" $stem $fastKey) -}}
-  {{- end -}}
+  {{- $hasFast := hasKey $shape "fast" -}}
   {{- if and (eq (len $standard) 0) (eq (len $fast) 0) -}}
     {{- continue -}}
   {{- end -}}
-  {{- $defaultFast := false -}}
-  {{- if hasKey $shape "default_fast" -}}{{- $defaultFast = index $shape "default_fast" -}}{{- end -}}
+  {{- $defaultFast := eq true (index $shape "pi_default_fast") -}}
   {{- $contexts := list "" -}}
-  {{- if and (hasKey $shape "contexts") (gt (len (index $shape "contexts")) 0) -}}
-    {{- $contexts = index $shape "contexts" -}}
+  {{- if gt (len (default (list) (index $shape "pi_contexts"))) 0 -}}
+    {{- $contexts = index $shape "pi_contexts" -}}
   {{- end -}}
   {{- range $ctx := $contexts -}}
     {{- $id := $stem -}}

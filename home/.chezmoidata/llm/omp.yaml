@@ -83,15 +83,7 @@ llm:
         - openai/gpt-6*
         - xai-oauth/${grok_primary}*
         - openai-codex/gpt-6*
-        - cursor/gpt-6*
-        - cursor/claude-opus-5*
-        - cursor/claude-sonnet-5*
-        - cursor/claude-fable-5*
-        - cursor/composer-2.5*
-        - cursor/*${grok_primary}*
-        - cursor/*muse-spark-1.3*
-        - cursor/*gemini-3.8-flash*
-        - cursor/default
+        # cursor/* globs come from llm.catalogs.cursor.
       providers:
         openai:
           provider: iv
@@ -140,30 +132,12 @@ llm:
         openai-codex:
           provider: openai-codex
           models: false
+        # Prices, windows, and picker globs: llm.catalogs.cursor in
+        # llm/cursor.yaml. Stems expand onto effort siblings, Claude thinking
+        # compounds, and `cursor-` ids; a Fast card also carries the stem's
+        # image input, so Cursor's text-only Grok ids still advertise vision.
+        # A model_overrides key here still wins.
         cursor:
           provider: cursor
           models: false
-          # GetUsableModels ships no pricing. Third-party ids copy first-party
-          # list prices from models-dev (preference order below). Explicit
-          # rates, including Fast, are llm.rates.cursor in llm/cursor.yaml;
-          # a model_overrides key here still wins. `cursor-` covers
-          # GetUsableModels grok ids. Stems cover effort siblings and Claude
-          # thinking compounds. A dedicated *-fast key expands to
-          # *-{effort}-fast and carries the stem's image input, so Cursor's
-          # text-only Grok ids still advertise vision. Context windows are
-          # not effort suffixes; `context_windows` names `{stem}-{window}-fast`
-          # (llm.context_windows in llm/cursor.yaml).
-          rates: cursor
-          context_windows: cursor
-          data_set: models-dev
-          data_set_providers:
-            - anthropic
-            - openai
-            - google
-            - meta
-            - xai
-            - moonshotai
-            - zai
-            - deepseek
-          model_override_prefixes:
-            - cursor-
+          catalog: cursor

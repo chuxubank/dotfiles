@@ -102,12 +102,15 @@ comparison the role table uses. Do not add a field-allowlist or a $0
 special case for subscriptions. Effort-sibling and `cursor-` copies take `cost`,
 so a live name or window is not replaced by the first-party stem. A stem with
 a dedicated `*-fast` key also copies its image `input` onto those siblings.
-Context-window ids are not derived: declare them in `llm.context_windows` in
-that same file, opt the provider in with `context_windows`, and the fast lane
-is copied onto `{stem}-{window}-fast`.
+Context-window ids are not derived: declare them as `omp_windows` on the stem,
+and the fast lane is copied onto `{stem}-{window}-fast`.
 Claude thinking compounds (`{stem}-thinking-{effort}` and `{id}-thinking`) stay
 on that same rate.
-Explicit `model_overrides` still win. Fast rates come only from a `*-fast`
-key, and those keys live once in `home/.chezmoidata/llm/cursor.yaml`. Pi
-projects that same stem map onto its extension ids. The rationale is in
+Everything known about a Cursor stem — standard `cost`, `fast` rate, Pi
+`pi_contexts`/`pi_default_fast`, OMP `omp_windows` — lives on one entry in
+`llm.catalogs.cursor` (`home/.chezmoidata/llm/cursor.yaml`), together with the
+models.dev provider list and the picker globs. Tool providers opt in with
+`catalog: cursor`; do not restate those fields per tool. Explicit
+`model_overrides` still win. Fast rates come only from `fast`. Pi projects that
+same stem map onto its extension ids. The rationale is in
 `docs/adr/0009-omp-models-dev-overlays.md`.

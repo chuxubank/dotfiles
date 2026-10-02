@@ -15,10 +15,10 @@ so a first-party name overwrites a live Fast lane. Image `input` is the
 exception when the stem has a dedicated `*-fast` key: that lane is the same
 model, and Cursor's Grok 4.7 effort ids ship as text-only, so the stem card's
 image input is copied onto those siblings. Context-window ids are not effort
-suffixes. `llm.context_windows` names them, and the same fast-lane patch is
+suffixes. A stem's `omp_windows` names them, and the same fast-lane patch is
 copied onto `{stem}-{window}-fast`. OMP's personal default is the `500k`
-window of `${grok_primary}`. Explicit rate keys in
-`llm/cursor.yaml` replace the models.dev price, which is how Cursor Fast
+window of `${grok_primary}`. Explicit `cost`/`fast` rates on the stem in
+`llm.catalogs.cursor` replace the models.dev price, which is how Cursor Fast
 stays on the Cursor docs rate rather than the xAI list price. A provider
 `model_overrides` entry still wins over that table. Pi reads the same stem
 cards and projects cost onto `pi-cursor-sdk` ids (`@window`, `:fast`,
@@ -35,5 +35,11 @@ reasoning_effort; the thinking map forwards the default.
 
 Cursor's thinking variants are their own ids (`claude-opus-5-thinking-max`).
 Those copies are cost-only too, plus image input when the stem's fast lane
-propagates it. A Fast rate still requires an explicit `*-fast` key; the
+propagates it. A Fast rate still requires an explicit `fast` card; the
 standard rate is not reused for it.
+
+One catalog entry per stem holds the rates, Pi windows, and OMP window ids.
+These used to be three tables keyed in three grammars (`llm.rates`,
+`llm.cursor_pi`, `llm.context_windows`), plus a models.dev provider list and
+picker globs copied into each tool. Adding a model meant touching five places
+that could drift apart. Tool providers now carry only `catalog: cursor`.

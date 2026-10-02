@@ -21,8 +21,11 @@
            disable_strict_tools — opt out of Anthropic strict tool schemas (if set)
            compat    — provider compatibility overrides (if set)
            model_overrides — per-model metadata overrides (if set)
-           rates     — shared rate table from llm.rates (if set)
-           project   — id projection name (if set)
+           rates     — stem → {cost}, plus `<stem>-fast` → {cost}, from the
+                       `catalog` (if set)
+           context_windows — stem → OMP window ids, from the catalog
+           catalog_models — stem → {fast?, pi_contexts?, pi_default_fast?},
+                       from the catalog
            model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
@@ -37,6 +40,12 @@
                       name: Anthropic             — optional display name override
                       type: anthropic             — optional type override
                       auth_field: cc-auth-token   — optional auth override
+                      catalog: cursor             — llm.catalogs entry; its
+                                                    data_set, data_set_providers,
+                                                    and model_override_prefixes
+                                                    are defaults for the ref, and
+                                                    its enabled_models globs are
+                                                    appended as <alias>/<glob>
 */ -}}
 {{- $tool := .tool -}}
 {{- $toolCfg := index .llm.tools $tool -}}
@@ -75,7 +84,16 @@
 {{- /* Data sets are shared by several aliases (for example, the models.dev
        OpenAI-compatible surfaces). Cache the parsed map for this render. */ -}}
 {{- $dataSetMemo := dict -}}
+{{- $catalogs := default dict (index .llm "catalogs") -}}
 {{- range $alias, $ref := $refs }}
+  {{- $catalog := dict -}}
+  {{- if hasKey $ref "catalog" -}}
+    {{- $catalog = index $catalogs $ref.catalog -}}
+    {{- if not $catalog -}}
+      {{- fail (printf "llm catalogs: unknown catalog %q" $ref.catalog) -}}
+    {{- end -}}
+    {{- $ref = merge (deepCopy $ref) (pick $catalog "data_set" "data_set_providers" "model_override_prefixes") -}}
+  {{- end -}}
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
 
@@ -144,35 +162,20 @@
   {{- else if hasKey $prov "model_override_prefixes" -}}
     {{- $_ := set $resolved "model_override_prefixes" $prov.model_override_prefixes -}}
   {{- end -}}
-  {{- if hasKey $ref "rates" -}}
-    {{- $table := index (default dict (index $ctx.llm "rates")) $ref.rates -}}
-    {{- if not $table -}}
-      {{- fail (printf "llm rates: unknown table %q" $ref.rates) -}}
+  {{- if hasKey $catalog "models" -}}
+    {{- $rates := dict -}}
+    {{- $windows := dict -}}
+    {{- $shapes := dict -}}
+    {{- range $model, $entry := $catalog.models -}}
+      {{- $stem := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
+      {{- if hasKey $entry "cost" -}}{{- $_ := set $rates $stem (dict "cost" $entry.cost) -}}{{- end -}}
+      {{- if hasKey $entry "fast" -}}{{- $_ := set $rates (printf "%s-fast" $stem) (dict "cost" $entry.fast) -}}{{- end -}}
+      {{- if hasKey $entry "omp_windows" -}}{{- $_ := set $windows $stem $entry.omp_windows -}}{{- end -}}
+      {{- $_ := set $shapes $stem (pick $entry "fast" "pi_contexts" "pi_default_fast") -}}
     {{- end -}}
-    {{- $resolvedRates := dict -}}
-    {{- range $model, $override := $table -}}
-      {{- $resolvedModel := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
-      {{- $_ := set $resolvedRates $resolvedModel $override -}}
-    {{- end -}}
-    {{- $_ := set $resolved "rates" $resolvedRates -}}
-  {{- end -}}
-  {{- if hasKey $ref "context_windows" -}}
-    {{- $table := index (default dict (index $ctx.llm "context_windows")) $ref.context_windows -}}
-    {{- if not $table -}}
-      {{- fail (printf "llm context_windows: unknown table %q" $ref.context_windows) -}}
-    {{- end -}}
-    {{- $resolvedWindows := dict -}}
-    {{- range $model, $windows := $table -}}
-      {{- if ne (kindOf $windows) "slice" -}}
-        {{- fail (printf "llm context_windows: %s windows must be a list" $model) -}}
-      {{- end -}}
-      {{- $resolvedModel := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
-      {{- $_ := set $resolvedWindows $resolvedModel $windows -}}
-    {{- end -}}
-    {{- $_ := set $resolved "context_windows" $resolvedWindows -}}
-  {{- end -}}
-  {{- if hasKey $ref "project" -}}
-    {{- $_ := set $resolved "project" $ref.project -}}
+    {{- $_ := set $resolved "rates" $rates -}}
+    {{- $_ := set $resolved "context_windows" $windows -}}
+    {{- $_ := set $resolved "catalog_models" $shapes -}}
   {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}
@@ -266,8 +269,16 @@
 {{- range $alias, $_ := $providers -}}{{- $_ := set $aliasSet $alias true -}}{{- end -}}
 
 {{- if hasKey $toolCfg "enabled_models" }}
+  {{- $patterns := $toolCfg.enabled_models -}}
+  {{- range $alias, $ref := $refs -}}
+    {{- if hasKey $ref "catalog" -}}
+      {{- range $glob := default (list) (index (index $catalogs $ref.catalog) "enabled_models") -}}
+        {{- $patterns = append $patterns (printf "%s/%s" $alias $glob) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
   {{- $enabledModels := list -}}
-  {{- range $model := $toolCfg.enabled_models -}}
+  {{- range $model := $patterns -}}
     {{- $resolved := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
     {{- $keep := true -}}
     {{- $parts := splitList "/" $resolved -}}
