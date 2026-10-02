@@ -16,14 +16,15 @@ llm:
   # Alias groups a tool pulls in with `provider_sets: [<name>]`. A tool's
   # own `providers.<alias>` entry is deep-merged on top.
   provider_sets:
-    # IV's surfaces under Pi/OMP's bundled provider names, so bare ids land
-    # on IV first. `openai`/`anthropic` are the codex and cc token groups;
-    # `iv` is the default token on the OpenAI surface.
+    # Pi/OMP keep the bundled names `openai` and `anthropic` free for /login.
+    # Codex token is `iv-codex`, cc token is `iv-cc`. Neither is a bundled
+    # provider, so each catalog is the enumerated IV list. `iv` is the
+    # default token's OpenAI surface.
     iv:
-      openai:
+      iv-codex:
         provider: iv
         auth_field: codex-auth-token
-      anthropic:
+      iv-cc:
         provider: iv
         type: anthropic
         auth_field: cc-auth-token
@@ -93,10 +94,8 @@ llm:
     cursor:
       name: Cursor
       # Picker globs, appended as `<alias>/<glob>` to the enabled_models of
-      # every tool with a cursor alias. Pi warns on gpt-6* until the SDK
-      # lists a gpt-6 id.
+      # every tool with a cursor alias. Cursor does not serve GPT-6.
       enabled_models:
-        - gpt-6*
         - claude-opus-5*
         - claude-sonnet-5*
         - claude-fable-5*

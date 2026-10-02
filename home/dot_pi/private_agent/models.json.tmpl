@@ -5,9 +5,8 @@
        out to bin/pass-field at request time, the same helper codex's config
        uses. Nothing here is sensitive, so no private_ attribute.
 
-       Merge semantics do the heavy lifting. For a provider pi already bundles
-       (anthropic, openai), built-in models are kept and ours are upserted by
-       id — so the bundled catalog's rich metadata survives while the IV proxy's
-       extra ids (claude-opus-5, the -thinking variants) get added on top. */ -}}
+       `iv-codex` and `iv-cc` are not bundled names, so those providers are
+       only the enumerated IV list. The bundled `openai` and `anthropic`
+       names stay free for /login. */ -}}
 {{- $providers := includeTemplate "llm/custom-providers" (merge (dict "tool" "pi") .) | fromJson -}}
 {{ dict "providers" $providers | toPrettyJson }}

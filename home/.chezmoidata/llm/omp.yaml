@@ -2,13 +2,14 @@ llm:
   tools:
     omp:
       # Primary session prefers IV, then Cursor `${grok_primary}` 500k Fast,
-      # then SuperGrok, then ChatGPT/Codex OAuth. `openai`/`anthropic` are IV
-      # aliases (same as Pi); the ChatGPT subscription is `openai-codex`.
+      # then SuperGrok, then ChatGPT/Codex OAuth. `iv-codex`/`iv-cc` are the
+      # IV aliases (same names as Codex). `openai` and `anthropic` stay the
+      # bundled names for /login; the older subscription alias is `openai-codex`.
       # The 500k id is the context SKU (`grok-4.7-500k-fast`), not the effort
       # sibling `grok-4.7-high-fast`. The window still needs extendedContext.
       model:
-        - openai/${gpt_primary}
-        - anthropic/claude-opus-5
+        - iv-codex/${gpt_primary}
+        - iv-cc/claude-opus-5
         - cursor/${grok_primary}-500k-fast
         - xai-oauth/${grok_primary}
         - openai-codex/${gpt_primary}
@@ -31,14 +32,14 @@ llm:
         # Prewalk target and background worker. GPT-6 Luna's ladder starts at
         # `none`; the IV pick stays at medium. Personal takes Composer 2.5 Fast.
         smol:
-          - openai/gpt-6-luna:medium
+          - iv-codex/gpt-6-luna:medium
           - cursor/composer-2.5-fast
           - xai-oauth/${grok_primary}:medium
         # Every subagent's default, and the system's heaviest output producer.
         # Same Sol id as default, at medium. The personal fallback stays
         # SuperGrok at :high. Each subagent starts on a fresh context.
         task:
-          - openai/${gpt_primary}:medium
+          - iv-codex/${gpt_primary}:medium
           - xai-oauth/${grok_primary}:high
         # Reviews every primary turn's delta, so it wants a family other than
         # the primary's. IV spends company-funded Sonnet; the personal fallback
@@ -46,19 +47,19 @@ llm:
         # smol's interactive lane; a late review still lands on the current
         # primary, so the extra rate does not change what the agent sees.
         advisor:
-          - anthropic/claude-sonnet-5
+          - iv-cc/claude-sonnet-5
           - cursor/composer-2.5
         # Titles, memory, auto-thinking classification, unexpected-stop checks.
         # Unset would borrow @smol, which is the same model here — the point of
         # spelling it out is the lower effort.
         tiny:
-          - openai/gpt-6-luna:low
+          - iv-codex/gpt-6-luna:low
           - xai-oauth/${grok_primary}:minimal
         # Architectural planning: once per session, low volume, and the one
         # place where the best available reasoning outranks its price. Opus is
         # $6/$30 — worth it at this call frequency, not at task's.
         plan:
-          - anthropic/claude-opus-5:xhigh
+          - iv-cc/claude-opus-5:xhigh
           - cursor/claude-opus-5-1m:high
         # No `vision` role on purpose. inspect_image falls back @vision →
         # @default → active model, each level requiring image input. Both
@@ -71,8 +72,8 @@ llm:
       # match too, or the role resolves to a model the session cannot select.
       # Pin the provider on every glob.
       enabled_models:
-        - anthropic/claude-opus-5*
-        - anthropic/claude-sonnet-5*
+        - iv-cc/claude-opus-5*
+        - iv-cc/claude-sonnet-5*
         - iv-anthropic/claude-fable-5
         # IV's open-weight lines, served only by the default-token group; the
         # codex and cc groups list none of these ids. `kimi/kimi-k3*` keeps the
@@ -80,7 +81,7 @@ llm:
         - iv/deepseek-v4.1*
         - iv/glm-5.3*
         - iv/kimi/kimi-k3*
-        - openai/gpt-6*
+        - iv-codex/gpt-6*
         - xai-oauth/${grok_primary}*
         - openai-codex/gpt-6*
         # cursor/* globs come from llm.providers.cursor.

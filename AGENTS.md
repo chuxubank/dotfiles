@@ -51,21 +51,29 @@ is silently last-wins, so verify the rendered destinations are unique.
 
 ## LLM provider aliases
 
-`home/.chezmoidata/llm/*.yaml` names provider aliases after the consuming
-tool's bundled catalog, not after the endpoint: the same IV surface is `openai`
-where the tool ships an OpenAI provider and `iv-codex` where it does not.
-Do not unify these names. The alias is the lookup key for the tool's built-in
-model list, and an unrecognized alias silently loses that catalog's metadata.
+Pi and OMP name IV token surfaces the same way Codex and Hermes do.
+`iv-codex` is the codex token, `iv-cc` is the cc token, and `iv` is the
+default token's OpenAI surface. `iv-anthropic` is that same default token
+on the Anthropic protocol and only serves `claude-fable-5`. The bundled
+names `openai` and `anthropic` stay free for `/login`. `iv-codex` and
+`iv-cc` are not bundled providers: each catalog is the enumerated IV list
+plus models-dev metadata. opencode, craft-agents, and claude-code keep
+`openai` / `anthropic` as their own provider keys; they do not share Pi's
+`auth.json`. An alias the tool does not ship has no bundled card to inherit.
 
 Because our entries merge into the bundled catalog instead of replacing it, one
 model id can exist on several providers and a bare id resolves against the
 union, reaching a different provider with no error. Pin the provider on any id
-more than one alias can serve. Leave deliberate globs like `claude-opus-5*`
-alone: they are meant to surface every copy. Omit OpenRouter on pi, omp,
+more than one alias can serve. Pi's `enabled_models` generation globs stay
+unprefixed (`gpt-6*`, `claude-opus-5*`) so every copy stays in the picker.
+OMP pins the provider on those same globs. Role and default model refs stay
+qualified. Omit OpenRouter on pi, omp,
 hermes, and opencode: `models: false` still injects the API key and enables
 the bundled catalog, so a bare id can resolve there instead of IV or the
 subscription fallback. Tools that actually route through it (goose, gptel)
-keep the alias. The rationale is in `docs/adr/0005-llm-provider-aliases.md`.
+keep the alias. The rationale is in
+`docs/adr/0005-llm-provider-aliases.md` and
+`docs/adr/0010-iv-codex-iv-cc.md`.
 
 ## OMP model roles
 

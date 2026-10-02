@@ -9,7 +9,7 @@ file's `default_models` into `modelRoles` in `~/.omp/agent/config.yml`.
 
 Every role is a candidate list. The renderer picks the first entry whose
 provider alias resolved on this host, so one table covers both tiers: the IV
-aliases (`openai`, `anthropic`, `iv-anthropic`, `iv`) are gated on
+aliases (`iv-codex`, `iv-cc`, `iv-anthropic`, `iv`) are gated on
 `host_env: [iv]` and drop out elsewhere, leaving the personal-subscription
 entry. The `cursor` provider is the reverse: disabled on iv, so no Cursor
 model reaches the IV tier or its picker. IV is company-funded and spends
@@ -29,13 +29,13 @@ SKU and is unaffected. See
 
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
-| `default` | `openai/${gpt_primary}:high`        | `cursor/grok-4.7-500k-fast:high`        | Primary session; `*` selector                 |
+| `default` | `iv-codex/${gpt_primary}:high`      | `cursor/grok-4.7-500k-fast:high`        | Primary session; `*` selector                 |
 | `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
-| `smol`    | `openai/gpt-6-luna:medium`         | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
-| `task`    | `openai/${gpt_primary}:medium`      | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
-| `advisor` | `anthropic/claude-sonnet-5`        | `cursor/composer-2.5`                   | Per-turn advisor review                       |
-| `tiny`    | `openai/gpt-6-luna:low`            | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
-| `plan`    | `anthropic/claude-opus-5:xhigh`    | `cursor/claude-opus-5-1m:high`          | `--plan`, architectural planning              |
+| `smol`    | `iv-codex/gpt-6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
+| `task`    | `iv-codex/${gpt_primary}:medium`    | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
+| `advisor` | `iv-cc/claude-sonnet-5`            | `cursor/composer-2.5`                   | Per-turn advisor review                       |
+| `tiny`    | `iv-codex/gpt-6-luna:low`          | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
+| `plan`    | `iv-cc/claude-opus-5:xhigh`        | `cursor/claude-opus-5-1m:high`          | `--plan`, architectural planning              |
 
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
 those three.
@@ -100,15 +100,17 @@ SKU, so the suffix is `:medium` rather than an `-medium` id.
 
 Pin the provider on any model id more than one alias can serve; a bare id
 resolves against the union of every alias's catalog and can silently reach the
-wrong endpoint. `gpt-6-luna` is written `openai/gpt-6-luna`. The `anthropic`
-alias is the cc token's Anthropic surface, and its allow-list is Claude ids.
-GPT ids stay on `openai/gpt-6*`.
-See [ADR 0005](../adr/0005-llm-provider-aliases.md).
+wrong endpoint. `gpt-6-luna` is written `iv-codex/gpt-6-luna`. Claude ids
+on this table stay on `iv-cc`, except `claude-fable-5`, which stays on
+`iv-anthropic`. The bundled names `openai` and `anthropic` are the logins.
+See [ADR 0005](../adr/0005-llm-provider-aliases.md) and
+[ADR 0010](../adr/0010-iv-codex-iv-cc.md).
 
 Role targets must also appear in `enabled_models`. That list is the picker's
 allow-list, and a role pointing outside it resolves to a model the session
-cannot select. Entries are generation globs (`gpt-6*`,
-`claude-opus-5*`, `claude-fable-5*`, `grok-4.7*`, `muse-spark-1.3*`,
+cannot select. Entries are generation globs (`iv-codex/gpt-6*`,
+`iv-cc/claude-opus-5*`, `iv-cc/claude-sonnet-5*`, `claude-fable-5*`,
+`grok-4.7*`, `muse-spark-1.3*`,
 `gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
 catalogs, so older lines stay out while personal-host `plan` and `slow` still
 match `claude-opus-5*`. IV `slow` is the exact `iv-anthropic/claude-fable-5`

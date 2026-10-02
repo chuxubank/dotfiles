@@ -10,8 +10,8 @@ llm:
       # reasoning_effort. OMP's `claude-opus-5-1m` is `claude-opus-5@1m`; effort
       # follows reasoning_effort.
       model:
-        - openai/${gpt_primary}
-        - anthropic/claude-opus-5
+        - iv-codex/${gpt_primary}
+        - iv-cc/claude-opus-5
         - cursor/${grok_primary}@256k:fast
         - xai/${grok_primary}
         - openai-codex/${gpt_primary}
@@ -36,7 +36,7 @@ llm:
         - xai/${grok_primary}:low
       # IV first; xAI is a bundled Pi provider and the personal fallback.
       subagent_model:
-        - openai/${gpt_primary}
+        - iv-codex/${gpt_primary}
         - xai/${grok_primary}
       provider_sets: [iv]
       providers:
