@@ -1,0 +1,24 @@
+{{- /* chezmoi:modify-template */ -}}
+
+{{- /* Pi keeps OAuth login state in auth.json. This modify owns only the
+       Cursor API key, and only while llm.providers.cursor is enabled.
+       The secret is the api-key field of Personal/Tech/AI/Cursor. */ -}}
+
+{{- $key := "" -}}
+{{- if includeTemplate "when/context" (merge (dict "item" (index .llm.providers "cursor")) .) | fromJson -}}
+  {{- $key = includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/Cursor" "field" "api-key") .) -}}
+{{- end -}}
+{{- if $key -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict
+    "cursor" (dict
+      "type" "api_key"
+      "key" $key
+    )
+  )
+) -}}
+{{- else -}}
+{{- dig "stdin" "" .chezmoi -}}
+{{- end -}}
