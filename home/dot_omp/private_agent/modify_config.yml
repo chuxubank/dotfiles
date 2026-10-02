@@ -57,6 +57,7 @@
   "display" (dict
     "cacheMissMarker" true
     "showTokenUsage" true
+    "showTurnTime" true
   )
   "disabledProviders" $disabledProviders
   "modelRoles" $roles
@@ -72,8 +73,10 @@
     "batch" true
     "eager" "preferred"
     "enableEffort" true
+    "enableLsp" true
     "maxConcurrency" 3
     "maxRecursionDepth" 2
+    "showResolvedModelBadge" true
     "agentModelOverrides" $agentModels
     "isolation" (dict
       "enabled" true
