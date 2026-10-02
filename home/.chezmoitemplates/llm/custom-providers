@@ -16,7 +16,8 @@
        That fast lane also copies the stem's image input onto those
        siblings. A catalog stem's `omp_windows` land on
        `{stem}-{window}-fast` the same way. Missing Fast ids stay
-       unpriced; the stem rate is not copied onto them.
+       unpriced; the stem rate is not copied onto them. With `live_ids`, only
+       ids the provider serves survive, plus the synthesized window ids.
        Pi with a catalog skips that expansion. It keeps cost only and
        rewrites each stem onto pi-cursor-sdk ids (`@window`, `:fast`,
        `:slow`). longContext becomes cost.tiers. Names, windows, and
@@ -75,15 +76,14 @@
       {{- if hasKey $overrides $id -}}
         {{- $model = mergeOverwrite $model (deepCopy (index $overrides $id)) -}}
       {{- end -}}
-      {{- /* Inline Pi's single-consumer ProviderModelConfig projection. */ -}}
-      {{- $cost := dict "input" 0.0 "output" 0.0 "cacheRead" 0.0 "cacheWrite" 0.0 -}}
+      {{- /* Inline Pi's single-consumer ProviderModelConfig projection.
+             Pi takes long-context pricing as cost.tiers; OMP rows stay flat. */ -}}
+      {{- $costOv := dict -}}
       {{- if hasKey $model "cost" -}}
-        {{- $c := $model.cost -}}
-        {{- $_ := set $cost "input" (float64 (default 0 (index $c "input"))) -}}
-        {{- $_ := set $cost "output" (float64 (default 0 (index $c "output"))) -}}
-        {{- $_ := set $cost "cacheRead" (float64 (default 0 (index $c "cache_read"))) -}}
-        {{- $_ := set $cost "cacheWrite" (float64 (default 0 (index $c "cache_write"))) -}}
+        {{- $costOv = includeTemplate "llm/cost-override" $model.cost | fromJson -}}
       {{- end -}}
+      {{- if ne $tool "pi" -}}{{- $costOv = omit $costOv "longContext" -}}{{- end -}}
+      {{- $cost := includeTemplate "llm/pi-cost" $costOv | fromJson -}}
       {{- $input := list -}}
       {{- if hasKey $model "modalities" -}}
         {{- range $modality := default (list) (index $model.modalities "input") -}}
@@ -133,6 +133,20 @@
             "overrides" $stem
             "prefixes" (default (list) (index $ep "model_override_prefixes"))
             "contexts" (default dict (index $ep "context_windows"))) | fromJson -}}
+      {{- if hasKey $ep "live_ids" -}}
+        {{- $keep := dict -}}
+        {{- range $id := $ep.live_ids -}}{{- $_ := set $keep $id true -}}{{- end -}}
+        {{- range $stemId, $windows := default dict (index $ep "context_windows") -}}
+          {{- range $window := $windows -}}
+            {{- $_ := set $keep (printf "%s-%s-fast" $stemId $window) true -}}
+          {{- end -}}
+        {{- end -}}
+        {{- $live := dict -}}
+        {{- range $id, $ov := $overrides -}}
+          {{- if hasKey $keep $id -}}{{- $_ := set $live $id $ov -}}{{- end -}}
+        {{- end -}}
+        {{- $overrides = $live -}}
+      {{- end -}}
     {{- else -}}
       {{- $overrides = $explicit -}}
     {{- end -}}

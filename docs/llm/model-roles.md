@@ -44,7 +44,8 @@ Pi uses the same candidate order and the same Cursor families, but
 `pi-cursor-sdk` ids are not these SKUs. Personal `default` is
 `cursor/grok-4.7@256k:fast`: the Fast lane on the 256k window. The SDK
 default window is 500k (`cursor/grok-4.7@500k:fast`), which is OMP's
-`cursor/grok-4.7-500k-fast`. OMP only keeps that window while
+`cursor/grok-4.7-500k-fast`, but Cursor rejects that window from the SDK
+(ADR 0009). OMP only keeps that window while
 `extendedContext` is on; `modify_config.yml` sets it. Off clamps Cursor to
 the bundled long-context threshold, 256k. Pi cannot set Grok's `reasoning_effort`.
 `claude-opus-5-high` is `cursor/claude-opus-5@1m`. Composer Fast is

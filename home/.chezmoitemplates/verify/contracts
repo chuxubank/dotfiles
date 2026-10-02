@@ -528,7 +528,7 @@
 {{- /* The cursor provider is off on iv; check both projections off-iv. */ -}}
 {{- $ompProviders := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}
 {{- $ompCursor := index $ompProviders "cursor" "modelOverrides" -}}
-{{- $ompFast := index $ompCursor "grok-4.7-high-fast" -}}
+{{- $ompFast := index $ompCursor "grok-4.7-fast" -}}
 {{- $omp500 := index $ompCursor "grok-4.7-500k-fast" -}}
 {{- if or (not $ompFast) (ne (float64 $ompFast.cost.input) 4.0) (not $omp500) (ne (float64 $omp500.cost.input) 4.0) (ne (float64 (index $ompCursor "composer-2.5").cost.input) 0.5) (ne (float64 (index $ompCursor "composer-2.5-fast").cost.input) 3.0) -}}
   {{- fail "cursor rates: omp projection" -}}
@@ -541,8 +541,37 @@
   {{- fail "cursor rates: context window leaked" -}}
 {{- end -}}
 {{- $piCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
-{{- if or (hasKey $piCursor "grok-4.7-high-fast") (ne (float64 (index $piCursor "grok-4.7@500k:fast").cost.input) 4.0) (ne (float64 (index $piCursor "composer-2.5").cost.input) 3.0) (ne (float64 (index $piCursor "composer-2.5:slow").cost.input) 0.5) (ne (float64 (index $piCursor "claude-opus-5-5@1m:fast").cost.input) 8.0) (ne (float64 (index $piCursor "claude-opus-5-5@1m").cost.input) 4.0) (ne (float64 (index (index (index $piCursor "gpt-5.6-luna@1m:fast").cost.tiers 0) "input")) 0.8) -}}
+{{- if or (hasKey $piCursor "grok-4.7-high-fast") (ne (float64 (index $piCursor "grok-4.7@500k:fast").cost.input) 4.0) (ne (float64 (index $piCursor "composer-2.5").cost.input) 3.0) (ne (float64 (index $piCursor "composer-2.5:slow").cost.input) 0.5) (ne (float64 (index $piCursor "claude-opus-5-5@1m:fast").cost.input) 8.0) (ne (float64 (index $piCursor "claude-opus-5-5@1m").cost.input) 4.0) (ne (float64 (index $piCursor "claude-opus-5@1m:fast").cost.input) 10.0) -}}
   {{- fail "cursor rates: pi projection" -}}
+{{- end -}}
+
+{{- /* llm/tool-config: a provider_sets alias merges with the tool's own entry,
+      and its catalog resolves to rates, windows, and appended picker globs. */ -}}
+{{- $catalogCfg := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict
+      "tool" "fixture"
+      "host_env" "personal"
+      "llm" (dict
+        "catalogs" (dict "fixture" (dict
+          "enabled_models" (list "g1*" "g2")
+          "models" (dict "m" (dict
+            "cost" (dict "input" 1)
+            "fast" (dict "input" 2)
+            "omp_windows" (list "1m")
+            "pi_contexts" (list "300k")))))
+        "provider_sets" (dict "fixture" (dict "c" (dict "provider" "cursor" "models" false)))
+        "tools" (dict "fixture" (dict
+          "enabled_models" (list "first")
+          "provider_sets" (list "fixture")
+          "providers" (dict "c" (dict "catalog" "fixture"))))))) | fromJson -}}
+{{- $catalogProv := index $catalogCfg.providers "c" -}}
+{{- if or (ne (float64 (index $catalogProv.rates "m").cost.input) 1.0) (ne (float64 (index $catalogProv.rates "m-fast").cost.input) 2.0) (ne (index $catalogProv.context_windows "m" | toJson) "[\"1m\"]") (ne (index (index $catalogProv.catalog_models "m") "pi_contexts" | toJson) "[\"300k\"]") (hasKey (index $catalogProv.catalog_models "m") "cost") -}}
+  {{- fail (printf "tool-config: catalog resolution %s" ($catalogProv | toJson)) -}}
+{{- end -}}
+{{- if ne ($catalogCfg.enabled_models | toJson) "[\"first\",\"c/g1*\",\"c/g2\"]" -}}
+  {{- fail (printf "tool-config: catalog globs %s" ($catalogCfg.enabled_models | toJson)) -}}
+{{- end -}}
+{{- if ne $catalogProv.name "cursor" -}}
+  {{- fail "tool-config: provider_sets merge" -}}
 {{- end -}}
 
 ok

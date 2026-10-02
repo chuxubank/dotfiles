@@ -12,6 +12,35 @@ llm:
       type: models-dev
       file_path: models-dev-api
 
+  # ── Provider sets ───────────────────────────────────────────────────
+  # Alias groups a tool pulls in with `provider_sets: [<name>]`. A tool's
+  # own `providers.<alias>` entry is deep-merged on top.
+  provider_sets:
+    # IV's surfaces under Pi/OMP's bundled provider names, so bare ids land
+    # on IV first. `openai`/`anthropic` are the codex and cc token groups;
+    # `iv` is the default token on the OpenAI surface.
+    iv:
+      openai:
+        provider: iv
+        auth_field: codex-auth-token
+      anthropic:
+        provider: iv
+        type: anthropic
+        auth_field: cc-auth-token
+      # The default token's Anthropic surface. claude-fable-5 needs exactly
+      # this: the cc group 404s the id, and the OpenAI-typed `iv` alias is
+      # rejected for sending reasoning_effort. The catalog is scoped to that
+      # one id so the group's OpenAI-format models are not mistyped.
+      iv-anthropic:
+        provider: iv
+        type: anthropic
+        auth_field: default-auth-token
+        models:
+          - claude-fable-5
+      iv:
+        provider: iv
+        auth_field: default-auth-token
+
   # ── Providers ───────────────────────────────────────────────────────
   # Each provider = one API endpoint (base_url + default auth).
   # Tools override only `auth.field` to pick a different API key from the

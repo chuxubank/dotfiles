@@ -26,6 +26,8 @@
            context_windows — stem → OMP window ids, from the catalog
            catalog_models — stem → {fast?, pi_contexts?, pi_default_fast?},
                        from the catalog
+           live_ids  — ids the provider serves, from the catalog's
+                       ids_cache (only when that file exists)
            model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
@@ -46,6 +48,9 @@
                                                     are defaults for the ref, and
                                                     its enabled_models globs are
                                                     appended as <alias>/<glob>
+          Sets:   provider_sets: [iv]             — aliases from llm.provider_sets;
+                                                    a same-named `providers`
+                                                    entry is deep-merged on top
 */ -}}
 {{- $tool := .tool -}}
 {{- $toolCfg := index .llm.tools $tool -}}
@@ -63,6 +68,15 @@
 
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}
 {{- $refs := dict -}}
+{{- range $setName := default (list) (index $toolCfg "provider_sets") -}}
+  {{- $set := index (default dict (index $.llm "provider_sets")) $setName -}}
+  {{- if not $set -}}
+    {{- fail (printf "llm provider_sets: unknown set %q" $setName) -}}
+  {{- end -}}
+  {{- range $alias, $ref := $set -}}
+    {{- $_ := set $refs $alias (deepCopy $ref) -}}
+  {{- end -}}
+{{- end -}}
 {{- if hasKey $toolCfg "providers" }}
   {{- $raw := $toolCfg.providers -}}
   {{- if eq (kindOf $raw) "slice" }}
@@ -73,6 +87,9 @@
   {{- else }}
     {{- /* Map form: { alias: { provider: ..., auth_field: ... } } */ -}}
     {{- range $alias, $ref := $raw }}
+      {{- if hasKey $refs $alias -}}
+        {{- $ref = mergeOverwrite (index $refs $alias) (deepCopy $ref) -}}
+      {{- end -}}
       {{- $_ := set $refs $alias $ref -}}
     {{- end }}
   {{- end }}
@@ -176,6 +193,16 @@
     {{- $_ := set $resolved "rates" $rates -}}
     {{- $_ := set $resolved "context_windows" $windows -}}
     {{- $_ := set $resolved "catalog_models" $shapes -}}
+    {{- if hasKey $catalog "ids_cache" -}}
+      {{- $idsFile := index $ctx.path.cache $catalog.ids_cache -}}
+      {{- if not (hasPrefix "/" $idsFile) -}}{{- $idsFile = joinPath $ctx.chezmoi.homeDir $idsFile -}}{{- end -}}
+      {{- if stat $idsFile -}}
+        {{- $ids := include $idsFile | trim | fromJson -}}
+        {{- if and (eq (kindOf $ids) "slice") (gt (len $ids) 0) -}}
+          {{- $_ := set $resolved "live_ids" $ids -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
   {{- /* Resolve the cache declared for this provider/auth combination. */ -}}
   {{- $cacheKey := "" -}}

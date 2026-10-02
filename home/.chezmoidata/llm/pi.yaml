@@ -4,18 +4,11 @@ llm:
       # Same candidate order as omp.yaml. IV aliases enumerate models because
       # the proxy catalog differs from Pi's bundled catalog; subscription
       # providers keep models: false. Cursor ids are pi-cursor-sdk's, not
-      # OMP SKUs. Personal default is `${grok_primary}@256k:fast`. The SDK
-      # posts registry id `${grok_primary}` with params `context`,
-      # `reasoning_effort`, and `fast`, not OMP's `${grok_primary}-500k-fast`
-      # SKU. `models.list()` still advertises `500k` + high + fast as the
-      # default, and local validation only checks the id, so the picker
-      # shows it. The run registry then rejects `context=500k` with
-      # `Invalid parameters for registry model` / `AI Model Not Found`.
-      # `context=256k` completes; `context=500k` alone is rejected too, so
-      # the failure is the window, not `reasoning_effort`. Pi still cannot
-      # set Grok's reasoning_effort; the thinking map forwards the default.
-      # `claude-opus-5-high` is `claude-opus-5@1m`; effort follows
-      # reasoning_effort.
+      # OMP SKUs. Personal default is `${grok_primary}@256k:fast`: Cursor's
+      # run registry rejects the SDK's advertised 500k window (see
+      # docs/adr/0009-omp-models-dev-overlays.md). Pi cannot set Grok's
+      # reasoning_effort. `claude-opus-5-high` is `claude-opus-5@1m`; effort
+      # follows reasoning_effort.
       model:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
@@ -45,28 +38,13 @@ llm:
       subagent_model:
         - openai/${gpt_primary}
         - xai/${grok_primary}
+      provider_sets: [iv]
       providers:
-        openai:
-          provider: iv
-          auth_field: codex-auth-token
-        anthropic:
-          provider: iv
-          type: anthropic
-          auth_field: cc-auth-token
-        # Anthropic IV surface on the default token. This model needs the
-        # Anthropic type and adaptive reasoning handled server-side.
+        # Fable's adaptive reasoning is handled server-side.
         iv-anthropic:
-          provider: iv
-          type: anthropic
-          auth_field: default-auth-token
           model_overrides:
             claude-fable-5:
               reasoning: false
-          models:
-            - claude-fable-5
-        iv:
-          provider: iv
-          auth_field: default-auth-token
         ollama:
           provider: ollama
         # OAuth providers own their catalogs and authentication.

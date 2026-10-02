@@ -84,43 +84,20 @@ llm:
         - xai-oauth/${grok_primary}*
         - openai-codex/gpt-6*
         # cursor/* globs come from llm.catalogs.cursor.
+      provider_sets: [iv]
       providers:
-        openai:
-          provider: iv
-          auth_field: codex-auth-token
-        anthropic:
-          provider: iv
-          type: anthropic
-          auth_field: cc-auth-token
-        # The IV endpoint's Anthropic surface on the default token. Named for
-        # the surface, not its one model: `anthropic` above is the same surface
-        # on the cc token, and `iv` below is the same token on the OpenAI one.
-        #
-        # claude-fable-5 needs exactly this combination. The cc-auth group 404s
-        # the id, and the OpenAI-typed `iv` alias is rejected for sending
-        # reasoning_effort. The catalog is scoped to that one id so the group's
-        # OpenAI-format models are not mistyped as Anthropic.
-        #
-        # This group's Anthropic front is also stricter than the cc-auth one:
-        # it rejects the `strict` tool field, and rejects the oauth,
+        # The default token's Anthropic front is stricter than the cc-auth
+        # one: it rejects the `strict` tool field, and rejects the oauth,
         # prompt-caching-scope, and advanced-tool-use betas OMP sends by
         # default. allowAnthropicHeaderOverrides lets the header below replace
         # that set with the betas this endpoint accepts (probed 2026-09-02);
         # effort-2025-11-24 is what carries the role's `:high` thinking.
         iv-anthropic:
-          provider: iv
-          type: anthropic
-          auth_field: default-auth-token
           disable_strict_tools: true
           compat:
             allowAnthropicHeaderOverrides: true
           headers:
             anthropic-beta: claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24,context-management-2025-06-27
-          models:
-            - claude-fable-5
-        iv:
-          provider: iv
-          auth_field: default-auth-token
         xai-oauth:
           provider: xai-oauth
           models: false

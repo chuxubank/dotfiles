@@ -43,3 +43,10 @@ These used to be three tables keyed in three grammars (`llm.rates`,
 `llm.cursor_pi`, `llm.context_windows`), plus a models.dev provider list and
 picker globs copied into each tool. Adding a model meant touching five places
 that could drift apart. Tool providers now carry only `catalog: cursor`.
+
+The expansion is blind: it emitted about 2800 OMP overrides, most for ids
+Cursor does not serve. The catalog's `ids_cache` holds OMP's own
+`omp models cursor` id list; when present, only served ids survive, plus the
+`omp_windows` ids OMP synthesizes at request time. Without the cache (CI, a
+fresh machine) the full expansion is kept, so a missing list never unprices
+a real id.

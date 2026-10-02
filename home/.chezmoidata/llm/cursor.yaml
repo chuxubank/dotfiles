@@ -6,6 +6,11 @@ llm:
     cursor:
       # GetUsableModels ships no pricing. Stems copy the first-party
       # models.dev card from these providers, in preference order.
+      provider: cursor
+      # Live id list, refreshed by the LLM model refresh script. When it is
+      # present, OMP drops expanded overrides for ids Cursor does not serve;
+      # `omp_windows` ids are synthesized by OMP and always kept.
+      ids_cache: cursor-model-ids
       data_set: models-dev
       data_set_providers:
         - anthropic
@@ -92,45 +97,6 @@ llm:
             cacheRead: 0.4
             cacheWrite: 10
           pi_contexts: ["300k", "1m"]
-        gpt-5.6-luna:
-          fast:
-            input: 0.4
-            output: 2.4
-            cacheRead: 0.04
-            cacheWrite: 0.5
-            longContext:
-              inputThreshold: 272000
-              input: 0.8
-              output: 3.6
-              cacheRead: 0.08
-              cacheWrite: 1
-          pi_contexts: ["272k", "1m"]
-        gpt-5.6-sol:
-          fast:
-            input: 8
-            output: 40
-            cacheRead: 0.8
-            cacheWrite: 10
-            longContext:
-              inputThreshold: 272000
-              input: 16
-              output: 60
-              cacheRead: 1.6
-              cacheWrite: 20
-          pi_contexts: ["272k", "1m"]
-        gpt-5.6-terra:
-          fast:
-            input: 4
-            output: 24
-            cacheRead: 0.4
-            cacheWrite: 5
-            longContext:
-              inputThreshold: 272000
-              input: 8
-              output: 36
-              cacheRead: 0.8
-              cacheWrite: 10
-          pi_contexts: ["272k", "1m"]
         # List price only; listed so Pi projects the models.dev card.
         claude-fable-5:
           pi_contexts: ["300k", "1m"]
