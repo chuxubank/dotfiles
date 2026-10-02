@@ -179,6 +179,19 @@ environment:
         PASSWORD_STORE_DIR:
           homePath: [personal, pass]
 
+    # Bun's @cursor/sdk looks for tree-sitter next to the pi binary.
+    # The natives live in this platform package. Off on iv, same as pi-cursor-sdk.
+    - tool: pi
+      owner: pi
+      when:
+        enabled:
+          os: [darwin]
+        disabled:
+          host_env: [iv]
+      variables:
+        CURSOR_TREE_SITTER_VENDOR_DIR:
+          home: [.pi, agent, npm, node_modules, "@cursor/sdk-darwin-arm64", vendor]
+
     - tool: qmk
       when:
         enabled:
