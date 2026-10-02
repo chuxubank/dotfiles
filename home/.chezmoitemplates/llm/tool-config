@@ -156,6 +156,21 @@
     {{- end -}}
     {{- $_ := set $resolved "rates" $resolvedRates -}}
   {{- end -}}
+  {{- if hasKey $ref "context_windows" -}}
+    {{- $table := index (default dict (index $ctx.llm "context_windows")) $ref.context_windows -}}
+    {{- if not $table -}}
+      {{- fail (printf "llm context_windows: unknown table %q" $ref.context_windows) -}}
+    {{- end -}}
+    {{- $resolvedWindows := dict -}}
+    {{- range $model, $windows := $table -}}
+      {{- if ne (kindOf $windows) "slice" -}}
+        {{- fail (printf "llm context_windows: %s windows must be a list" $model) -}}
+      {{- end -}}
+      {{- $resolvedModel := includeTemplate "llm/resolve-model-alias" (dict "model" $model "aliases" $modelAliases) -}}
+      {{- $_ := set $resolvedWindows $resolvedModel $windows -}}
+    {{- end -}}
+    {{- $_ := set $resolved "context_windows" $resolvedWindows -}}
+  {{- end -}}
   {{- if hasKey $ref "project" -}}
     {{- $_ := set $resolved "project" $ref.project -}}
   {{- end -}}

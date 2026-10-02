@@ -2,7 +2,8 @@ llm:
   # Cursor prices shared by OMP and Pi. Keys are models.dev stems, or
   # `<stem>-fast` for the Cursor docs Fast rate. A stem omitted here keeps
   # its models.dev card. OMP expands these onto SKU siblings
-  # (`-high`, `-high-fast`, `cursor-`). Pi projects the same cards onto
+  # (`-high`, `-high-fast`, `cursor-`). Context-window ids are
+  # `context_windows`, not effort suffixes. Pi projects the same cards onto
   # pi-cursor-sdk ids; see cursor_pi. longContext is OMP's field — Pi
   # emits it as cost.tiers.
   #
@@ -122,3 +123,13 @@ llm:
     muse-spark-1.3:
       contexts: ["300k", "1m"]
     gemini-3.8-flash: {}
+
+  # OMP ids that embed a context window. expand-model-overrides cannot
+  # derive these from effort suffixes. A provider sets `context_windows:
+  # cursor`; the fast lane is copied onto `{stem}-{window}-fast` (cost, and
+  # image input when the stem has a dedicated `*-fast` key). Only windows
+  # that are their own model id belong here — the unsuffixed stem stays the
+  # default window. Pi uses `@window` instead; see cursor_pi.
+  context_windows:
+    cursor:
+      ${grok_primary}: ["500k"]

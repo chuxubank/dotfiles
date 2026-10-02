@@ -14,8 +14,9 @@
        `{stem}-thinking-{effort}` compounds.
        A dedicated `*-fast` key expands to `*-{effort}-fast` and wins.
        That fast lane also copies the stem's image input onto those
-       siblings. Missing Fast ids stay unpriced; the stem rate is not
-       copied onto them.
+       siblings. `contexts` from the provider's `context_windows` table
+       lands on `{stem}-{window}-fast` the same way. Missing Fast ids stay
+       unpriced; the stem rate is not copied onto them.
        project: pi-cursor skips that expansion. It keeps cost only and
        rewrites each stem onto pi-cursor-sdk ids (`@window`, `:fast`,
        `:slow`). longContext becomes cost.tiers. Names, windows, and
@@ -142,7 +143,8 @@
     {{- else if eq $tool "omp" -}}
       {{- $overrides = includeTemplate "llm/expand-model-overrides" (dict
             "overrides" $stem
-            "prefixes" (default (list) (index $ep "model_override_prefixes"))) | fromJson -}}
+            "prefixes" (default (list) (index $ep "model_override_prefixes"))
+            "contexts" (default dict (index $ep "context_windows"))) | fromJson -}}
     {{- else -}}
       {{- $overrides = $explicit -}}
     {{- end -}}

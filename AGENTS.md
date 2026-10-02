@@ -102,6 +102,9 @@ comparison the role table uses. Do not add a field-allowlist or a $0
 special case for subscriptions. Effort-sibling and `cursor-` copies take `cost`,
 so a live name or window is not replaced by the first-party stem. A stem with
 a dedicated `*-fast` key also copies its image `input` onto those siblings.
+Context-window ids are not derived: declare them in `llm.context_windows` in
+that same file, opt the provider in with `context_windows`, and the fast lane
+is copied onto `{stem}-{window}-fast`.
 Claude thinking compounds (`{stem}-thinking-{effort}` and `{id}-thinking`) stay
 on that same rate.
 Explicit `model_overrides` still win. Fast rates come only from a `*-fast`

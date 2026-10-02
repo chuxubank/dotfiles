@@ -1,5 +1,5 @@
 {{- /* llm/expand-model-overrides — Fan modelOverrides out to sibling ids.
-       Input: { overrides: dict, prefixes: list }
+       Input: { overrides: dict, prefixes: list, contexts: dict }
        Output: JSON dict.
 
        Cost copies. An existing key is never replaced:
@@ -9,16 +9,22 @@
          `{stem}-{effort}-thinking`, including the `*-fast` twin
        - a dedicated `*-fast` key expands to `*-{effort}-fast`.
          It does not price the non-fast ids.
+       - `contexts` maps a stem to window tokens. Prefixes are stripped
+         before lookup. Each token lands on `{stem}-{window}-fast` from
+         that stem's fast lane. Windows are data, not effort suffixes,
+         and an unlisted stem grows no context id.
 
        Image input follows a stem only when that stem has a dedicated
        `*-fast` key. The fast lane is the same model at another rate, and
-       Cursor's Grok effort ids are text-only, so those siblings would
-       otherwise hide the stem card's image input. Stems with no fast key
-       stay cost-only: their live catalog modalities are left alone. A
-       named card is not copied onto the fast id. */ -}}
+       some effort ids ship as text-only, so those siblings would otherwise
+       hide the stem card's image input. `{stem}-{window}-fast` receives
+       that same patch. Stems with no fast key stay cost-only: their live
+       catalog modalities are left alone. A named card is not copied onto
+       the fast id. */ -}}
 {{- $in := . -}}
 {{- $overrides := default dict (index $in "overrides") -}}
 {{- $prefixes := default (list) (index $in "prefixes") -}}
+{{- $contexts := default dict (index $in "contexts") -}}
 {{- $efforts := list "none" "minimal" "low" "medium" "high" "xhigh" "max" "thinking" -}}
 
 {{- $base := dict -}}
@@ -84,6 +90,14 @@
           {{- end -}}
           {{- if not (hasKey $expanded $thinkFirst) -}}{{- $_ := set $expanded $thinkFirst $patch -}}{{- end -}}
           {{- if not (hasKey $expanded $thinkLast) -}}{{- $_ := set $expanded $thinkLast $patch -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if $fast -}}
+        {{- range $window := default (list) (index $contexts $stemId) -}}
+          {{- if $window -}}
+            {{- $ctxSibling := printf "%s-%s-fast" $stemId $window -}}
+            {{- if not (hasKey $expanded $ctxSibling) -}}{{- $_ := set $expanded $ctxSibling $patch -}}{{- end -}}
+          {{- end -}}
         {{- end -}}
       {{- end -}}
     {{- end -}}

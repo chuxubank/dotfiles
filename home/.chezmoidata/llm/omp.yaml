@@ -1,13 +1,15 @@
 llm:
   tools:
     omp:
-      # Primary session prefers IV, then Cursor `${grok_primary}` Fast, then SuperGrok,
-      # then ChatGPT/Codex OAuth. `openai`/`anthropic` are IV aliases (same as
-      # Pi); the ChatGPT subscription is `openai-codex`.
+      # Primary session prefers IV, then Cursor `${grok_primary}` 500k Fast,
+      # then SuperGrok, then ChatGPT/Codex OAuth. `openai`/`anthropic` are IV
+      # aliases (same as Pi); the ChatGPT subscription is `openai-codex`.
+      # The 500k id is the context SKU (`grok-4.7-500k-fast`), not the effort
+      # sibling `grok-4.7-high-fast`. The window still needs extendedContext.
       model:
         - openai/${gpt_primary}
         - anthropic/claude-opus-5
-        - cursor/${grok_primary}-high-fast
+        - cursor/${grok_primary}-500k-fast
         - xai-oauth/${grok_primary}
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-high
@@ -148,8 +150,11 @@ llm:
           # GetUsableModels grok ids. Stems cover effort siblings and Claude
           # thinking compounds. A dedicated *-fast key expands to
           # *-{effort}-fast and carries the stem's image input, so Cursor's
-          # text-only Grok effort ids still advertise vision.
+          # text-only Grok ids still advertise vision. Context windows are
+          # not effort suffixes; `context_windows` names `{stem}-{window}-fast`
+          # (llm.context_windows in llm/cursor.yaml).
           rates: cursor
+          context_windows: cursor
           data_set: models-dev
           data_set_providers:
             - anthropic

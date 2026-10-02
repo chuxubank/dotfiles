@@ -14,12 +14,24 @@ copy only `cost`, because those keys exist so a rate follows the stem — not
 so a first-party name overwrites a live Fast lane. Image `input` is the
 exception when the stem has a dedicated `*-fast` key: that lane is the same
 model, and Cursor's Grok 4.7 effort ids ship as text-only, so the stem card's
-image input is copied onto those siblings. Explicit rate keys in
+image input is copied onto those siblings. Context-window ids are not effort
+suffixes. `llm.context_windows` names them, and the same fast-lane patch is
+copied onto `{stem}-{window}-fast`. OMP's personal default is the `500k`
+window of `${grok_primary}`. Explicit rate keys in
 `llm/cursor.yaml` replace the models.dev price, which is how Cursor Fast
 stays on the Cursor docs rate rather than the xAI list price. A provider
 `model_overrides` entry still wins over that table. Pi reads the same stem
 cards and projects cost onto `pi-cursor-sdk` ids (`@window`, `:fast`,
 `:slow`). It does not copy names, windows, or thinking ladders onto those ids.
+Pi's personal default stays `${grok_primary}@256k:fast`. That id is not the
+500k SKU: `pi-cursor-sdk` posts registry id `${grok_primary}` plus `context`,
+`reasoning_effort`, and `fast`. `models.list()` still advertises `500k` +
+high + fast as the default, and local validation only checks the id, so the
+picker shows it. Cursor's run registry then rejects `context=500k` with
+`Invalid parameters for registry model` / `AI Model Not Found`.
+`context=256k` completes; `context=500k` alone is rejected too, so the
+failure is the window, not `reasoning_effort`. Pi still cannot set Grok's
+reasoning_effort; the thinking map forwards the default.
 
 Cursor's thinking variants are their own ids (`claude-opus-5-thinking-max`).
 Those copies are cost-only too, plus image input when the stem's fast lane

@@ -17,9 +17,19 @@ effort freely; the fallback stays
 deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
+Pi does not use this table. Its personal default is
+`cursor/${grok_primary}@256k:fast` because `pi-cursor-sdk` posts `context`,
+`reasoning_effort`, and `fast` on registry id `${grok_primary}`, and Cursor's
+run registry rejects `context=500k` (`Invalid parameters for registry model`
+/ `AI Model Not Found`). `models.list()` still advertises that window, and
+local validation only checks the id. `context=256k` completes; `context=500k`
+alone is rejected too. OMP's `cursor/${grok_primary}-500k-fast` is a different
+SKU and is unaffected. See
+[ADR 0009](../adr/0009-omp-models-dev-overlays.md).
+
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
 |-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
-| `default` | `openai/${gpt_primary}:high`        | `cursor/grok-4.7-high-fast:high`        | Primary session; `*` selector                 |
+| `default` | `openai/${gpt_primary}:high`        | `cursor/grok-4.7-500k-fast:high`        | Primary session; `*` selector                 |
 | `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
 | `smol`    | `openai/gpt-6-luna:medium`         | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
 | `task`    | `openai/${gpt_primary}:medium`      | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
@@ -34,7 +44,7 @@ Pi uses the same candidate order and the same Cursor families, but
 `pi-cursor-sdk` ids are not these SKUs. Personal `default` is
 `cursor/grok-4.7@256k:fast`: the Fast lane on the 256k window. The SDK
 default window is 500k (`cursor/grok-4.7@500k:fast`), which is OMP's
-`cursor/grok-4.7-high-fast`. OMP only keeps that window while
+`cursor/grok-4.7-500k-fast`. OMP only keeps that window while
 `extendedContext` is on; `modify_config.yml` sets it. Off clamps Cursor to
 the bundled long-context threshold, 256k. Pi cannot set Grok's `reasoning_effort`.
 `claude-opus-5-high` is `cursor/claude-opus-5@1m`. Composer Fast is
@@ -43,6 +53,7 @@ the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
 is `cursor/claude-opus-5-5@1m`. Pi has no `slow` role, so that id is only on
 the picker allow-list. Prices are one table, `llm.rates.cursor` in
 `home/.chezmoidata/llm/cursor.yaml`. OMP expands those stems to SKU siblings.
+Context-window ids come from `llm.context_windows` in that file.
 Pi projects the same cards onto extension ids. `longContext` becomes
 `cost.tiers`. The unsuffixed Pi id bills the fast card when that is the SDK
 default (Grok, Composer); `:slow` bills the stem.
@@ -53,9 +64,9 @@ default (Grok, Composer); `:slow` bills the stem.
 
 `inspect_image` resolves `@vision` → `@default` → active model, requiring image
 input at each level. Both tiers' `default` advertise it: IV through `${gpt_primary}`,
-and personal through `cursor/grok-4.7-high-fast`. Cursor's bundled Grok 4.7
-effort ids are text-only; the Fast lane copies image input from the `grok-4.7`
-card onto those siblings. Neither provider bills per image. `commit` falls
+and personal through `cursor/grok-4.7-500k-fast`. Cursor's bundled Grok 4.7
+effort ids and the `500k-fast` SKU are text-only; the Fast lane copies image
+input from the `grok-4.7` card onto those siblings. Neither provider bills per image. `commit` falls
 through to the active model, which is what that flow wants.
 
 Setting a role that would resolve to the same model as its fallback is only

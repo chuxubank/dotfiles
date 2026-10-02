@@ -498,23 +498,47 @@
 {{- end -}}
 
 {{- /* Image input is copied only when the stem card and its fast key both exist.
+      Context windows come from the contexts map, not from the stem name.
       The live catalog is not on CI, so this fixture is the check. */ -}}
 {{- $imaged := includeTemplate "llm/expand-model-overrides" (dict
+      "contexts" (dict
+        "grok-4.7" (list "500k")
+        "other" (list "1m"))
       "overrides" (dict
         "grok-4.7" (dict "cost" (dict "input" 2 "output" 6) "input" (list "text" "image"))
         "grok-4.7-fast" (dict "cost" (dict "input" 4 "output" 12))
-        "plain" (dict "cost" (dict "input" 1 "output" 1) "input" (list "text" "image")))) | fromJson -}}
-{{- if or (not (has "image" (index $imaged "grok-4.7-high-fast").input)) (ne (float64 (index $imaged "grok-4.7-high-fast").cost.input) 4.0) (not (has "image" (index $imaged "grok-4.7-high").input)) (hasKey (index $imaged "plain-high") "input") -}}
+        "plain" (dict "cost" (dict "input" 1 "output" 1) "input" (list "text" "image"))
+        "other" (dict "cost" (dict "input" 3 "output" 3))
+        "other-fast" (dict "cost" (dict "input" 3 "output" 3)))) | fromJson -}}
+{{- if or (not (has "image" (index $imaged "grok-4.7-high-fast").input)) (ne (float64 (index $imaged "grok-4.7-high-fast").cost.input) 4.0) (not (has "image" (index $imaged "grok-4.7-500k-fast").input)) (ne (float64 (index $imaged "grok-4.7-500k-fast").cost.input) 4.0) (not (has "image" (index $imaged "grok-4.7-high").input)) (hasKey (index $imaged "plain-high") "input") (hasKey $imaged "plain-500k-fast") -}}
   {{- fail "expand-model-overrides: image follows the fast lane" -}}
+{{- end -}}
+{{- if or (hasKey $imaged "grok-4.7-1m-fast") (hasKey $imaged "other-500k-fast") (hasKey $imaged "plain-500k-fast") (not (index $imaged "other-1m-fast")) (ne (float64 (index $imaged "other-1m-fast").cost.input) 3.0) (hasKey (index $imaged "other-1m-fast") "input") -}}
+  {{- fail "expand-model-overrides: context windows" -}}
+{{- end -}}
+{{- $noCtx := includeTemplate "llm/expand-model-overrides" (dict
+      "overrides" (dict
+        "grok-4.7-fast" (dict "cost" (dict "input" 4 "output" 12)))) | fromJson -}}
+{{- if hasKey $noCtx "grok-4.7-500k-fast" -}}
+  {{- fail "expand-model-overrides: context window invented" -}}
 {{- end -}}
 
 {{- /* Live projection uses the shared rate table. Stem list prices come from
       models.dev and are absent on CI, so only cards in llm/cursor.yaml are checked here. */ -}}
 {{- /* The cursor provider is off on iv; check both projections off-iv. */ -}}
-{{- $ompCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
+{{- $ompProviders := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}
+{{- $ompCursor := index $ompProviders "cursor" "modelOverrides" -}}
 {{- $ompFast := index $ompCursor "grok-4.7-high-fast" -}}
-{{- if or (not $ompFast) (ne (float64 $ompFast.cost.input) 4.0) (ne (float64 (index $ompCursor "composer-2.5").cost.input) 0.5) (ne (float64 (index $ompCursor "composer-2.5-fast").cost.input) 3.0) -}}
+{{- $omp500 := index $ompCursor "grok-4.7-500k-fast" -}}
+{{- if or (not $ompFast) (ne (float64 $ompFast.cost.input) 4.0) (not $omp500) (ne (float64 $omp500.cost.input) 4.0) (ne (float64 (index $ompCursor "composer-2.5").cost.input) 0.5) (ne (float64 (index $ompCursor "composer-2.5-fast").cost.input) 3.0) -}}
   {{- fail "cursor rates: omp projection" -}}
+{{- end -}}
+{{- $xaiOv := dict -}}
+{{- if index $ompProviders "xai-oauth" -}}
+  {{- $xaiOv = default dict (index (index $ompProviders "xai-oauth") "modelOverrides") -}}
+{{- end -}}
+{{- if hasKey $xaiOv "grok-4.7-500k-fast" -}}
+  {{- fail "cursor rates: context window leaked" -}}
 {{- end -}}
 {{- $piCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
 {{- if or (hasKey $piCursor "grok-4.7-high-fast") (ne (float64 (index $piCursor "grok-4.7@500k:fast").cost.input) 4.0) (ne (float64 (index $piCursor "composer-2.5").cost.input) 3.0) (ne (float64 (index $piCursor "composer-2.5:slow").cost.input) 0.5) (ne (float64 (index $piCursor "claude-opus-5-5@1m:fast").cost.input) 8.0) (ne (float64 (index $piCursor "claude-opus-5-5@1m").cost.input) 4.0) (ne (float64 (index (index (index $piCursor "gpt-5.6-luna@1m:fast").cost.tiers 0) "input")) 0.8) -}}
