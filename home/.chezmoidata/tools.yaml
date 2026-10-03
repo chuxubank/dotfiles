@@ -241,7 +241,7 @@ tools:
   # Self-hosted daemon that launches the other agent CLIs. The desktop cask
   # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
   paseo:
-    when: *non_ci
+    when: *disabled
     remove:
       - ".paseo/config.json"
     purge:
