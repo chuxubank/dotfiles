@@ -132,6 +132,16 @@ tools:
     purge:
       - ".config/herdr/**"
 
+  # Mac App Store app installed through brew mas, plus the managed config and
+  # the macOS import helper. The helper is a bin/ script, so it is gated in
+  # its template rather than listed here.
+  immersive-translate:
+    when: *disabled
+    remove:
+      - ".config/immersive-translate/config.json"
+    purge:
+      - ".config/immersive-translate/**"
+
   # Fig-style PTY autocomplete. Disabled because its Node readline proxy blocks
   # Kitty keyboard protocol query/set/push/pop sequences, breaking enhanced
   # keyboard input in terminal multiplexers such as Luvus and Herdr.
