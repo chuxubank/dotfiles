@@ -1,10 +1,10 @@
 #!/bin/sh
 set -eu
 
-echo "{{ template "week" . }} 󰯁 Refresh LLM models"
+echo "{{ includeTemplate "date" . | trim }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
 # Best effort: a failed refresh keeps the previous cache and only warns.
-# The week stamp above reruns this script weekly, and exiting non-zero here
+# The day stamp above reruns this script daily, and exiting non-zero here
 # would abort the rest of chezmoi apply over a stale catalog.
 
 fetch_model_response() {
