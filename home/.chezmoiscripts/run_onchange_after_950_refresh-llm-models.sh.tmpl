@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-echo "{{ includeTemplate "date" . | trim }} 󰯁 Refresh LLM models"
+echo "{{ includeTemplate "time/date" . | trim }} 󰯁 Refresh LLM models"
 export PASSWORD_STORE_DIR={{ joinPath .chezmoi.homeDir .path.personal.pass | quote }}
 # Best effort: a failed refresh keeps the previous cache and only warns.
 # The day stamp above reruns this script daily, and exiting non-zero here

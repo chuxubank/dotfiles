@@ -1,7 +1,7 @@
 {{- if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Upgrade agent extensions"
+echo "{{ template "time/week" . }} 󰯁 Upgrade agent extensions"
 
 source "$HOME/.zshenv"
 export BUN_INSTALL="${BUN_INSTALL:-$HOME/{{ .path.tool.bun }}}"

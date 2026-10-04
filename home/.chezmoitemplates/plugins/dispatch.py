@@ -4,7 +4,7 @@
 {{- end -}}
 {{- $managers := includeTemplate "plugins/managers" (merge (dict "phase" $phase) .) | fromJson -}}
 #!/usr/bin/env python3
-# Reconciliation epoch: {{ includeTemplate "week" . }}
+# Reconciliation epoch: {{ includeTemplate "time/week" . }}
 
 import json
 

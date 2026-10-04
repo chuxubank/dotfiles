@@ -1,7 +1,7 @@
 {{ if and (ne .host_env "ci") (ne .chezmoi.os "windows") -}}
 #!/usr/bin/env zsh
 
-echo "{{ template "week" . }} 󰯁 Upgrade Rust tools"
+echo "{{ template "time/week" . }} 󰯁 Upgrade Rust tools"
 
 source "$HOME/.zshenv"
 export PATH="${CARGO_HOME:+$CARGO_HOME/bin:}$HOME/.local/bin:$PATH"
