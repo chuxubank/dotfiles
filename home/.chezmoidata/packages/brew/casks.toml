@@ -65,7 +65,7 @@ casks = [
   "Jarvis322/tap/sysdata",
   "karabiner-elements",
   { name = "kiro-cli", owner = "kiro-cli" },
-  "kotlin-lsp",
+  # "kotlin-lsp",
   "libreoffice",
   "loop",
   "mitmproxy",
