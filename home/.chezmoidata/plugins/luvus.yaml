@@ -21,9 +21,7 @@ plugins:
       - name: asahiart.worktrunk
         description: >-
           Provide Luvus worktree creation and removal through Worktrunk. The
-          module manifest requires Luvus 0.15.0 or newer; provider selection is
+          module manifest requires Luvus 0.14.3 or newer; provider selection is
           pinned in private_dot_luvus/modify_config.json, while production
           policy settings remain unmanaged until they exist authoritatively.
         source: AsahiArt/luvus-worktrunk-provider
-        when:
-          disabled: true
