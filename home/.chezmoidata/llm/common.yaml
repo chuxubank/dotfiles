@@ -65,9 +65,6 @@ llm:
           auth_field: cc-auth-token
       auth:
         path: Work/IV/LLM
-      when:
-        enabled:
-          host_env: ["iv"]
 
     # Codex's built-in ChatGPT-login provider. No endpoint, key, or model
     # cache: the OpenAI API is not used. Codex skips this alias when writing
