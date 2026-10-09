@@ -37,6 +37,8 @@ global = [
   { name = "@oh-my-pi/pi-coding-agent", owner = "omp" },
   { name = "@openai/codex", owner = "codex" },
   { name = "@zed-industries/codex-acp", owner = "codex" },
+  # Postinstall prepares the native executable; Bun must allow it to run.
+  { name = "agent-browser", owner = "agent-browser", trust = true },
   { name = "clawhub", owner = "openclaw" },
   { name = "emacs-lsp-proxy", trust = true, when.enabled = false },
   { name = "lody", owner = "lody" },

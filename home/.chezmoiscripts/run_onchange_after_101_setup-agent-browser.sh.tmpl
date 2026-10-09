@@ -1,0 +1,20 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "agent-browser") .) | fromJson -}}
+#!/usr/bin/env zsh
+set -e
+
+echo "󰯁 Setup agent-browser Chrome"
+
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+{{ includeTemplate "script/windows-path" . }}
+
+{{- if and (eq .chezmoi.os "linux") (ne .chezmoi.arch "amd64") }}
+# Chrome for Testing has no Linux ARM build. The CLI still supports a
+# system Chromium via --executable-path, or an existing browser via --cdp.
+echo "Install system Chromium for agent-browser on Linux {{ .chezmoi.arch }}; Chrome for Testing is unavailable."
+{{- else }}
+# Bun owns the CLI. Keep the browser download in its own success/retry unit;
+# Linux system libraries remain an explicit, privileged install --with-deps.
+agent-browser install
+{{- end }}
+{{- end }}

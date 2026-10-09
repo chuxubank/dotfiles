@@ -89,6 +89,22 @@ Shared workspace, tab, pane, command, and agent declarations live in
 Both runtime commands leave existing named workspaces untouched and focus the
 workspace marked with =focus: true= after applying missing entries.
 
+** Browser automation
+
+[[https://github.com/vercel-labs/agent-browser][agent-browser]] is installed globally through Bun. Its switch in
+[[file:home/.chezmoidata/tools.yaml][tools.yaml]] gates both the CLI and the official discovery skill on
+non-CI macOS, Linux, and Windows hosts. Browser downloads run in a separate
+=run_onchange= script after Bun setup, so a failed download can be retried
+without reinstalling the CLI.
+
+The skill is distributed through the shared skills manager; it loads current
+usage instructions with =agent-browser skills get core=. Chrome DevTools MCP
+remains available separately. On Linux, missing system browser libraries can
+be installed explicitly with =agent-browser install --with-deps= (requires
+system package-manager privileges); automated setup only downloads Chrome.
+Linux ARM hosts need system Chromium or a CDP connection because Chrome for
+Testing has no Linux ARM build.
+
 ** OMP model roles
 
 OMP resolves named model slots (=default=, =smol=, =slow=, =task=, =advisor=,

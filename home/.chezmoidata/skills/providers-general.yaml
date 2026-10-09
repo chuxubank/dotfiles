@@ -69,6 +69,10 @@ skills:
         source: lycorp-jp/sim-use/skills
         owner: sim-use
 
+      - name: agent-browser
+        source: vercel-labs/agent-browser
+        owner: agent-browser
+
       - name: agent-device
         source: callstack/agent-device
 

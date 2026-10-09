@@ -28,6 +28,17 @@ tool_conditions:
   iv_only: &iv_only { enabled: { host_env: [iv] } }
 
 tools:
+  # CLI via bun; the official discovery skill follows this switch. Chrome
+  # downloads are a separate retry unit from the global package install.
+  agent-browser:
+    when:
+      enabled:
+        os: [darwin, linux, windows]
+      disabled:
+        host_env: [ci]
+    purge:
+      - ".agent-browser/**"
+
   # CLI via bun. No managed dest files.
   amp:
     when: *disabled
