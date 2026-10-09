@@ -14,7 +14,28 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
-      "additionalProperties": { "$ref": "#/$defs/tool" }
+      "additionalProperties": { "$ref": "#/$defs/tool" },
+      "properties": {
+        "rtk": {
+          "allOf": [
+            { "$ref": "#/$defs/tool" },
+            {
+              "required": ["purge"],
+              "properties": {
+                "purge": {
+                  "allOf": [
+                    { "contains": { "const": ".config/rtk/**" } },
+                    { "contains": { "const": ".local/share/rtk/**" } },
+                    { "contains": { "const": "Library/Caches/rtk/**" } },
+                    { "contains": { "const": "AppData/Local/rtk/**" } }
+                  ],
+                  "not": { "contains": { "const": "Library/Application Support/rtk/**" } }
+                }
+              }
+            }
+          ]
+        }
+      }
     }
   },
   "$defs": {
@@ -79,6 +100,12 @@
       "minLength": 1,
       "pattern": "^(?![/~])(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*\\\\)(?!\\*{1,2}$).+$"
     },
+    "stringPath": {
+      "allOf": [
+        { "$ref": "#/$defs/path" },
+        { "not": { "pattern": "^[^./][^/]*/(?!\\*\\*$)[^/]+(?:/\\*\\*)?$" } }
+      ]
+    },
     "commandPath": {
       "allOf": [
         { "$ref": "#/$defs/path" },
@@ -128,13 +155,13 @@
         "when": { "$ref": "#/$defs/when" },
         "remove": {
           "type": "array",
-          "items": { "$ref": "#/$defs/path" }
+          "items": { "$ref": "#/$defs/stringPath" }
         },
         "purge": {
           "type": "array",
           "items": {
             "oneOf": [
-              { "$ref": "#/$defs/path" },
+              { "$ref": "#/$defs/stringPath" },
               { "$ref": "#/$defs/purgeCommand" }
             ]
           }

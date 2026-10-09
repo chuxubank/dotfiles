@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill providers and agent targets",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skills"],
+  "properties": {
+    "skills": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agents": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/string" },
+              { "$ref": "#/$defs/agent" }
+            ]
+          }
+        },
+        "external": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/external" }
+        },
+        "provider_groups": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/provider" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "string": { "type": "string", "minLength": 1 },
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "$ref": "#/$defs/condition" },
+        "disabled": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "condition": {
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "properties": { "tool": { "$ref": "tools.schema.json#/$defs/match" } },
+          "additionalProperties": false,
+          "patternProperties": {
+            "^(host_env|device_type|roles)$": { "$ref": "tools.schema.json#/$defs/match" },
+            "^os$": { "$ref": "tools.schema.json#/$defs/os" },
+            "^(mem_gb|disk_gb|disk_available_gb)$": { "$ref": "tools.schema.json#/$defs/range" }
+          }
+        }
+      ]
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/string" },
+        "owner": { "$ref": "#/$defs/string" },
+        "when": { "$ref": "#/$defs/when" }
+      }
+    },
+    "external": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "owner"],
+      "properties": {
+        "name": { "$ref": "#/$defs/string" },
+        "owner": { "$ref": "#/$defs/string" },
+        "when": { "$ref": "#/$defs/when" }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source"],
+      "properties": {
+        "name": {
+          "oneOf": [
+            { "$ref": "#/$defs/string" },
+            { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/string" } }
+          ]
+        },
+        "source": { "$ref": "#/$defs/string" },
+        "owner": { "$ref": "#/$defs/string" },
+        "full_depth": { "type": "boolean" },
+        "when": { "$ref": "#/$defs/when" }
+      }
+    }
+  }
+}

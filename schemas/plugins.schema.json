@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plugin and package declarations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plugins"],
+  "properties": {
+    "plugins": {
+      "type": "object",
+      "properties": {
+        "providers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/commonProvider" }
+        },
+        "pi": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "providers": { "type": "array", "items": { "$ref": "#/$defs/piProvider" } },
+            "marketplaces": { "$ref": "#/$defs/marketplaces" }
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "providers": { "type": "array", "items": { "$ref": "#/$defs/provider" } },
+          "marketplaces": { "$ref": "#/$defs/marketplaces" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "string": { "type": "string", "minLength": 1 },
+    "resources": { "type": "array", "items": { "$ref": "#/$defs/string" } },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "anyOf": [{ "required": ["source"] }, { "required": ["sources"] }],
+      "properties": {
+        "name": { "$ref": "#/$defs/string" },
+        "description": { "type": "string" },
+        "source": { "$ref": "#/$defs/string" },
+        "sources": { "type": "object", "additionalProperties": { "$ref": "#/$defs/string" } },
+        "ref": { "$ref": "#/$defs/string" },
+        "when": { "$ref": "skills.schema.json#/$defs/when" },
+        "trust": { "type": "boolean" },
+        "extensions": { "$ref": "#/$defs/resources" },
+        "skills": { "$ref": "#/$defs/resources" },
+        "prompts": { "$ref": "#/$defs/resources" },
+        "themes": { "$ref": "#/$defs/resources" }
+      }
+    },
+    "piRules": {
+      "allOf": [
+        {
+          "if": { "required": ["trust"] },
+          "then": {
+            "properties": {
+              "source": { "pattern": "^npm:" },
+              "sources": { "properties": { "pi": { "pattern": "^npm:" } } }
+            }
+          }
+        },
+        {
+          "if": {
+            "anyOf": [
+              { "required": ["source"], "properties": { "source": { "const": "npm:mitsupi" } } },
+              { "required": ["sources"], "properties": { "sources": { "required": ["pi"], "properties": { "pi": { "const": "npm:mitsupi" } } } } }
+            ]
+          },
+          "then": {
+            "required": ["extensions", "skills", "prompts", "themes"],
+            "properties": {
+              "extensions": { "const": ["extensions/control.ts"] },
+              "skills": { "const": [] },
+              "prompts": { "const": [] },
+              "themes": { "const": [] }
+            }
+          }
+        }
+      ]
+    },
+    "piProvider": { "allOf": [{ "$ref": "#/$defs/provider" }, { "$ref": "#/$defs/piRules" }] },
+    "commonProvider": {
+      "allOf": [
+        { "$ref": "#/$defs/provider" },
+        { "required": ["sources"] },
+        {
+          "if": { "properties": { "sources": { "required": ["pi"] } } },
+          "then": { "$ref": "#/$defs/piRules" }
+        }
+      ]
+    },
+    "marketplaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "source"],
+        "properties": {
+          "name": { "$ref": "#/$defs/string" },
+          "source": { "$ref": "#/$defs/string" },
+          "source_type": { "type": "string" },
+          "when": { "$ref": "skills.schema.json#/$defs/when" }
+        }
+      }
+    }
+  }
+}

@@ -70,14 +70,23 @@ run_template() {
 	echo "ok $name"
 }
 
-# Validate declaration shape before templates consume typed tool fields.
-if ! check_schema --check-metaschema "$SOURCE/schemas/tools.schema.json"; then
-	exit 1
-fi
-if ! check_schema --schemafile "$SOURCE/schemas/tools.schema.json" \
-	--regex-variant python "$SOURCE/home/.chezmoidata/tools.yaml"; then
-	exit 1
-fi
+# Validate static declaration contracts before templates consume typed fields.
+for schema in tools packages skills defaults plugins llm-policy integrations plugin-managers; do
+	check_schema --check-metaschema "$SOURCE/schemas/$schema.schema.json" || exit 1
+done
+for domain in tools defaults integrations plugin-managers; do
+	check_schema --schemafile "$SOURCE/schemas/$domain.schema.json" \
+		--regex-variant python "$SOURCE/home/.chezmoidata/$domain.yaml" || exit 1
+done
+check_schema --schemafile "$SOURCE/schemas/packages.schema.json" \
+	--regex-variant python "$SOURCE"/home/.chezmoidata/packages/*.toml \
+	"$SOURCE"/home/.chezmoidata/packages/brew/*.toml || exit 1
+check_schema --schemafile "$SOURCE/schemas/skills.schema.json" \
+	--regex-variant python "$SOURCE"/home/.chezmoidata/skills/*.yaml || exit 1
+check_schema --schemafile "$SOURCE/schemas/plugins.schema.json" \
+	--regex-variant python "$SOURCE"/home/.chezmoidata/plugins/*.yaml || exit 1
+check_schema --schemafile "$SOURCE/schemas/llm-policy.schema.json" \
+	--regex-variant python "$SOURCE"/home/.chezmoidata/llm/*.yaml || exit 1
 
 run_template verify/contracts
 run_template verify/model
@@ -86,20 +95,7 @@ if ! check_schema --builtin-schema vendor.github-workflows \
 	"$SOURCE/.github/workflows/ci.yaml"; then
 	failed=1
 fi
-if ! check_schema --check-metaschema "$SOURCE/schemas/integrations.schema.json"; then
-	failed=1
-fi
-if ! check_schema --schemafile "$SOURCE/schemas/integrations.schema.json" \
-	--regex-variant python "$SOURCE/home/.chezmoidata/integrations.yaml"; then
-	failed=1
-fi
-if ! check_schema --check-metaschema "$SOURCE/schemas/plugin-managers.schema.json"; then
-	failed=1
-fi
-if ! check_schema --schemafile "$SOURCE/schemas/plugin-managers.schema.json" \
-	"$SOURCE/home/.chezmoidata/plugin-managers.yaml"; then
-	failed=1
-fi
+
 if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
 	python3 "$SOURCE/scripts/check-integration-semantics.py" "$SOURCE"; then
 	failed=1

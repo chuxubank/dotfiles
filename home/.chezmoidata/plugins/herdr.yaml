@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/plugins.schema.json
 plugins:
   # herdr-only plugins (plugins/herdr.yaml). The tool is implied by the
   # filename, so a plain `source` string is enough. `when` conditions work

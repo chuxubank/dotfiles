@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/skills.schema.json
 # Skills another installer owns. Declared here only so the undeclared-skill
 # cleanup in run_onchange_after_200_setup-skills.sh leaves them alone; the
 # skills CLI never installs, updates, or removes them.

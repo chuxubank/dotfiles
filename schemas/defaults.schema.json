@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Managed macOS defaults",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["defaults"],
+  "properties": {
+    "defaults": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domain", "keys"],
+        "properties": {
+          "domain": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "open": { "type": "string", "minLength": 1 },
+          "when": { "$ref": "tools.schema.json#/$defs/when" },
+          "keys": {
+            "type": "object",
+            "additionalProperties": {
+              "if": { "type": "object", "required": ["when"] },
+              "then": {
+                "additionalProperties": false,
+                "required": ["value"],
+                "properties": {
+                  "when": { "$ref": "tools.schema.json#/$defs/when" },
+                  "value": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

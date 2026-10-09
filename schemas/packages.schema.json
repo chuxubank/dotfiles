@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Package declarations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["packages"],
+  "properties": {
+    "packages": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "darwin": { "$ref": "#/$defs/group" },
+        "python": { "$ref": "#/$defs/group" },
+        "node": { "$ref": "#/$defs/group" },
+        "apt": { "$ref": "#/$defs/group" },
+        "pacman": { "$ref": "#/$defs/group" },
+        "msys2": { "$ref": "#/$defs/group" },
+        "termux": { "$ref": "#/$defs/group" },
+        "rust": { "$ref": "#/$defs/group" },
+        "scoop": { "$ref": "#/$defs/group" },
+        "winget": { "$ref": "#/$defs/group" },
+        "sdkman": { "$ref": "#/$defs/list" },
+        "go": { "$ref": "#/$defs/list" }
+      }
+    }
+  },
+  "$defs": {
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "taps": { "$ref": "#/$defs/list" },
+        "brews": { "$ref": "#/$defs/list" },
+        "casks": { "$ref": "#/$defs/list" },
+        "mas": { "$ref": "#/$defs/list" },
+        "tools": { "$ref": "#/$defs/list" },
+        "global": { "$ref": "#/$defs/list" },
+        "pkg": { "$ref": "#/$defs/list" },
+        "repo": { "$ref": "#/$defs/list" },
+        "core": { "$ref": "#/$defs/list" },
+        "extra": { "$ref": "#/$defs/list" },
+        "aur": { "$ref": "#/$defs/list" },
+        "msys": { "$ref": "#/$defs/list" },
+        "ucrt64": { "$ref": "#/$defs/list" },
+        "cargo": { "$ref": "#/$defs/list" },
+        "buckets": { "$ref": "#/$defs/list" },
+        "apps": { "$ref": "#/$defs/list" }
+      }
+    },
+    "list": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string", "minLength": 1 },
+          { "$ref": "#/$defs/package" }
+        ]
+      }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "when": { "$ref": "tools.schema.json#/$defs/when" },
+        "id": { "type": "integer", "minimum": 1 },
+        "url": { "type": "string", "minLength": 1 },
+        "trust": { "type": "boolean" },
+        "trusted": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "formula": { "type": "string", "minLength": 1 },
+            "cask": { "type": "string", "minLength": 1 },
+            "command": { "type": "string", "minLength": 1 }
+          }
+        },
+        "restart_service": { "type": "boolean" },
+        "version": { "type": "string" },
+        "extra": { "type": "string" },
+        "with": { "type": "string" },
+        "with-exec": { "type": "string" },
+        "git": { "type": "string" },
+        "branch": { "type": "string" },
+        "example": { "type": "string" }
+      }
+    }
+  }
+}

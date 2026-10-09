@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LLM provider policy (not the complete model catalog schema)",
+  "type": "object",
+  "properties": {
+    "llm": {
+      "type": "object",
+      "properties": {
+        "tools": {
+          "type": "object",
+          "patternProperties": {
+            "^(pi|omp|hermes|opencode)$": {
+              "type": "object",
+              "properties": { "providers": { "$ref": "#/$defs/providers" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "providers": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string", "not": { "const": "openrouter" } }
+        },
+        {
+          "type": "object",
+          "propertyNames": { "not": { "const": "openrouter" } },
+          "additionalProperties": {
+            "type": "object",
+            "properties": { "provider": { "type": "string", "not": { "const": "openrouter" } } }
+          }
+        }
+      ]
+    }
+  }
+}

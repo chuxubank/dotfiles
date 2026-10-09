@@ -2,9 +2,6 @@
        Requires .tools / .packages / .skills / .services / .environment / .defaults. */ -}}
 
 {{- $declared := default dict .tools -}}
-{{- if eq (len $declared) 0 -}}
-  {{- fail "verify/model: tools.yaml is empty" -}}
-{{- end -}}
 
 {{- /* Ignore lines must not be a whole well-known root. */ -}}
 {{- $broad := list ".config" "Library" ".local" "AppData" "bin" -}}
@@ -27,40 +24,6 @@
       {{- fail (printf "disabled-ignore on %s: overly broad %q" $ih.name $root) -}}
     {{- end -}}
   {{- end -}}
-{{- end -}}
-
-{{- /* Integration owners and targets must be declared tools. Detailed static
-       structure is checked by integrations.schema.json; dynamic references
-       and agent-root containment by check-integration-semantics.py. */ -}}
-{{- range $name, $spec := default dict .integration_owners -}}
-  {{- if not (hasKey $declared $name) -}}
-    {{- fail (printf "integration: unknown owner %q" $name) -}}
-  {{- end -}}
-  {{- $targets := dig "targets" (list) $spec -}}
-  {{- if eq (len $targets) 0 -}}
-    {{- fail (printf "%s: integration targets must not be empty" $name) -}}
-  {{- end -}}
-  {{- range $target := $targets -}}
-    {{- $agent := dig "tool" "" $target -}}
-    {{- if not (hasKey $declared $agent) -}}
-      {{- fail (printf "%s integration: unknown target %q" $name $agent) -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-{{- $rtkSpec := index $declared "rtk" -}}
-{{- $rtkPurge := dig "purge" (list) $rtkSpec -}}
-{{- range $need := list
-      ".config/rtk/**"
-      ".local/share/rtk/**"
-      "Library/Caches/rtk/**"
-      "AppData/Local/rtk/**" -}}
-  {{- if not (has $need $rtkPurge) -}}
-    {{- fail (printf "rtk purge missing %q" $need) -}}
-  {{- end -}}
-{{- end -}}
-
-{{- if has "Library/Application Support/rtk/**" $rtkPurge -}}
-  {{- fail "rtk purge: Application Support must alias .config, not be a second root" -}}
 {{- end -}}
 
 {{- /* Schema validates tool declaration shape. Keep only the cross-entry
@@ -90,7 +53,7 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Every owner reference is declared. Package maps must use owner, not tool. */ -}}
+{{- /* Cross-file owner references must name declared tools. */ -}}
 {{- $pkgPaths := list
       (list "darwin" "taps")
       (list "darwin" "brews")
@@ -122,9 +85,6 @@
   {{- if and $ok (eq (kindOf $list) "slice") -}}
     {{- range $package := $list -}}
       {{- if eq (kindOf $package) "map" -}}
-        {{- if hasKey $package "tool" -}}
-          {{- fail (printf "package %s: use owner, not tool" (dig "name" "?" $package)) -}}
-        {{- end -}}
         {{- $owner := dig "owner" "" $package -}}
         {{- if and $owner (not (hasKey $declared $owner)) -}}
           {{- fail (printf "package %s: unknown owner %q" (dig "name" "?" $package) $owner) -}}
@@ -136,9 +96,6 @@
 
 {{- range $groupName := keys (default dict .skills.provider_groups) | sortAlpha -}}
   {{- range $provider := index $.skills.provider_groups $groupName -}}
-    {{- if hasKey $provider "tool" -}}
-      {{- fail (printf "skill provider in %s: use owner, not tool" $groupName) -}}
-    {{- end -}}
     {{- $owner := dig "owner" "" $provider -}}
     {{- if and $owner (not (hasKey $declared $owner)) -}}
       {{- fail (printf "skill provider %s: unknown owner %q" (dig "name" "?" $provider) $owner) -}}
@@ -148,9 +105,6 @@
 
 {{- range $agentEntry := default (list) .skills.agents -}}
   {{- if eq (kindOf $agentEntry) "map" -}}
-    {{- if hasKey $agentEntry "tool" -}}
-      {{- fail (printf "skills agent %s: use owner, not tool" (dig "name" "?" $agentEntry)) -}}
-    {{- end -}}
     {{- $owner := dig "owner" "" $agentEntry -}}
     {{- if and $owner (not (hasKey $declared $owner)) -}}
       {{- fail (printf "skills agent %s: unknown owner %q" (dig "name" "?" $agentEntry) $owner) -}}
@@ -174,66 +128,9 @@
 
 {{- range $name := keys (default dict .defaults) -}}
   {{- $item := index $.defaults $name -}}
-  {{- if hasKey $item "tool" -}}
-    {{- fail (printf "defaults %s: use owner, not tool" $name) -}}
-  {{- end -}}
   {{- $owner := dig "owner" "" $item -}}
   {{- if and $owner (not (hasKey $declared $owner)) -}}
     {{- fail (printf "defaults %s: unknown owner %q" $name $owner) -}}
-  {{- end -}}
-{{- end -}}
-
-{{- /* Coding agents with bundled catalogs omit OpenRouter so a bare id cannot
-       resolve there instead of IV or a subscription fallback. */ -}}
-{{- $llmTools := default dict (index (default dict .llm) "tools") -}}
-{{- range $tool := list "pi" "omp" "hermes" "opencode" -}}
-  {{- $toolCfg := default dict (index $llmTools $tool) -}}
-  {{- $raw := index $toolCfg "providers" -}}
-  {{- $has := false -}}
-  {{- if eq (kindOf $raw) "slice" -}}
-    {{- range $name := $raw -}}
-      {{- if eq $name "openrouter" -}}{{- $has = true -}}{{- end -}}
-    {{- end -}}
-  {{- else if eq (kindOf $raw) "map" -}}
-    {{- if hasKey $raw "openrouter" -}}{{- $has = true -}}{{- end -}}
-    {{- range $alias, $ref := $raw -}}
-      {{- if and (eq (kindOf $ref) "map") (eq (index $ref "provider") "openrouter") -}}
-        {{- $has = true -}}
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
-  {{- if $has -}}
-    {{- fail (printf "llm.%s must not enable openrouter" $tool) -}}
-  {{- end -}}
-{{- end -}}
-
-{{- /* Pi package lifecycle trust is declarative but Bun-specific: only npm
-       package sources can appear in trustedDependencies. */ -}}
-{{- range $provider := includeTemplate "plugins/resolve" (merge (dict "tool" "pi") .) | fromJson -}}
-  {{- if hasKey $provider "trust" -}}
-    {{- if ne (kindOf $provider.trust) "bool" -}}
-      {{- fail (printf "plugins.pi %s: trust must be boolean" $provider.name) -}}
-    {{- end -}}
-    {{- if not (hasPrefix "npm:" $provider.source) -}}
-      {{- fail (printf "plugins.pi %s: trust requires npm source, got %q" $provider.name $provider.source) -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-
-{{- /* mitsupi is Armin's whole kit. A string-form source would load uv,
-       auto-trust, unified-edit, btw, review, and the rest on top of the
-       packages we already declare. */ -}}
-{{- range $provider := dig "providers" (list) (dig "pi" dict .plugins) -}}
-  {{- if eq (dig "source" "" $provider) "npm:mitsupi" -}}
-    {{- $ext := dig "extensions" (list) $provider -}}
-    {{- if or (ne (len $ext) 1) (ne (index $ext 0) "extensions/control.ts") -}}
-      {{- fail "plugins.pi mitsupi: extensions must be only extensions/control.ts" -}}
-    {{- end -}}
-    {{- range $key := list "skills" "prompts" "themes" -}}
-      {{- if or (not (hasKey $provider $key)) (ne (kindOf (index $provider $key)) "slice") (gt (len (index $provider $key)) 0) -}}
-        {{- fail (printf "plugins.pi mitsupi: %s must be []" $key) -}}
-      {{- end -}}
-    {{- end -}}
   {{- end -}}
 {{- end -}}
 
