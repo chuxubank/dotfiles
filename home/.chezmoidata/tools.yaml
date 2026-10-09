@@ -110,7 +110,7 @@ tools:
       - ".copilot/**"
 
   hermes:
-    when: *disabled
+    when: *iv_only
     remove:
       - ".hermes/config.yaml"
       - ".hermes/SOUL.md"
