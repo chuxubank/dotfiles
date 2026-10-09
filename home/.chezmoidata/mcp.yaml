@@ -200,6 +200,18 @@ mcp:
           GOOGLE_MAPS_API_KEY:
             path: Personal/Tech/Google
             field: goose-map-api-key
+    - name: iPhone Use
+      description: Control a USB-connected physical iPhone through a local WDA runner; includes setup, UI inspection, Unicode input and bounded batch operations.
+      when:
+        enabled:
+          os: darwin
+        disabled:
+          host_env: ci
+      execution:
+        type: stdio
+        cmd: ~/bin/iphone-use-mcp
+        timeout: 30
+        tool_timeout: 120
     - name: JetBrains MCP
       # Pi's built-in MCP does not support legacy SSE; mcp/pi skips this entry.
       # Replace /sse with a verified streamable HTTP endpoint when available.

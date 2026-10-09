@@ -1,0 +1,3 @@
+#!/bin/sh
+# WDA signing, device configuration and logs stay in ~/.local/share/iphone-use.
+exec python3 {{ joinPath .chezmoi.homeDir .path.workspace.example "iPhone-use/server/iphone_use.py" | quote }} "$@"

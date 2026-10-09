@@ -222,6 +222,18 @@ repositories:
 
   # path.workspace.example — third-party trees we only read or build against.
   - path: [workspace, example]
+    dest: iPhone-use
+    url: https://github.com/zhongerxin/iPhone-use.git
+    refresh_period: 24h
+    branch: main
+    depth: 1
+    when:
+      enabled:
+        os: darwin
+      disabled:
+        host_env: [ci]
+
+  - path: [workspace, example]
     dest: Android/nowinandroid
     url: https://github.com/android/nowinandroid.git
     refresh_period: 168h
