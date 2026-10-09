@@ -43,4 +43,12 @@ trash_path {{ printf "%s/%s" $.chezmoi.homeDir $rel | quote }}
   {{- end }}
 {{- end }}
 
+{{- /* The Hermes installer writes launchers into shared .local/bin, which
+       cannot be listed in tools.yaml purge without ignoring other tools. */ -}}
+{{- if and (ne .chezmoi.os "windows") (not (includeTemplate "tool/enabled" (merge (dict "tool" "hermes") .) | fromJson)) }}
+for launcher in hermes hermes-agent hermes-acp; do
+    trash_path "${HOME}/.local/bin/$launcher"
+done
+{{- end }}
+
 {{- end -}}

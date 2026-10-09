@@ -115,15 +115,9 @@ tools:
       - ".hermes/config.yaml"
       - ".hermes/SOUL.md"
     purge:
-      # The vendor checkout lives at .hermes/hermes-agent/. Do not
-      # purge .hermes/** or a disable wipes the install.
-      - ".hermes/auth.json"
-      - ".hermes/.env"
-      - ".hermes/memories/**"
-      - ".hermes/sessions/**"
-      - ".hermes/cron/**"
-      - ".hermes/logs/**"
-      - ".hermes/mcp-tokens/**"
+      # Include the vendor checkout and venv: disabling Hermes uninstalls it.
+      # Its launchers in shared .local/bin are handled by the purge script.
+      - ".hermes/**"
 
   herdr:
     when: *disabled
