@@ -56,9 +56,6 @@
     "memory_enabled" true
     "user_profile_enabled" true
   )
-  "display" (dict
-    "skin" "gruvbox"
-  )
 -}}
 {{- includeTemplate "config/merge" (dict
   "format" "yaml"
