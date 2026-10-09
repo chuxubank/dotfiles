@@ -12,7 +12,7 @@
     {{- end -}}
     {{- if $purge -}}
       {{- range $pattern := dig "purge" (list) $spec }}
-        {{- if not (hasSuffix "/**" $pattern) }}
+        {{- if and (eq (kindOf $pattern) "string") (not (hasSuffix "/**" $pattern)) }}
 {{ $pattern }}
         {{- end -}}
       {{- end -}}

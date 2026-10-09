@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../schemas/tools.schema.json
 # Declared tools. A name listed here is the single enablement switch.
 # Lifecycle affiliation in data files is `owner` (packages, skill
 # providers, defaults). Services and environment groups use `tool` as
@@ -10,6 +11,13 @@
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
 # tool is off. purge: runtime data (login state, history, caches); applied
 # only when policies.purge_disabled_tools is on.
+# purge accepts path strings or {command, paths, env?, when?} objects. Command
+# entries run before managed files are removed; their paths declare cleanup
+# scope and must be absent after success (trailing /** checks the tree root).
+# They are never deleted by generic purges. command is literal argv, env is
+# per-command, and a leading {home} expands to HOME. A missing command skips
+# only if its paths are already absent. when uses the shared condition schema.
+# Command paths ignore exact targets (/** ignores its root), never a parent.
 # plugin_upgrades: weekly commands, executed in order after plugin reconciliation.
 # for_each: enabled_plugins expands {source} from plugin declarations.
 # All enabled tools share one weekly chezmoi success/retry unit; individual
@@ -18,10 +26,10 @@
 # in the source state so apply does not recreate it (ignore of that exact
 # path would also block .chezmoiremove). Managed files at the dest root
 # (e.g. .claude.json) are emptied in their templates instead.
-# Every remove/purge path must sit under a directory this tool owns, so the
-# parent that disabled-ignore derives is never a shared tree. A managed file
-# in a shared tree (e.g. bin/) belongs in neither list: gate its template on
-# tool/enabled and it renders empty, which chezmoi removes on its own.
+# Every remove/purge string path must sit under a directory this tool owns, so
+# the parent that disabled-ignore derives is never a shared tree. For command
+# entries, exact file paths may sit in shared trees. Managed files in shared
+# trees should instead gate their templates on tool/enabled.
 tool_conditions:
   disabled: &disabled { enabled: false }
   non_ci: &non_ci { disabled: { host_env: [ci] } }
@@ -121,14 +129,23 @@ tools:
       - ".copilot/**"
 
   hermes:
-    when: *iv_only
+    when: *disabled
     remove:
       - ".hermes/config.yaml"
       - ".hermes/SOUL.md"
     purge:
-      # Include the vendor checkout and venv: disabling Hermes uninstalls it.
-      # Its launchers in shared .local/bin are handled by the purge script.
-      - ".hermes/**"
+      - command: ["{home}/.local/bin/hermes", uninstall, --full, --yes]
+        when:
+          enabled:
+            os: [darwin, linux]
+        env:
+          HERMES_HOME: "{home}/.hermes"
+          HERMES_INSTALL_DIR: "{home}/.hermes/hermes-agent"
+        paths:
+          - ".hermes/**"
+          - ".local/bin/hermes"
+          - ".local/bin/hermes-agent"
+          - ".local/bin/hermes-acp"
 
   herdr:
     when: *disabled

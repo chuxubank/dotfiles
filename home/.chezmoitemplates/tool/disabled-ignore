@@ -7,7 +7,15 @@
   {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
     {{- $patterns := dig "remove" (list) $spec -}}
     {{- range $p := dig "purge" (list) $spec -}}
-      {{- $patterns = append $patterns $p -}}
+      {{- if eq (kindOf $p) "map" -}}
+        {{- /* Commands own exact targets, including files in shared trees.
+             Never derive .local/bin from .local/bin/<one launcher>. */ -}}
+        {{- range $path := $p.paths }}
+{{ trimSuffix "/**" $path }}
+        {{- end -}}
+      {{- else -}}
+        {{- $patterns = append $patterns $p -}}
+      {{- end -}}
     {{- end -}}
     {{- range $pattern := $patterns -}}
       {{- if hasSuffix "/**" $pattern }}

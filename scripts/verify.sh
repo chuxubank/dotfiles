@@ -70,6 +70,15 @@ run_template() {
 	echo "ok $name"
 }
 
+# Validate declaration shape before templates consume typed tool fields.
+if ! check_schema --check-metaschema "$SOURCE/schemas/tools.schema.json"; then
+	exit 1
+fi
+if ! check_schema --schemafile "$SOURCE/schemas/tools.schema.json" \
+	--regex-variant python "$SOURCE/home/.chezmoidata/tools.yaml"; then
+	exit 1
+fi
+
 run_template verify/contracts
 run_template verify/model
 
@@ -105,10 +114,12 @@ fi
 if ! python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"; then
 	failed=1
 fi
-if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$SOURCE/scripts/test-hermes-setup.py" "$SOURCE"; then
-	failed=1
-fi
+for test in test-hermes-setup.py test-tool-purge.py; do
+	if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
+		python3 "$SOURCE/scripts/$test" "$SOURCE"; then
+		failed=1
+	fi
+done
 if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
 	python3 "$SOURCE/scripts/test-agent-browser-setup.py" "$SOURCE"; then
 	failed=1

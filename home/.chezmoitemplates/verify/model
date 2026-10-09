@@ -63,24 +63,22 @@
   {{- fail "rtk purge: Application Support must alias .config, not be a second root" -}}
 {{- end -}}
 
-{{- /* Path width for remove and purge. */ -}}
+{{- /* Schema validates tool declaration shape. Keep only the cross-entry
+       constraint that string purges must not overlap command-owned targets. */ -}}
 {{- range $name, $spec := $declared -}}
-  {{- $patterns := dig "remove" (list) $spec -}}
-  {{- range $p := dig "purge" (list) $spec -}}
-    {{- $patterns = append $patterns $p -}}
-  {{- end -}}
-  {{- range $pattern := $patterns -}}
-    {{- if not $pattern -}}
-      {{- fail (printf "tool %s: empty remove/purge path" $name) -}}
-    {{- end -}}
-    {{- if or (hasPrefix "/" $pattern) (hasPrefix "~" $pattern) -}}
-      {{- fail (printf "tool %s: absolute remove/purge path %q" $name $pattern) -}}
-    {{- end -}}
-    {{- if or (eq $pattern "*") (eq $pattern "**") (eq $pattern "/**") -}}
-      {{- fail (printf "tool %s: overly broad remove/purge path %q" $name $pattern) -}}
-    {{- end -}}
-    {{- if or (hasPrefix "../" $pattern) (contains "/../" $pattern) (eq $pattern "..") -}}
-      {{- fail (printf "tool %s: parent traversal in %q" $name $pattern) -}}
+  {{- range $entry := dig "purge" (list) $spec -}}
+    {{- if eq (kindOf $entry) "map" -}}
+      {{- range $path := $entry.paths -}}
+        {{- $target := trimSuffix "/**" $path -}}
+        {{- range $other := dig "purge" (list) $spec -}}
+          {{- if eq (kindOf $other) "string" -}}
+            {{- $root := trimSuffix "/**" $other -}}
+            {{- if or (eq $root $target) (hasPrefix (printf "%s/" $root) $target) (hasPrefix (printf "%s/" $target) $root) -}}
+              {{- fail (printf "tool %s: string purge %q overlaps command target %q" $name $other $path) -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

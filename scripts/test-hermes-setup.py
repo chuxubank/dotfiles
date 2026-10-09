@@ -23,11 +23,15 @@ for flag, variable in (
 command.extend(["execute-template", "--source", str(root)])
 
 
-def render(path, host="iv", platform="linux", extra=""):
+def render(path, host="iv", platform="linux", extra="", enabled_fixture=True):
     prefix = (
         '{{- $_ := set . "host_env" ' + json.dumps(host) + " -}}"
         '{{- $_ := set .chezmoi "os" ' + json.dumps(platform) + " -}}"
     )
+    # Test installation independently of the live switch; keep exercising the
+    # IV-only branch even while Hermes is disabled in the actual declarations.
+    if enabled_fixture:
+        prefix += '{{- $_ := set .tools.hermes "when" (dict "enabled" (dict "host_env" (list "iv"))) -}}'
     return subprocess.run(
         command,
         input=prefix + extra + path.read_text(),
@@ -46,6 +50,9 @@ assert render(upgrade_path, platform="windows").strip() == ""
 for host in ("personal", "aa", "ci"):
     assert render(setup_path, host=host).strip() == ""
     assert render(upgrade_path, host=host).strip() == ""
+for host in ("iv", "personal", "aa", "ci"):
+    assert render(setup_path, host=host, enabled_fixture=False).strip() == ""
+    assert render(upgrade_path, host=host, enabled_fixture=False).strip() == ""
 assert not (root / "home/.chezmoiscripts/run_onchange_after_100_setup-hermes.sh.tmpl").exists()
 
 # Replace the whole LLM tree: no real tokens or live catalogs are read.
@@ -186,4 +193,4 @@ with tempfile.TemporaryDirectory() as tmp:
     assert (home / "calls.log").read_text().count("curl ") == 2
     assert list((home / "temp").iterdir()) == []
 
-print("ok Hermes setup: host gates, config effort, offline install success/failure and retry")
+print("ok Hermes setup: gates, config effort, offline success/failure and retry")

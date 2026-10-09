@@ -346,15 +346,39 @@
   {{- fail (printf "disabled-ignore: expected .config/rclone, got %q" $ignore) -}}
 {{- end -}}
 
+{{- /* Command paths ignore exact targets, never shared parents; mixed string
+       purges retain normal file removal while command targets are excluded. */ -}}
+{{- $commandCtx := mergeOverwrite (deepCopy $base) (dict
+      "host_env" "ci"
+      "policies" (dict "purge_disabled_tools" true)
+      "tools" (dict "fixture" (dict "when" (dict "enabled" false)
+        "purge" (list
+          (dict "command" (list "cleanup") "paths" (list "owned/**" ".local/bin/fixture"))
+          ".cache/fixture/**" "ordinary-file")))) -}}
+{{- $commandIgnore := printf "\n%s\n" (includeTemplate "tool/disabled-ignore" $commandCtx) -}}
+{{- if or (not (contains "\nowned\n" $commandIgnore))
+      (not (contains "\n.local/bin/fixture\n" $commandIgnore))
+      (not (contains "\n.cache/fixture\n" $commandIgnore))
+      (contains "\n.local/bin\n" $commandIgnore) -}}
+  {{- fail "command purge: ignore must retain exact scope" -}}
+{{- end -}}
+{{- $commandRemove := printf "\n%s\n" (includeTemplate "tool/disabled-remove" $commandCtx) -}}
+{{- if or (not (contains "\nordinary-file\n" $commandRemove))
+      (contains "\n.local/bin/fixture\n" $commandRemove) (contains "\nowned/**\n" $commandRemove) -}}
+  {{- fail "command purge: only string file purges belong in .chezmoiremove" -}}
+{{- end -}}
+
 {{- /* disabled-ignore derives a parent from every remove/purge path. A
        two-segment path under a non-hidden first segment makes that parent a
        shared tree (bin/herdr-layout once ignored all of ~/bin and froze every
        home/bin script). Gate such a file's template on tool/enabled instead. */ -}}
 {{- range $name, $spec := default dict .tools -}}
   {{- range $pattern := concat (dig "remove" (list) $spec) (dig "purge" (list) $spec) -}}
-    {{- $parts := splitList "/" (trimSuffix "/**" $pattern) -}}
-    {{- if and (eq (len $parts) 2) (not (hasPrefix "." (index $parts 0))) -}}
-      {{- fail (printf "tool %s: %q would make disabled-ignore skip the shared tree %q" $name $pattern (index $parts 0)) -}}
+    {{- if eq (kindOf $pattern) "string" -}}
+      {{- $parts := splitList "/" (trimSuffix "/**" $pattern) -}}
+      {{- if and (eq (len $parts) 2) (not (hasPrefix "." (index $parts 0))) -}}
+        {{- fail (printf "tool %s: %q would make disabled-ignore skip the shared tree %q" $name $pattern (index $parts 0)) -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}

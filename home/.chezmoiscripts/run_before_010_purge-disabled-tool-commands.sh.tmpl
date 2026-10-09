@@ -1,0 +1,50 @@
+{{- $ctx := . -}}
+{{- $items := list -}}
+{{- if includeTemplate "policy/enabled" (merge (dict "policy" "purge_disabled_tools") .) | fromJson -}}
+  {{- range $name, $spec := .tools -}}
+    {{- if not (includeTemplate "tool/enabled" (merge (dict "tool" $name) $ctx) | fromJson) -}}
+      {{- range $entry := dig "purge" (list) $spec -}}
+        {{- if eq (kindOf $entry) "map" -}}
+          {{- if includeTemplate "when/context" (merge (dict "item" $entry) $ctx) | fromJson -}}
+            {{- $items = append $items (dict "name" $name "spec" $entry) -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $items) 0 -}}
+#!/bin/sh
+set -eu
+
+# Each command owns its cleanup. Run before managed files are removed, keep
+# environment overrides local, and never fall back to deleting paths ourselves.
+check_absent() {
+    _name=$1
+    shift
+    _remaining=false
+    for _path do
+        if [ -e "$_path" ] || [ -L "$_path" ]; then
+            echo "$_name: cleanup target remains: $_path; restore a working uninstaller or inspect its output" >&2
+            _remaining=true
+        fi
+    done
+    [ "$_remaining" = false ]
+}
+
+{{ range $item := $items }}
+(
+{{- range $key, $value := default dict $item.spec.env }}
+    export {{ $key }}={{ if hasPrefix "{home}" $value }}"$HOME"{{ printf "'%s'" (replace "'" "'\"'\"'" (trimPrefix "{home}" $value)) }}{{ else }}{{ printf "'%s'" (replace "'" "'\"'\"'" $value) }}{{ end }}
+{{- end }}
+    set --{{ range $arg := $item.spec.command }} {{ if hasPrefix "{home}" $arg }}"$HOME"{{ printf "'%s'" (replace "'" "'\"'\"'" (trimPrefix "{home}" $arg)) }}{{ else }}{{ printf "'%s'" (replace "'" "'\"'\"'" $arg) }}{{ end }}{{ end }}
+    if command -v "$1" >/dev/null 2>&1; then
+        echo {{ printf "'%s'" (replace "'" "'\"'\"'" (printf "Purge disabled tool by command: %s" $item.name)) }}
+        "$@"
+    fi
+    # A missing executable is only a no-op if every declared target is gone.
+    # Also catches uninstallers that warn about partial cleanup but exit 0.
+    check_absent {{ printf "'%s'" (replace "'" "'\"'\"'" $item.name) }}{{ range $path := $item.spec.paths }} "$HOME/"{{ printf "'%s'" (replace "'" "'\"'\"'" (trimSuffix "/**" $path)) }}{{ end }}
+)
+{{ end -}}
+{{- end -}}

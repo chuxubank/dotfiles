@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.local/schemas/tools.schema.json",
+  "title": "Tool enablement and cleanup declarations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tools"],
+  "properties": {
+    "tool_conditions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/when" }
+    },
+    "tools": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/tool" }
+    }
+  },
+  "$defs": {
+    "string": { "type": "string", "minLength": 1 },
+    "match": {
+      "oneOf": [
+        { "$ref": "#/$defs/string" },
+        { "type": "array", "items": { "$ref": "#/$defs/string" } }
+      ]
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 }
+      }
+    },
+    "os": {
+      "oneOf": [
+        { "$ref": "#/$defs/match" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "type": { "$ref": "#/$defs/match" },
+            "version": { "$ref": "#/$defs/string" }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "host_env": { "$ref": "#/$defs/match" },
+            "device_type": { "$ref": "#/$defs/match" },
+            "roles": { "$ref": "#/$defs/match" },
+            "os": { "$ref": "#/$defs/os" },
+            "mem_gb": { "$ref": "#/$defs/range" },
+            "disk_gb": { "$ref": "#/$defs/range" },
+            "disk_available_gb": { "$ref": "#/$defs/range" }
+          }
+        }
+      ]
+    },
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "$ref": "#/$defs/condition" },
+        "disabled": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?![/~])(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*\\\\)(?!\\*{1,2}$).+$"
+    },
+    "commandPath": {
+      "allOf": [
+        { "$ref": "#/$defs/path" },
+        {
+          "pattern": "^(?!.*//)(?!.*[?\\[\\]])[^*]+(?<!/)(?:/\\*\\*)?$",
+          "not": {
+            "enum": [
+              ".config", ".config/**", "Library", "Library/**",
+              ".local", ".local/**", "AppData", "AppData/**",
+              "bin", "bin/**", ".local/bin", ".local/bin/**",
+              "Library/Application Support", "Library/Application Support/**"
+            ]
+          }
+        }
+      ]
+    },
+    "argv": {
+      "type": "array",
+      "minItems": 1,
+      "prefixItems": [{ "$ref": "#/$defs/string" }],
+      "items": { "type": "string" }
+    },
+    "purgeCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "paths"],
+      "properties": {
+        "command": { "$ref": "#/$defs/argv" },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/commandPath" }
+        },
+        "env": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+          "additionalProperties": { "type": "string" }
+        },
+        "when": { "$ref": "#/$defs/when" }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "when": { "$ref": "#/$defs/when" },
+        "remove": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "purge": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/path" },
+              { "$ref": "#/$defs/purgeCommand" }
+            ]
+          }
+        },
+        "plugin_upgrades": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["command"],
+            "properties": {
+              "command": { "$ref": "#/$defs/argv" },
+              "for_each": { "const": "enabled_plugins" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

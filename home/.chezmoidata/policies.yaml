@@ -3,7 +3,8 @@
 policies:
   # When a declared tool is off, `remove` always deletes chezmoi-managed
   # dest files. `purge` (runtime data, login state, caches) is skipped
-  # unless this policy is on.
+  # unless this policy is on. Hermes is an exception to Trash cleanup:
+  # its official `uninstall --full --yes` permanently removes owned files.
   purge_disabled_tools: true
 
   # Zap Microsoft Edge / AutoUpdate leftovers. Off on aa (Brewfile installs
