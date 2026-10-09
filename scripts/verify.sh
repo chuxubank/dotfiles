@@ -105,6 +105,10 @@ fi
 if ! python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"; then
 	failed=1
 fi
+if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
+	python3 "$SOURCE/scripts/test-hermes-setup.py" "$SOURCE"; then
+	failed=1
+fi
 
 if ! python3 - "$SOURCE" <<'PY'; then
 import re

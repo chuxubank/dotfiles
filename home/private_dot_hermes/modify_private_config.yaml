@@ -45,6 +45,9 @@
     "default" $model
     "provider" $runtimeProvider
   )
+  "agent" (dict
+    "reasoning_effort" $cfg.reasoning_effort
+  )
   "terminal" (dict
     "backend" "local"
     "cwd" .chezmoi.homeDir

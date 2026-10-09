@@ -1,0 +1,52 @@
+{{- if and (ne .chezmoi.os "windows") (includeTemplate "tool/enabled" (merge (dict "tool" "hermes") .) | fromJson) -}}
+#!/bin/sh
+set -eu
+
+export PATH="$HOME/.local/bin:$PATH"
+# Keep the installer aligned with chezmoi's managed config and cleanup paths.
+export HERMES_HOME="$HOME/.hermes"
+export HERMES_INSTALL_DIR="$HERMES_HOME/hermes-agent"
+launcher="$HOME/.local/bin/hermes"
+
+# Check on every apply so deleting an installation does not require resetting
+# chezmoi's run_onchange state. A damaged or foreign install needs an explicit
+# repair decision rather than an automatic overwrite.
+if [ -e "$launcher" ] || [ -L "$launcher" ]; then
+    if "$launcher" --version >/dev/null 2>&1; then
+        exit 0
+    fi
+    echo "Hermes launcher is broken: $launcher; repair it or remove it to retry installation" >&2
+    exit 1
+fi
+if command -v hermes >/dev/null 2>&1; then
+    echo "Hermes is installed outside $launcher; reconcile that installation before applying" >&2
+    exit 1
+fi
+
+echo "󰯁 Setup Hermes"
+
+# Skills CLI detects Hermes by ~/.hermes existing. Prepare it before the
+# 200_setup-skills script; a failed install must still stop this apply.
+mkdir -p "$HERMES_HOME"
+
+installer=$(mktemp)
+trap 'rm -f "$installer"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Download separately: POSIX sh would lose a curl failure in `curl | bash`.
+# Hermes owns its pinned runtime dependencies; omit the optional browser and
+# computer-use tools for this CLI/messaging installation.
+curl -fsSL --retry 3 --retry-max-time 120 --connect-timeout 15 --max-time 120 \
+    https://hermes-agent.nousresearch.com/install.sh -o "$installer"
+bash "$installer" \
+    --non-interactive \
+    --skip-browser \
+    --skip-computer-use
+
+if ! "$launcher" --version >/dev/null 2>&1; then
+    echo "Hermes installer finished without a working launcher: $launcher" >&2
+    exit 1
+fi
+
+{{- end -}}
