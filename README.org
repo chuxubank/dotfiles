@@ -105,6 +105,12 @@ system package-manager privileges); automated setup only downloads Chrome.
 Linux ARM hosts need system Chromium or a CDP connection because Chrome for
 Testing has no Linux ARM build.
 
+[[https://github.com/citrolabs/ego-lite][ego lite]]'s official =ego-browser= skill is distributed on non-CI macOS
+hosts through the same skills manager. The app supplies its CLI after manual
+installation and first-run onboarding; chezmoi does not install the app or
+import browser data. Only the browser skill is selected, not the repository's
+internal development skills.
+
 ** OMP model roles
 
 OMP resolves named model slots (=default=, =smol=, =slow=, =task=, =advisor=,

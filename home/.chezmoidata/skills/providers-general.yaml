@@ -73,6 +73,15 @@ skills:
         source: vercel-labs/agent-browser
         owner: agent-browser
 
+      # The macOS app owns the ego-browser CLI; first-run onboarding is manual.
+      - name: ego-browser
+        source: citrolabs/ego-lite
+        when:
+          enabled:
+            os: darwin
+          disabled:
+            host_env: ci
+
       - name: agent-device
         source: callstack/agent-device
 
