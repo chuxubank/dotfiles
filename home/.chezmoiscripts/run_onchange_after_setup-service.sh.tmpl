@@ -1,16 +1,6 @@
 #!/bin/sh
 set -eu
 
-{{ if eq .chezmoi.os "linux" -}}
-# PID 1 is often tini in a cloud container: systemctl exists or does not,
-# but there is no user bus and no XDG_RUNTIME_DIR. Probing keeps a missing
-# session from failing this script and blocking later apply steps.
-systemd_user_available() {
-	command -v systemctl >/dev/null 2>&1 || return 1
-	systemctl --user show-environment >/dev/null 2>&1
-}
-
-{{ end -}}
 {{- range (includeTemplate "service/services" . | fromJson) }}
 {{- if eq $.chezmoi.os "darwin" }}
 {{ includeTemplate "service/register-darwin" (merge (dict) . $) }}

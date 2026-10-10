@@ -26,7 +26,8 @@
 brew services restart {{ .tool }} --file=/dev/stdin <<'SYSTEMD'
 {{ $unit }}SYSTEMD
 {{- else }}
-if systemd_user_available; then
+# No systemd user bus, for example when PID 1 is tini.
+if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
 mkdir -p {{ $unitDir | quote }}
 cat > {{ $unitFile | quote }} <<'SYSTEMD'
 {{ $unit }}SYSTEMD

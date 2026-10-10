@@ -26,18 +26,6 @@
 {{- $osVersion := $facts.os_version -}}
 {{- $isDarkMode := $facts.isDarkMode -}}
 
-{{- /* update --init does not pass --data, so prompt*Once cannot see the
-       current chezmoi.toml. Read that file directly. Interactive prompts stay
-       as they are; a non-TTY run keeps saved answers instead of the
-       first-run defaults (server / ci / automation). */ -}}
-{{- $savedData := dict -}}
-{{- if and .chezmoi.configFile (stat .chezmoi.configFile) -}}
-{{- $parsedConfig := include .chezmoi.configFile | fromToml -}}
-{{- if hasKey $parsedConfig "data" -}}
-{{- $savedData = index $parsedConfig "data" -}}
-{{- end -}}
-{{- end -}}
-
 {{- if $interactive }}
 {{- $email = promptStringOnce . "email" "Email address" -}}
 {{- $deviceType = promptChoiceOnce . "device_type" "What type of device is this" $deviceTypeChoices -}}
@@ -47,14 +35,6 @@
 
 {{- $roles = promptMultichoiceOnce . "roles" "Roles" $roleChoices $defaultRoles }}
 {{- $passDir = promptStringOnce . "path.pass" "Password store dir for pass cli" ".password-store" }}
-{{- else }}
-{{- if hasKey $savedData "email" }}{{ $email = index $savedData "email" }}{{ end }}
-{{- if hasKey $savedData "device_type" }}{{ $deviceType = index $savedData "device_type" }}{{ end }}
-{{- if hasKey $savedData "host_env" }}{{ $hostEnv = index $savedData "host_env" }}{{ end }}
-{{- if hasKey $savedData "roles" }}{{ $roles = index $savedData "roles" }}{{ end }}
-{{- if and (hasKey $savedData "path") (kindIs "map" (index $savedData "path")) (hasKey (index $savedData "path") "pass") -}}
-{{- $passDir = index (index $savedData "path") "pass" -}}
-{{- end }}
 {{- end }}
 
 sourceDir = {{ .chezmoi.sourceDir | quote }}
