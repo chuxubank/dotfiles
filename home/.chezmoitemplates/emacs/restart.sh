@@ -25,11 +25,12 @@ termux-x11 :1 -xstartup "\emacs" &
 if \emacs --version 2>&1 | \grep -q 'Emacs Mac Port'; then
     \emacs &
 else
-    if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] || [ -t 1 ]; then
+    if [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
         \emacsclient -cn -a=""
     else
-        # No display and no TTY: a client frame cannot attach. A failed
-        # daemon must not abort the rest of this apply.
+        # No display, including an interactive SSH session: a client frame
+        # would open in the terminal and block. A failed daemon must not
+        # abort the rest of this apply.
         \emacs --daemon || echo "warning: could not start emacs daemon" >&2
     fi
 fi

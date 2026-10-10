@@ -1,18 +1,3 @@
-{{- define "config-data-policies" -}}
-{{- range $key := .value | keys | sortAlpha }}
-{{- $value := index $.value $key }}
-{{- if not (kindIs "map" $value) }}
-{{ $key }} = {{ $value | toToml }}
-{{- end }}
-{{- end }}
-{{- range $key := .value | keys | sortAlpha }}
-{{- $value := index $.value $key }}
-{{- if kindIs "map" $value }}
-[{{ $.prefix }}.{{ $key }}]
-{{- template "config-data-policies" (dict "prefix" (printf "%s.%s" $.prefix $key) "value" $value) }}
-{{- end }}
-{{- end }}
-{{- end }}
 {{- $interactive := stdinIsATTY }}
 {{- $deviceTypeChoices := list "laptop" "desktop" "server" -}}
 {{- $hostEnvChoices := list "personal" "aa" "iv" "cloud" "ci" -}}
@@ -104,11 +89,6 @@ encryption = "gpg"
 [data.path]
     pass = {{- $passDir | quote }}
 {{- includeTemplate "path/platform" (dict "os" $os "arch" .chezmoi.arch "homeDir" .chezmoi.homeDir) }}
-{{- if and (hasKey $savedData "policies") (kindIs "map" (index $savedData "policies")) }}
-
-[data.policies]
-{{- template "config-data-policies" (dict "prefix" "data.policies" "value" (index $savedData "policies")) }}
-{{- end }}
 
 [diff]
     command = "difft"
