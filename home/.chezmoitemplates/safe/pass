@@ -4,11 +4,14 @@
               ["asJson" <truthy>]    — return full passFields dict as JSON
        The input should be merged with the root context (e.g. via
        merge (dict ...) .) so that .host_env is available for CI check.
+       CI is also detected from the conventional environment variables so
+       synthetic verification contexts cannot accidentally invoke pass.
        Output:
          - without asJson: password string (or empty in CI)
          - with asJson:    full dict as JSON (or {} in CI)
 */ -}}
-{{- if ne .host_env "ci" -}}
+{{- $inCI := or (eq .host_env "ci") (eq (env "CI") "true") (eq (env "CI") "1") (eq (env "GITHUB_ACTIONS") "true") -}}
+{{- if not $inCI -}}
   {{- if hasKey . "asJson" -}}
     {{- passFields .path | toJson -}}
   {{- else if and (hasKey . "field") .field -}}
