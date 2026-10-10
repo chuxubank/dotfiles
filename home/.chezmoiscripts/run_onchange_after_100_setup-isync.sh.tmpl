@@ -11,8 +11,12 @@ if ! mkdir -p {{ joinPath .chezmoi.homeDir .path.data.mail }}/gmail; then
 	had_errors=true
 fi
 echo "Sync all emails..."
+# QQ Mail returns per-message UID FETCH errors after the rest of a channel
+# has synced, and mbsync then exits non-zero. That must not set had_errors:
+# a failed run_onchange script is retried on every apply and blocks every
+# later script. Maildir creation and mu init/index stay fatal.
 if ! mbsync -a; then
-	had_errors=true
+	printf 'warning: mbsync reported errors; continuing with a partial sync\n' >&2
 fi
 {{- if not (stat (joinPath .chezmoi.homeDir ".cache" "mu")) }}
 echo "Init mu..."
