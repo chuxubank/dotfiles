@@ -15,7 +15,7 @@ fetch_model_response() {
 
   case "$auth_mode" in
     bearer)
-      curl -sSfL --fail-with-body \
+      curl -sSL --fail-with-body \
         -H "Authorization: Bearer $token" \
         "$url" >"$output_file"
       ;;
@@ -25,11 +25,11 @@ fetch_model_response() {
       case "$url" in
         *\?*) separator='&' ;;
       esac
-      curl -sSfL --fail-with-body \
+      curl -sSL --fail-with-body \
         "$url${separator}${query_param}=${token}" >"$output_file"
       ;;
     none)
-      curl -sSfL --fail-with-body "$url" >"$output_file"
+      curl -sSL --fail-with-body "$url" >"$output_file"
       ;;
     *)
       printf 'unknown model cache auth mode: %s\n' "$auth_mode" >&2

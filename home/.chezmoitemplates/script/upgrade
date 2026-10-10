@@ -10,6 +10,20 @@ run_upgrade() {
   fi
 }
 
+# Self-upgrades of a toolchain binary can fail for reasons this script cannot
+# fix (the install method refuses them, or the download endpoint returns 403).
+# Those must not set had_errors: a failed run_onchange script is retried on
+# every apply and blocks every later script. Managed package upgrades stay
+# fatal so chezmoi retries them.
+run_upgrade_optional() {
+  local label=$1
+  shift
+  echo "Upgrade $label"
+  if ! "$@"; then
+    print -u2 -- "Could not upgrade $label; continuing"
+  fi
+}
+
 finish_upgrades() {
   ! $had_errors
 }

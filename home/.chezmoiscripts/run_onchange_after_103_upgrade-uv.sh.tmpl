@@ -12,8 +12,44 @@ fi
 
 {{ template "script/upgrade" . }}
 
-if ! command -v brew >/dev/null || ! brew list uv &>/dev/null; then
+# uv self update only succeeds for the official installer. It looks for
+# uv-receipt.json and then checks that this executable lives in that
+# receipt's install prefix. Brew, apt, pip, and a second copy on PATH all
+# exit 1 with "standalone installation scripts".
+uv_receipt() {
+  if [[ -n ${AXOUPDATER_CONFIG_WORKING_DIR-} ]]; then
+    print -r -- "$PWD/uv-receipt.json"
+  elif [[ -n ${AXOUPDATER_CONFIG_PATH-} ]]; then
+    print -r -- "${AXOUPDATER_CONFIG_PATH%/}/uv-receipt.json"
+  elif [[ -n ${XDG_CONFIG_HOME-} && -d ${XDG_CONFIG_HOME}/uv ]]; then
+    print -r -- "${XDG_CONFIG_HOME}/uv/uv-receipt.json"
+  else
+    print -r -- "$HOME/.config/uv/uv-receipt.json"
+  fi
+}
+
+uv_standalone() {
+  local receipt prefix bin parent root
+  receipt=$(uv_receipt)
+  [[ -f $receipt ]] || return 1
+  bin=$(command -v uv) || return 1
+  bin=${bin:A}
+  prefix=$(sed -n 's/.*"install_prefix"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$receipt")
+  prefix=${prefix%%$'\n'*}
+  [[ -n $prefix ]] || return 1
+  prefix=${prefix:A}
+  parent=${bin:h}
+  root=$parent
+  if [[ ${parent:t} == bin && ${prefix:t} != bin ]]; then
+    root=${parent:h}
+  fi
+  [[ $root == $prefix ]]
+}
+
+if uv_standalone; then
   run_upgrade 'uv self' uv self update
+else
+  echo "uv was not installed by the standalone installer; skipping self-update"
 fi
 run_upgrade 'uv tools' uv tool upgrade --all
 

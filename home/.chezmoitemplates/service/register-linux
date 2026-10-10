@@ -26,6 +26,7 @@
 brew services restart {{ .tool }} --file=/dev/stdin <<'SYSTEMD'
 {{ $unit }}SYSTEMD
 {{- else }}
+if systemd_user_available; then
 mkdir -p {{ $unitDir | quote }}
 cat > {{ $unitFile | quote }} <<'SYSTEMD'
 {{ $unit }}SYSTEMD
@@ -35,4 +36,7 @@ systemctl --user enable --now {{ $label }}
 {{- else }}
 systemctl --user start {{ $label }}
 {{- end }}
+else
+echo "systemd user session unavailable; skipping {{ $label }}"
+fi
 {{- end -}}
