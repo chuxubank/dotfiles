@@ -1,4 +1,4 @@
-{{ if not (eq .host_env "ci") -}}
+{{ if not (has .host_env (list "ci" "cloud")) -}}
 #!/bin/sh
 
 echo "󰯁 Setup proxy with {{ output "git" "-C" (joinPath .chezmoi.homeDir .path.personal.proxy) "rev-parse" "HEAD" }}"

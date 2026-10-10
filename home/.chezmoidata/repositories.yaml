@@ -27,11 +27,14 @@ repositories:
     refresh_period: 24h
     when: *non_ci
 
+  # Playbook reloads systemd; skip on CI and on headless cloud containers.
   - path: [personal, proxy]
     url: https://github.com/chuxubank/proxy-config
     refresh_period: 4h
     branch: stable
-    when: *non_ci
+    when:
+      disabled:
+        host_env: [ci, cloud]
 
   - path: [personal, keyboard]
     url: https://github.com/chuxubank/keyboard-config
