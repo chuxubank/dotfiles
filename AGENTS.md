@@ -119,3 +119,15 @@ prices everything at $0, so `llm.catalogs.cursor`
 onto its ids; Fast rates come only from `fast`. Cursor picker globs live on
 `llm.providers.cursor.enabled_models`. The rationale is in
 `docs/adr/0009-omp-models-dev-overlays.md`.
+
+## Cursor Cloud specific instructions
+
+`CI=true make verify` is the check on a cloud agent. `safe/pass` skips the
+password store when `CI` or `GITHUB_ACTIONS` is set; GitHub Actions sets
+that, and a cloud VM does not. Non-interactive `chezmoi init` records
+`host_env=ci`, `device_type=server`, and `roles=["automation"]`. Render a
+target with `chezmoi cat`. `make plan` calls `difft`, which this repo
+installs with Homebrew; on Linux pass `--use-builtin-diff` to
+`chezmoi apply --dry-run`. Leave `./install.sh` on `--install-only` and
+leave `make apply` unused while validating: both install host packages and
+externals.
