@@ -111,6 +111,27 @@ installation and first-run onboarding; chezmoi does not install the app or
 import browser data. Only the browser skill is selected, not the repository's
 internal development skills.
 
+** Recoverable deletion
+
+[[https://github.com/sindresorhus/trash-cli][trash-cli]] is installed globally through Bun on macOS, Linux, and Windows. It is a
+shared system utility rather than a separately switchable tool, so its package
+entry is gated directly by the host OS. The existing Bun reconciliation and
+weekly upgrade scripts own installation and upgrades.
+
+- =trash FILE...= moves files and directories to the platform's native trash.
+- macOS uses Finder's Trash, Linux uses the FreeDesktop Trash, and Windows
+  uses the Recycle Bin.
+- Linux under WSL is handled by the package's Windows Recycle Bin integration.
+- =trash= does not expand globs unless they are passed as quoted input, and it
+  returns failure rather than deleting permanently when the platform backend
+  cannot move an item.
+
+=rm= is deliberately not aliased. =pi-delete= uses this same =trash= command
+first, before its compatibility fallbacks (=gio trash= and =trash-put=), so
+normal session deletion is recoverable on all supported desktop platforms.
+The existing disabled-tool runtime purge also uses =trash= first. Disabling
+this tool never purges the Trash contents.
+
 ** OMP model roles
 
 OMP resolves named model slots (=default=, =smol=, =slow=, =task=, =advisor=,

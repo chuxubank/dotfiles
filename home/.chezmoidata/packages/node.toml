@@ -14,6 +14,7 @@ global = [
   "pyright",
   "skills",
   "typescript-language-server",
+  { name = "trash-cli", when.enabled.os = ["darwin", "linux", "windows"] },
   "vscode-json-languageserver",
   "yaml-language-server",
   { name = "@agentclientprotocol/claude-agent-acp", owner = "claude-code" },

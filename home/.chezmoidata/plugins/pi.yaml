@@ -56,9 +56,10 @@ plugins:
 
       - name: pi-delete
         description: >-
-          /delete and pi --delete remove a session. Default is the system
-          trash; --purge deletes permanently and --force skips confirmation.
-          If trash is unavailable, deletion stops.
+          /delete and pi --delete remove a session through the shared
+          cross-platform trash command. Default is the system trash;
+          --purge deletes permanently and --force skips confirmation. If
+          trash is unavailable, deletion stops.
         source: npm:pi-delete
 
       # Must stay ahead of pi-input-history. Both replace the editor via
