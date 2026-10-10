@@ -54,6 +54,13 @@ plugins:
           current Pi session branch.
         source: npm:pi-edit-session-in-place
 
+      - name: pi-delete
+        description: >-
+          /delete and pi --delete remove a session. Default is the system
+          trash; --purge deletes permanently and --force skips confirmation.
+          If trash is unavailable, deletion stops.
+        source: npm:pi-delete
+
       # Must stay ahead of pi-input-history. Both replace the editor via
       # ctx.ui.setEditorComponent, which is a single setter (last writer wins),
       # not a stack like addAutocompleteProvider. pi-input-history composes --
