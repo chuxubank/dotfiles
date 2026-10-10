@@ -14,6 +14,12 @@ skills:
         full_depth: true
 
       - name:
+          - adb-device-unlock
+          - apk-device-install
+        source: chuxubank/skills
+        full_depth: true
+
+      - name:
           - kotlin-tooling-agp9-migration
           - kotlin-tooling-cocoapods-spm-migration
           - kotlin-tooling-java-to-kotlin
