@@ -20,7 +20,7 @@
        agents.skills.selection is an empty custom list, not `all`. The skills
        CLI owns ~/.agents/skills for every agent on this host and installs the
        paseo-* set from getpaseo/paseo
-       (.chezmoidata/skills/providers-general.yaml). Paseo ships the same
+       (.chezmoidata/skills/providers.yaml). Paseo ships the same
        skills and re-converges them from its own bundle on startup, which
        would make two writers for one directory. An empty selection leaves its
        converger owning nothing; startup convergence never deletes, so the

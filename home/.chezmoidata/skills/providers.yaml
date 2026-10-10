@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=../../../schemas/skills.schema.json
 skills:
+  # Skills managed by the skills CLI. Group keys preserve traversal order;
+  # they are not separate installation or retry boundaries.
   provider_groups:
     10-general:
       - name: find-skills
@@ -135,3 +137,89 @@ skills:
 
       - name: swiftui-design-skill
         source: wholiver/swiftui-design-skill
+
+    20-android:
+      - name:
+          - agp-9-upgrade
+          - edge-to-edge
+          - navigation-3
+          - r8-analyzer
+        source: android/skills
+
+      - name: "*"
+        source: android/skills/jetpack-compose
+        full_depth: true
+
+      - name:
+          - adb-device-unlock
+          - apk-device-install
+        source: chuxubank/skills
+        full_depth: true
+
+      - name:
+          - kotlin-tooling-agp9-migration
+          - kotlin-tooling-cocoapods-spm-migration
+          - kotlin-tooling-java-to-kotlin
+          - kotlin-tooling-native-build-performance
+        source: Kotlin/kotlin-agent-skills
+
+    30-personal:
+      - name: bugfix-delivery
+        source: chuxubank/skills
+        when:
+          enabled:
+            host_env: iv
+
+      - name: feishu-projects
+        source: chuxubank/skills
+        owner: feishu-projects
+
+      - name: meegle
+        source: larksuite/meegle-cli
+        owner: meegle-cli
+        when:
+          enabled:
+            host_env: iv
+
+      - name: grok-subagent
+        source: chuxubank/skills
+        when:
+          enabled:
+            tool: [codex, cursor, grok, pi]
+
+      - name: starlists
+        source: chuxubank/starlists
+
+      - name: "*"
+        source: larksuite/cli/skills
+        when:
+          enabled:
+            host_env: iv
+
+      - name: ip-as-logo
+        source: s1dashu/ip-as-logo-skill
+
+      - name: photo-abstract-editorial
+        source: ZzzLc0405/photo-abstract-editorial
+
+      - name: mono-color
+        source: yanliudesign/mono-color-skill
+
+      - name:
+          - writing-dna-skill
+          - lieflat-less-ai-tone
+        source: larashero3-dotcom/writing-dna-skill
+        full_depth: true
+
+      - name:
+          - rare-style-explorer
+          - shan-ze-school
+          - vibeshot-candid-photography
+          - virtual-couple-travel-vlog
+        source: vibeshotclub/vsc-skills
+
+      - name: codex-image-to-eagle
+        source: vibeshotclub/vsc-skills
+        when:
+          enabled:
+            tool: codex
