@@ -60,6 +60,9 @@ workspaces:
             kind: pi
 
   - name: proxy
+    when:
+      disabled:
+        host_env: [cloud]
     tabs:
       - label: proxy
         panes:

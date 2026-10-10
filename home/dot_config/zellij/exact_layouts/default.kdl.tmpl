@@ -24,6 +24,7 @@ layout {
     }
     {{- end }}
 
+    {{- if ne .host_env "cloud" }}
     tab name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.personal.proxy -}}" {
         pane split_direction="vertical" {
             pane command="tail" {
@@ -32,4 +33,5 @@ layout {
             pane
         }
     }
+    {{- end }}
 }
