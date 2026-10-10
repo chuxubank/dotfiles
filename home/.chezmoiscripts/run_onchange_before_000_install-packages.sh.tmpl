@@ -97,6 +97,16 @@ apt_remove() {
 }
 sync_open_packages "$STATE_DIR/packages.apt" "apt package" apt_remove
 
+# Debian's fd-find installs fdfind. Homebrew's formula is fd; link the apt
+# binary when nothing else already provides that name.
+if ! command -v fd >/dev/null 2>&1; then
+	_fdfind=$(command -v fdfind 2>/dev/null || true)
+	if [ -n "$_fdfind" ]; then
+		mkdir -p "$HOME/.local/bin"
+		ln -sfn "$_fdfind" "$HOME/.local/bin/fd"
+	fi
+fi
+
 {{ else if lookPath "pacman" }}
 _desired='{{ template "package/lines" (dict "ctx" . "path" (list "pacman" "core")) }}
 {{ template "package/lines" (dict "ctx" . "path" (list "pacman" "extra")) }}'

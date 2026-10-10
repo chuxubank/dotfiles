@@ -12,8 +12,20 @@ fi
 
 {{ template "script/upgrade" . }}
 
-if ! command -v brew >/dev/null || ! brew list uv &>/dev/null; then
-  run_upgrade 'uv self' uv self update
+# uv self update only succeeds for the official installer. Anything else
+# exits 1 and says "standalone installation scripts"; that is a skip.
+# Every other failure stays fatal so chezmoi retries it.
+echo "Upgrade uv self"
+if ! uv_self_output=$(uv self update 2>&1); then
+  if [[ $uv_self_output == *'standalone installation scripts'* ]]; then
+    echo "uv was not installed by the standalone installer; skipping self-update"
+  else
+    print -u2 -- "$uv_self_output"
+    print -u2 -- "Could not upgrade uv self"
+    had_errors=true
+  fi
+elif [[ -n $uv_self_output ]]; then
+  print -r -- "$uv_self_output"
 fi
 run_upgrade 'uv tools' uv tool upgrade --all
 
