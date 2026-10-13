@@ -1,0 +1,16 @@
+{{- /* Cursor discovers unpacked plugins here on reload. Use archive externals
+       to extract a single plugin, rather than clone the entire marketplace or
+       run an LLM during apply. https://cursor.com/docs/plugins#test-plugins-locally */ -}}
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "cursor") .) | fromJson -}}
+{{- range $plugin := includeTemplate "plugins/resolve" (merge (dict "tool" "cursor") .) | fromJson -}}
+{{- if $plugin.enabled }}
+[{{ $plugin.name | quote }}]
+    type = "archive"
+    url = {{ $plugin.source | quote }}
+    exact = true
+    stripComponents = 2
+    refreshPeriod = "24h"
+    include = [{{ printf "*/%s/**" $plugin.name | quote }}]
+{{ end -}}
+{{- end -}}
+{{- end -}}
