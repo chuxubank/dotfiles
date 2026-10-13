@@ -1,5 +1,15 @@
 had_errors=false
 
+# Check the selected executable, not just whether the formula is installed:
+# a standalone copy can shadow Homebrew's symlink on PATH.
+is_homebrew_binary() {
+  local binary cellar
+  binary=$(command -v "$1") || return 1
+  command -v brew >/dev/null || return 1
+  cellar=$(brew --cellar 2>/dev/null) || return 1
+  [[ -n $cellar && ${binary:A} == "${cellar:A}/"* ]]
+}
+
 run_upgrade() {
   local label=$1
   shift

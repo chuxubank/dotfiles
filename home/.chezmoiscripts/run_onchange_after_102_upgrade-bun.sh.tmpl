@@ -13,7 +13,11 @@ fi
 
 {{ template "script/upgrade" . }}
 
-run_upgrade_optional bun bun upgrade
+if is_homebrew_binary bun; then
+  echo "bun is managed by Homebrew; skipping self-update"
+else
+  run_upgrade_optional bun bun upgrade
+fi
 run_upgrade 'bun globals' bun update -g --latest
 {{- if includeTemplate "tool/enabled" (merge (dict "tool" "opencode") .) | fromJson }}
 opencode_postinstall="$BUN_INSTALL/install/global/node_modules/opencode-ai/postinstall.mjs"
