@@ -1,0 +1,22 @@
+{{- if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+set -eu
+
+# Re-point Homebrew's site-lisp entry after an Emacs.app upgrade. The
+# emacs-plus setup links it at the app bundle, whose subdirs.el has no
+# lexical-binding cookie; upgrades restore that file.
+# emacs-plus-app: {{ if lookPath "brew" }}{{ output "sh" "-c" "brew list --cask --versions emacs-plus-app 2>/dev/null || true" | trim }}{{ else }}not-installed{{ end }}
+
+source={{ joinPath .chezmoi.homeDir (index .path.tool "emacs-site-lisp") "subdirs.el" | quote }}
+target={{ joinPath .path.usr "share" "emacs" "site-lisp" "subdirs.el" | quote }}
+
+[ -f "$source" ] || exit 0
+mkdir -p "$(dirname "$target")"
+
+if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+	exit 0
+fi
+
+echo "󰯁 Link Emacs site-lisp subdirs.el"
+ln -sfn "$source" "$target"
+{{- end -}}

@@ -1,0 +1,14 @@
+{{- if eq .chezmoi.os "darwin" -}}
+;;; subdirs.el --- add site-lisp subdirectories to load-path -*- lexical-binding: t; -*-
+
+;; Chezmoi owns this copy. Linking Emacs.app's subdirs.el instead makes Emacs 31
+;; warn about the missing lexical-binding cookie whenever the file is loaded
+;; outside startup's suppressed scan.
+(if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+    (normal-top-level-add-subdirs-to-load-path))
+
+;; Local Variables:
+;; no-byte-compile: t
+;; no-update-autoloads: t
+;; End:
+{{- end -}}
