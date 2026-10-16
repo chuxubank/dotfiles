@@ -51,6 +51,9 @@ llm:
   #   Controls model list endpoint path and response parsing.
   #
   # Per-tool model selection lives in llm/<tool>.yaml.
+  provider_conditions:
+    disabled: &disabled { enabled: false }
+
   providers:
     iv:
       name: IV
@@ -72,12 +75,11 @@ llm:
     openai:
       name: OpenAI
 
-    # Pi/OMP ChatGPT subscription. Flip `when.enabled` to true to bring the
-    # alias, picker globs, and OMP provider back; false hides it everywhere.
+    # Pi/OMP ChatGPT subscription. Replace this provider's `when` with
+    # { enabled: true } to bring its alias, picker globs, and OMP provider back.
     openai-codex:
       name: OpenAI Codex
-      when:
-        enabled: false
+      when: *disabled
 
     # Hermes' built-in SuperGrok subscription provider. Hermes owns the OAuth
     # flow and model catalog, so there is no endpoint or API key here.
@@ -152,6 +154,7 @@ llm:
 
     siliconflow-cn:
       name: SiliconFlow (China)
+      when: *disabled
       data_set: models-dev
       provider: siliconflow-cn
       base_url: "https://api.siliconflow.cn/v1"
@@ -201,6 +204,7 @@ llm:
     # richer per-model protocol metadata used by OpenCode itself.
     opencode:
       name: OpenCode Zen
+      when: *disabled
       data_set: models-dev
       provider: opencode
       base_url: "https://opencode.ai/zen"
@@ -209,6 +213,7 @@ llm:
 
     opencode-go:
       name: OpenCode Go
+      when: *disabled
       data_set: models-dev
       provider: opencode-go
       base_url: "https://opencode.ai/zen/go"
