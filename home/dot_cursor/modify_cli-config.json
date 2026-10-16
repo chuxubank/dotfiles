@@ -2,13 +2,39 @@
 
 {{- /* https://cursor.com/docs/cli/reference/configuration
        attribution.attributeCommitsToAgent / attributePRsToAgent default on
-       and add a Co-authored-by / Made with Cursor trailer. A modify-template
-       so CLI-owned keys (model, permissions, authInfo) survive apply. */ -}}
+       and add a Co-authored-by / Made with Cursor trailer.
+       approvalMode unrestricted is Run Everything (--force / --yolo).
+       The model id is llm.models.grok_primary, with 500k context, high
+       effort, and fast. A modify-template
+       so CLI-owned keys (permissions, authInfo) survive apply. */ -}}
+
+{{- $model := .llm.models.grok_primary -}}
+{{- if not $model -}}
+  {{- fail "cursor cli-config: llm.models.grok_primary is unset" -}}
+{{- end -}}
+{{- $parameters := list
+  (dict "id" "context" "value" "500k")
+  (dict "id" "reasoning_effort" "value" "high")
+  (dict "id" "fast" "value" "true")
+-}}
 
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
+    "approvalMode" "unrestricted"
+    "hasChangedDefaultModel" true
+    "model" (dict
+      "modelId" $model
+      "displayModelId" $model
+      "displayName" $model
+      "displayNameShort" $model
+    )
+    "selectedModel" (dict
+      "modelId" $model
+      "parameters" $parameters
+    )
+    "modelParameters" (dict $model $parameters)
     "attribution" (dict
       "attributeCommitsToAgent" false
       "attributePRsToAgent" false
