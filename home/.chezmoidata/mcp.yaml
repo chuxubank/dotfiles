@@ -120,6 +120,10 @@ mcp:
           host_env: iv
     - name: Context7
       description: Up-to-date Docs for LLMs and AI code editors
+      # Cursor uses the context7 plugin. Other agents keep this API-key server.
+      when:
+        disabled:
+          tool: ["cursor"]
       execution:
         type: http
         uri: https://mcp.context7.com/mcp

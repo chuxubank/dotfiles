@@ -1,7 +1,9 @@
 # yaml-language-server: $schema=../../../schemas/plugins.schema.json
 plugins:
   # Cursor local plugins are archive externals, not account-level marketplace
-  # installs. source is an archive URL; name is its top-level plugin directory.
+  # installs. source is an archive URL. name is the directory under
+  # ~/.cursor/plugins/local/. path is the plugin directory beneath the archive
+  # repository root; it defaults to name.
   # home/dot_cursor/plugins/local/.chezmoiexternal.toml.tmpl extracts only that
   # directory. Cursor discovers the unpacked manifest on reload.
   cursor:
@@ -9,3 +11,7 @@ plugins:
       - name: pstack
         description: Rigorous engineering workflows, skills, and review agents
         source: https://github.com/cursor/plugins/archive/refs/heads/main.tar.gz
+      - name: context7
+        description: Up-to-date documentation lookup for libraries and frameworks
+        source: https://github.com/upstash/context7/archive/refs/heads/master.tar.gz
+        path: plugins/cursor/context7

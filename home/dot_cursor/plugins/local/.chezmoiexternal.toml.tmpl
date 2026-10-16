@@ -4,13 +4,17 @@
 {{- if includeTemplate "tool/enabled" (merge (dict "tool" "cursor") .) | fromJson -}}
 {{- range $plugin := includeTemplate "plugins/resolve" (merge (dict "tool" "cursor") .) | fromJson -}}
 {{- if $plugin.enabled }}
+{{- /* path is the plugin directory beneath the archive's repository root.
+       stripComponents drops that root plus every path segment. */ -}}
+{{- $archivePath := default $plugin.name (dig "path" "" $plugin) -}}
+{{- $strip := add 1 (len (splitList "/" $archivePath)) -}}
 [{{ $plugin.name | quote }}]
     type = "archive"
     url = {{ $plugin.source | quote }}
     exact = true
-    stripComponents = 2
+    stripComponents = {{ $strip }}
     refreshPeriod = "24h"
-    include = [{{ printf "*/%s/**" $plugin.name | quote }}]
+    include = [{{ printf "*/%s/**" $archivePath | quote }}]
 {{ end -}}
 {{- end -}}
 {{- end -}}

@@ -1,8 +1,9 @@
 # Cursor plugins
 
 `home/.chezmoidata/plugins/cursor.yaml` declares Cursor-only plugins. Each
-`source` is a repository archive URL; `name` is the plugin directory within
-that archive (beneath the archive’s repository root).
+`source` is a repository archive URL. `name` is the directory created under
+`~/.cursor/plugins/local/`. `path`, when set, is the plugin directory beneath
+the archive’s repository root; it defaults to `name`.
 
 `home/dot_cursor/plugins/local/.chezmoiexternal.toml.tmpl` uses the shared
 plugin resolver and tool gating to extract enabled plugins into
