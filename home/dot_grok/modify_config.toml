@@ -21,9 +21,16 @@
        5s). Deliberately not `ternary ... .isDarkMode` — that is captured once
        when chezmoi init probes AppleInterfaceStyle, so it would freeze the
        theme and not even follow a later apply. */ -}}
+{{- /* Grok 4.7 Fast at the 500k window. The catalog lists 256k and 500k and
+       defaults the selected window to 256k; context_window is that default.
+       The id is `${grok_primary}-build-fast`, the same 500k Fast choice as
+       Pi's `@500k:fast` and OMP's `-500k-fast`. */ -}}
+{{- $grokFast := printf "%s-build-fast" (index .llm.models "grok_primary") -}}
 {{- $managed := dict
   "ui" (dict "theme" "auto")
   "memory" (dict "enabled" true)
+  "models" (dict "default" $grokFast)
+  "model" (dict $grokFast (dict "context_window" 500000))
 -}}
 {{- $replace := dict
   "mcp_servers" $servers

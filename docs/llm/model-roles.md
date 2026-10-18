@@ -18,13 +18,14 @@ deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
 Pi does not use this table. Its personal default is
-`cursor/${grok_primary}@256k:fast` because `pi-cursor-sdk` posts `context`,
-`reasoning_effort`, and `fast` on registry id `${grok_primary}`, and Cursor's
-run registry rejects `context=500k` (`Invalid parameters for registry model`
-/ `AI Model Not Found`). `models.list()` still advertises that window, and
-local validation only checks the id. `context=256k` completes; `context=500k`
-alone is rejected too. OMP's `cursor/${grok_primary}-500k-fast` is a different
-SKU and is unaffected. See
+`cursor/${grok_primary}@500k:fast`, the same 500k Fast grok as OMP's
+`cursor/${grok_primary}-500k-fast`. Grok Build selects that lane as
+`${grok_primary}-build-fast` with `context_window` 500000. `pi-cursor-sdk`
+posts `context`, `reasoning_effort`, and `fast` on registry id
+`${grok_primary}` rather than the OMP context SKU. An earlier probe saw the
+run registry reject `context=500k` (`Invalid parameters for registry model`
+/ `AI Model Not Found`) while `context=256k` completed; the pin is 500k so
+the three tools share one grok. See
 [ADR 0009](../adr/0009-omp-models-dev-overlays.md).
 
 | Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
@@ -42,12 +43,12 @@ those three.
 
 Pi uses the same candidate order and the same Cursor families, but
 `pi-cursor-sdk` ids are not these SKUs. Personal `default` is
-`cursor/grok-4.7@256k:fast`: the Fast lane on the 256k window. The SDK
-default window is 500k (`cursor/grok-4.7@500k:fast`), which is OMP's
-`cursor/grok-4.7-500k-fast`, but Cursor rejects that window from the SDK
-(ADR 0009). OMP only keeps that window while
-`extendedContext` is on; `modify_config.yml` sets it. Off clamps Cursor to
-the bundled long-context threshold, 256k. Pi cannot set Grok's `reasoning_effort`.
+`cursor/grok-4.7@500k:fast`: the Fast lane on the 500k window. That is OMP's
+`cursor/grok-4.7-500k-fast` and the SDK's default variant. Grok Build uses
+`grok-4.7-build-fast` with `context_window` 500000. OMP only keeps that
+window while `extendedContext` is on; `modify_config.yml` sets it. Off clamps
+Cursor to the bundled long-context threshold, 256k. Pi cannot set Grok's
+`reasoning_effort`.
 OMP's `claude-opus-5-1m` is `cursor/claude-opus-5@1m`. Composer Fast is
 `cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
 the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5

@@ -4,15 +4,16 @@ llm:
       # Same candidate order as omp.yaml. IV aliases enumerate models because
       # the proxy catalog differs from Pi's bundled catalog; subscription
       # providers keep models: false. Cursor ids are pi-cursor-sdk's, not
-      # OMP SKUs. Personal default is `${grok_primary}@256k:fast`: Cursor's
-      # run registry rejects the SDK's advertised 500k window (see
-      # docs/adr/0009-omp-models-dev-overlays.md). Pi cannot set Grok's
+      # OMP SKUs. Personal default is `${grok_primary}@500k:fast`: the same
+      # 500k Fast grok as OMP's `${grok_primary}-500k-fast` and Grok Build's
+      # `${grok_primary}-build-fast` at a 500k window. Pi posts registry id
+      # `${grok_primary}` plus context and fast; it cannot set Grok's
       # reasoning_effort. OMP's `claude-opus-5-1m` is `claude-opus-5@1m`; effort
       # follows reasoning_effort.
       model:
         - iv-codex/${gpt_primary}
         - iv-cc/claude-opus-5
-        - cursor/${grok_primary}@256k:fast
+        - cursor/${grok_primary}@500k:fast
         - xai/${grok_primary}
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5@1m
