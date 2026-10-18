@@ -56,6 +56,7 @@ casks = [
   "font-zhuque-fangsong",
   "fontgoggles",
   "ghostty",
+  "gimp",
   { name = "grok-bot", owner = "grok" },
   { name = "grok-build", owner = "grok" },
   { name = "owo-network/brew/herdrm", owner = "herdr" },
