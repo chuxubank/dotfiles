@@ -13,15 +13,17 @@ installed=()
 cleanup_enabled=true
 had_errors=false
 
+skills_state_dir=$(mktemp -d) || exit 1
+trap 'rm -rf "$skills_state_dir"' EXIT
+
+# skills 1.7.2 exits before large piped JSON finishes flushing. Give the CLI
+# a regular file for stdout, then let cat safely feed the inventory loader.
 json_names_load installed \
-  'skills list -g --json' \
+  'skills list -g --json > "$skills_state_dir/installed.json" && cat "$skills_state_dir/installed.json"' \
   'type == "array"' \
   '.[].path | split("/")[-1]' \
   cleanup_enabled \
   'skills'
-
-skills_state_dir=$(mktemp -d) || exit 1
-trap 'rm -rf "$skills_state_dir"' EXIT
 
 skill_name_is_pattern() {
   [[ "$1" == *[\*\?\[]* ]]
