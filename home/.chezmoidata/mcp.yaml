@@ -204,6 +204,14 @@ mcp:
           GOOGLE_MAPS_API_KEY:
             path: Personal/Tech/Google
             field: goose-map-api-key
+    - name: Artemis
+      owner: artemis
+      description: Drive a USB-connected Android device or emulator from natural language, and collect logcat, screenshots, and traces. The checkout lives under the example tree; ~/bin/artemis-mcp starts the stdio server.
+      execution:
+        type: stdio
+        cmd: ~/bin/artemis-mcp
+        timeout: 60
+        tool_timeout: 180
     - name: iPhone Use
       description: Control a USB-connected physical iPhone through a local WDA runner; includes setup, UI inspection, Unicode input and bounded batch operations.
       when:

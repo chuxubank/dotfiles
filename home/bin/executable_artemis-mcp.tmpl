@@ -1,0 +1,6 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson -}}
+#!/bin/sh
+# stdio MCP server. cwd is the checkout so `python -m mcp_server` resolves.
+{{ includeTemplate "script/artemis-prelude" . }}
+exec uv run --frozen --no-dev --directory "$root" python -m mcp_server "$@"
+{{- end }}

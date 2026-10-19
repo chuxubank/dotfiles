@@ -76,6 +76,15 @@ environment:
         - home: [Library, Android, sdk, platform-tools]
         - home: [Library, Android, sdk, cmdline-tools, latest, bin]
 
+    # A source checkout keeps .env and traces in the repo unless this is set.
+    - tool: artemis
+      owner: artemis
+      variables:
+        ARTEMIS_APP_DIR:
+          homePath: [data, artemis]
+        ARTEMIS_USE_USER_DIR:
+          literal: "true"
+
     - tool: vcpkg
       variables:
         VCPKG_ROOT:

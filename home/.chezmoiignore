@@ -37,6 +37,13 @@ Library/LaunchAgents/rclone.rpi.plist
 .sentryclirc
 {{- end }}
 
+{{- if not (includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson) }}
+{{ .path.data.artemis }}
+bin/artemis
+bin/artemis-mcp
+.cursor/rules/artemis.mdc
+{{- end }}
+
 {{- includeTemplate "tool/disabled-ignore" . }}
 
 {{- if eq .host_env "ci" }}

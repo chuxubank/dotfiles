@@ -236,6 +236,15 @@ repositories:
       disabled:
         host_env: [ci]
 
+  # Android device agent. State and secrets stay in path.data.artemis.
+  # owner follows the tools.yaml switch; a disabled tool is not cloned.
+  - path: [workspace, example]
+    dest: artemis
+    url: https://github.com/google/artemis.git
+    refresh_period: 24h
+    branch: main
+    owner: artemis
+
   - path: [workspace, example]
     dest: d2r-mobile
     url: https://github.com/jhaizhou-ops/d2r-mobile

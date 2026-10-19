@@ -1,0 +1,9 @@
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") (includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson) -}}
+# Chezmoi renders this from the password store. ARTEMIS_APP_DIR points here,
+# so a source checkout does not keep secrets or traces in the git tree.
+GEMINI_API_KEY={{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/Google" "field" "gemini-api-key") .) | quote }}
+OPEN_ROUTER_API_KEY={{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Tech/AI/OpenRouter" "field" "api-key") .) | quote }}
+ARTEMIS_DEFAULT_PROFILE=flash
+# Personal phones: install the accessibility helper only via `artemis helper install`.
+ARTEMIS_HELPER_AUTO_INSTALL=false
+{{- end -}}

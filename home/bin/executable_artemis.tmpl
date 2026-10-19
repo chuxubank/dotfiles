@@ -1,0 +1,6 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson -}}
+#!/bin/sh
+# Checkout stays clean. Secrets and traces live in ARTEMIS_APP_DIR.
+{{ includeTemplate "script/artemis-prelude" . }}
+exec uv run --frozen --no-dev --directory "$root" artemis "$@"
+{{- end }}

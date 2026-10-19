@@ -1,0 +1,15 @@
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") (includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson) }}
+#!/usr/bin/env zsh
+set -euo pipefail
+
+echo "󰯁 Setup Artemis"
+
+{{ includeTemplate "script/artemis-prelude" . }}
+
+if ! command -v uv >/dev/null 2>&1; then
+  print -u2 -- "uv is not installed; declare it in the package lists"
+  exit 1
+fi
+
+uv sync --frozen --no-dev
+{{- end }}

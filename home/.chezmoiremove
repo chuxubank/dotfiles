@@ -1,3 +1,8 @@
 bin/node
 .pi/web-search.json
+{{- if not (includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson) }}
+bin/artemis
+bin/artemis-mcp
+.cursor/rules/artemis.mdc
+{{- end }}
 {{- includeTemplate "tool/disabled-remove" . }}

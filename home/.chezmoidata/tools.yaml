@@ -55,6 +55,16 @@ tools:
       - ".config/amp/**"
       - ".local/share/amp/**"
 
+  # Android device agent. The example checkout, MCP entry, and launchers
+  # follow this switch. Off until a model provider is chosen. Turning it
+  # on should keep it to macOS and exclude CI.
+  artemis:
+    when: *disabled
+    remove:
+      - ".local/share/artemis/.env"
+    purge:
+      - ".local/share/artemis/**"
+
   # Multi-shell completion provider. Configuration is ready, but fzf-tab is
   # the preferred completion UI; enable this separately when its specs are
   # wanted in addition to native Zsh completions.

@@ -1,0 +1,16 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "artemis") .) | fromJson -}}
+---
+description: Drive a connected Android phone or emulator with Artemis. Use when asked to automate, test, inspect, or diagnose an Android device, including logcat, screenshots, UI flows, and traces.
+alwaysApply: false
+---
+
+Artemis is managed by chezmoi. The checkout is `{{ joinPath .chezmoi.homeDir .path.workspace.example "artemis" }}`. The CLI on `PATH` is `artemis`. The MCP server is already configured as `artemis`; do not run `artemis mcp --install`, which rewrites IDE configs chezmoi owns. Secrets and traces live in `{{ joinPath .chezmoi.homeDir .path.data.artemis }}`, not in the checkout.
+{{- $rules := joinPath .chezmoi.homeDir .path.workspace.example "artemis/mcp_server/rules.md" }}
+{{- if glob $rules }}
+
+{{ output "cat" $rules }}
+{{- else }}
+
+The testing mindset is `{{ $rules }}`. It appears after chezmoi clones the checkout. Until then, call `mobile_diagnose` when a tool fails, use `mobile_run_task` with profile `flash` for a short UI flow, and use `pro` when the task needs a plan, checkpoints, or logcat. Ask which device to use when more than one is connected.
+{{- end }}
+{{- end }}

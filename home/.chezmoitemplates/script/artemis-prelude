@@ -1,0 +1,17 @@
+{{- /* script/artemis-prelude — Checkout, app dir, and runtime env for Artemis.
+       POSIX. Leaves the caller in the checkout, or exits 1. GUI apps do not
+       inherit Homebrew, so uv's usual locations are prepended here. */ -}}
+root={{ joinPath .chezmoi.homeDir .path.workspace.example "artemis" | quote }}
+app={{ joinPath .chezmoi.homeDir .path.data.artemis | quote }}
+export ARTEMIS_APP_DIR="$app"
+export ARTEMIS_USE_USER_DIR=true
+export PYTHONUNBUFFERED=1
+export ARTEMIS_DESKTOP_NOTIFY=true
+export PATH="/opt/homebrew/bin:${HOME}/.local/bin:${PATH}"
+if [ ! -f "$root/pyproject.toml" ]; then
+  echo "artemis checkout is missing: $root" >&2
+  exit 1
+fi
+cd "$root" || exit 1
+PYTHONPATH="${root}${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH
