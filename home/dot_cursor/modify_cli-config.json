@@ -5,7 +5,9 @@
        and add a Co-authored-by / Made with Cursor trailer.
        approvalMode unrestricted is Run Everything (--force / --yolo).
        The model id is llm.models.grok_primary, with 500k context, high
-       effort, and fast. A modify-template
+       effort, and fast. 500k is the max-mode variant: contextTokenLimit
+       stays 256k unless maxMode is on, and a false maxMode rewrites the
+       500k parameters back to the non-max default. A modify-template
        so CLI-owned keys (permissions, authInfo) survive apply. */ -}}
 
 {{- $model := .llm.models.grok_primary -}}
@@ -24,6 +26,7 @@
   "managed" (dict
     "approvalMode" "unrestricted"
     "hasChangedDefaultModel" true
+    "maxMode" true
     "model" (dict
       "modelId" $model
       "displayModelId" $model
