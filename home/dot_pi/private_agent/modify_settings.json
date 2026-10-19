@@ -95,6 +95,17 @@
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}
+{{- /* iv-codex/gpt-6.1-sol advertises a 1,050,000 window. Pi compacts when
+       context exceeds contextWindow - reserveTokens, so 650000 starts
+       compaction above 400k. Other models keep the built-in 16384 reserve.
+       keepRecentTokens stays at 20000. */ -}}
+{{- $_ := set $managed "compaction" (dict
+  "modelOverrides" (dict
+    "iv-codex/gpt-6.1-sol" (dict
+      "reserveTokens" 650000
+    )
+  )
+) -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
