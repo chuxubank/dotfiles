@@ -9,23 +9,36 @@
        and add a Co-authored-by / Made with Cursor trailer.
        approvalMode unrestricted is Run Everything (--force / --yolo).
        The model id is llm.models.grok_primary, with 500k context, high
-       effort, and fast. selectedModel is what startup reads once the
-       catalog is loaded. maxMode stays on because 500k is the max
-       variant: a false maxMode rewrites those parameters back to the
-       non-max default. model and modelParameters are CLI caches of that
-       selection, so apply must not write them. A modify-template so
-       CLI-owned keys (model, modelParameters, permissions, authInfo)
-       survive apply. */ -}}
+       effort, and fast. 500k is the max-mode variant: contextTokenLimit
+       stays 256k unless maxMode is on, and a false maxMode rewrites the
+       500k parameters back to the non-max default. A modify-template
+       so CLI-owned keys (permissions, authInfo) survive apply. */ -}}
 
 {{- $model := .llm.models.grok_primary -}}
 {{- if not $model -}}
   {{- fail "cursor cli-config: llm.models.grok_primary is unset" -}}
 {{- end -}}
+{{- /* CLI labels are "<Name> <Context> <Effort> [Fast]", e.g.
+       "Grok 4.7 500K High Fast". The name is the id with the family
+       capitalized; parameter tokens use the catalog's display case. */ -}}
+{{- $context := "500k" -}}
+{{- $effort := "high" -}}
+{{- $fast := true -}}
 {{- $parameters := list
-  (dict "id" "context" "value" "500k")
-  (dict "id" "reasoning_effort" "value" "high")
-  (dict "id" "fast" "value" "true")
+  (dict "id" "context" "value" $context)
+  (dict "id" "reasoning_effort" "value" $effort)
+  (dict "id" "fast" "value" (ternary "true" "false" $fast))
 -}}
+{{- $stem := splitList "-" $model -}}
+{{- $label := $model -}}
+{{- if gt (len $stem) 1 -}}
+  {{- $label = printf "%s %s" (title (index $stem 0)) (join "-" (rest $stem)) -}}
+{{- end -}}
+{{- $summary := list (upper $context) (title $effort) -}}
+{{- if $fast -}}
+  {{- $summary = append $summary "Fast" -}}
+{{- end -}}
+{{- $display := printf "%s %s" $label (join " " $summary) -}}
 
 {{- includeTemplate "config/merge" (dict
   "format" "json"
@@ -34,10 +47,19 @@
     "approvalMode" "unrestricted"
     "hasChangedDefaultModel" true
     "maxMode" true
+    "model" (dict
+      "modelId" $model
+      "displayModelId" $model
+      "displayName" $display
+      "displayNameShort" $display
+      "aliases" (list)
+      "maxMode" true
+    )
     "selectedModel" (dict
       "modelId" $model
       "parameters" $parameters
     )
+    "modelParameters" (dict $model $parameters)
     "attribution" (dict
       "attributeCommitsToAgent" false
       "attributePRsToAgent" false
