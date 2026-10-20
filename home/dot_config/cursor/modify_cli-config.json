@@ -1,14 +1,21 @@
 {{- /* chezmoi:modify-template */ -}}
 
 {{- /* https://cursor.com/docs/cli/reference/configuration
+       Dest is ~/.config/cursor/cli-config.json: the CLI uses
+       $XDG_CONFIG_HOME/cursor when that variable is set, and
+       environment.yaml sets it to ~/.config. ~/.cursor/cli-config.json
+       is not read.
        attribution.attributeCommitsToAgent / attributePRsToAgent default on
        and add a Co-authored-by / Made with Cursor trailer.
        approvalMode unrestricted is Run Everything (--force / --yolo).
        The model id is llm.models.grok_primary, with 500k context, high
-       effort, and fast. 500k is the max-mode variant: contextTokenLimit
-       stays 256k unless maxMode is on, and a false maxMode rewrites the
-       500k parameters back to the non-max default. A modify-template
-       so CLI-owned keys (permissions, authInfo) survive apply. */ -}}
+       effort, and fast. selectedModel is what startup reads once the
+       catalog is loaded. maxMode stays on because 500k is the max
+       variant: a false maxMode rewrites those parameters back to the
+       non-max default. model and modelParameters are CLI caches of that
+       selection, so apply must not write them. A modify-template so
+       CLI-owned keys (model, modelParameters, permissions, authInfo)
+       survive apply. */ -}}
 
 {{- $model := .llm.models.grok_primary -}}
 {{- if not $model -}}
@@ -27,17 +34,10 @@
     "approvalMode" "unrestricted"
     "hasChangedDefaultModel" true
     "maxMode" true
-    "model" (dict
-      "modelId" $model
-      "displayModelId" $model
-      "displayName" $model
-      "displayNameShort" $model
-    )
     "selectedModel" (dict
       "modelId" $model
       "parameters" $parameters
     )
-    "modelParameters" (dict $model $parameters)
     "attribution" (dict
       "attributeCommitsToAgent" false
       "attributePRsToAgent" false

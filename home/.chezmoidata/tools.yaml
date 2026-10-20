@@ -101,7 +101,8 @@ tools:
     when: *non_ci
     remove:
       - ".cursor/mcp.json"
-      - ".cursor/cli-config.json"
+      # CLI reads $XDG_CONFIG_HOME/cursor/cli-config.json. Data stays in ~/.cursor.
+      - ".config/cursor/cli-config.json"
     purge:
       - ".cursor/**"
 
