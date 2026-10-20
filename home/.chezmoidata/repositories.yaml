@@ -103,6 +103,12 @@ repositories:
     refresh_period: 24h
     when: *personal_only
 
+  - path: [workspace, asahiart]
+    dest: aep-parser
+    url: https://github.com/AsahiArt/aep-parser
+    refresh_period: 24h
+    when: *personal_only
+
   # path.workspace.iv
   - path: [workspace, iv]
     dest: agentia
