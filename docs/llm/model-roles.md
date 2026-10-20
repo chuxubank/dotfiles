@@ -11,8 +11,9 @@ Every role is a candidate list. The renderer picks the first entry whose
 provider alias resolved on this host, so one table covers both tiers: the IV
 aliases (`iv-codex`, `iv-cc`, `iv-anthropic`, `iv`) are gated on
 `host_env: [iv]` and drop out elsewhere, leaving the personal-subscription
-entry. The `cursor` provider is the reverse: disabled on iv, so no Cursor
-model reaches the IV tier or its picker. IV is company-funded and spends
+entry. The `cursor` alias resolves on `iv` as well, so `cursor/*` stays in
+that host's picker; each role still leads with an IV candidate, and that
+entry wins. IV is company-funded and spends
 effort freely; the fallback stays
 deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).

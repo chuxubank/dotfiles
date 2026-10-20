@@ -93,8 +93,7 @@ llm:
 
     # OMP's built-in Cursor subscription provider. It has no endpoint or API
     # key here: omp owns its OAuth flow and bundled model catalog. Pi reaches
-    # it through pi-cursor-sdk. Off on iv: the alias, its role candidates,
-    # and cursor/* picker globs drop out for both tools.
+    # it through pi-cursor-sdk. Both tools keep the alias on every host.
     cursor:
       name: Cursor
       # Picker globs, appended as `<alias>/<glob>` to the enabled_models of
@@ -108,9 +107,6 @@ llm:
         - "*muse-spark-1.3*"
         - "*gemini-3.8-flash*"
         - default
-      when:
-        disabled:
-          host_env: ["iv"]
 
     google:
       name: Google

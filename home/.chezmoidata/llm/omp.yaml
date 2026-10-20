@@ -112,6 +112,8 @@ llm:
           models: false
         # OMP's bundled Cursor catalog prices every served id, including Fast
         # lanes and context SKUs such as `grok-4.7-500k-fast`; no overlay.
+        # The alias stays on iv so the picker can select it. Role lists still
+        # lead with an IV candidate, and that entry wins.
         cursor:
           provider: cursor
           models: false
