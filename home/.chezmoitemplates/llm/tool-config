@@ -28,7 +28,12 @@
            model_override_prefixes — extra id prefixes copied onto overrides
            timeout   — model fetch timeout in seconds (if set)
            headers   — static request headers (if set)
-           model_metadata — map of model id -> data set metadata (if resolved)
+           model_metadata_args — JSON object for llm/fetch-data-set, when
+                       this alias has a data set. The parsed catalog stays
+                       out of this result: it is several megabytes, and
+                       includeTemplate deep-copies its argument, so encoding
+                       the map once per tool dominated apply. Callers that
+                       need rows fetch them.
            model_filter — model metadata filter (if set)
 
        Provider reference formats:
@@ -94,8 +99,9 @@
 {{- /* Resolve each provider reference */ -}}
 {{- $ctx := . -}}
 {{- $providers := dict -}}
-{{- /* Data sets are shared by several aliases (for example, the models.dev
-       OpenAI-compatible surfaces). Cache the parsed map for this render. */ -}}
+{{- /* Several aliases share one data set. This memo covers that sharing
+       inside this call. It cannot outlive includeTemplate: chezmoi
+       deep-copies the argument, so callers refetch from model_metadata_args. */ -}}
 {{- $dataSetMemo := dict -}}
 {{- $catalogs := default dict (index .llm "catalogs") -}}
 {{- range $alias, $ref := $refs }}
@@ -238,26 +244,30 @@
         {{- $_ := set $dsFetchArgs "providers" $dsProviders -}}
       {{- end -}}
       {{- $dataSetKey := $dsFetchArgs | toJson -}}
-      {{- $metadataModels := dict -}}
-      {{- if hasKey $dataSetMemo $dataSetKey -}}
-        {{- $metadataModels = index $dataSetMemo $dataSetKey -}}
-      {{- else -}}
-        {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
-        {{- $_ := set $dataSetMemo $dataSetKey $metadataModels -}}
-      {{- end -}}
-      {{- if and (gt (len $dsProviders) 0) (not $resolved.base_url) (not (hasKey $ref "models")) (gt (len $metadataModels) 0) -}}
-        {{- /* A provider-scoped catalog is authoritative when this alias has
-               no endpoint of its own and did not declare models. */ -}}
-        {{- $sourceNames := dict -}}
-        {{- range $id, $m := $metadataModels -}}
-          {{- $name := $m.name -}}
-          {{- if not $name -}}{{- $name = $id -}}{{- end -}}
-          {{- $_ := set $sourceNames $id $name -}}
+      {{- /* Hand the fetch arguments to callers. Load the catalog here only
+             when this alias's model list is the catalog itself. */ -}}
+      {{- if and (gt (len $dsProviders) 0) (not $resolved.base_url) (not (hasKey $ref "models")) -}}
+        {{- $metadataModels := dict -}}
+        {{- if hasKey $dataSetMemo $dataSetKey -}}
+          {{- $metadataModels = index $dataSetMemo $dataSetKey -}}
+        {{- else -}}
+          {{- $metadataModels = includeTemplate "llm/fetch-data-set" $dsFetchArgs | fromJson -}}
+          {{- $_ := set $dataSetMemo $dataSetKey $metadataModels -}}
         {{- end -}}
-        {{- $_ := set $resolved "models" $sourceNames -}}
-      {{- end -}}
-      {{- if gt (len $metadataModels) 0 -}}
-        {{- $_ := set $resolved "model_metadata" $metadataModels -}}
+        {{- if gt (len $metadataModels) 0 -}}
+          {{- /* A provider-scoped catalog is authoritative when this alias has
+                 no endpoint of its own and did not declare models. */ -}}
+          {{- $sourceNames := dict -}}
+          {{- range $id, $m := $metadataModels -}}
+            {{- $name := $m.name -}}
+            {{- if not $name -}}{{- $name = $id -}}{{- end -}}
+            {{- $_ := set $sourceNames $id $name -}}
+          {{- end -}}
+          {{- $_ := set $resolved "models" $sourceNames -}}
+          {{- $_ := set $resolved "model_metadata_args" $dataSetKey -}}
+        {{- end -}}
+      {{- else -}}
+        {{- $_ := set $resolved "model_metadata_args" $dataSetKey -}}
       {{- end -}}
     {{- end -}}
   {{- end }}
@@ -273,8 +283,7 @@
 {{- end }}
 {{- $_ := set $result "providers" $providers -}}
 {{- /* pick-model and split-model only test alias membership. includeTemplate
-       cost grows with its argument, and resolved providers carry parsed
-       catalog metadata, so hand them a keys-only set. */ -}}
+       cost grows with its argument, so hand them a keys-only set. */ -}}
 {{- $aliasSet := dict -}}
 {{- range $alias, $_ := $providers -}}{{- $_ := set $aliasSet $alias true -}}{{- end -}}
 

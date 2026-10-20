@@ -77,12 +77,22 @@
 {{- end -}}
 {{- end -}}
 
+{{- $metadataMemo := dict -}}
 {{- range $alias, $ep := $cfg.providers }}
   {{- if or (eq $alias "openai") (ne $alias $activeProvider) }}{{ continue }}{{ end }}
 
   {{- /* Cache entries are authoritative for availability. A map keyed by id
          also removes duplicate records returned by some OpenAI-compatible APIs. */ -}}
-  {{- $metadata := default (dict) (index $ep "model_metadata") -}}
+  {{- $metadata := dict -}}
+  {{- if hasKey $ep "model_metadata_args" -}}
+    {{- $metadataArgs := index $ep "model_metadata_args" -}}
+    {{- if hasKey $metadataMemo $metadataArgs -}}
+      {{- $metadata = index $metadataMemo $metadataArgs -}}
+    {{- else -}}
+      {{- $metadata = includeTemplate "llm/fetch-data-set" ($metadataArgs | fromJson) | fromJson -}}
+      {{- $_ := set $metadataMemo $metadataArgs $metadata -}}
+    {{- end -}}
+  {{- end -}}
   {{- if ne (kindOf $metadata) "map" -}}{{- $metadata = dict -}}{{- end -}}
   {{- $sourceModels := dict -}}
   {{- $ollamaModels := dict -}}

@@ -6,6 +6,7 @@
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "opencode") .) | fromJson -}}
 
 {{- $provider := dict -}}
+{{- $metadataMemo := dict -}}
 {{- range $alias, $ep := $cfg.providers }}
   {{- $provDict := dict -}}
   {{- if $ep.base_url }}
@@ -14,7 +15,16 @@
 
   {{- /* Static models → use as-is; models: false → skip; otherwise fetch. */ -}}
   {{- $models := dict -}}
-  {{- $modelMetadata := default dict (index $ep "model_metadata") -}}
+  {{- $modelMetadata := dict -}}
+  {{- if hasKey $ep "model_metadata_args" -}}
+    {{- $metadataArgs := index $ep "model_metadata_args" -}}
+    {{- if hasKey $metadataMemo $metadataArgs -}}
+      {{- $modelMetadata = index $metadataMemo $metadataArgs -}}
+    {{- else -}}
+      {{- $modelMetadata = includeTemplate "llm/fetch-data-set" ($metadataArgs | fromJson) | fromJson -}}
+      {{- $_ := set $metadataMemo $metadataArgs $modelMetadata -}}
+    {{- end -}}
+  {{- end -}}
   {{- $modelFilter := default dict (index $ep "model_filter") -}}
   {{- $source := dict -}}
   {{- if hasKey $ep "models" -}}

@@ -29,6 +29,7 @@
 {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
 
 {{- $providers := dict -}}
+{{- $metadataMemo := dict -}}
 {{- range $alias, $ep := $cfg.providers -}}
   {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
   {{- $api := $endpoint.api -}}
@@ -37,6 +38,16 @@
   {{- $models := list -}}
   {{- $declaresModels := true -}}
   {{- $overrides := default dict (index $ep "model_overrides") -}}
+  {{- $metadata := dict -}}
+  {{- if hasKey $ep "model_metadata_args" -}}
+    {{- $metadataArgs := index $ep "model_metadata_args" -}}
+    {{- if hasKey $metadataMemo $metadataArgs -}}
+      {{- $metadata = index $metadataMemo $metadataArgs -}}
+    {{- else -}}
+      {{- $metadata = includeTemplate "llm/fetch-data-set" ($metadataArgs | fromJson) | fromJson -}}
+      {{- $_ := set $metadataMemo $metadataArgs $metadata -}}
+    {{- end -}}
+  {{- end -}}
   {{- if and (hasKey $ep "models") (eq (kindOf $ep.models) "bool") -}}
     {{- $declaresModels = false -}}
   {{- else -}}
@@ -52,7 +63,6 @@
     {{- else -}}
       {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
     {{- end -}}
-    {{- $metadata := default dict (index $ep "model_metadata") -}}
     {{- $filter := default dict (index $ep "model_filter") -}}
     {{- if and (gt (len $filter) 0) (gt (len $metadata) 0) -}}
       {{- $allowed := includeTemplate "llm/filter-models" (dict "models" $metadata "filter" $filter) | fromJson -}}
@@ -118,7 +128,7 @@
     {{- $stem := $explicit -}}
     {{- if or (eq $tool "omp") $piCatalog -}}
       {{- $fromMeta := dict -}}
-      {{- range $id, $m := default dict (index $ep "model_metadata") -}}
+      {{- range $id, $m := $metadata -}}
         {{- $full := includeTemplate "model-config/omp" $m | fromJson -}}
         {{- if gt (len $full) 0 -}}{{- $_ := set $fromMeta $id $full -}}{{- end -}}
       {{- end -}}
