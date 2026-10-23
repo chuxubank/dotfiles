@@ -32,6 +32,17 @@ over custom checkpoint state. Validate changes by rendering each affected
 template, checking its shell syntax and success/failure exit status, and running
 `make verify`; do not invoke the real operations during validation.
 
+## Homebrew tap trust
+
+When adding a third-party formula or cask, declare its tap and scoped trust in
+`home/.chezmoidata/packages/brew/taps.toml` in the same change, even when the
+fully qualified package name would auto-tap it. Trust only the required items:
+use `trusted.formula` / `trusted.cask` for one item, or `trusted.formulae` /
+`trusted.casks` for multiple items; keep `schemas/packages.schema.json` aligned
+with any newly used trust keys. Whole-tap trust requires an explicit reason.
+Verify the rendered Brewfile includes both the package and its tap trust, then
+run `make verify`; validation must not install packages or modify live trust.
+
 ## External repo definitions
 
 `home/.chezmoidata/path.toml` owns path strings only.

@@ -3,6 +3,7 @@ taps = [
   { name = "AnInsomniacy/rayburst", trusted = { cask = "rayburst" } },
   { name = "achannarasappa/tap", trusted = { formula = "ticker" } },
   { name = "beeftornado/rmtree", trusted = { command = "rmtree" } },
+  { name = "cat-emacs/tap", trusted = { formulae = ["android-project", "compose-preview"] } },
   { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },
   { name = "deb-sig/tap", trusted = { formula = "double-entry-generator" } },
   "jimeh/emacs-builds",
