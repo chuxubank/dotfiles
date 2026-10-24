@@ -13,8 +13,8 @@ llm:
       model:
         - iv-codex/${gpt_primary}
         - iv-cc/claude-opus-5
-        - cursor/${grok_primary}@500k:fast
         - xai/${grok_primary}
+        - cursor/${grok_primary}@500k:fast
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5@1m
       reasoning_effort: high
