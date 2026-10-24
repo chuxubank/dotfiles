@@ -111,7 +111,9 @@ skills:
       - name: conventional-commit
         source: github/awesome-copilot
 
-      - name: "*"
+      # dot-openapi only forwards the old name. Device ops and Canvas design
+      # are the two skills below.
+      - name: ["dot-device-openapi", "dot-canvas-designer"]
         source: MindReset/dot_skill/skills
         when:
           disabled:
