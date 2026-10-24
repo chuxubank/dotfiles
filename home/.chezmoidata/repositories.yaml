@@ -92,6 +92,12 @@ repositories:
     when: *personal_only
 
   - path: [workspace, asahiart]
+    dest: PerlerPal
+    url: https://github.com/AsahiArt/PerlerPal
+    refresh_period: 24h
+    when: *personal_only
+
+  - path: [workspace, asahiart]
     dest: quote0-school-calendar
     url: https://github.com/AsahiArt/quote0-school-calendar
     refresh_period: 24h

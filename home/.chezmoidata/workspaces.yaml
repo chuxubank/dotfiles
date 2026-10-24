@@ -23,6 +23,8 @@
 # pane_launch is merged into every pane. Set kind to start a named agent,
 # or command to run a process instead. Change this map to retarget every
 # pane that does not override the same key.
+# Workspace focus selects the one workspace after apply. Pane or tab focus
+# selects inside that workspace. A single pane needs no focus.
 pane_launch: &pane_launch
   kind: pi
 
@@ -46,7 +48,6 @@ workspaces:
           - <<: *pane_launch
             cwd: ~/.local/share/chezmoi
             name: chezmoi
-            focus: true
 
   - name: luvus
     tabs:
@@ -56,7 +57,6 @@ workspaces:
             path: [workspace, oss]
             dest: luvus
             name: luvus
-            focus: true
 
   - name: cat-emacs
     tabs:
@@ -76,7 +76,6 @@ workspaces:
           - <<: *pane_launch
             path: [personal, proxy]
             name: proxy
-            focus: true
 
   - name: skills
     tabs:
@@ -85,7 +84,6 @@ workspaces:
           - <<: *pane_launch
             path: [personal, skills]
             name: skills
-            focus: true
 
   - name: ivc
     when: *iv_only
@@ -96,7 +94,6 @@ workspaces:
             path: [workspace, iv]
             dest: ivc
             name: ivc
-            focus: true
 
   - name: OpenTactic
     when: *personal_only
@@ -116,7 +113,6 @@ workspaces:
           - <<: *pane_launch
             path: [workspace, asahiart]
             name: asahiart
-            focus: true
 
   - name: Luvia
     when: *personal_or_iv
@@ -127,7 +123,6 @@ workspaces:
             path: [workspace, asahiart]
             dest: Luvia
             name: luvia
-            focus: true
 
   - name: quote0
     when: *personal_only
@@ -138,7 +133,16 @@ workspaces:
             path: [workspace, asahiart]
             dest: quote0-school-calendar
             name: quote0
-            focus: true
+
+  - name: PerlerPal
+    when: *personal_only
+    tabs:
+      - label: perlerpal
+        panes:
+          - <<: *pane_launch
+            path: [workspace, asahiart]
+            dest: PerlerPal
+            name: perlerpal
 
   - name: XingZhi
     when: *personal_only
@@ -148,4 +152,3 @@ workspaces:
           - <<: *pane_launch
             path: [workspace, xz]
             name: main
-            focus: true
