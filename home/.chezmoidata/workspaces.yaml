@@ -19,6 +19,13 @@
 # pane when name and kind are unset. kind: pi is launched with --session-control.
 # split: right | down | auto. auto uses the previous pane's cell rect,
 # converted with tty cell pixels when available, else cells at ~1:2.
+#
+# pane_launch is merged into every pane. Set kind to start a named agent,
+# or command to run a process instead. Change this map to retarget every
+# pane that does not override the same key.
+pane_launch: &pane_launch
+  kind: pi
+
 workspace_conditions:
   personal_only: &personal_only
     enabled:
@@ -36,28 +43,28 @@ workspaces:
     tabs:
       - label: chezmoi
         panes:
-          - cwd: ~/.local/share/chezmoi
+          - <<: *pane_launch
+            cwd: ~/.local/share/chezmoi
             name: chezmoi
-            kind: pi
             focus: true
 
   - name: luvus
     tabs:
       - label: luvus
         panes:
-          - path: [workspace, oss]
+          - <<: *pane_launch
+            path: [workspace, oss]
             dest: luvus
             name: luvus
-            kind: pi
             focus: true
 
   - name: cat-emacs
     tabs:
       - label: emacs
         panes:
-          - path: [personal, emacs]
+          - <<: *pane_launch
+            path: [personal, emacs]
             name: emacs
-            kind: pi
 
   - name: proxy
     when:
@@ -66,18 +73,18 @@ workspaces:
     tabs:
       - label: proxy
         panes:
-          - path: [personal, proxy]
+          - <<: *pane_launch
+            path: [personal, proxy]
             name: proxy
-            kind: pi
             focus: true
 
   - name: skills
     tabs:
       - label: skills
         panes:
-          - path: [personal, skills]
+          - <<: *pane_launch
+            path: [personal, skills]
             name: skills
-            kind: pi
             focus: true
 
   - name: ivc
@@ -85,10 +92,10 @@ workspaces:
     tabs:
       - label: ivc
         panes:
-          - path: [workspace, iv]
+          - <<: *pane_launch
+            path: [workspace, iv]
             dest: ivc
             name: ivc
-            kind: pi
             focus: true
 
   - name: OpenTactic
@@ -96,19 +103,19 @@ workspaces:
     tabs:
       - label: OpenTactic
         panes:
-          - path: [workspace, opentactic]
+          - <<: *pane_launch
+            path: [workspace, opentactic]
             dest: OpenTactic
             name: open-tactic
-            kind: omp
 
   - name: AsahiArt
     when: *personal_only
     tabs:
       - label: asahiart
         panes:
-          - path: [workspace, asahiart]
+          - <<: *pane_launch
+            path: [workspace, asahiart]
             name: asahiart
-            kind: omp
             focus: true
 
   - name: Luvia
@@ -116,10 +123,21 @@ workspaces:
     tabs:
       - label: luvia
         panes:
-          - path: [workspace, asahiart]
+          - <<: *pane_launch
+            path: [workspace, asahiart]
             dest: Luvia
             name: luvia
-            kind: omp
+            focus: true
+
+  - name: quote0
+    when: *personal_only
+    tabs:
+      - label: quote0
+        panes:
+          - <<: *pane_launch
+            path: [workspace, asahiart]
+            dest: quote0-school-calendar
+            name: quote0
             focus: true
 
   - name: XingZhi
@@ -127,7 +145,7 @@ workspaces:
     tabs:
       - label: xingzhi
         panes:
-          - path: [workspace, xz]
+          - <<: *pane_launch
+            path: [workspace, xz]
             name: main
-            kind: omp
             focus: true
