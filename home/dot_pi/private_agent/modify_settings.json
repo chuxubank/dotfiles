@@ -16,8 +16,8 @@
 {{- $theme := "light/dark" -}}
 
 {{- /* llm.yaml states models as "<alias>/<id>"; pi splits them across
-       defaultProvider and defaultModel. A last-candidate bundled fallback
-       (xai/${grok_primary}) is not an alias, so split the slash here. */ -}}
+       defaultProvider and defaultModel. An unresolved last candidate still
+       splits on the slash. */ -}}
 {{- $aliases := default dict .llm.models -}}
 {{- $provider := $cfg.model_provider -}}
 {{- $model := $cfg.model_id -}}

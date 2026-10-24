@@ -1,15 +1,17 @@
 llm:
   tools:
     pi:
-      # Same candidate order as omp.yaml. IV aliases enumerate models because
-      # the proxy catalog differs from Pi's bundled catalog; subscription
-      # providers keep models: false. Cursor ids are pi-cursor-sdk's, not
-      # OMP SKUs. Personal default is `${grok_primary}@500k:fast`: the same
-      # 500k Fast grok as OMP's `${grok_primary}-500k-fast` and Grok Build's
-      # `${grok_primary}-build-fast` at a 500k window. Pi posts registry id
+      # IV first. Elsewhere the next candidate is xai, a Pi alias with
+      # models: false. Cursor's
+      # `${grok_primary}@500k:fast` follows that: the same 500k Fast grok as
+      # OMP's `${grok_primary}-500k-fast` and Grok Build's
+      # `${grok_primary}-build-fast`, but not the personal default. Cursor ids
+      # are pi-cursor-sdk's, not OMP SKUs. Pi posts registry id
       # `${grok_primary}` plus context and fast; it cannot set Grok's
       # reasoning_effort. OMP's `claude-opus-5-1m` is `claude-opus-5@1m`; effort
-      # follows reasoning_effort.
+      # follows reasoning_effort. IV aliases enumerate models because the proxy
+      # catalog differs from Pi's bundled catalog; subscription providers keep
+      # models: false.
       model:
         - iv-codex/${gpt_primary}
         - iv-cc/claude-opus-5
@@ -48,7 +50,11 @@ llm:
               reasoning: false
         ollama:
           provider: ollama
-        # OAuth providers own their catalogs and authentication.
+        # Pi ships these. models: false keeps their catalogs; when on the
+        # provider record is the host gate. openai-codex stays off until enabled.
+        xai:
+          provider: xai
+          models: false
         openai-codex:
           provider: openai-codex
           models: false

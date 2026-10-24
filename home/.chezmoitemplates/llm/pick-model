@@ -2,10 +2,7 @@
         Input: dict "models" <list> "providers" <dict>
         Output: chosen model string
 
-        If no alias resolves, take the last candidate. IV-first lists put a
-        bundled fallback last (SuperGrok, ChatGPT OAuth). pick-model cannot
-        see a provider that is not a tool alias, so the last entry is the
-        one the consuming tool already ships. */ -}}
+        If no alias resolves, take the last candidate. */ -}}
 {{- $chosen := "" -}}
 {{- range $m := .models -}}
   {{- if not $chosen -}}

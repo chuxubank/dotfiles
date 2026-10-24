@@ -26,9 +26,9 @@ Pi still needs prices: `pi-cursor-sdk` discovers every model at $0.
 `pi_contexts`, `pi_default_fast` — with the standard rate falling back to
 the models.dev card. Pi projects cost onto `pi-cursor-sdk` ids (`@window`, `:fast`,
 `:slow`). It does not copy names, windows, or thinking ladders onto those ids.
-Pi's personal default is `${grok_primary}@500k:fast`, the same 500k Fast grok
-as OMP's `${grok_primary}-500k-fast` and Grok Build's
-`${grok_primary}-build-fast` at a 500k window. The Pi id is still not the OMP
+Pi's Cursor grok candidate is `${grok_primary}@500k:fast`, the same 500k Fast
+grok as OMP's `${grok_primary}-500k-fast` and Grok Build's
+`${grok_primary}-build-fast` at a 500k window. The session default is the `xai` candidate listed ahead of it. The Cursor id is still not the OMP
 SKU: `pi-cursor-sdk` posts registry id `${grok_primary}` plus `context`,
 `reasoning_effort`, and `fast`. `models.list()` advertises `500k` + high +
 fast as the default variant, and local validation only checks the id. A probe

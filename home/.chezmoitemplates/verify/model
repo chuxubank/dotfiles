@@ -153,4 +153,27 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* Pi's xai alias participates in candidate order. models: false keeps it
+       out of the custom-provider file. openai-codex stays off via when. */ -}}
+{{- $personal := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson -}}
+{{- $wantPersonal := printf "xai/%s" (index .llm.models "grok_primary") -}}
+{{- if ne $personal.model $wantPersonal -}}
+  {{- fail (printf "pi personal model: got %q, want %q" $personal.model $wantPersonal) -}}
+{{- end -}}
+{{- if not (hasKey $personal.providers "xai") -}}
+  {{- fail "pi: xai alias did not resolve" -}}
+{{- end -}}
+{{- if hasKey $personal.providers "openai-codex" -}}
+  {{- fail "pi: disabled openai-codex alias resolved" -}}
+{{- end -}}
+{{- $emitted := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson -}}
+{{- if hasKey $emitted "xai" -}}
+  {{- fail "pi: xai must not be emitted as a custom provider" -}}
+{{- end -}}
+{{- $iv := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "iv")) | fromJson -}}
+{{- $wantIV := printf "iv-codex/%s" (index .llm.models "gpt_primary") -}}
+{{- if ne $iv.model $wantIV -}}
+  {{- fail (printf "pi iv model: got %q, want %q" $iv.model $wantIV) -}}
+{{- end -}}
+
 ok

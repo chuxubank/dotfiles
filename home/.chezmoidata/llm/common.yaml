@@ -80,11 +80,18 @@ llm:
     openai:
       name: OpenAI
 
-    # Pi/OMP ChatGPT subscription. Replace this provider's `when` with
-    # { enabled: true } to bring its alias, picker globs, and OMP provider back.
+    # Pi/OMP ChatGPT subscription. Tools list it as an alias with
+    # models: false. Replace this `when` with { enabled: true } to bring the
+    # alias and its picker globs back.
     openai-codex:
       name: OpenAI Codex
       when: *disabled
+
+    # Pi's built-in xAI provider. No endpoint or key: Pi owns login and the
+    # catalog. Tools list the alias with models: false. No when, so the alias
+    # is on wherever it is listed.
+    xai:
+      name: xAI
 
     # Hermes' built-in SuperGrok subscription provider. Hermes owns the OAuth
     # flow and model catalog, so there is no endpoint or API key here.
