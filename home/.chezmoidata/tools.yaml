@@ -275,12 +275,13 @@ tools:
     remove:
       - ".config/orca/profiles/local-default/orca-data.json"
     purge:
-      - ".orca/**"
+      - ".config/Orca/**"
+      - ".config/orca/**"
       - ".orca-relay/**"
       - ".orca-remote/**"
-      - ".config/orca/**"
-      - ".config/Orca/**"
+      - ".orca/**"
       - "Library/Application Support/orca/**"
+      - "orca/**"
 
   # Self-hosted daemon that launches the other agent CLIs. The desktop cask
   # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
