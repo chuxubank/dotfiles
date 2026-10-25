@@ -22,8 +22,11 @@
        thinking ladders stay on the extension.
 
        Emit only when the alias contributes a model list, an override-only
-       modelOverrides map, or an endpoint we can authenticate against. A bare
-       baseUrl with no key would just restate the tool's own default. */ -}}
+       modelOverrides map, or an endpoint we can authenticate against. A pass
+       path stays a !command. A literal auth_key (a loopback token, no pass
+       path) is written as apiKey, which is what lets the entry exist while
+       the endpoint is down. A bare baseUrl with no key would just restate
+       the tool's own default. */ -}}
 {{- $cfg := includeTemplate "llm/tool-config" . | fromJson -}}
 {{- $tool := .tool -}}
 {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
@@ -146,7 +149,13 @@
   {{- end -}}
 
   {{- $hasOverrides := and (not $declaresModels) (gt (len $overrides) 0) -}}
-  {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) $hasOverrides -}}
+  {{- /* A pass path stays a !command. A literal auth_key is only a
+         non-secret local token with no pass path. */ -}}
+  {{- $literalKey := "" -}}
+  {{- if and (not $ep.auth_path) $ep.auth_key -}}
+    {{- $literalKey = $ep.auth_key -}}
+  {{- end -}}
+  {{- if or (gt (len $models) 0) (and $baseURL $ep.auth_path) (and $baseURL $literalKey) $hasOverrides -}}
     {{- $p := dict -}}
     {{- if $baseURL -}}{{- $_ := set $p "baseUrl" $baseURL -}}{{- end -}}
     {{- if hasKey $ep "headers" -}}{{- $_ := set $p "headers" $ep.headers -}}{{- end -}}
@@ -158,6 +167,14 @@
         {{- $args = printf "%s %s" $ep.auth_path $ep.auth_field -}}
       {{- end -}}
       {{- $_ := set $p "apiKey" (printf "!%s %s" $passField $args) -}}
+      {{- if not $declaresModels -}}
+        {{- $_ := set $p "api" $api -}}
+      {{- end -}}
+    {{- else if $literalKey -}}
+      {{- $_ := set $p "apiKey" $literalKey -}}
+      {{- if not $declaresModels -}}
+        {{- $_ := set $p "api" $api -}}
+      {{- end -}}
     {{- else if $declaresModels -}}
       {{- $_ := set $p "apiKey" "unused" -}}
     {{- end -}}

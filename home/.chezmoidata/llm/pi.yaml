@@ -68,3 +68,6 @@ llm:
           provider: cursor
           models: false
           catalog: cursor
+        # Gateway alias. Omitted while the magpie tool is off. Not a default.
+        magpie:
+          provider: magpie

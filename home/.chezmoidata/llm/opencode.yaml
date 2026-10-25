@@ -38,5 +38,8 @@ llm:
         # live Zen/Go /v1/models endpoints; models-dev only enriches metadata.
         opencode:
           provider: opencode
+        # Gateway alias. Omitted while the magpie tool is off. Not a default.
+        magpie:
+          provider: magpie
         opencode-go:
           provider: opencode-go

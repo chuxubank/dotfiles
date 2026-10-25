@@ -86,12 +86,25 @@ refresh_models() {
 }
 
 {{ range $providerName, $provider := .llm.providers }}
-{{ if and (hasKey $provider "model_caches") (includeTemplate "when/evaluate" (dict "item" $provider "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson) }}
+{{- $owned := true -}}
+{{- if hasKey $provider "owner" -}}
+  {{- $owned = includeTemplate "tool/enabled" (merge (dict "tool" (index $provider "owner") "require" true) $) | fromJson -}}
+{{- end -}}
+{{ if and $owned (hasKey $provider "model_caches") (includeTemplate "when/evaluate" (dict "item" $provider "values" (dict "host_env" $.host_env "roles" $.roles "os" $.chezmoi.os)) | fromJson) }}
 {{ range $cacheKey, $cache := $provider.model_caches }}
 {{ if ne (default "" (index $cache "managed")) "external" }}
-  {{- $endpoint := includeTemplate "llm/model-endpoint" $provider | fromJson -}}
+  {{- $endpointInput := $provider -}}
+  {{- if and (not (index $provider "base_url")) (hasKey $provider "public_domain") -}}
+    {{- $domainSpec := $provider.public_domain -}}
+    {{- $domain := includeTemplate "safe/pass" (merge (dict "path" $domainSpec.path "field" $domainSpec.field) $) | trim -}}
+    {{- if $domain -}}
+      {{- $endpointInput = merge (deepCopy $provider) (dict "base_url" (printf "%s://%s.%s" (default "https" (index $provider "public_scheme")) (default "magpie" (index $provider "public_prefix")) $domain)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $endpointInput | fromJson -}}
   {{- $authPath := "" -}}
   {{- if hasKey $provider "auth" -}}{{- $authPath = $provider.auth.path -}}{{- end -}}
+{{- if hasPrefix "http" $endpoint.url }}
 if ! refresh_models \
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
@@ -99,6 +112,7 @@ if ! refresh_models \
   printf 'warning: failed to refresh provider=%s cache=%s url=%s\n' \
     {{ $providerName | quote }} {{ $cacheKey | quote }} {{ $endpoint.url | quote }} >&2
 fi
+{{- end }}
 {{ end }}
 {{ end }}
 {{ end }}

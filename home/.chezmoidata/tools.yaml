@@ -239,6 +239,14 @@ tools:
     purge:
       - ".lody/**"
 
+  # Client switch only. The gateway runs once on bwg-cn2-gia, not on
+  # each machine: no formula, no launchd, no http://127.0.0.1:3425.
+  # While this is on, the provider tables below gain
+  # https://magpie.<VPS domain>. While it is off, those tables drop it.
+  # ~/.config/magpie on the VPS holds upstream keys and is not managed here.
+  magpie:
+    when: *non_ci
+
   omp:
     when: *non_ci
     plugin_upgrades:

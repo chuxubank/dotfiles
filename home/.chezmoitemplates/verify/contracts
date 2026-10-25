@@ -558,4 +558,28 @@
   {{- fail "tool-config: provider_sets merge" -}}
 {{- end -}}
 
+{{- /* magpie is one remote gateway. On: the origin is https://magpie.<domain>,
+      the OpenAI base adds /v1, and Pi's apiKey is a pass-field command.
+      Off: the alias is gone. Goose does not list it. */ -}}
+{{- $magpieOn := mergeOverwrite (deepCopy .tools) (dict "magpie" (dict "when" (dict "enabled" true "disabled" false))) -}}
+{{- $magpieOff := mergeOverwrite (deepCopy .tools) (dict "magpie" (dict "when" (dict "enabled" false))) -}}
+{{- $piOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
+{{- $piMagpie := index (default dict $piOn.providers) "magpie" -}}
+{{- if or (not $piMagpie) (not (hasPrefix "https://magpie." $piMagpie.base_url)) (contains "127.0.0.1" $piMagpie.base_url) (not (has "magpie/*" $piOn.enabled_models)) -}}
+  {{- fail "magpie on: origin was not rendered" -}}
+{{- end -}}
+{{- $piEmitted := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson) "magpie" -}}
+{{- if or (not $piEmitted) (not (hasPrefix "https://magpie." $piEmitted.baseUrl)) (not (hasSuffix "/v1" $piEmitted.baseUrl)) (contains "127.0.0.1" $piEmitted.baseUrl) (not (hasPrefix "!" $piEmitted.apiKey)) (not (contains "pass-field" $piEmitted.apiKey)) (not (contains "Personal/Tech/AI/Magpie" $piEmitted.apiKey)) (ne $piEmitted.api "openai-completions") -}}
+  {{- fail "magpie pi provider: OpenAI base or pass-field command is wrong" -}}
+{{- end -}}
+{{- $piOff := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
+{{- $piEmittedOff := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
+{{- if or (hasKey $piOff.providers "magpie") (has "magpie/*" $piOff.enabled_models) (hasKey $piEmittedOff "magpie") -}}
+  {{- fail "magpie off: provider still rendered" -}}
+{{- end -}}
+{{- $gooseOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "goose" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
+{{- if hasKey $gooseOn.providers "magpie" -}}
+  {{- fail "magpie: goose must not take the gateway provider" -}}
+{{- end -}}
+
 ok

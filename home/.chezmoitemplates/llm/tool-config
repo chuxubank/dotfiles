@@ -117,6 +117,12 @@
   {{- $prov := index $llmProviders $provName -}}
 
   {{- $enabled := includeTemplate "when/context" (merge (dict "item" $prov) $ctx) | fromJson -}}
+  {{- /* A provider with `owner` follows that tool. Undeclared owners fail.
+         Off, the alias is absent, and templates that replace their provider
+         table drop its base URL. */ -}}
+  {{- if and $enabled (hasKey $prov "owner") -}}
+    {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" (index $prov "owner") "require" true) $ctx) | fromJson -}}
+  {{- end -}}
   {{- if $enabled -}}
 
   {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
@@ -135,6 +141,29 @@
     {{- $authField = $field -}}
     {{- $authKey = includeTemplate "safe/pass" (merge (dict "path" $auth.path "field" $field) $ctx) -}}
   {{- end }}
+  {{- /* A literal api_key is a non-secret local token. It never replaces a
+         pass path, and it is not written as a pass command. */ -}}
+  {{- if not $authKey -}}
+    {{- if hasKey $ref "api_key" -}}
+      {{- $authKey = index $ref "api_key" -}}
+    {{- else if hasKey $prov "api_key" -}}
+      {{- $authKey = index $prov "api_key" -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* A public_domain pass entry builds the origin. OpenAI clients add
+         /v1 later; this value stays the scheme and host. */ -}}
+  {{- $baseURL := default "" (index $prov "base_url") -}}
+  {{- if and (not $baseURL) (hasKey $prov "public_domain") -}}
+    {{- $domainSpec := $prov.public_domain -}}
+    {{- $domain := includeTemplate "safe/pass" (merge (dict "path" $domainSpec.path "field" $domainSpec.field) $ctx) | trim -}}
+    {{- if and (not $domain) (ne $ctx.host_env "ci") (ne (env "CI") "true") (ne (env "CI") "1") (ne (env "GITHUB_ACTIONS") "true") -}}
+      {{- fail (printf "magpie: pass %s field %s is empty" $domainSpec.path $domainSpec.field) -}}
+    {{- end -}}
+    {{- if $domain -}}
+      {{- $baseURL = printf "%s://%s.%s" (default "https" (index $prov "public_scheme")) (default "magpie" (index $prov "public_prefix")) $domain -}}
+    {{- end -}}
+  {{- end -}}
 
   {{- $displayName := $alias -}}
   {{- if hasKey $prov "name" -}}
@@ -148,7 +177,7 @@
     "name"     $provName
     "display_name" $displayName
     "type"     (default (default "openai" (index $prov "type")) (index $ref "type"))
-    "base_url" (default "" (index $prov "base_url"))
+    "base_url" $baseURL
     "auth_key" $authKey
     "auth_path" $authPath
     "auth_field" $authField
@@ -276,6 +305,8 @@
          `models: false` for data-set-backed providers. */ -}}
   {{- if hasKey $ref "models" -}}
     {{- $_ := set $resolved "models" $ref.models -}}
+  {{- else if hasKey $prov "models" -}}
+    {{- $_ := set $resolved "models" $prov.models -}}
   {{- end -}}
 
   {{- $_ := set $providers $alias $resolved -}}

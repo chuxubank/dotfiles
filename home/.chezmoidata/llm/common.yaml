@@ -207,6 +207,32 @@ llm:
         enabled:
           roles: ["llm"]
 
+    # One gateway, on the VPS. The origin is https://magpie.<domain from
+    # the same pass entry the proxy inventory uses. OpenAI-compatible
+    # clients append /v1; an anthropic or gemini type keeps the origin.
+    # Pi, OMP, and Codex read the gateway key through pass-field. OpenCode
+    # and Hermes have no command field, so they still receive the key.
+    # The model list is GET /v1/models, cached like the other OpenAI
+    # catalogs. A missing cache is fetched at render; the daily refresh
+    # rewrites it. Codex does not read that list. The picker glob is
+    # appended as magpie/* by tools that have a pool.
+    magpie:
+      name: Magpie
+      public_scheme: https
+      public_prefix: magpie
+      public_domain:
+        path: Network/Host/BandwagonHost/CN2/ssh
+        field: domain
+      owner: magpie
+      auth:
+        path: Personal/Tech/AI/Magpie
+        field: gateway-key
+      model_caches:
+        magpie-models-api:
+          auth_field: gateway-key
+      enabled_models:
+        - "*"
+
     # OpenCode Zen's official provider ID is `opencode`. Both Zen and Go
     # expose an OpenAI-shaped /v1/models endpoint; models-dev supplies the
     # richer per-model protocol metadata used by OpenCode itself.

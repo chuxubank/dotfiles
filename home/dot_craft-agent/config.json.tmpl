@@ -18,6 +18,12 @@
     {{- $createdAt = (index $existing.workspaces 0).createdAt -}}
   {{- end -}}
   {{- $baseURL := trimSuffix "/" $ep.base_url -}}
+  {{- /* OpenAI-compatible magpie uses origin/v1. Anthropic and Gemini
+         types keep the origin: model-endpoint does not append /v1 to those. */ -}}
+  {{- if eq $alias "magpie" -}}
+    {{- $magpieEndpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+    {{- $baseURL = $magpieEndpoint.api_base_url -}}
+  {{- end -}}
   {{- $isPiCompat := eq $ep.type "ollama" -}}
   {{- $isAnthropicCompat := eq $ep.type "anthropic" -}}
   {{- $models := list -}}
