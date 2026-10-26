@@ -22,6 +22,3 @@ llm:
           provider: openrouter
         ollama:
           provider: ollama
-        # Gateway alias. Omitted while the magpie tool is off. Not a default.
-        magpie:
-          provider: magpie

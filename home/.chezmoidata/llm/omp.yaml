@@ -117,6 +117,3 @@ llm:
         cursor:
           provider: cursor
           models: false
-        # Gateway alias. Omitted while the magpie tool is off. Not a role target.
-        magpie:
-          provider: magpie

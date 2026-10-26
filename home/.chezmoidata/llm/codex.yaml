@@ -24,6 +24,3 @@ llm:
           provider: siliconflow-cn
         opencode:
           provider: opencode
-        # Gateway alias. Omitted while the magpie tool is off. Not a default.
-        magpie:
-          provider: magpie

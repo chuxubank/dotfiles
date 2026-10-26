@@ -110,7 +110,7 @@ fi
 if ! python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"; then
 	failed=1
 fi
-for test in test-hermes-setup.py test-tool-purge.py test-tool-upgrades.py; do
+for test in test-hermes-setup.py test-tool-purge.py test-tool-upgrades.py test-llm-providers.py test-llm-client-providers.py; do
 	if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
 		python3 "$SOURCE/scripts/$test" "$SOURCE"; then
 		failed=1

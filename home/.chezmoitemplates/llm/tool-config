@@ -48,6 +48,11 @@
                                                     data_set and
                                                     data_set_providers are
                                                     defaults for the ref
+       Shared defaults: llm.default_providers uses the same short/map forms.
+       Merge order: defaults < provider_sets (in order) < tool providers.
+       Tool exclude_providers removes aliases after all merges.
+       supported_provider_types filters incompatible protocols; api_types
+       on a provider lets a gateway negotiate a supported alternative.
        A provider's `enabled_models` globs are appended as <alias>/<glob>.
           Sets:   provider_sets: [iv]             — aliases from llm.provider_sets;
                                                     a same-named `providers`
@@ -69,13 +74,21 @@
 
 {{- /* Normalize provider references into a uniform list of (alias, ref-map) */ -}}
 {{- $refs := dict -}}
+{{- $defaults := default dict (index .llm "default_providers") -}}
+{{- if eq (kindOf $defaults) "slice" -}}
+  {{- range $name := $defaults -}}
+    {{- $_ := set $refs $name (dict "provider" $name) -}}
+  {{- end -}}
+{{- else -}}
+  {{- $refs = deepCopy $defaults -}}
+{{- end -}}
 {{- range $setName := default (list) (index $toolCfg "provider_sets") -}}
   {{- $set := index (default dict (index $.llm "provider_sets")) $setName -}}
   {{- if not $set -}}
     {{- fail (printf "llm provider_sets: unknown set %q" $setName) -}}
   {{- end -}}
   {{- range $alias, $ref := $set -}}
-    {{- $_ := set $refs $alias (deepCopy $ref) -}}
+    {{- $_ := set $refs $alias (mergeOverwrite (deepCopy (default dict (index $refs $alias))) (deepCopy $ref)) -}}
   {{- end -}}
 {{- end -}}
 {{- if hasKey $toolCfg "providers" }}
@@ -83,7 +96,7 @@
   {{- if eq (kindOf $raw) "slice" }}
     {{- /* Short form: ["iv", "ollama"] → alias = provider name */ -}}
     {{- range $name := $raw }}
-      {{- $_ := set $refs $name (dict "provider" $name) -}}
+      {{- $_ := set $refs $name (mergeOverwrite (deepCopy (default dict (index $refs $name))) (dict "provider" $name)) -}}
     {{- end }}
   {{- else }}
     {{- /* Map form: { alias: { provider: ..., auth_field: ... } } */ -}}
@@ -95,6 +108,20 @@
     {{- end }}
   {{- end }}
 {{- end }}
+
+{{- range $alias := default (list) (index $toolCfg "exclude_providers") -}}
+  {{- $_ := unset $refs $alias -}}
+{{- end -}}
+{{- /* Check the effective aliases too: defaults and sets must not bypass
+       the per-tool OpenRouter policy enforced on direct entries by schema. */ -}}
+{{- range $alias, $ref := $refs -}}
+  {{- if not (hasKey $llmProviders $ref.provider) -}}
+    {{- fail (printf "llm %s: unknown provider %q for alias %q" $tool $ref.provider $alias) -}}
+  {{- end -}}
+  {{- if and (has $tool (list "pi" "omp" "hermes" "opencode")) (or (eq $alias "openrouter") (eq $ref.provider "openrouter")) -}}
+    {{- fail (printf "llm %s: OpenRouter provider is not allowed" $tool) -}}
+  {{- end -}}
+{{- end -}}
 
 {{- /* Resolve each provider reference */ -}}
 {{- $ctx := . -}}
@@ -116,6 +143,18 @@
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
 
+  {{- /* Some clients only speak a subset of protocols. Multi-protocol
+         gateways declare api_types; a tool-level type override stays explicit. */ -}}
+  {{- $type := default (default "openai" (index $prov "type")) (index $ref "type") -}}
+  {{- $supported := default (list) (index $toolCfg "supported_provider_types") -}}
+  {{- if and (gt (len $supported) 0) (not (has $type $supported)) (not (hasKey $ref "type")) -}}
+    {{- range $candidate := default (list) (index $prov "api_types") -}}
+      {{- if and (not (has $type $supported)) (has $candidate $supported) -}}
+        {{- $type = $candidate -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $compatible := or (eq (len $supported) 0) (has $type $supported) -}}
   {{- $enabled := includeTemplate "when/context" (merge (dict "item" $prov) $ctx) | fromJson -}}
   {{- /* A provider with `owner` follows that tool. Undeclared owners fail.
          Off, the alias is absent, and templates that replace their provider
@@ -123,7 +162,7 @@
   {{- if and $enabled (hasKey $prov "owner") -}}
     {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" (index $prov "owner") "require" true) $ctx) | fromJson -}}
   {{- end -}}
-  {{- if $enabled -}}
+  {{- if and $enabled $compatible -}}
 
   {{- /* Resolve auth key — use tool-level auth_field override if present */ -}}
   {{- $authKey := "" -}}
@@ -176,7 +215,7 @@
   {{- $resolved := dict
     "name"     $provName
     "display_name" $displayName
-    "type"     (default (default "openai" (index $prov "type")) (index $ref "type"))
+    "type"     $type
     "base_url" $baseURL
     "auth_key" $authKey
     "auth_path" $authPath
@@ -335,7 +374,7 @@
     {{- $parts := splitList "/" $resolved -}}
     {{- if gt (len $parts) 1 -}}
       {{- $alias := index $parts 0 -}}
-      {{- if and (hasKey $refs $alias) (not (hasKey $providers $alias)) -}}
+      {{- if or (has $alias (default (list) (index $toolCfg "exclude_providers"))) (and (hasKey $refs $alias) (not (hasKey $providers $alias))) -}}
         {{- $keep = false -}}
       {{- end -}}
     {{- end -}}

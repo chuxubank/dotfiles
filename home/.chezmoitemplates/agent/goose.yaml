@@ -68,10 +68,16 @@ extensions:
     available_tools: []
 {{ includeTemplate "mcp/goose-extensions" . | indent 2}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "goose") .) | fromJson }}
-GOOSE_MODEL: {{ $cfg.model }}
-{{- range $provName, $ep := $cfg.providers }}
-{{- if $ep.base_url }}
-{{ $provName | upper }}_HOST: {{ $ep.base_url }}
+GOOSE_MODEL: {{ $cfg.model_id | quote }}
+{{- if $cfg.model_provider }}
+  {{- $provider := $cfg.model_provider -}}
+  {{- if not (has $provider (list "openai" "anthropic" "ollama" "openrouter")) -}}
+    {{- $provider = printf "custom_chezmoi_%s" $provider -}}
+  {{- end }}
+GOOSE_PROVIDER: {{ $provider | quote }}
 {{- end }}
-GOOSE_PROVIDER: {{ $provName }}
+{{- range $alias, $ep := $cfg.providers }}
+  {{- if and $ep.base_url (has $alias (list "openai" "anthropic" "ollama" "openrouter")) }}
+{{ $alias | upper }}_HOST: {{ $ep.base_url | quote }}
+  {{- end }}
 {{- end }}

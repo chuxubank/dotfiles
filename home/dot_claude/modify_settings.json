@@ -8,15 +8,20 @@
   "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC" "1"
 -}}
 
+{{- /* CC has one active endpoint, not a provider registry. A qualified
+       model selects it; otherwise retain the native anthropic alias/login.
+       Never choose an endpoint by map iteration order. */ -}}
+{{- $provider := $cfg.model_provider -}}
+{{- if and (not $provider) (hasKey $cfg.providers "anthropic") -}}
+  {{- $provider = "anthropic" -}}
+{{- end -}}
 {{- $anthropicResolved := false -}}
-{{- range $_, $ep := $cfg.providers }}
-  {{- if eq $ep.type "anthropic" }}{{- $anthropicResolved = true -}}{{- end }}
-  {{- if $ep.base_url }}
-    {{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}
-  {{- end }}
-  {{- if $ep.auth_key }}
-    {{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}
-  {{- end }}
+{{- if $provider -}}
+  {{- $ep := index $cfg.providers $provider -}}
+  {{- if ne $ep.type "anthropic" -}}{{- fail "claude-code requires an Anthropic Messages provider" -}}{{- end -}}
+  {{- $anthropicResolved = true -}}
+  {{- if $ep.base_url -}}{{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}{{- end -}}
+  {{- if $ep.auth_key -}}{{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}{{- end -}}
 {{- end -}}
 
 {{- /* Map each default_models alias → ANTHROPIC_DEFAULT_<ALIAS>_MODEL
@@ -66,12 +71,17 @@
   "enabledPlugins" $enabledPlugins
   "env" $env
   "extraKnownMarketplaces" $extraKnownMarketplaces
-  "model" $cfg.model
+  "model" $cfg.model_id
   "permissions" $permissions
   "skipAutoPermissionPrompt" true
   "statusLine" $statusLine
 -}}
 {{- $remove := list -}}
+{{- /* Drop stale routing keys when returning to native login. Keep unrelated
+       user environment values in the modify file. */ -}}
+{{- range $key := list "ANTHROPIC_BASE_URL" "ANTHROPIC_AUTH_TOKEN" "ANTHROPIC_DEFAULT_OPUS_MODEL" "ANTHROPIC_DEFAULT_SONNET_MODEL" "ANTHROPIC_DEFAULT_HAIKU_MODEL" "ANTHROPIC_DEFAULT_FABLE_MODEL" -}}
+  {{- if not (hasKey $env $key) -}}{{- $remove = append $remove (printf "env.%s" $key) -}}{{- end -}}
+{{- end -}}
 {{- if $rtk -}}
   {{- $_ := set $managed "hooks" $hooks -}}
 {{- else -}}

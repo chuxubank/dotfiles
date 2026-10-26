@@ -1,0 +1,28 @@
+{{- /* Aider's model-scoped LiteLLM parameters let multiple gateways coexist
+       without fighting over OPENAI_API_BASE or a global API key. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "aider") .) | fromJson -}}
+{{- $settings := list -}}
+{{- range $alias, $ep := $cfg.providers -}}
+  {{- $source := dict -}}
+  {{- if hasKey $ep "models" -}}
+    {{- if eq (kindOf $ep.models) "slice" -}}
+      {{- range $id := $ep.models -}}{{- $_ := set $source $id $id -}}{{- end -}}
+    {{- else if eq (kindOf $ep.models) "map" -}}
+      {{- $source = $ep.models -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+  {{- end -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- $type := $ep.type -}}
+  {{- if eq $type "ollama" -}}{{- $type = "ollama_chat" -}}{{- end -}}
+  {{- $base := $endpoint.api_base_url -}}
+  {{- if eq $ep.type "ollama" -}}{{- $base = $ep.base_url -}}{{- end -}}
+  {{- range $id, $_ := $source -}}
+    {{- $params := dict "model" $id "custom_llm_provider" $type "api_base" $base -}}
+    {{- if $ep.auth_key -}}{{- $_ := set $params "api_key" $ep.auth_key -}}{{- end -}}
+    {{- if hasKey $ep "headers" -}}{{- $_ := set $params "extra_headers" $ep.headers -}}{{- end -}}
+    {{- $settings = append $settings (dict "name" (printf "%s/%s" $alias $id) "extra_params" $params) -}}
+  {{- end -}}
+{{- end -}}
+{{- $settings | toYaml -}}

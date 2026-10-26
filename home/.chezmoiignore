@@ -48,6 +48,7 @@ bin/artemis-mcp
 
 {{- if eq .host_env "ci" }}
 .aider.conf.yml
+.aider.model.settings.yml
 .authinfo.gpg
 .config/monid
 .double-entry-generator.yaml

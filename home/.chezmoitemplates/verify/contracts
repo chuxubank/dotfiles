@@ -536,6 +536,7 @@
       "tool" "fixture"
       "host_env" "personal"
       "llm" (dict
+        "default_providers" (list)
         "providers" (dict "cursor" (dict "enabled_models" (list "g1*" "g2")))
         "catalogs" (dict "fixture" (dict
           "models" (dict "m" (dict
@@ -561,25 +562,48 @@
 {{- /* magpie is one remote gateway. On: the origin is https://magpie.<domain>,
       the OpenAI base adds /v1, and Pi's apiKey is a pass-field command.
       Off: the alias is gone. Goose does not list it. */ -}}
+{{- /* Use a fixture origin: safe/pass deliberately returns no domain on CI. */ -}}
+{{- $magpieCtx := mergeOverwrite (deepCopy .) (dict "llm" (dict "providers" (dict "magpie" (dict "base_url" "https://magpie.example.test" "models" false)))) -}}
 {{- $magpieOn := mergeOverwrite (deepCopy .tools) (dict "magpie" (dict "when" (dict "enabled" true "disabled" false))) -}}
 {{- $magpieOff := mergeOverwrite (deepCopy .tools) (dict "magpie" (dict "when" (dict "enabled" false))) -}}
-{{- $piOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
+{{- $piOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
 {{- $piMagpie := index (default dict $piOn.providers) "magpie" -}}
 {{- if or (not $piMagpie) (not (hasPrefix "https://magpie." $piMagpie.base_url)) (contains "127.0.0.1" $piMagpie.base_url) (not (has "magpie/*" $piOn.enabled_models)) -}}
   {{- fail "magpie on: origin was not rendered" -}}
 {{- end -}}
-{{- $piEmitted := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson) "magpie" -}}
+{{- $piEmitted := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson) "magpie" -}}
 {{- if or (not $piEmitted) (not (hasPrefix "https://magpie." $piEmitted.baseUrl)) (not (hasSuffix "/v1" $piEmitted.baseUrl)) (contains "127.0.0.1" $piEmitted.baseUrl) (not (hasPrefix "!" $piEmitted.apiKey)) (not (contains "pass-field" $piEmitted.apiKey)) (not (contains "Personal/Tech/AI/Magpie" $piEmitted.apiKey)) (ne $piEmitted.api "openai-completions") -}}
   {{- fail "magpie pi provider: OpenAI base or pass-field command is wrong" -}}
 {{- end -}}
-{{- $piOff := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
-{{- $piEmittedOff := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
+{{- $piOff := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
+{{- $piEmittedOff := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
 {{- if or (hasKey $piOff.providers "magpie") (has "magpie/*" $piOff.enabled_models) (hasKey $piEmittedOff "magpie") -}}
   {{- fail "magpie off: provider still rendered" -}}
 {{- end -}}
-{{- $gooseOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "goose" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
-{{- if hasKey $gooseOn.providers "magpie" -}}
-  {{- fail "magpie: goose must not take the gateway provider" -}}
+{{- /* Default inheritance preserves the pre-defaults client scope. Compare
+      every recipient against its former explicit reference, including model
+      and role selection, not just provider membership. */ -}}
+{{- range $tool := list "codex" "pi" "omp" "opencode" "hermes" "craft-agents" "aider" "goose" "claude-code" -}}
+  {{- $ctx := mergeOverwrite (deepCopy $magpieCtx) (dict "tool" $tool "host_env" "personal" "tools" $magpieOn) -}}
+  {{- $inherited := includeTemplate "llm/tool-config" $ctx | fromJson -}}
+  {{- if not (hasKey $inherited.providers "magpie") -}}
+    {{- fail (printf "magpie: %s did not inherit default provider" $tool) -}}
+  {{- end -}}
+  {{- $_ := set $ctx.llm "default_providers" (list) -}}
+  {{- $toolCfg := index $ctx.llm.tools $tool -}}
+  {{- if eq (kindOf $toolCfg.providers) "slice" -}}
+    {{- $_ := set $toolCfg "providers" (append $toolCfg.providers "magpie") -}}
+  {{- else -}}
+    {{- $_ := set $toolCfg.providers "magpie" (dict "provider" "magpie") -}}
+  {{- end -}}
+  {{- $explicit := includeTemplate "llm/tool-config" $ctx | fromJson -}}
+  {{- if ne ($inherited | toJson) ($explicit | toJson) -}}
+    {{- fail (printf "magpie: %s defaults changed resolved config" $tool) -}}
+  {{- end -}}
+{{- end -}}
+{{- $cc := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "claude-code" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
+{{- if ne $cc.providers.magpie.type "anthropic" -}}
+  {{- fail "magpie: CC must use the gateway's Anthropic protocol" -}}
 {{- end -}}
 
 ok

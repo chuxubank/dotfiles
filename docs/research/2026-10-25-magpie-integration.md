@@ -4,6 +4,11 @@
 **Question:** How does current magpie relate to this repo's LLM configuration, and what integration is possible without two writers on the same files?
 **Method:** [yetone/magpie](https://github.com/yetone/magpie) tag `v0.1.1477` (published 2026-10-25, `target_commitish` `main`) for `docs/reference.md`, `docs/integrating.md`, and `internal/agent`. The README was read from `main` the same day; the release notes point at that tag. Install facts are from [yetone/magpie-releases](https://github.com/yetone/magpie-releases/blob/main/README.md). Local facts are from `home/.chezmoidata/` and the destination templates. `rg` found no `magpie` or `yetone` declaration in this repo before this note. `magpie` is not on `PATH`. No magpie process was run, and no live config was opened.
 
+> Subsequent client integration: shared defaults now also reach Aider, Goose
+> and Claude Code (via its Anthropic surface), with protocol-based filtering
+> rather than a provider-name exclusion. See [current provider wiring](../llm/providers.md).
+> The agent-file ownership analysis below describes the original investigation.
+
 ## Recommendation
 
 Do not let magpie's Agents page write config. Magpie is a second writer of the model and provider keys this repo already renders from `home/.chezmoidata/llm/`.

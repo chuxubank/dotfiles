@@ -6,12 +6,23 @@
     "llm": {
       "type": "object",
       "properties": {
+        "default_providers": { "$ref": "#/$defs/providerRefs" },
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": { "api_types": { "$ref": "#/$defs/protocols" } }
+          }
+        },
         "tools": {
           "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/tool" },
           "patternProperties": {
             "^(pi|omp|hermes|opencode)$": {
-              "type": "object",
-              "properties": { "providers": { "$ref": "#/$defs/providers" } }
+              "allOf": [
+                { "$ref": "#/$defs/tool" },
+                { "properties": { "providers": { "$ref": "#/$defs/providers" } } }
+              ]
             }
           }
         }
@@ -19,6 +30,40 @@
     }
   },
   "$defs": {
+    "protocols": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["openai", "anthropic", "gemini", "ollama", "opencode"] }
+    },
+    "tool": {
+      "type": "object",
+      "properties": {
+        "providers": { "$ref": "#/$defs/providerRefs" },
+        "supported_provider_types": { "$ref": "#/$defs/protocols" },
+        "exclude_providers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "providerRefs": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": { "provider": { "type": "string" } }
+          }
+        }
+      ]
+    },
     "providers": {
       "oneOf": [
         {

@@ -1,6 +1,7 @@
 llm:
   tools:
     aider:
+      supported_provider_types: [openai, anthropic, gemini, ollama]
       model: gemini-2.5-pro
       providers:
         gemini:

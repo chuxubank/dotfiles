@@ -10,12 +10,15 @@ resolver templates. Schema checks do not fetch model catalogs or credentials.
 | `skills.schema.json` | `skills/*.yaml` | agents, external skills, provider groups, owners and conditions |
 | `defaults.schema.json` | `defaults.yaml` | domains, keys, owners, gated values |
 | `plugins.schema.json` | `plugins/*.yaml` | providers/marketplaces, Pi npm trust, mitsupi resource filters |
-| `llm-policy.schema.json` | `llm/*.yaml` | no OpenRouter provider on Pi, OMP, Hermes or OpenCode |
+| `llm-policy.schema.json` | `llm/*.yaml` | provider defaults/refs, protocol capabilities and exclusions; no direct OpenRouter provider on Pi, OMP, Hermes or OpenCode |
 | `integrations.schema.json` | `integrations.yaml` | integration declaration structure |
 | `plugin-managers.schema.json` | `plugin-managers.yaml` | plugin lifecycle manager structure |
 
 `llm-policy` is intentionally a policy overlay, not a schema for all model
-metadata. It allows unrelated catalog fields and providers. Package options
+metadata. It allows unrelated catalog fields and providers. Effective provider
+resolution also rejects OpenRouter inherited through defaults or sets for those
+four tools; `scripts/test-llm-providers.py` checks that policy and the
+[default/override/exclusion behavior](llm/providers.md) offline. Package options
 share one declaration shape across ecosystems; this does not prove a particular
 package manager accepts every option.
 

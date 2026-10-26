@@ -12,6 +12,12 @@ llm:
       type: models-dev
       file_path: models-dev-api
 
+  # ── Default providers ───────────────────────────────────────────────
+  # Inherited by every llm.tools entry. Sets and tool entries override
+  # these refs; exclude_providers removes aliases for unsupported clients.
+  # This adds selectable providers, not default models or OMP role targets.
+  default_providers: [magpie]
+
   # ── Provider sets ───────────────────────────────────────────────────
   # Alias groups a tool pulls in with `provider_sets: [<name>]`. A tool's
   # own `providers.<alias>` entry is deep-merged on top.
@@ -218,6 +224,7 @@ llm:
     # appended as magpie/* by tools that have a pool.
     magpie:
       name: Magpie
+      api_types: [openai, anthropic, gemini]
       public_scheme: https
       public_prefix: magpie
       public_domain:

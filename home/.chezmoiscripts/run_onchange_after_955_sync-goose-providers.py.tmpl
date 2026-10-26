@@ -1,0 +1,71 @@
+{{- /* Goose needs one JSON file per custom provider. Own only the reserved
+       custom_chezmoi_ prefix; native providers and user files stay untouched. */ -}}
+{{- $definitions := dict -}}
+{{- $enabled := includeTemplate "tool/enabled" (merge (dict "tool" "goose") .) | fromJson -}}
+{{- if $enabled -}}
+  {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "goose") .) | fromJson -}}
+  {{- range $alias, $ep := $cfg.providers -}}
+    {{- /* Built-in provider ids retain their native auth/config path. */ -}}
+    {{- if and $ep.base_url (not (has $alias (list "openai" "anthropic" "ollama" "openrouter"))) -}}
+      {{- $id := printf "custom_chezmoi_%s" $alias -}}
+      {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+      {{- $base := $endpoint.api_base_url -}}
+      {{- if eq $ep.type "openai" -}}{{- $base = printf "%s/chat/completions" $base -}}
+      {{- else if eq $ep.type "anthropic" -}}{{- $base = printf "%s/v1/messages" (trimSuffix "/" $ep.base_url) -}}
+      {{- else if eq $ep.type "ollama" -}}{{- $base = $ep.base_url -}}{{- end -}}
+      {{- $def := dict
+        "name" $id "engine" $ep.type "display_name" $ep.display_name
+        "base_url" $base "models" (list) "dynamic_models" true
+        "supports_streaming" true "requires_auth" false -}}
+      {{- if hasKey $ep "headers" -}}{{- $_ := set $def "headers" $ep.headers -}}{{- end -}}
+      {{- if $ep.auth_path -}}
+        {{- $args := list $ep.auth_path -}}
+        {{- if $ep.auth_field -}}{{- $args = append $args $ep.auth_field -}}{{- end -}}
+        {{- $_ := set $def "requires_auth" true -}}
+        {{- $_ := set $def "auth" (dict "command" (joinPath $.chezmoi.homeDir "bin" "pass-field") "args" $args) -}}
+      {{- else if $ep.auth_key -}}
+        {{- /* Literal keys are non-secret local tokens in this data layer. */ -}}
+        {{- $_ := set $def "headers" (mergeOverwrite (deepCopy (default dict (index $def "headers"))) (dict "Authorization" (printf "Bearer %s" $ep.auth_key))) -}}
+      {{- end -}}
+      {{- $_ := set $definitions $id $def -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+#!/usr/bin/env python3
+"""Synchronize only chezmoi-owned Goose declarative provider definitions."""
+import json
+import os
+import re
+import tempfile
+from pathlib import Path
+
+DEFINITIONS = json.loads({{ $definitions | toJson | toJson }})
+DIRECTORY = Path({{ joinPath .chezmoi.homeDir ".config/goose/custom_providers" | toJson }})
+PREFIX = "custom_chezmoi_"
+
+
+def main():
+    for name in DEFINITIONS:
+        if not re.fullmatch(r"custom_chezmoi_[a-z0-9_-]+", name):
+            raise ValueError(f"Invalid Goose provider id: {name}")
+    if not DEFINITIONS and not DIRECTORY.exists():
+        return
+    DIRECTORY.mkdir(parents=True, exist_ok=True)
+    # Finish writes before pruning. A failure leaves stale definitions for a
+    # retry, rather than deleting a working provider before its replacement.
+    for name, definition in DEFINITIONS.items():
+        fd, temporary = tempfile.mkstemp(prefix=".chezmoi-", dir=DIRECTORY)
+        try:
+            with os.fdopen(fd, "w") as output:
+                json.dump(definition, output, indent=2)
+                output.write("\n")
+            os.replace(temporary, DIRECTORY / f"{name}.json")
+        finally:
+            Path(temporary).unlink(missing_ok=True)
+    for path in DIRECTORY.glob(f"{PREFIX}*.json"):
+        if path.stem not in DEFINITIONS:
+            path.unlink()
+
+
+if __name__ == "__main__":
+    main()

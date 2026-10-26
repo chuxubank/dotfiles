@@ -1,5 +1,6 @@
 llm:
   tools:
     goose:
-      model: z-ai/glm-4.5-air:free
+      supported_provider_types: [openai, anthropic, ollama]
+      model: openrouter/z-ai/glm-4.5-air:free
       providers: [openrouter]
