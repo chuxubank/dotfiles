@@ -11,8 +11,9 @@ Existing `purge` path strings keep their behavior: files go through
 `.chezmoiremove`; trees ending in `/**` are moved to Trash by
 `run_after_020_purge-disabled-tools.sh.tmpl`.
 
-A command object lets a tool's uninstaller own services, application files, and
-data. It can coexist with ordinary path strings for independently cleaned data:
+A command object first tries a tool's uninstaller for services, application
+files, and data, then moves any declared path leftovers to Trash. It can coexist
+with ordinary path strings for independently cleaned data:
 
 ```yaml
 tools:
@@ -46,9 +47,14 @@ tools:
   file ignores only that file, never its parent. This allows launchers in shared
   `.local/bin` without hiding unrelated commands. Ignore is independent of the
   command's platform condition and the purge policy.
-- Missing executables are a no-op only if all declared targets are absent.
-  A nonzero command exit stops apply. A zero exit with remaining targets also
-  fails. There is no automatic reinstall or destructive cleanup fallback.
+- An available uninstaller runs first. A nonzero exit emits a warning with its
+  status, but does not prevent declared path cleanup. Missing, dangling, or
+  non-executable uninstallers simply skip this step; they are never reinstalled.
+- Remaining declared paths are moved to Trash in all cases. Symlinks are moved
+  themselves, never followed into shared skill sources. Success is determined
+  by the final state: every declared path must be absent. Trash failure or
+  leftovers fail apply and retry on the next run. If nothing remains, no Trash
+  backend is needed. There is no permanent deletion fallback.
 - `run_before_010_purge-disabled-tool-commands.sh.tmpl` executes command entries
   before chezmoi removes managed configuration. It runs on every apply, so a
   failed removal can retry on the next apply. Commands should be idempotent.
@@ -61,13 +67,21 @@ tools:
   their parent ignore and must be under tool-owned directories.
 
 Hermes declares `hermes uninstall --full --yes` inside `purge`; there is no
-parallel `uninstall` field or tool-specific script. Unlike Trash-based purges,
-its official uninstaller permanently deletes owned files. Review its live scope
-with `hermes uninstall --dry-run` before enabling destructive cleanup.
+parallel `uninstall` field, missing-command option, or tool-specific script.
+If a skill installer has left `~/.hermes/skills` behind, cleanup moves the
+declared Hermes tree and launcher paths to Trash even when the launcher is gone
+or the uninstaller leaves files behind. It does not change skill installation
+or incremental updates for other agents. File cleanup alone cannot stop
+services or undo system changes the uninstaller would own; inspect warnings
+when the uninstaller fails. When available, the official uninstaller permanently
+deletes owned files; review its live scope with `hermes uninstall --dry-run`
+before enabling destructive cleanup.
 
 `schemas/tools.schema.json` validates YAML declaration types, required fields,
 allowed keys, argv/env values, conditions, and path syntax. `make verify` runs
 schema validation before rendering templates. Cross-entry path overlap remains
 in `verify/model`; exact ignore/removal behavior remains in `verify/contracts`.
-`scripts/test-tool-purge.py` checks execution with offline stubs only. Validation
-never invokes real uninstallers.
+`scripts/test-tool-purge.py` checks execution with offline uninstaller and Trash
+stubs, including missing/dangling launchers, symlink safety, partial cleanup,
+backend failure, and repeated apply. Validation never invokes real uninstallers
+or trashes live files.

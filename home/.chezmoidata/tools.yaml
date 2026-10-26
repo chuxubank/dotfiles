@@ -15,8 +15,9 @@
 # entries run before managed files are removed; their paths declare cleanup
 # scope and must be absent after success (trailing /** checks the tree root).
 # They are never deleted by generic purges. command is literal argv, env is
-# per-command, and a leading {home} expands to HOME. A missing command skips
-# only if its paths are already absent. when uses the shared condition schema.
+# per-command, and a leading {home} expands to HOME. Run an available command
+# first (warn on failure), then move declared leftovers to Trash. Success means
+# all declared paths are absent. when uses the shared condition schema.
 # Command paths ignore exact targets (/** ignores its root), never a parent.
 # plugin_upgrades: weekly commands, executed in order after plugin reconciliation.
 # for_each: enabled_plugins expands {source} from plugin declarations.

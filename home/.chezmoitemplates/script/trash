@@ -1,0 +1,33 @@
+{{- /* Shared Trash-only cleanup for directory purges and command leftovers.
+       Never permanently delete or follow symlinks. */ -}}
+announced=false
+
+trash_path() {
+    _path=$1
+    if [ ! -e "$_path" ] && [ ! -L "$_path" ]; then
+        return 0
+    fi
+
+    if [ "$announced" = false ]; then
+        echo "󰯁 Purge disabled tool runtime data"
+        announced=true
+    fi
+    echo "Move disabled tool data to Trash: $_path"
+
+    if command -v trash >/dev/null 2>&1; then
+        trash -- "$_path"
+    elif command -v gio >/dev/null 2>&1; then
+        gio trash -- "$_path"
+    elif command -v trash-put >/dev/null 2>&1; then
+        trash-put -- "$_path"
+    elif [ "$(uname -s)" = Darwin ] && command -v osascript >/dev/null 2>&1; then
+        osascript - "$_path" <<'APPLESCRIPT'
+on run argv
+    tell application "Finder" to delete POSIX file (item 1 of argv)
+end run
+APPLESCRIPT
+    else
+        echo "No trash command available for $_path; refusing to delete it" >&2
+        return 1
+    fi
+}
