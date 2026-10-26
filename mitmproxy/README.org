@@ -1,4 +1,29 @@
 * mitmproxy
+
+** 启动
+
+使用 WireGuard 模式加载本地响应脚本：
 #+begin_src sh
   mitmdump --mode wireguard -s ~/.local/share/chezmoi/mitmproxy/map-local.py
 #+end_src
+
+通过 =HOST_ENV= 选择配置目录（默认 =aa=）：
+#+begin_src sh
+  HOST_ENV=iv mitmdump --mode wireguard -s ~/.local/share/chezmoi/mitmproxy/map-local.py
+#+end_src
+
+** 配置
+
+配置相对于 =map-local.py= 所在目录：
+- =<HOST_ENV>/routes.json=：URL 匹配规则、响应文件和处理器名称。
+- =<HOST_ENV>/data/=：本地 JSON 响应文件。
+- =<HOST_ENV>/handlers.py=：可选的自定义处理器，以 =handle_= 为函数名前缀。
+
+** 客户端连接
+
+- 按启动提示在客户端导入 WireGuard 配置并连接。
+- 访问 =http://mitm.it=，安装并信任本机 mitmproxy CA，以便调试 HTTPS 请求。
+- 仅在授权的测试环境使用；调试结束后关闭隧道。
+- WireGuard 客户端配置、二维码及 CA 私钥属于敏感文件，不要提交或公开分享。
+
+前台运行时按 =Ctrl-C= 停止代理。

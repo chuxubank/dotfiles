@@ -1,0 +1,7 @@
+{
+  "scenario": "list",
+  "role_id": 1000001,
+  "current_rounds": 123,
+  "required_rounds": 600,
+  "note": "baseline / list / upgrade / unlocked / long / detail-error; change scenario and re-enter the relevant page, no proxy restart required"
+}

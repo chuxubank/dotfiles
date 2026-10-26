@@ -1,5 +1,10 @@
 [
   {
+    "pattern": "^https://wx-(?:test|nightly|uat|pre)\\.infinityparadise\\.com(?::443)?/(?:queen/(?:game/(?:list-crush-configs|get-crush-info|get-item-detail)|script/crush-reward-info)|__ivc_mock__/crush-cover-(?:lu|sol)\\.webp)(?:\\?[^#]*)?$",
+    "handler": "crush_ritual",
+    "delay_seconds": 0
+  },
+  {
     "pattern": "/iv/collection/list-saves\\?(?=[^#]*\\btab=9(?:&|$))",
     "file": "legacy_web_card.json",
     "delay_seconds": 0
