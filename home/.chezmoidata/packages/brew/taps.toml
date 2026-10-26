@@ -16,6 +16,7 @@ taps = [
   { name = "stablyai/orca", trusted = { cask = "orca" }, owner = "orca" },
   { name = "termio-sh/tap", trusted = { cask = "termio" }, owner = "termio" },
   { name = "theseal/ssh-askpass", trusted = { formula = "ssh-askpass" } },
+  { name = "tranvuongquocdat/sidescreen", trusted = { cask = "sidescreen" } },
   { name = "vjeantet/tap", trusted = { formula = "alerter" } },
   { name = "atlassian/acli", trusted = { formula = "acli" }, when.enabled.host_env = ["aa"] },
   { name = "tornikegomareli/talkify", url = "https://github.com/tornikegomareli/Talkify", trusted = { cask = "talkify" }, owner = "talkify" },
