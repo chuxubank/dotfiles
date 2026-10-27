@@ -13,6 +13,14 @@ configuration files as the source of truth and keep the summary concise.
 
 Run `make verify` after modifying keyboard configuration or its documentation.
 
+## README
+
+`README.org` stays a short map. When a summary is required, such as a
+keybinding change, name the behavior and point at the file that owns it.
+Leave filters, refresh periods, trust scopes, and version notes in that
+file. An app or package that follows an existing install path does not get
+its own heading.
+
 ## Template boundaries
 
 Inline single-consumer rendering and transformation logic in its target
@@ -42,6 +50,18 @@ use `trusted.formula` / `trusted.cask` for one item, or `trusted.formulae` /
 with any newly used trust keys. Whole-tap trust requires an explicit reason.
 Verify the rendered Brewfile includes both the package and its tap trust, then
 run `make verify`; validation must not install packages or modify live trust.
+
+## macOS app externals
+
+Install a macOS app that Homebrew does not ship by adding an entry to
+`home/Applications/.chezmoiexternal.toml.tmpl`, inside the existing darwin
+block that excludes `host_env=ci`. chezmoi unpacks tar and zip archives into
+`~/Applications`. When the upstream release is a DMG, convert it to a zip in
+that entry's `filter` and set `format = "zip"`. Use a weekly `refreshPeriod`
+when the app updates itself. Render the external and run `make verify`; do
+not apply it while validating.
+
+Do not add a `run_` script that downloads, mounts, or copies the app.
 
 ## External repo definitions
 
