@@ -23,16 +23,16 @@
     stripComponents = 1
 
 {{- /* BetterCast publishes a DMG. chezmoi archives are tar or zip, so the
-       filter mounts that image and writes a zip of the app. */ -}}
+       filter mounts that image and writes a tar of the app. */ -}}
 {{- $bettercastURL := includeTemplate "github/release-asset-url" (dict "repo" "StephenLovino/BetterCast" "pattern" "BetterCast.dmg") | trim -}}
 {{- if $bettercastURL }}
 ["BetterCast.app"]
     type = "archive"
-    format = "zip"
+    format = "tar"
     url = {{ $bettercastURL | quote }}
     stripComponents = 1
     refreshPeriod = "168h"
     filter.command = "/bin/zsh"
-    filter.args = ["-c", {{ `d=$(mktemp -d); trap 'diskutil eject "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; cat > "$d/BetterCast.dmg"; diskutil image attach --nobrowse --readOnly --mountPoint "$d/mnt" "$d/BetterCast.dmg" >/dev/null; (cd "$d/mnt" && zip -r -X -q - BetterCast.app)` | quote }}]
+    filter.args = ["-c", {{ `d=$(mktemp -d); trap 'diskutil eject "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; cat > "$d/BetterCast.dmg"; diskutil image attach --nobrowse --readOnly --mountPoint "$d/mnt" "$d/BetterCast.dmg" >/dev/null; COPYFILE_DISABLE=1 tar -C "$d/mnt" -cf - BetterCast.app` | quote }}]
 {{- end }}
 {{- end }}

@@ -56,8 +56,11 @@ run `make verify`; validation must not install packages or modify live trust.
 Install a macOS app that Homebrew does not ship by adding an entry to
 `home/Applications/.chezmoiexternal.toml.tmpl`, inside the existing darwin
 block that excludes `host_env=ci`. chezmoi unpacks tar and zip archives into
-`~/Applications`. When the upstream release is a DMG, convert it to a zip in
-that entry's `filter` and set `format = "zip"`. Use a weekly `refreshPeriod`
+`~/Applications`. When the upstream release is a DMG, mount it in that
+entry's `filter` and emit a tar with `format = "tar"`. Use
+`COPYFILE_DISABLE=1 tar` so symlinks stay symlinks and macOS does not add
+pax headers. Following symlinks turns a framework into both a framework and
+an app, and macOS then refuses to open the bundle. Use a weekly `refreshPeriod`
 when the app updates itself. Render the external and run `make verify`; do
 not apply it while validating.
 
