@@ -63,6 +63,11 @@ not apply it while validating.
 
 Do not add a `run_` script that downloads, mounts, or copies the app.
 
+When that app is not notarized, add its installed path to
+`home/.chezmoiscripts/darwin/run_once_after_200_remove-quarantine.sh.tmpl` in
+the same change. Homebrew casks land in `/Applications`. Application
+externals land in `~/Applications`.
+
 ## External repo definitions
 
 `home/.chezmoidata/path.toml` owns path strings only.
