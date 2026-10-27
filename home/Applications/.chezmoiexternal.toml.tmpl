@@ -1,3 +1,16 @@
+{{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") -}}
+{{- $mygoURL := includeTemplate "github/release-asset-url" (dict
+      "repo" "egoist/mygo-cloudmusic"
+      "pattern" (printf "mygo-cloudmusic-*-darwin-%s.tar.gz" .chezmoi.arch)) | trim -}}
+{{- if $mygoURL }}
+["MyGo 云音乐.app"]
+    type = "archive"
+    url = {{ $mygoURL | quote }}
+    stripComponents = 1
+    refreshPeriod = "168h"
+{{- end }}
+{{- end }}
+
 {{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") }}
 ["iloader.app"]
     type = "archive"

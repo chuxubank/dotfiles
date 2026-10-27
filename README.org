@@ -111,6 +111,14 @@ installation and first-run onboarding; chezmoi does not install the app or
 import browser data. Only the browser skill is selected, not the repository's
 internal development skills.
 
+** MyGo 云音乐
+
+[[https://music.egoist.dev/download][MyGo 云音乐]] is managed as a macOS
+=chezmoiexternal= in =~/Applications=. Chezmoi downloads the architecture-
+matched official release archive and refreshes it weekly. The archive is
+signed by the upstream release process; the app's own updater handles
+subsequent updates. Homebrew does not manage this app.
+
 ** Recoverable deletion
 
 [[https://github.com/sindresorhus/trash-cli][trash-cli]] is installed globally through Bun on macOS, Linux, and Windows. It is a
