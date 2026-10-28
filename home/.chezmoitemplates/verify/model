@@ -159,7 +159,7 @@
 {{- $personal := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson -}}
 {{- $wantPersonal := printf "xai/%s" (index .llm.models "grok_primary") -}}
 {{- if hasKey $personal.providers "magpie" -}}
-  {{- $wantPersonal = "magpie/auto-grok-4.7@500k" -}}
+  {{- $wantPersonal = "magpie/auto/grok-4.7@500k" -}}
 {{- end -}}
 {{- if ne $personal.model $wantPersonal -}}
   {{- fail (printf "pi personal model: got %q, want %q" $personal.model $wantPersonal) -}}
@@ -177,7 +177,7 @@
 {{- $iv := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "iv")) | fromJson -}}
 {{- $wantIV := printf "iv-codex/%s" (index .llm.models "gpt_primary") -}}
 {{- if hasKey $iv.providers "magpie" -}}
-  {{- $wantIV = "magpie/auto-grok-4.7@500k" -}}
+  {{- $wantIV = "magpie/auto/grok-4.7@500k" -}}
 {{- end -}}
 {{- if ne $iv.model $wantIV -}}
   {{- fail (printf "pi iv model: got %q, want %q" $iv.model $wantIV) -}}

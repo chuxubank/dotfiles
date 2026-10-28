@@ -71,6 +71,69 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None):
 
 with tempfile.TemporaryDirectory() as tmp:
     home = Path(tmp)
+    # Rich discovery must survive the native Pi/OMP render, not just id/name.
+    model_cache = home / ".cache/llm/models/magpie.json"
+    model_cache.parent.mkdir(parents=True)
+    rows = [{
+        "id": "auto/model@wide", "display_name": "Gateway model",
+        "context_window": 500000, "max_output_tokens": 32000,
+        "modalities": {"input": ["text", "image"]}, "reasoning": True,
+        "reasoning_levels": ["low", "high", "xhigh"],
+        "pricing": {"prompt": "0.000002", "completion": "0.000006",
+                    "input_cache_read": "0.0000005", "input_cache_write": "0.000003"},
+    }, {
+        "id": "vendor/supported-levels", "context_length": 240000,
+        "reasoning": True, "supported_reasoning_levels": [{"effort": "high"}],
+    }, {"id": "vendor/bare"}]
+    model_cache.write_text(json.dumps({"data": rows}))
+    discovered = {
+        "models": {},
+        "default_providers": ["magpie"],
+        "providers": {"magpie": {
+            "base_url": "https://offline.invalid", "models_cache": "magpie-models-api",
+        }},
+        "tools": {"pi": {}, "omp": {}},
+    }
+    for tool, path, yaml in (
+        ("pi", "home/dot_pi/private_agent/models.json.tmpl", False),
+        ("omp", "home/dot_omp/private_agent/models.yml.tmpl", True),
+    ):
+        cfg = json.loads(render(path, discovered, home, yaml=yaml))
+        models = {m["id"]: m for m in cfg["providers"]["magpie"]["models"]}
+        model = models["auto/model@wide"]
+        assert model["id"] == "auto/model@wide" and model["name"] == "Gateway model"
+        assert model["contextWindow"] == 500000, model
+        assert model["maxTokens"] == 32000, model
+        assert model["input"] == ["text", "image"] and model["reasoning"] is True, model
+        assert model["cost"] == {"input": 2, "output": 6, "cacheRead": 0.5, "cacheWrite": 3}, model
+        if tool == "pi":
+            assert model["thinkingLevelMap"]["xhigh"] == "xhigh", model
+            assert model["thinkingLevelMap"]["medium"] is None, model
+        else:
+            assert model["thinking"]["efforts"] == ["low", "high", "xhigh"], model
+        alternative = models["vendor/supported-levels"]
+        assert alternative["contextWindow"] == 240000, alternative
+        bare = models["vendor/bare"]
+        assert bare["name"] == "vendor/bare" and bare["reasoning"] is False, bare
+        assert bare["contextWindow"] == 128000 and bare["input"] == ["text"], bare
+        assert "thinkingLevelMap" not in bare and "thinking" not in bare, bare
+
+        # Explicit metadata overrides still win over discovery.
+        overridden = copy.deepcopy(discovered)
+        overridden["tools"][tool]["providers"] = {"magpie": {"model_overrides": {
+            "auto/model@wide": {"limit": {"context": 300000}, "reasoning": False},
+        }}}
+        cfg = json.loads(render(path, overridden, home, yaml=yaml))
+        model = next(m for m in cfg["providers"]["magpie"]["models"] if m["id"] == "auto/model@wide")
+        assert model["contextWindow"] == 300000 and model["maxTokens"] == 32000, model
+        assert model["reasoning"] is False and "thinkingLevelMap" not in model and "thinking" not in model
+
+    # Name-only consumers retain their existing contract.
+    template = '{{ includeTemplate "llm/fetch-models" (dict "type" "openai" "base_url" "https://offline.invalid" "auth_key" "" "cache_file" ' + json.dumps(str(model_cache)) + ') }}'
+    names = subprocess.run(command, input=template, text=True, capture_output=True)
+    assert names.returncode == 0, names.stderr
+    assert json.loads(names.stdout) == {row["id"]: row.get("display_name", row["id"]) for row in rows}
+
     llm = copy.deepcopy(base)
     # Model-scoped routing means two inherited OpenAI endpoints never overwrite
     # a single global base/key. Provider prefixes in the upstream id survive.

@@ -3,7 +3,7 @@ llm:
     pi:
       # Select the first candidate whose provider alias is enabled.
       model:
-        - magpie/auto-grok-4.7@500k
+        - magpie/auto/grok-4.7@500k
         - iv-codex/${gpt_primary}
         - iv-cc/claude-opus-5
         - xai/${grok_primary}

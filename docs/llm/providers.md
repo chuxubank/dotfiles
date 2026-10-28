@@ -54,6 +54,11 @@ Endpoint and credential construction belong to the provider definition:
   `public_prefix` and the `public_domain` credential reference.
 - `llm/model-endpoint` adds the protocol-specific API path.
 - `model_caches` and `home/.chezmoidata/path.toml` own model-discovery caches.
+  Pi/OMP preserve the endpoint's exact ids, limits, input modalities, reasoning
+  levels and prices. Discovery normalizes these into the shared model format;
+  endpoint metadata overrides vendor catalog data, then explicit per-model
+  overrides win. Missing fields keep the renderer's fallbacks. Advertised
+  per-token prices are converted to the clients' per-million-token unit.
 - Clients with a command-based credential field use `pass-field`; other
   clients receive the resolved key in their private config.
 

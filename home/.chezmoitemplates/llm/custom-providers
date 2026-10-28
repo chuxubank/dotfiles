@@ -55,6 +55,7 @@
     {{- $declaresModels = false -}}
   {{- else -}}
     {{- $source := dict -}}
+    {{- $discovered := dict -}}
     {{- if hasKey $ep "models" -}}
       {{- if eq (kindOf $ep.models) "slice" -}}
         {{- /* Bare id list: the display name is the id, matching what the
@@ -64,7 +65,10 @@
         {{- $source = $ep.models -}}
       {{- end -}}
     {{- else -}}
-      {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+      {{- $discovered = includeTemplate "llm/fetch-models" (merge (dict "metadata" true) $ep) | fromJson -}}
+      {{- range $id, $model := $discovered -}}
+        {{- $_ := set $source $id (default $id (index $model "name")) -}}
+      {{- end -}}
     {{- end -}}
     {{- $filter := default dict (index $ep "model_filter") -}}
     {{- if and (gt (len $filter) 0) (gt (len $metadata) 0) -}}
@@ -83,6 +87,10 @@
       {{- if ne $name $id -}}{{- $_ := set $model "name" $name -}}{{- end -}}
       {{- if hasKey $metadata $id -}}
         {{- $model = mergeOverwrite (deepCopy (index $metadata $id)) $model -}}
+      {{- end -}}
+      {{- /* The serving endpoint outranks vendor metadata; explicit overrides win last. */ -}}
+      {{- if hasKey $discovered $id -}}
+        {{- $model = mergeOverwrite $model (deepCopy (index $discovered $id)) -}}
       {{- end -}}
       {{- if hasKey $overrides $id -}}
         {{- $model = mergeOverwrite $model (deepCopy (index $overrides $id)) -}}
@@ -109,7 +117,7 @@
         {{- $contextWindow = int (default $contextWindow (index $limits "context")) -}}
         {{- $maxTokens = int (default $maxTokens (index $limits "output")) -}}
       {{- end -}}
-      {{- $models = append $models (dict
+      {{- $entry := dict
         "id" $model.id
         "name" (default $model.id (index $model "name"))
         "api" $model.api
@@ -118,7 +126,35 @@
         "cost" $cost
         "contextWindow" $contextWindow
         "maxTokens" $maxTokens
-      ) -}}
+      -}}
+      {{- if and (eq true (index $model "reasoning")) (hasKey $discovered $id) -}}
+        {{- range $option := default (list) (index $model "reasoning_options") -}}
+          {{- if eq (index $option "type") "effort" -}}
+            {{- $levels := default (list) (index $option "values") -}}
+            {{- if $levels -}}
+              {{- $map := dict -}}
+              {{- range $level := list "off" "minimal" "low" "medium" "high" "xhigh" "max" -}}
+                {{- $value := "null" | fromJson -}}
+                {{- if has $level $levels -}}{{- $value = $level -}}{{- end -}}
+                {{- if and (eq $level "off") (has "none" $levels) -}}{{- $value = "none" -}}{{- end -}}
+                {{- $_ := set $map $level $value -}}
+              {{- end -}}
+              {{- if eq $tool "pi" -}}
+                {{- $_ := set $entry "thinkingLevelMap" $map -}}
+              {{- else -}}
+                {{- $efforts := list -}}
+                {{- range $level := list "minimal" "low" "medium" "high" "xhigh" "max" -}}
+                  {{- if has $level $levels -}}{{- $efforts = append $efforts $level -}}{{- end -}}
+                {{- end -}}
+                {{- if $efforts -}}
+                  {{- $_ := set $entry "thinking" (dict "mode" "effort" "efforts" $efforts "defaultLevel" (first $efforts)) -}}
+                {{- end -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $models = append $models $entry -}}
     {{- end -}}
   {{- end -}}
 

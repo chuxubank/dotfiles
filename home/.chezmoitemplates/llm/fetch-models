@@ -3,7 +3,8 @@
        Optional "cache_file" — read the raw response from this file
               (populated by an external or refresh script) instead of
               a live curl.
-       Output: JSON map of { model_id: display_name, ... }
+       Optional "metadata" — return normalized model objects instead of names.
+       Output: JSON map keyed by the exact upstream id.
        Returns empty map on failure or missing base_url.
 
        Provider types:
@@ -12,6 +13,7 @@
          gemini:            GET /v1beta/models?key=   → .models[] (.name, .displayName)
 */ -}}
 {{- $models := dict -}}
+{{- $details := dict -}}
 {{- if .base_url }}
   {{- $endpoint := includeTemplate "llm/model-endpoint" . | fromJson -}}
   {{- $fetchURL := $endpoint.url -}}
@@ -75,8 +77,47 @@
           {{- $display = $m.display_name -}}
         {{- end }}
         {{- $_ := set $models $m.id $display -}}
+        {{- $_ := set $details $m.id $m -}}
       {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
+{{- if eq true (index . "metadata") -}}
+  {{- $normalized := dict -}}
+  {{- range $id, $name := $models -}}
+    {{- $raw := default dict (index $details $id) -}}
+    {{- $model := dict "id" $id -}}
+    {{- if ne $name $id -}}{{- $_ := set $model "name" $name -}}{{- end -}}
+    {{- $limits := dict -}}
+    {{- $context := default (index $raw "max_input_tokens") (default (index $raw "context_length") (index $raw "context_window")) -}}
+    {{- if gt (int (default 0 $context)) 0 -}}{{- $_ := set $limits "context" (int $context) -}}{{- end -}}
+    {{- if gt (int (default 0 (index $raw "max_output_tokens"))) 0 -}}
+      {{- $_ := set $limits "output" (int (index $raw "max_output_tokens")) -}}
+    {{- end -}}
+    {{- if gt (len $limits) 0 -}}{{- $_ := set $model "limit" $limits -}}{{- end -}}
+    {{- if hasKey $raw "modalities" -}}{{- $_ := set $model "modalities" $raw.modalities -}}{{- end -}}
+    {{- if hasKey $raw "reasoning" -}}{{- $_ := set $model "reasoning" $raw.reasoning -}}{{- end -}}
+    {{- $levels := default (list) (index $raw "reasoning_levels") -}}
+    {{- if not $levels -}}
+      {{- range $level := default (list) (index $raw "supported_reasoning_levels") -}}
+        {{- $levels = append $levels $level.effort -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $levels -}}
+      {{- $_ := set $model "reasoning_options" (list (dict "type" "effort" "values" $levels)) -}}
+    {{- end -}}
+    {{- /* Gateway pricing is USD/token; internal cost cards use USD/million. */ -}}
+    {{- if hasKey $raw "pricing" -}}
+      {{- $cost := dict -}}
+      {{- range $source, $target := dict "prompt" "input" "completion" "output" "input_cache_read" "cache_read" "input_cache_write" "cache_write" -}}
+        {{- if hasKey $raw.pricing $source -}}
+          {{- $_ := set $cost $target (mulf 1000000 (float64 (index $raw.pricing $source))) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if gt (len $cost) 0 -}}{{- $_ := set $model "cost" $cost -}}{{- end -}}
+    {{- end -}}
+    {{- $_ := set $normalized $id $model -}}
+  {{- end -}}
+  {{- $models = $normalized -}}
+{{- end -}}
 {{- toJson $models -}}
