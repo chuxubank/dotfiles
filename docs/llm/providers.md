@@ -70,7 +70,9 @@ Cursor CLI do not consume `llm/tool-config` and are unaffected.
 
 The `magpie` entry in `home/.chezmoidata/tools.yaml` is a client switch, enabled
 on non-CI hosts. It does not install or start Magpie. Disabling it removes the
-inherited alias. Existing default models and OMP roles remain unchanged.
+inherited alias. Pi explicitly prefers `magpie/auto-grok-4.7@500k` while the
+alias is enabled, then falls back to its previous candidate list when disabled.
+Other tools' defaults and OMP roles remain unchanged.
 
 The gateway origin is built from the provider definition in `common.yaml`:
 

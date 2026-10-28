@@ -18,10 +18,11 @@ effort freely; the fallback stays
 deliberately cheaper. Rationale is in
 [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
-Pi does not use this table. Its personal default is `xai/${grok_primary}`:
-Pi ships that provider, the alias is listed with `models: false`, and the
-candidate is before `cursor/${grok_primary}@500k:fast`. The
-Cursor id is the next candidate, the same 500k Fast grok as OMP's
+Pi does not use this table. When Magpie is enabled, its default is
+`magpie/auto-grok-4.7@500k` on both IV and personal hosts. Without that alias,
+it retains the IV-first selection, then `xai/${grok_primary}` on personal
+hosts. Pi ships xAI with `models: false`. The retained
+Cursor candidate is the same 500k Fast grok as OMP's
 `cursor/${grok_primary}-500k-fast`. Grok Build selects that lane as
 `${grok_primary}-build-fast` with `context_window` 500000. `pi-cursor-sdk`
 posts `context`, `reasoning_effort`, and `fast` on registry id
@@ -44,8 +45,12 @@ the Cursor candidate matches OMP and Grok Build. See
 `cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
 those three.
 
-Pi's candidate order is IV, then `xai/${grok_primary}`, then Cursor.
-`pi-cursor-sdk` ids are not these SKUs. Personal `default` is `xai/grok-4.7`.
+Pi's primary candidate is `magpie/auto-grok-4.7@500k` while the Magpie alias
+is enabled. With Magpie disabled, selection falls through to IV, then
+`xai/${grok_primary}`, then the retained Cursor candidates. This is render-time
+provider selection, not request-time failover if the gateway is unavailable.
+The `pi-cursor-sdk` plugin is currently disabled; its config is retained for
+re-enabling. Its ids are not OMP's SKUs.
 `cursor/grok-4.7@500k:fast` is the next candidate: the Fast lane on the 500k
 window, OMP's `cursor/grok-4.7-500k-fast`, and the SDK's default variant. Grok Build uses
 `grok-4.7-build-fast` with `context_window` 500000. OMP only keeps that
