@@ -1,148 +1,78 @@
-# OMP model roles
+# Model selection and OMP roles
 
-`home/.chezmoidata/llm/omp.yaml` is the source of truth; this file is the
-summary. The shared primary model is `${gpt_primary}`, declared once in
-`home/.chezmoidata/llm/common.yaml`; references below intentionally keep that
-alias so changing the primary does not require editing this document. A role is a named model slot OMP resolves at each call site, not a
-model name. `home/dot_omp/private_agent/modify_config.yml` renders the data
-file's `default_models` into `modelRoles` in `~/.omp/agent/config.yml`.
+## Sources of truth
 
-Every role is a candidate list. The renderer picks the first entry whose
-provider alias resolved on this host, so one table covers both tiers: the IV
-aliases (`iv-codex`, `iv-cc`, `iv-anthropic`, `iv`) are gated on
-`host_env: [iv]` and drop out elsewhere, leaving the personal-subscription
-entry. The `cursor` alias resolves on `iv` as well, so `cursor/*` stays in
-that host's picker; each role still leads with an IV candidate, and that
-entry wins. IV is company-funded and spends
-effort freely; the fallback stays
-deliberately cheaper. Rationale is in
-[ADR 0006](../adr/0006-omp-model-role-tiers.md).
+- `home/.chezmoidata/llm/common.yaml`: shared model aliases and provider definitions.
+- `home/.chezmoidata/llm/<tool>.yaml`: model candidates, effort and picker patterns.
+- `home/dot_omp/private_agent/modify_config.yml`: native role rendering and
+  per-agent role assignments.
 
-Pi does not use this table. When Magpie is enabled, its default is
-`magpie/auto-grok-4.7@500k` on both IV and personal hosts. Without that alias,
-it retains the IV-first selection, then `xai/${grok_primary}` on personal
-hosts. Pi ships xAI with `models: false`. The retained
-Cursor candidate is the same 500k Fast grok as OMP's
-`cursor/${grok_primary}-500k-fast`. Grok Build selects that lane as
-`${grok_primary}-build-fast` with `context_window` 500000. `pi-cursor-sdk`
-posts `context`, `reasoning_effort`, and `fast` on registry id
-`${grok_primary}` rather than the OMP context SKU. An earlier probe saw the
-run registry reject `context=500k` (`Invalid parameters for registry model`
-/ `AI Model Not Found`) while `context=256k` completed; the pin is 500k so
-the Cursor candidate matches OMP and Grok Build. See
-[ADR 0009](../adr/0009-omp-models-dev-overlays.md).
+Read those files for current assignments. This document describes how they
+are selected, not a second copy of the model table.
 
-| Role      | `iv` host                          | Other hosts                             | Consumed by                                   |
-|-----------|------------------------------------|-----------------------------------------|-----------------------------------------------|
-| `default` | `iv-codex/${gpt_primary}:high`      | `cursor/grok-4.7-500k-fast:high`        | Primary session; `*` selector                 |
-| `slow`    | `iv-anthropic/claude-fable-5:high` | `cursor/claude-opus-5-5:medium`         | `--slow`, thorough analysis                   |
-| `smol`    | `iv-codex/gpt-6-luna:medium`       | `cursor/composer-2.5-fast`              | Prewalk target, background work, vibe `fast`  |
-| `task`    | `iv-codex/${gpt_primary}:medium`    | `xai-oauth/grok-4.7:high`               | Subagent default, vibe `good`                 |
-| `advisor` | `iv-cc/claude-sonnet-5`            | `cursor/composer-2.5`                   | Per-turn advisor review                       |
-| `tiny`    | `iv-codex/gpt-6-luna:low`          | `xai-oauth/grok-4.7:minimal`            | Titles, memory, auto-thinking, stop detection |
-| `plan`    | `iv-cc/claude-opus-5:xhigh`        | `cursor/claude-opus-5-1m:high`          | `--plan`, architectural planning              |
+## Selection flow
 
-`cycleOrder` is OMP's default `smol → default → slow`, so `Alt+N`/`Alt+P` walk
-those three.
+1. `llm/tool-config` merges provider references and applies host conditions,
+   owner switches, exclusions and protocol compatibility. See
+   [provider resolution](providers.md).
+2. Shared model aliases are expanded in each candidate.
+3. Each candidate list selects the first entry whose provider alias resolved.
+   This happens during rendering; it does not probe model availability or
+   provide request-time failover when an endpoint fails.
+4. The tool's template writes the selected model into its native config.
 
-Pi's primary candidate is `magpie/auto-grok-4.7@500k` while the Magpie alias
-is enabled. With Magpie disabled, selection falls through to IV, then
-`xai/${grok_primary}`, then the retained Cursor candidates. This is render-time
-provider selection, not request-time failover if the gateway is unavailable.
-The `pi-cursor-sdk` plugin is currently disabled; its config is retained for
-re-enabling. Its ids are not OMP's SKUs.
-`cursor/grok-4.7@500k:fast` is the next candidate: the Fast lane on the 500k
-window, OMP's `cursor/grok-4.7-500k-fast`, and the SDK's default variant. Grok Build uses
-`grok-4.7-build-fast` with `context_window` 500000. OMP only keeps that
-window while `extendedContext` is on; `modify_config.yml` sets it. Off clamps
-Cursor to the bundled long-context threshold, 256k. Pi cannot set Grok's
-`reasoning_effort`.
-OMP's `claude-opus-5-1m` is `cursor/claude-opus-5@1m`. Composer Fast is
-`cursor/composer-2.5:fast` (the unsuffixed id is also fast, because that is
-the SDK default); standard Composer is `cursor/composer-2.5:slow`. Opus 5.5
-is `cursor/claude-opus-5-5@1m`. Pi has no `slow` role, so that id is only on
-the picker allow-list. OMP prices Cursor from its own catalog. Pi's
-prices are `llm.catalogs.cursor` in `home/.chezmoidata/llm/cursor.yaml`,
-projected onto extension ids. `longContext` becomes
-`cost.tiers`. The unsuffixed Pi id bills the fast card when that is the SDK
-default (Grok, Composer); `:slow` bills the stem.
+An inherited provider only makes models available. To prefer it, place a
+qualified model reference in the tool's candidate list. Disabling that
+provider lets selection continue through the remaining candidates.
 
-## Deliberately unset
+Pi selects its primary model, session-title model and subagent model from
+separate lists in `pi.yaml`. OMP instead exposes named roles to its call sites.
+Plugin enablement is separate from provider resolution: an alias for an
+extension-backed provider does not load that extension. Check
+`home/.chezmoidata/plugins/pi.yaml` when changing such candidates.
 
-`vision` and `commit` carry no assignment.
+## OMP role policy
 
-`inspect_image` resolves `@vision` → `@default` → active model, requiring image
-input at each level. Both tiers' `default` advertise it: IV through `${gpt_primary}`,
-and personal through `cursor/grok-4.7-500k-fast`, which OMP's Cursor
-catalog lists with image input. Neither provider bills per image. `commit` falls
-through to the active model, which is what that flow wants.
+The renderer builds `modelRoles.default` from the selected primary model and
+effort, then adds `default_models`. Each role may have its own candidate list.
 
-Setting a role that would resolve to the same model as its fallback is only
-worth it for a different effort level. On the IV tier that is `tiny` against
-`smol`, and `task` against `default`.
+| Role | Responsibility | Selection policy |
+| --- | --- | --- |
+| `default` | Primary session | General coding capability |
+| `slow` | Thorough analysis and security review | Favor depth for infrequent work |
+| `smol` | Prewalk and lightweight work | Favor latency and cost |
+| `task` | Subagent execution | Balance capability against high output volume |
+| `advisor` | Review the primary's changes | Prefer a different model family; avoid paying for unnecessary speed |
+| `tiny` | Titles, memory and classification | Use only the effort the task needs |
+| `plan` | Architectural planning | Favor reasoning quality over price for infrequent calls |
 
-## Why these models
+Role lists lead with company-funded IV candidates and retain personal
+subscription candidates for other hosts. Provider host conditions choose the
+tier; templates must not duplicate that policy with host-specific role tables.
+Effort support is per model, so a personal fallback must use its own valid level.
+See [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
-`default` tracks the shared `gpt_primary` pin at `:high`. `task` uses the
-same id at `:medium`, and Pi's `subagent_model` tracks the same pin. The personal fallback stays `xai-oauth/grok-4.7:high`. Each
-subagent starts on a fresh context.
+Leave a role unset when its native fallback already gives the intended model
+and effort. Image inspection can fall through from the vision role to the
+default role and active model, checking image support at each step. Commit
+work can use the active model without a separate assignment.
 
-`plan` runs about once per session and is the one place where the best available
-reasoning outranks price, so it takes `claude-opus-5` at $6/$30 — a rate that
-would not survive at `task`'s call volume.
+Per-agent overrides use role aliases rather than model ids. This reuses the
+same host selection instead of introducing another model table. Their mapping
+and the model-cycle order belong to `modify_config.yml`.
 
-`advisor` stays on Sonnet. It reviews the primary's own deltas, so it is a
-different model family from the GPT-family `default`. The personal fallback is
-Composer 2.5, which sits in Cursor's
-first-party pool rather than SuperGrok — the standard SKU, not Fast. Fast is
-`smol`'s interactive execution lane ($3/$15); advisor reviews in the background
-and a late note still lands on the current primary, so the cheaper standard
-rate ($0.5/$2.5) is enough. Personal `default` is Cursor Grok 4.7 Fast on the 500k window; tokens past 256k bill the long-context Fast rate.
+## Changing a selection
 
-`slow` stays `claude-fable-5` on IV, at `:high`, because that role is the
-thorough, infrequent one and the cc group 404s the id — it only resolves on
-`iv-anthropic`. The personal fallback is `cursor/claude-opus-5-5:medium`
-($4/$20). Cursor serves that as one id with an effort ladder, not a per-effort
-SKU, so the suffix is `:medium` rather than an `-medium` id.
-
-## Constraints
-
-Pin the provider on any model id more than one alias can serve; a bare id
-resolves against the union of every alias's catalog and can silently reach the
-wrong endpoint. `gpt-6-luna` is written `iv-codex/gpt-6-luna`. Claude ids
-on this table stay on `iv-cc`, except `claude-fable-5`, which stays on
-`iv-anthropic`. The bundled names `openai` and `anthropic` are the logins.
-See [ADR 0005](../adr/0005-llm-provider-aliases.md) and
-[ADR 0010](../adr/0010-iv-codex-iv-cc.md).
-
-Role targets must also appear in `enabled_models`. That list is the picker's
-allow-list, and a role pointing outside it resolves to a model the session
-cannot select. Entries are generation globs (`iv-codex/gpt-6*`,
-`iv-cc/claude-opus-5*`, `iv-cc/claude-sonnet-5*`, `claude-fable-5*`,
-`grok-4.7*`, `muse-spark-1.3*`,
-`gemini-3.8-flash*`, `deepseek-v4*`, `glm-5.3*`, `kimi/kimi-k3*`), not whole
-catalogs, so older lines stay out while personal-host `plan` and `slow` still
-match `claude-opus-5*`. IV `slow` is the exact `iv-anthropic/claude-fable-5`
-pin; `cursor/claude-fable-5*` stays a manual pick. `deepseek-v4*`,
-`glm-5.3*`, and `kimi/kimi-k3*` are `iv`-pinned and carry no role: they are
-manual picks, and they drop out with the alias on
-non-`iv` hosts. `muse-spark-1.3*`, `gemini-3.8-flash*`, and `cursor/default`
-(Auto) are Cursor-pinned manual picks. `kimi/kimi-k3*` keeps its vendor segment because the endpoint
-returns the id that way; a leading segment counts as a provider only when it
-names a configured alias.
-
-Effort suffixes are per model. `gpt-6-luna` has no `minimal`; its ladder
-starts at `none`, and `tiny` stays at `:low`.
-
-## Subagents
-
-`task.agentModelOverrides` in `modify_config.yml` assigns role aliases rather
-than model ids, so per-agent routing re-resolves per host through the table
-above instead of needing a second tier list.
-
-| Agent               | Model   | Why                                     |
-|---------------------|---------|-----------------------------------------|
-| `scout`             | `@smol` | Read-only research                      |
-| `sonic`             | `@smol` | Mechanical, low-reasoning by definition |
-| `security-reviewer` | `@slow` | Depth is the point                      |
-| everything else     | `@task` | Bundled default                         |
+- Edit the owning tool data file, not generated agent config.
+- Qualify model references when multiple aliases can serve the same id.
+  Bundled login names and custom aliases have distinct ownership; see
+  [ADR 0005](../adr/0005-llm-provider-aliases.md) and
+  [ADR 0010](../adr/0010-iv-codex-iv-cc.md).
+- Keep selected models and role targets covered by `enabled_models`.
+  Use scoped family patterns rather than whole catalogs where appropriate.
+- Treat effort, context and Fast variants as provider-specific. Do not copy
+  another client's SKU spelling or catalog window without checking its adapter.
+  Catalog ownership is described in
+  [ADR 0009](../adr/0009-omp-models-dev-overlays.md).
+- Validate enabled and disabled provider branches, including the non-IV tier,
+  then run `make verify`. Rendering must not make model requests or install tools.

@@ -1,12 +1,7 @@
 llm:
   tools:
     omp:
-      # Primary session prefers IV, then Cursor `${grok_primary}` 500k Fast,
-      # then SuperGrok, then ChatGPT/Codex OAuth. `iv-codex`/`iv-cc` are the
-      # IV aliases (same names as Codex). `openai` and `anthropic` stay the
-      # bundled names for /login; the older subscription alias is `openai-codex`.
-      # The 500k id is the context SKU (`grok-4.7-500k-fast`), not the effort
-      # sibling `grok-4.7-high-fast`. The window still needs extendedContext.
+      # Select the first enabled provider. Context SKUs need extendedContext.
       model:
         - iv-codex/${gpt_primary}
         - iv-cc/claude-opus-5
@@ -15,69 +10,36 @@ llm:
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5-1m:high
       reasoning_effort: high
-      # OMP roles, not model names. Same keys on every host; each list picks
-      # the first candidate whose provider resolved here. IV is company-funded,
-      # so every role leads with an IV alias and spends effort freely; the
-      # trailing entries are the personal-subscription fallback for non-iv
-      # hosts and stay deliberately cheaper. Grok has no IV entry, so SuperGrok
-      # is only ever a fallback. Cycle is OMP's default: smol → default → slow.
+      # IV first, personal subscriptions next; see docs/llm/model-roles.md.
       default_models:
-        # Thorough and infrequent (--slow, security-reviewer). IV keeps
-        # fable on iv-anthropic: the cc group 404s that id. Personal takes
-        # Opus 5.5, one Cursor id with an effort ladder rather than a
-        # per-effort SKU, and stays at :medium.
+        # Fable requires the default-token alias; the cc group rejects it.
         slow:
           - iv-anthropic/claude-fable-5:high
           - cursor/claude-opus-5-5:medium
-        # Prewalk target and background worker. GPT-6 Luna's ladder starts at
-        # `none`; the IV pick stays at medium. Personal takes Composer 2.5 Fast.
         smol:
           - iv-codex/gpt-6-luna:medium
           - cursor/composer-2.5-fast
           - xai-oauth/${grok_primary}:medium
-        # Every subagent's default, and the system's heaviest output producer.
-        # Same Sol id as default, at medium. The personal fallback stays
-        # SuperGrok at :high. Each subagent starts on a fresh context.
         task:
           - iv-codex/${gpt_primary}:medium
           - xai-oauth/${grok_primary}:high
-        # Reviews every primary turn's delta, so it wants a family other than
-        # the primary's. IV spends company-funded Sonnet; the personal fallback
-        # is standard Composer 2.5 (Cursor Models pool), not Fast. Fast is
-        # smol's interactive lane; a late review still lands on the current
-        # primary, so the extra rate does not change what the agent sees.
         advisor:
           - iv-cc/claude-sonnet-5
           - cursor/composer-2.5
-        # Titles, memory, auto-thinking classification, unexpected-stop checks.
-        # Unset would borrow @smol, which is the same model here — the point of
-        # spelling it out is the lower effort.
+        # Explicit assignment lowers effort rather than inheriting @smol.
         tiny:
           - iv-codex/gpt-6-luna:low
           - xai-oauth/${grok_primary}:minimal
-        # Architectural planning: once per session, low volume, and the one
-        # place where the best available reasoning outranks its price. Opus is
-        # $6/$30 — worth it at this call frequency, not at task's.
         plan:
           - iv-cc/claude-opus-5:xhigh
           - cursor/claude-opus-5-1m:high
-        # No `vision` role on purpose. inspect_image falls back @vision →
-        # @default → active model, each level requiring image input. Both
-        # defaults advertise it, so a photo stays on @default. Neither
-        # provider bills per image.
-      # Allow-list for the picker. Generation globs, not catalogs: only the
-      # current families. `${gpt_primary}` and `${grok_primary}` are the
-      # default-model pins and stay selectable even if those ids move off
-      # the globs. Role targets must
-      # match too, or the role resolves to a model the session cannot select.
-      # Pin the provider on every glob.
+        # Unset roles use native fallbacks; see docs/llm/model-roles.md.
+      # Provider-pinned family globs; every role target must remain selectable.
       enabled_models:
         - iv-cc/claude-opus-5*
         - iv-cc/claude-sonnet-5*
         - iv-anthropic/claude-fable-5
-        # IV's open-weight lines, served only by the default-token group; the
-        # codex and cc groups list none of these ids. `kimi/kimi-k3*` keeps the
-        # vendor segment because that is the id the endpoint returns.
+        # Open-weight models require the default-token group; keep vendor ids.
         - iv/deepseek-v4.1*
         - iv/glm-5.3*
         - iv/kimi/kimi-k3*
@@ -102,18 +64,14 @@ llm:
         xai-oauth:
           provider: xai-oauth
           models: false
-          # SuperGrok discovery returns bare ids. models.dev supplies the
-          # first-party card, including list prices — same overlay as Cursor.
+          # Enrich discovered ids with first-party metadata and list prices.
           data_set: models-dev
           data_set_providers:
             - xai
         openai-codex:
           provider: openai-codex
           models: false
-        # OMP's bundled Cursor catalog prices every served id, including Fast
-        # lanes and context SKUs such as `grok-4.7-500k-fast`; no overlay.
-        # The alias stays on iv so the picker can select it. Role lists still
-        # lead with an IV candidate, and that entry wins.
+        # The native catalog owns prices and context windows; do not overlay.
         cursor:
           provider: cursor
           models: false

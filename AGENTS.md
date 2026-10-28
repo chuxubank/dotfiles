@@ -13,6 +13,21 @@ configuration files as the source of truth and keep the summary concise.
 
 Run `make verify` after modifying keyboard configuration or its documentation.
 
+## Documentation and comments
+
+All documentation and comments describe workflows, rules, responsibilities,
+constraints, and non-obvious reasons. Keep mutable configuration values in
+their owning data or config files; point readers there instead of copying
+model assignments, prices, versions, parameter values, or deployment details.
+Use placeholders when an example is needed to explain syntax.
+
+Keep each explanation in one authoritative place and link to it elsewhere.
+Comments explain why or warn about a local constraint, rather than narrating
+adjacent code or repeating configuration. When editing a document or comment,
+remove redundant explanations and stale snapshots instead of appending another
+layer. Update documentation when the process or rule changes, not merely when
+a configured value changes.
+
 ## README
 
 `README.org` stays a short map. When a summary is required, such as a
@@ -125,9 +140,10 @@ follow with the personal-subscription entry that applies off `iv`. Do not add a
 carries it. Role targets must also be listed in `enabled_models`, or the role
 resolves to a model the picker cannot select.
 
-Update the resolved two-tier table in `docs/llm/model-roles.md` in the same
-change, treating the data file as the source of truth. Verify the non-`iv` tier
-explicitly — the working host only exercises one branch:
+`docs/llm/model-roles.md` explains role responsibilities and selection rules;
+keep concrete assignments in the data file. Update that document only when
+those rules change. Verify the non-`iv` tier explicitly — the working host
+only exercises one branch:
 
 ```sh
 chezmoi execute-template '{{- $c := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}

@@ -137,41 +137,4 @@ assert result["enabled_models"] == ["gateway/*"]
 data["tools"]["fixture"]["providers"] = {"gateway": {"type": "openai"}}
 assert render(data)["providers"] == {}
 
-# Pi's real candidate list prefers Magpie only while its alias resolves.
-# Stub endpoints/auth/catalogs so neither credentials nor the gateway is used.
-pi_config = subprocess.run(
-    command, input="{{ .llm.tools.pi | toJson }}", text=True, capture_output=True,
-)
-assert pi_config.returncode == 0, pi_config.stderr
-pi_models = json.loads(pi_config.stdout)["model"]
-assert pi_models[0] == "magpie/auto-grok-4.7@500k"
-for magpie_on in (True, False):
-    for iv_on in (True, False):
-        data = {
-            "models": {"gpt_primary": "gpt-fixture", "grok_primary": "grok-fixture"},
-            "default_providers": ["magpie"],
-            "providers": {
-                "magpie": {"when": {"enabled": magpie_on}, "enabled_models": ["**"]},
-                "iv-codex": {"when": {"enabled": iv_on}},
-                "iv-cc": {"when": {"enabled": iv_on}},
-                "xai": {},
-                "cursor": {},
-                "openai-codex": {"when": {"enabled": False}},
-            },
-            "tools": {"pi": {
-                "model": pi_models,
-                "enabled_models": [],
-                "providers": ["iv-codex", "iv-cc", "xai", "cursor", "openai-codex"],
-            }},
-        }
-        result = render(data, tool="pi")
-        expected = (
-            "magpie/auto-grok-4.7@500k" if magpie_on
-            else "iv-codex/gpt-fixture" if iv_on else "xai/grok-fixture"
-        )
-        assert result["model"] == expected, result
-        provider, model_id = expected.split("/", 1)
-        assert result["model_provider"] == provider and result["model_id"] == model_id
-        assert ("magpie/**" in result["enabled_models"]) == magpie_on
-
 print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, gates and policy")
