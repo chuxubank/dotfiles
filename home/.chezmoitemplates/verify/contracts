@@ -568,7 +568,7 @@
 {{- $magpieOff := mergeOverwrite (deepCopy .tools) (dict "magpie" (dict "when" (dict "enabled" false))) -}}
 {{- $piOn := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
 {{- $piMagpie := index (default dict $piOn.providers) "magpie" -}}
-{{- if or (not $piMagpie) (not (hasPrefix "https://magpie." $piMagpie.base_url)) (contains "127.0.0.1" $piMagpie.base_url) (not (has "magpie/*" $piOn.enabled_models)) -}}
+{{- if or (not $piMagpie) (not (hasPrefix "https://magpie." $piMagpie.base_url)) (contains "127.0.0.1" $piMagpie.base_url) (not (has "magpie/**" $piOn.enabled_models)) -}}
   {{- fail "magpie on: origin was not rendered" -}}
 {{- end -}}
 {{- $piEmitted := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOn)) | fromJson) "magpie" -}}
@@ -577,7 +577,7 @@
 {{- end -}}
 {{- $piOff := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
 {{- $piEmittedOff := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "pi" "host_env" "personal" "tools" $magpieOff)) | fromJson -}}
-{{- if or (hasKey $piOff.providers "magpie") (has "magpie/*" $piOff.enabled_models) (hasKey $piEmittedOff "magpie") -}}
+{{- if or (hasKey $piOff.providers "magpie") (has "magpie/**" $piOff.enabled_models) (hasKey $piEmittedOff "magpie") -}}
   {{- fail "magpie off: provider still rendered" -}}
 {{- end -}}
 {{- /* Default inheritance preserves the pre-defaults client scope. Compare
