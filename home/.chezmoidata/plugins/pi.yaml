@@ -24,6 +24,8 @@ plugins:
           by default. Save a Cursor SDK API key with /login or
           CURSOR_API_KEY; Cursor desktop login is not reused.
         source: npm:pi-cursor-sdk
+        when:
+          enabled: false
 
       - name: pi-computer-use
         description: >-
