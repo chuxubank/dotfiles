@@ -84,7 +84,7 @@ casks = [
   { name = "stablyai/orca/orca", owner = "orca" },
   "stats",
   { name = "terminal-browser", owner = "terminal-browser" },
-  "thaw",
+  { name = "thaw", when.enabled = false },
   { name = "termio-sh/tap/termio", owner = "termio" },
   "tranvuongquocdat/sidescreen/sidescreen",
   "uuremote",
