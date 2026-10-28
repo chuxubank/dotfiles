@@ -23,7 +23,10 @@
     stripComponents = 1
 
 {{- /* BetterCast publishes a DMG. chezmoi archives are tar or zip, so the
-       filter mounts that image and writes a tar of the app. */ -}}
+       filter mounts that image and writes a tar of the app.
+       Same 50 GB free-space bar as the sidescreen cask. */ -}}
+{{- $bettercastReady := includeTemplate "when/context" (merge (dict "item" (dict "when" (dict "enabled" (dict "disk_available_gb" (dict "min" 50))))) .) | fromJson -}}
+{{- if $bettercastReady -}}
 {{- $bettercastURL := includeTemplate "github/release-asset-url" (dict "repo" "StephenLovino/BetterCast" "pattern" "BetterCast.dmg") | trim -}}
 {{- if $bettercastURL }}
 ["BetterCast.app"]
@@ -34,5 +37,6 @@
     refreshPeriod = "168h"
     filter.command = "/bin/zsh"
     filter.args = ["-c", {{ `d=$(mktemp -d); trap 'diskutil eject "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; cat > "$d/BetterCast.dmg"; diskutil image attach --nobrowse --readOnly --mountPoint "$d/mnt" "$d/BetterCast.dmg" >/dev/null; COPYFILE_DISABLE=1 tar -C "$d/mnt" -cf - BetterCast.app` | quote }}]
+{{- end }}
 {{- end }}
 {{- end }}
