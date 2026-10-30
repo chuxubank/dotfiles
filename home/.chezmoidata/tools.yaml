@@ -85,6 +85,18 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
+  # Desktop and mobile client for Claude Code, Codex, and Pi. Homebrew has
+  # no cask, so the notarized global DMG is unpacked by the Applications
+  # external. Electron state is under Library/Application Support/Cindy, a
+  # shared parent, so brew-style zap is not declared here.
+  cindy:
+    when:
+      enabled:
+        host_env: [personal, iv]
+        os: [darwin]
+        disk_available_gb:
+          min: 50
+
   # CLI via bun; agent wiring is MCP + env. No managed dest files.
   codegraph: {}
 
@@ -407,3 +419,14 @@ tools:
           version: ">=26"
     purge:
       - "Library/Application Support/Talkify/**"
+
+  # Desktop control surface for the agents already installed here. The cask
+  # ships the app and the t3 binary; server state lives under ~/.t3. The
+  # cask zap covers Electron userData under shared Library trees.
+  t3-code:
+    when:
+      enabled:
+        host_env: [personal, iv]
+        os: [darwin]
+    purge:
+      - ".t3/**"

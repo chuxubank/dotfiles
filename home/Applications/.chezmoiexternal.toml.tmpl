@@ -39,4 +39,22 @@
     filter.args = ["-c", {{ `d=$(mktemp -d); trap 'diskutil eject "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; cat > "$d/BetterCast.dmg"; diskutil image attach --nobrowse --readOnly --mountPoint "$d/mnt" "$d/BetterCast.dmg" >/dev/null; COPYFILE_DISABLE=1 tar -C "$d/mnt" -cf - BetterCast.app` | quote }}]
 {{- end }}
 {{- end }}
+
+{{- /* Cindy publishes a notarized DMG with an Applications symlink. Archive
+       only Cindy.app so that link is not followed into a second app. The app
+       updates itself, so refresh weekly. */ -}}
+{{- $cindyReady := includeTemplate "tool/enabled" (merge (dict "tool" "cindy" "require" true) .) | fromJson -}}
+{{- if $cindyReady -}}
+{{- $cindyURL := includeTemplate "github/release-asset-url" (dict "repo" "makecindy/cindy" "pattern" (printf "cindy-*-darwin-%s-global.dmg" .chezmoi.arch)) | trim -}}
+{{- if $cindyURL }}
+["Cindy.app"]
+    type = "archive"
+    format = "tar"
+    url = {{ $cindyURL | quote }}
+    stripComponents = 1
+    refreshPeriod = "168h"
+    filter.command = "/bin/zsh"
+    filter.args = ["-c", {{ `d=$(mktemp -d); trap 'diskutil eject "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; cat > "$d/Cindy.dmg"; diskutil image attach --nobrowse --readOnly --mountPoint "$d/mnt" "$d/Cindy.dmg" >/dev/null; COPYFILE_DISABLE=1 tar -C "$d/mnt" -cf - Cindy.app` | quote }}]
+{{- end }}
+{{- end }}
 {{- end }}

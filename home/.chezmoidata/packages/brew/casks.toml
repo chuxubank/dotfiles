@@ -125,6 +125,7 @@ casks = [
   { name = "notion", when.enabled.disk_gb.min = 256 },
   { name = "obsidian", when.enabled.disk_gb.min = 256 },
   { name = "opencode-desktop", owner = "opencode", when.enabled.host_env = ["personal", "iv"] },
+  { name = "t3-code", owner = "t3-code", when.enabled.host_env = ["personal", "iv"] },
   { name = "orbstack", when.enabled.host_env = ["personal", "iv"] },
   { name = "podman-desktop", when.enabled.host_env = ["aa"] },
   { name = "pycharm", when.enabled.host_env = ["aa"] },
