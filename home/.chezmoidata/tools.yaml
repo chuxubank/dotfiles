@@ -152,6 +152,15 @@ tools:
     purge:
       - ".copilot/**"
 
+  # The Homebrew formula exists only to serve this MCP. Off while gh covers
+  # the same GitHub work.
+  github-mcp-server:
+    when: *disabled
+
+  # glab stays installed on iv. This switch only owns the self-hosted MCP.
+  gitlab:
+    when: *disabled
+
   hermes:
     when: *disabled
     remove:
@@ -304,14 +313,24 @@ tools:
       - "Library/Application Support/orca/**"
       - "orca/**"
 
-  # Self-hosted daemon that launches the other agent CLIs. The desktop cask
-  # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
+  # The uv tool exists only to serve this MCP. Off while other converters
+  # cover the same documents.
+  markitdown:
+    when: *disabled
+
+  # Superseded by agent-device, iPhone Use, and Artemis. No local package
+  # belongs to this server.
+  mobile-device:
+    when: *disabled
+
   # Accessibility-snapshot browser MCP. Off while agent-browser and
   # Chrome DevTools MCP cover the same work. Turning this on restores the
   # MCP entry and the weekly Chromium install in the bun upgrade script.
   playwright:
     when: *disabled
 
+  # Self-hosted daemon that launches the other agent CLIs. The desktop cask
+  # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
   paseo:
     when: *disabled
     remove:

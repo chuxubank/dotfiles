@@ -41,7 +41,7 @@ brews = [
   "git-lfs",
   "git-secrets",
   "git-xet",
-  "github-mcp-server",
+  { name = "github-mcp-server", owner = "github-mcp-server" },
   "gitwatch",
   "gnupg",
   "go",
