@@ -177,6 +177,27 @@
               "for_each": { "const": "enabled_plugins" }
             }
           }
+        },
+        "zshrc": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["at", "body"],
+            "properties": {
+              "at": {
+                "enum": [
+                  "before-omz",
+                  "after-compinit",
+                  "completion-ui",
+                  "tail",
+                  "last"
+                ]
+              },
+              "body": { "$ref": "#/$defs/string" }
+            }
+          }
         }
       }
     }

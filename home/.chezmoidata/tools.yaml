@@ -71,6 +71,15 @@ tools:
   # wanted in addition to native Zsh completions.
   carapace:
     when: *disabled
+    zshrc:
+      - at: after-compinit
+        body: |
+          # Add Carapace's specs to Zsh completion without reintroducing the disabled
+          # inshellisense PTY bridge. This must run after compinit and before fzf-tab.
+          if command -v carapace >/dev/null 2>&1; then
+            export CARAPACE_BRIDGES='zsh,fish,bash'
+            source <(command carapace _carapace)
+          fi
 
   claude-code:
     when: *disabled
@@ -101,7 +110,14 @@ tools:
   codegraph: {}
 
   codex:
-    when: *non_ci
+    when: *disabled
+    zshrc:
+      - at: tail
+        body: |
+          if command -v codex >/dev/null 2>&1; then
+            eval "$(codex completion zsh)"
+          fi
+          alias codex="codex --yolo"
     plugin_upgrades:
       - command: [codex, plugin, marketplace, upgrade]
     remove:
@@ -128,7 +144,21 @@ tools:
 
   # Fuzzy UI for Zsh's native completion system. Unlike PTY wrappers, this
   # stays inside ZLE and does not interfere with terminal protocols.
-  fzf-tab: {}
+  # Load after compinit but before plugins that wrap ZLE widgets.
+  fzf-tab:
+    zshrc:
+      - at: completion-ui
+        body: |
+          zstyle ':completion:*' menu no
+          zstyle ':completion:*:descriptions' format '[%d]'
+          zstyle ':fzf-tab:*' switch-group '<' '>'
+          zstyle ':fzf-tab:*' fzf-flags --height=70% --layout=reverse --border
+          zstyle ':fzf-tab:complete:cd:*' fzf-preview 'command ls -la --color=always $realpath 2>/dev/null || command ls -laG $realpath'
+          zstyle ':fzf-tab:complete:git-(checkout|switch):*' sort false
+          zstyle ':fzf-tab:complete:git-(checkout|switch):*' fzf-preview 'command git log --oneline --decorate --color=always $word 2>/dev/null | command head -100'
+          source_if $HOMEBREW_PREFIX/opt/fzf-tab/share/fzf-tab/fzf-tab.zsh
+          source_if /usr/share/zsh/plugins/fzf-tab-git/fzf-tab.plugin.zsh
+          source_if /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
 
   goose:
     when: *non_ci
@@ -203,6 +233,32 @@ tools:
   # keyboard input in terminal multiplexers such as Luvus and Herdr.
   inshellisense:
     when: *disabled
+    zshrc:
+      - at: last
+        body: |
+          # PTY wrap; must stay last. Skip Emacs/SSH. Unpack lazily from the bun
+          # global cwd so Fig specs resolve (process.cwd()/node_modules).
+          if [[ -z "${ISTERM}" && $- = *i* && ${+ZSH_EXECUTION_STRING} -eq 0
+                && -z "${VSCODE_RESOLVING_ENVIRONMENT}"
+                && -z "${INSIDE_EMACS}" && -z "${SSH_CONNECTION}" ]] \
+              && command -v is >/dev/null 2>&1; then
+            () {
+              local root="${BUN_INSTALL:-$HOME/.bun}/install/global"
+              local data="${XDG_DATA_HOME:-$HOME/.local/share}/inshellisense"
+              local unpacked="" pkg
+              [[ -d "$root/node_modules/@chuxubank/inshellisense" ]] || return
+              [[ -r "$data/version.txt" ]] && unpacked=$(<"$data/version.txt")
+              pkg=$(command is -v 2>/dev/null) || return
+              if [[ "$unpacked" != "$pkg" ]]; then
+                (cd "$root" && command is init zsh >/dev/null)
+              fi
+              if [[ -o login ]]; then
+                command is -s zsh --login && exit
+              else
+                command is -s zsh && exit
+              fi
+            }
+          fi
     purge:
       - ".inshellisense/**"
       - ".local/share/inshellisense/**"
@@ -215,6 +271,15 @@ tools:
   # rest.
   kiro-cli:
     when: *disabled
+    zshrc:
+      - at: before-omz
+        body: |
+          # Kiro CLI pre block. Keep before oh-my-zsh.
+          source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
+      - at: tail
+        body: |
+          # Kiro CLI post block. Keep after the other tail hooks.
+          source_if -n -t 0.02 "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
     purge:
       - ".kiro/**"
       - "Library/Application Support/kiro-cli/**"
@@ -293,6 +358,12 @@ tools:
 
   opencode:
     when: *non_ci
+    zshrc:
+      - at: tail
+        body: |
+          if command -v opencode >/dev/null 2>&1; then
+            source <(opencode completion)
+          fi
     remove:
       - ".config/opencode/opencode.json"
       - ".config/opencode/tui.json"
@@ -419,6 +490,17 @@ tools:
 
   worktrunk:
     when: *non_ci
+    zshrc:
+      - at: tail
+        body: |
+          # `wt switch` needs this wrapper function to cd; the emitted code also
+          # lazily registers completions, so it must come after oh-my-zsh's
+          # compinit. `wt config shell install` would append this same line
+          # itself, which this file must own instead.
+          wt_bin=$(command -v wt 2>/dev/null) || true
+          if [[ -n $wt_bin && $wt_bin != *WindowsApps* && $wt_bin != *WindowsTerminal* ]]; then
+            eval "$(command wt config shell init zsh)"
+          fi
     remove:
       - ".config/worktrunk/config.toml"
     purge:
@@ -427,6 +509,14 @@ tools:
   # Live shell completion plugin loaded before oh-my-zsh.
   zsh-autocomplete:
     when: *disabled
+    zshrc:
+      - at: before-omz
+        body: |
+          # Must load before oh-my-zsh's compinit/compdef.
+          # cdr writes chpwd-recent-dirs here and errors if the parent is missing.
+          mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/zsh"
+          source_if $HOMEBREW_PREFIX/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+          source_if /usr/share/zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 
   # After Effects .aep parsers. Independent switches; no managed dest files.
   dot-aep:

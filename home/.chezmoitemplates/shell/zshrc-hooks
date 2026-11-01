@@ -1,0 +1,17 @@
+{{- /* shell/zshrc-hooks — Enabled zshrc bodies for one position.
+       Input: dict "at" <position> merged with root context.
+       Positions run before-omz, after-compinit, completion-ui, tail, last.
+       Tools are visited in name order; a tool's entries keep declaration order.
+       Output: shell text, or empty. */ -}}
+{{- $at := .at -}}
+{{- range $name := keys .tools | sortAlpha -}}
+  {{- $tool := index $.tools $name -}}
+  {{- if and (hasKey $tool "zshrc") (includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson) -}}
+    {{- range $hook := $tool.zshrc -}}
+      {{- if eq $hook.at $at }}
+{{ trim $hook.body }}
+
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
