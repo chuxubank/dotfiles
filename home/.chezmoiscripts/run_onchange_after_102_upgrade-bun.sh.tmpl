@@ -25,7 +25,9 @@ if [[ -f $opencode_postinstall ]]; then
   run_upgrade 'opencode postinstall' node "$opencode_postinstall"
 fi
 {{- end }}
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "playwright") .) | fromJson }}
 run_upgrade playwright bunx playwright install chromium
+{{- end }}
 
 finish_upgrades
 {{ end -}}

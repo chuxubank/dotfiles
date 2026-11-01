@@ -263,6 +263,20 @@ mcp:
           - -y
           - "@srmorete/mobile-device-mcp"
         timeout: 30
+    - name: Playwright
+      owner: playwright
+      description:
+        A MCP server that provides browser automation capabilities using
+        Playwright. This server enables LLMs to interact with web pages through
+        structured accessibility snapshots, bypassing the need for screenshots
+        or visually-tuned models.
+      execution:
+        type: stdio
+        cmd: bunx
+        args:
+          - -y
+          - "@playwright/mcp@latest"
+        timeout: 20
     - name: Notion
       description: Allows AI apps and agents to interface with the Notion public API.
       when:
@@ -282,21 +296,6 @@ mcp:
           NOTION_TOKEN:
             path: Personal/Tech/Notion
             field: asahi-art-token
-    - name: Playwright
-      description:
-        A MCP server that provides browser automation capabilities using
-        Playwright. This server enables LLMs to interact with web pages through
-        structured accessibility snapshots, bypassing the need for screenshots
-        or visually-tuned models.
-      when:
-        disabled: true
-      execution:
-        type: stdio
-        cmd: bunx
-        args:
-          - -y
-          - "@playwright/mcp@latest"
-        timeout: 20
     - name: Tavily
       description: Real-time web search and intelligent data extraction capabilities.
       when:

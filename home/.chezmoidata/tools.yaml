@@ -306,6 +306,12 @@ tools:
 
   # Self-hosted daemon that launches the other agent CLIs. The desktop cask
   # ships the binary on darwin; other hosts get @getpaseo/cli from npm.
+  # Accessibility-snapshot browser MCP. Off while agent-browser and
+  # Chrome DevTools MCP cover the same work. Turning this on restores the
+  # MCP entry and the weekly Chromium install in the bun upgrade script.
+  playwright:
+    when: *disabled
+
   paseo:
     when: *disabled
     remove:

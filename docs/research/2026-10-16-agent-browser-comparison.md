@@ -10,7 +10,7 @@ Keep the split this machine already has. Chrome DevTools MCP, started as `bunx c
 
 Leave ego lite uninstalled. It is the only product here whose own skill describes one Chromium app, the user's ego lite profile, a visible agent cursor, and an explicit `handOff()` back to the person. That is a new daily browser plus a DMG and a GUI onboarding step, and neither configured tool is missing a browser on this Mac.
 
-Leave the Browser Use Python library and Browser Harness off the default path. The library's `Agent.run()` is its own model loop. The Browser Use CLI, which the docs say is backed by Browser Harness, is the variant aimed at Claude Code, Codex, and Cursor, and its default is to attach to the running Chrome the DevTools MCP already uses. Playwright MCP is already listed in `home/.chezmoidata/mcp.yaml` with `when.disabled: true`; its README tells coding agents to prefer the Playwright CLI, and enabling the MCP would add a third general browser next to `agent-browser`. Stagehand, Browserbase, Skyvern, and Lightpanda are real agent-browser products. None of them replaces the local pair above for ordinary coding-agent work on this Mac.
+Leave the Browser Use Python library and Browser Harness off the default path. The library's `Agent.run()` is its own model loop. The Browser Use CLI, which the docs say is backed by Browser Harness, is the variant aimed at Claude Code, Codex, and Cursor, and its default is to attach to the running Chrome the DevTools MCP already uses. The `playwright` tool in `home/.chezmoidata/tools.yaml` is off. Turning it on restores the MCP entry and the weekly Chromium install. Its README tells coding agents to prefer the Playwright CLI, and enabling it would add a third general browser next to `agent-browser`. Stagehand, Browserbase, Skyvern, and Lightpanda are real agent-browser products. None of them replaces the local pair above for ordinary coding-agent work on this Mac.
 
 ## This machine
 
@@ -19,7 +19,7 @@ Checked 2026-10-16:
 - `agent-browser` resolves to `/Users/misaka/.bun/bin/agent-browser`, version 0.39.0, macOS aarch64. `agent-browser doctor --json` reported Chrome for Testing 155.0.8059.39, no active daemon, and a headless launch to `about:blank` in 0.93s. `AI_GATEWAY_API_KEY` is unset, so the doctor marked the `chat` command disabled.
 - Chezmoi owns that install: bun package `agent-browser` in `home/.chezmoidata/packages/node.toml`, tool `agent-browser` in `home/.chezmoidata/tools.yaml` (darwin/linux/windows, disabled on `host_env: ci`), and `home/.chezmoiscripts/run_onchange_after_101_setup-agent-browser.sh.tmpl` runs `agent-browser install`. The skill source `vercel-labs/agent-browser` is in `home/.chezmoidata/skills/providers.yaml`.
 - Chrome DevTools MCP is enabled in `home/.chezmoidata/mcp.yaml` except for the `opencode` tool. The stdio command is `bunx` with args `chrome-devtools-mcp@latest`, `--no-usage-statistics`, `--autoConnect`.
-- Playwright MCP is in the same file and `when.disabled: true`. The command would be `bunx -y @playwright/mcp@latest`.
+- The `playwright` tool is `when.enabled: false`. While it is off, `home/.chezmoidata/mcp.yaml` omits `bunx -y @playwright/mcp@latest` and the bun upgrade script omits `bunx playwright install chromium`.
 - `home/.chezmoidata/plugins/codex.yaml` lists `browser-use` with source `browser-use@openai-bundled`. What that bundled plugin does is unverified below.
 - The ego-browser skill source `citrolabs/ego-lite` is declared for darwin and disabled on `host_env: ci`. `ego-browser` is not on `PATH`. No app whose name matches ego or lite is in `/Applications` or `~/Applications`.
 
@@ -90,7 +90,7 @@ The User profile section says a persistent profile is the default, on macOS at `
 
 The person's existing Chrome is opt-in. `--extension` plus the Playwright Chrome extension connects to tabs in the default profile; the first interaction asks which tab, and several clients can be separated into tab groups. `--cdp-endpoint` connects to a CDP browser. `browser_annotate`, behind `--caps=devtools`, opens a dashboard and waits for the person to draw on the page. That is a narrow intervention, not a general handoff.
 
-The same README says coding agents may be better served by [Playwright CLI and skills](https://github.com/microsoft/playwright-cli) because CLI calls avoid loading large tool schemas and accessibility trees. This note does not review that CLI. Playwright MCP is a reasonable accessibility-snapshot MCP with a persistent per-workspace profile. It is a poor thing to enable here while `agent-browser` already covers coding-agent browser commands and the MCP entry is explicitly disabled.
+The same README says coding agents may be better served by [Playwright CLI and skills](https://github.com/microsoft/playwright-cli) because CLI calls avoid loading large tool schemas and accessibility trees. This note does not review that CLI. Playwright MCP is a reasonable accessibility-snapshot MCP with a persistent per-workspace profile. The `playwright` tool stays off while `agent-browser` already covers coding-agent browser commands.
 
 Source: [microsoft/playwright-mcp README](https://github.com/microsoft/playwright-mcp/blob/main/README.md), [Playwright extension README](https://github.com/microsoft/playwright/blob/main/packages/extension/README.md).
 

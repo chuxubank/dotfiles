@@ -86,7 +86,7 @@ with tempfile.TemporaryDirectory() as tmp:
         package_call = "bun update -g --latest" if tool == "bun" else "uv tool upgrade --all"
         assert package_call in calls, (tool, layout, calls)
         if tool == "bun":
-            assert "bunx playwright install chromium" in calls, calls
+            assert "bunx playwright install chromium" not in calls, calls
         if skip:
             assert "managed by Homebrew; skipping self-update" in result.stdout
 
