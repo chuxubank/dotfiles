@@ -109,11 +109,12 @@ repositories:
     refresh_period: 24h
     when: *personal_only
 
+  # PolyForm Noncommercial; the iv checkout is explicitly allowed.
   - path: [workspace, asahiart]
     dest: aep-parser
     url: https://github.com/AsahiArt/aep-parser
     refresh_period: 24h
-    when: *personal_only
+    when: *personal_or_iv
 
   # path.workspace.iv
   - path: [workspace, iv]
