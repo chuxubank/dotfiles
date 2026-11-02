@@ -102,6 +102,11 @@ skills:
           enabled:
             tool: codex
 
+      # Desktop MCP names this skill as a resource but serves none. The other
+      # skills in this repo call tools that server does not have.
+      - name: figma-design-to-code
+        source: figma/mcp-server-guide
+
       - name: android-emulator-qa
         source: openai/plugins/plugins/test-android-apps/skills
         when:
