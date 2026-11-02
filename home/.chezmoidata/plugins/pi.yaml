@@ -46,12 +46,6 @@ plugins:
           YouTube, and local-video content extraction.
         source: npm:pi-web-access
 
-      - name: pi-edit-session-in-place
-        description: >-
-          Re-edit or delete an earlier user or assistant message in the
-          current Pi session branch.
-        source: npm:pi-edit-session-in-place
-
       - name: pi-delete
         description: >-
           /delete and pi --delete remove a session through the shared
