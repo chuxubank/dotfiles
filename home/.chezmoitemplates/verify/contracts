@@ -267,12 +267,13 @@
   {{- fail (printf "mcp/alma: invalid SSE config %s" ($almaServers | toJson)) -}}
 {{- end -}}
 
-{{- /* package/items */ -}}
+{{- /* package/items: a passing package when must not override a disabled owner. */ -}}
 {{- $pkgCtx := merge (dict) $base (dict
       "host_env" "personal"
       "packages" (dict "python" (dict "tools" (list
         "black"
         (dict "name" "sentry" "owner" "claude-code")
+        (dict "name" "gated" "owner" "claude-code" "when" (dict "enabled" (dict "host_env" (list "personal"))))
         (dict "name" "gone" "ensure" "absent"))))) -}}
 {{- $pkgs := includeTemplate "package/items" (dict "ctx" $pkgCtx "path" (list "python" "tools")) | fromJson -}}
 {{- if ne (len $pkgs) 1 -}}

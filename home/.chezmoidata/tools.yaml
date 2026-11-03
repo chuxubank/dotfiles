@@ -48,19 +48,15 @@ tools:
     purge:
       - ".agent-browser/**"
 
-  # Homebrew cask. Settings, provider secrets, and chat state stay in
-  # Application Support; brew zap covers those plus Preferences, ByHost,
-  # and SFL under shared parents. Plugin packages are installed by the app
-  # and are not vendored. Bundled skills are app-owned copies. mcp.json is
-  # rendered from mcp.providers; the computer-use entry matches the one
-  # Alma's registrar writes, so launch does not rewrite the file.
+  # Off. Turning this on restores the cask and mcp.json. Settings,
+  # provider secrets, and chat state stay in Application Support; brew zap
+  # covers those plus Preferences, ByHost, and SFL under shared parents.
+  # Plugin packages are installed by the app and are not vendored. Bundled
+  # skills are app-owned copies. mcp.json is rendered from mcp.providers;
+  # the computer-use entry matches the one Alma's registrar writes, so
+  # launch does not rewrite the file.
   alma:
-    when:
-      enabled:
-        host_env: [personal, iv]
-        os: [darwin]
-        disk_available_gb:
-          min: 50
+    when: *disabled
     remove:
       - ".config/alma/mcp.json"
     purge:

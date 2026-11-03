@@ -17,5 +17,7 @@
     {{- toJson true -}}
   {{- end -}}
 {{- else -}}
-  {{- includeTemplate "when/context" (merge (dict) . (dict "item" (index $declared $name))) -}}
+  {{- /* Drop a caller item first. merge keeps that item, and enabled:false
+         is empty, so a package when would hide a disabled tool. */ -}}
+  {{- includeTemplate "when/context" (merge (omit . "item") (dict "item" (index $declared $name))) -}}
 {{- end -}}
