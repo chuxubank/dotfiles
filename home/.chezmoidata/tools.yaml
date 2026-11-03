@@ -48,6 +48,32 @@ tools:
     purge:
       - ".agent-browser/**"
 
+  # Homebrew cask. Settings, provider secrets, and chat state stay in
+  # Application Support; brew zap covers those plus Preferences, ByHost,
+  # and SFL under shared parents. Plugin packages are installed by the app
+  # and are not vendored. Bundled skills are app-owned copies. mcp.json is
+  # rendered from mcp.providers; the computer-use entry matches the one
+  # Alma's registrar writes, so launch does not rewrite the file.
+  alma:
+    when:
+      enabled:
+        host_env: [personal, iv]
+        os: [darwin]
+        disk_available_gb:
+          min: 50
+    remove:
+      - ".config/alma/mcp.json"
+    purge:
+      - ".alma/**"
+      - ".cache/alma/**"
+      - ".config/alma/**"
+      - "Library/Application Support/alma/**"
+      - "Library/Caches/alma-ocr/**"
+      - "Library/Caches/alma-updater/**"
+      - "Library/Caches/com.yetone.alma/**"
+      - "Library/Caches/com.yetone.alma.ShipIt/**"
+      - "Library/HTTPStorages/com.yetone.alma/**"
+
   # CLI via bun. No managed dest files.
   amp:
     when: *disabled

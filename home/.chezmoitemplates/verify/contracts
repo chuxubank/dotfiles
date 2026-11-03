@@ -245,6 +245,28 @@
   {{- fail (printf "mcp/pi: invalid HTTP/SSE config %s" ($piServers | toJson)) -}}
 {{- end -}}
 
+{{- /* mcp/alma: command means stdio, url means remote, SSE sets transport. */ -}}
+{{- $almaMcpCtx := merge (dict) $base (dict
+      "host_env" "personal"
+      "mcp" (dict "providers" (list
+        (dict "name" "Local Test" "description" "local" "execution" (dict "type" "stdio" "cmd" "local-test" "args" (list "serve") "timeout" 20))
+        (dict "name" "Remote Test" "description" "remote" "when" (dict "disabled" true) "execution" (dict "type" "http" "uri" "https://example.com/mcp" "timeout" 20))
+        (dict "name" "HTTP Test" "description" "http" "execution" (dict "type" "http" "uri" "https://example.com/mcp" "timeout" 20))
+        (dict "name" "SSE Test" "description" "legacy" "execution" (dict "type" "sse" "uri" "http://localhost:1234/sse" "timeout" 20))))) -}}
+{{- $almaServers := includeTemplate "mcp/alma" $almaMcpCtx | fromJson -}}
+{{- $almaLocal := index $almaServers "local-test" -}}
+{{- $almaHttp := index $almaServers "http-test" -}}
+{{- $almaSse := index $almaServers "sse-test" -}}
+{{- if or (ne (len $almaServers) 3) (ne $almaLocal.command "local-test") (ne (index $almaLocal.args 0) "serve") (hasKey $almaLocal "type") (hasKey $almaServers "remote-test") -}}
+  {{- fail (printf "mcp/alma: invalid stdio config %s" ($almaServers | toJson)) -}}
+{{- end -}}
+{{- if or (ne $almaHttp.url "https://example.com/mcp") (hasKey $almaHttp "transport") (hasKey $almaHttp "type") -}}
+  {{- fail (printf "mcp/alma: invalid HTTP config %s" ($almaServers | toJson)) -}}
+{{- end -}}
+{{- if or (ne $almaSse.url "http://localhost:1234/sse") (ne $almaSse.transport "sse") (hasKey $almaSse "type") -}}
+  {{- fail (printf "mcp/alma: invalid SSE config %s" ($almaServers | toJson)) -}}
+{{- end -}}
+
 {{- /* package/items */ -}}
 {{- $pkgCtx := merge (dict) $base (dict
       "host_env" "personal"

@@ -1,0 +1,9 @@
+{{- /* Alma starts every mcpServers entry. computer-use is not a shared
+       provider: the packaged app registers this exact command/args, and a
+       mismatch makes it rewrite the file. */ -}}
+{{- $servers := includeTemplate "mcp/alma" . | fromJson -}}
+{{- $_ := set $servers "computer-use" (dict
+  "command" "/Applications/Alma.app/Contents/MacOS/Alma"
+  "args" (list "/Applications/Alma.app/Contents/Resources/cli/alma-computer-use-mcp.mjs")
+  "env" (dict "ELECTRON_RUN_AS_NODE" "1")) -}}
+{{- dict "mcpServers" $servers | toPrettyJson }}

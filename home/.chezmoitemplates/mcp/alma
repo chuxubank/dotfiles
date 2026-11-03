@@ -1,0 +1,31 @@
+{{- /* mcp/alma — mcp.providers as Alma's ~/.config/alma/mcp.json servers.
+       Alma treats "command" as stdio and "url" as remote. SSE must set
+       transport; HTTP is streamable-http by default. Disabled servers are
+       omitted: Alma starts every entry. */ -}}
+{{- $servers := dict -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "alma") $) | fromJson -}}
+{{- range $s := $all }}
+  {{- if not $s.enabled }}{{ continue }}{{ end -}}
+  {{- $server := dict -}}
+  {{- if eq $s.type "stdio" }}
+    {{- $_ := set $server "command" $s.cmd -}}
+    {{- if gt (len $s.args) 0 }}
+      {{- $_ := set $server "args" $s.args -}}
+    {{- end }}
+    {{- if gt (len $s.envs) 0 }}
+      {{- $_ := set $server "env" $s.envs -}}
+    {{- end }}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") }}
+    {{- $_ := set $server "url" $s.uri -}}
+    {{- if eq $s.type "sse" }}
+      {{- $_ := set $server "transport" "sse" -}}
+    {{- end }}
+    {{- if hasKey $s "headers" }}
+      {{- $_ := set $server "headers" $s.headers -}}
+    {{- end }}
+  {{- else }}
+    {{- continue -}}
+  {{- end }}
+  {{- $_ := set $servers $s.name $server -}}
+{{- end -}}
+{{- toJson $servers -}}
