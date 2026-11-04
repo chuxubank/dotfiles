@@ -35,6 +35,7 @@ global = [
   { name = "@lark-project/meegle", owner = "meegle-cli" },
   { name = "@chuxubank/inshellisense", url = "github:chuxubank/inshellisense#bun", owner = "inshellisense" },
   { name = "@monid-ai/cli" },
+  { name = "@music163/ncm-cli", owner = "ncm-cli" },
   { name = "@oh-my-pi/pi-coding-agent", owner = "omp" },
   { name = "@openai/codex", owner = "codex" },
   { name = "@zed-industries/codex-acp", owner = "codex" },

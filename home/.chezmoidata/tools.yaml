@@ -356,6 +356,16 @@ tools:
   magpie:
     when: *non_ci
 
+  # Bun and the shared skills manager own installation. The credential setup
+  # script feeds pass fields into CLI-owned encrypted storage. Account login
+  # stays interactive: run `ncm-cli login` after applying.
+  ncm-cli:
+    when:
+      enabled:
+        os: [darwin, linux, windows]
+      disabled:
+        host_env: [ci]
+
   omp:
     when: *non_ci
     plugin_upgrades:

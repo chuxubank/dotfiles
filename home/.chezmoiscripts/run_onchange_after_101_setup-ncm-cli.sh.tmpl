@@ -1,0 +1,33 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "ncm-cli") .) | fromJson -}}
+#!/usr/bin/env zsh
+set +x
+set -eu
+
+{{- $passFile := joinPath .chezmoi.homeDir .path.personal.pass "Personal/Tech/NetEase/Music.gpg" }}
+# Encrypted-entry hash retries credential rotation without embedding plaintext.
+# pass entry: {{ if stat $passFile }}{{ include $passFile | sha256sum }}{{ else }}missing{{ end }}
+
+echo "󰯁 Setup ncm-cli credentials"
+
+export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
+export PATH="$BUN_INSTALL/bin:$HOME/bin:$PATH"
+{{ includeTemplate "script/windows-path" . }}
+
+appid=$(pass-field Personal/Tech/NetEase/Music appid)
+private_key=$(pass-field Personal/Tech/NetEase/Music private-key)
+if [[ -z $appid || -z $private_key ]]; then
+  print -u2 -- "ncm-cli requires appid and private-key in Personal/Tech/NetEase/Music"
+  exit 1
+fi
+
+# The CLI owns encrypted credential storage; suppress its value-echoing output.
+if ! ncm-cli config set appId "$appid" >/dev/null 2>&1; then
+  print -u2 -- "Could not configure ncm-cli appId"
+  exit 1
+fi
+if ! ncm-cli config set privateKey "$private_key" >/dev/null 2>&1; then
+  print -u2 -- "Could not configure ncm-cli privateKey"
+  exit 1
+fi
+unset appid private_key
+{{- end }}

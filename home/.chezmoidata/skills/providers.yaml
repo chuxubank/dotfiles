@@ -131,6 +131,13 @@ skills:
       - name: monid
         source: https://monid.ai/SKILL.md
 
+      - name:
+          - ncm-cli-setup
+          - netease-music-cli
+          - netease-music-assistant
+        source: NetEase/skills
+        owner: ncm-cli
+
       - name: "*"
         source: emilkowalski/skills
 
