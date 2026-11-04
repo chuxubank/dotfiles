@@ -80,6 +80,9 @@ tools:
       - ".config/amp/**"
       - ".local/share/amp/**"
 
+  android-project:
+    when: *non_ci
+
   # Android device agent. The example checkout, MCP entry, and launchers
   # follow this switch. Off until a model provider is chosen. Turning it
   # on should keep it to macOS and exclude CI.
@@ -132,6 +135,9 @@ tools:
 
   # CLI via bun; agent wiring is MCP + env. No managed dest files.
   codegraph: {}
+
+  compose-preview:
+    when: *non_ci
 
   codex:
     when: *disabled

@@ -153,6 +153,14 @@ skills:
         source: wholiver/swiftui-design-skill
 
     20-android:
+      - name: android-project
+        source: cat-emacs/android-project
+        owner: android-project
+
+      - name: compose-preview
+        source: cat-emacs/compose-preview
+        owner: compose-preview
+
       - name:
           - agp-9-upgrade
           - edge-to-edge
