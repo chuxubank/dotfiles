@@ -37,8 +37,10 @@ base = {
 }
 
 
-def render(path, llm, home, yaml=False, enabled=True, stdin=None):
+def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None):
     source = (root / path).read_text()
+    declared = {"goose": {"when": {"enabled": enabled}}}
+    declared.update(tools or {})
     data = {
         "llm": llm,
         "chezmoi": {"homeDir": str(home), "stdin": stdin or "{}"},
@@ -49,7 +51,7 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None):
             "when": {"enabled": True},
             "execution": {"type": "stdio", "cmd": "not-executed"},
         }]},
-        "tools": {"goose": {"when": {"enabled": enabled}}},
+        "tools": declared,
     }
     # Replace LLM/MCP data outright so no live catalogs or auth are consulted.
     prefix = (
@@ -67,6 +69,13 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None):
         result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
         assert result.returncode == 0, result.stderr
     return result.stdout
+
+
+def parse_toml(text):
+    template = "{{ (" + json.dumps(text) + " | fromToml) | toJson }}"
+    result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout)
 
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -201,4 +210,67 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg = json.loads(render(cc_path, llm, home, stdin=json.dumps(cfg)))
     assert "ANTHROPIC_BASE_URL" not in cfg["env"]
 
-print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection")
+    # Grok Build defaults to the magpie entry only while that tool is on.
+    # The native Fast pin stays, and the gateway key stays a pass-field command.
+    grok_llm = {
+        "models": {"grok_primary": "grok-4.7"},
+        "default_providers": ["magpie"],
+        "providers": {"magpie": {
+            "name": "Magpie",
+            "base_url": "https://gateway.example",
+            "owner": "magpie",
+            "api_types": ["openai", "anthropic", "gemini"],
+            "auth": {"path": "Test/Magpie", "field": "gateway-key"},
+        }},
+        "tools": {"grok": {
+            "supported_provider_types": ["openai"],
+            "model": [
+                "magpie/grok/${grok_primary}-build-fast@500k",
+                "${grok_primary}-build-fast",
+            ],
+        }},
+    }
+    grok_path = "home/dot_grok/modify_config.toml"
+    prior = """
+[models]
+default = "magpie"
+
+[model.magpie]
+model = "old"
+api_key = "secret"
+
+[model."grok-4.7-build-fast"]
+context_window = 1
+temperature = 0.2
+
+[model.custom]
+temperature = 0.1
+
+[auth_provider.magpie]
+command = "old"
+"""
+    on = parse_toml(render(
+        grok_path, grok_llm, home, stdin=prior,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    assert on["models"]["default"] == "magpie"
+    entry = on["model"]["magpie"]
+    assert entry["model"] == "grok/grok-4.7-build-fast@500k", entry
+    assert entry["base_url"] == "https://gateway.example/v1", entry
+    assert entry["api_backend"] == "responses" and entry["vision"] is True, entry
+    assert entry["context_window"] == 500000 and "api_key" not in entry, entry
+    helper = on["auth_provider"]["magpie"]["command"]
+    assert helper == f"'{home / 'bin' / 'pass-field'}' 'Test/Magpie' 'gateway-key'", helper
+    assert on["model"]["grok-4.7-build-fast"]["context_window"] == 500000
+    assert on["model"]["grok-4.7-build-fast"]["temperature"] == 0.2
+    assert on["model"]["custom"]["temperature"] == 0.1
+    off = parse_toml(render(
+        grok_path, grok_llm, home, stdin=prior,
+        tools={"magpie": {"when": {"enabled": False}}},
+    ))
+    assert off["models"]["default"] == "grok-4.7-build-fast"
+    assert "magpie" not in off["model"]
+    assert "auth_provider" not in off or "magpie" not in off["auth_provider"]
+    assert off["model"]["custom"]["temperature"] == 0.1
+
+print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok magpie default")

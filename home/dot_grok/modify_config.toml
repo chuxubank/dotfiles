@@ -25,11 +25,13 @@
        defaults the selected window to 256k; context_window is that default.
        The id is `${grok_primary}-build-fast`, the same 500k Fast choice as
        Pi's `@500k:fast` and OMP's `-500k-fast`. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "grok") .) | fromJson -}}
 {{- $grokFast := printf "%s-build-fast" (index .llm.models "grok_primary") -}}
+{{- $default := $grokFast -}}
 {{- $managed := dict
   "ui" (dict "theme" "auto")
   "memory" (dict "enabled" true)
-  "models" (dict "default" $grokFast)
+  "models" (dict "default" $default)
   "model" (dict $grokFast (dict "context_window" 500000))
 -}}
 {{- $replace := dict
@@ -37,10 +39,39 @@
   "plugins.enabled" $enabledPlugins
   "marketplace.sources" $sources
 -}}
+{{- $remove := list -}}
+{{- /* While magpie is on, new sessions use that gateway. The config key is
+       `magpie`; the upstream id is the 500k Fast row, whose native route is
+       /v1/responses. The helper prints the gateway key. A literal api_key
+       would land in this file and would also be what image tools accept. */ -}}
+{{- if eq $cfg.model_provider "magpie" -}}
+  {{- $ep := index $cfg.providers "magpie" -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
+  {{- $command := list (printf "'%s'" (replace "'" "'\\''" $passField)) (printf "'%s'" (replace "'" "'\\''" $ep.auth_path)) -}}
+  {{- if $ep.auth_field -}}
+    {{- $command = append $command (printf "'%s'" (replace "'" "'\\''" $ep.auth_field)) -}}
+  {{- end -}}
+  {{- $_ := set $managed "models" (dict "default" "magpie") -}}
+  {{- $_ := set $replace "model.magpie" (dict
+    "model" $cfg.model_id
+    "name" "Magpie"
+    "base_url" $endpoint.api_base_url
+    "api_backend" "responses"
+    "context_window" 500000
+    "vision" true
+    "auth_provider" "magpie"
+  ) -}}
+  {{- $_ := set $replace "auth_provider.magpie" (dict "command" (join " " $command)) -}}
+{{- else -}}
+  {{- $remove = append $remove "model.magpie" -}}
+  {{- $remove = append $remove "auth_provider.magpie" -}}
+{{- end -}}
 
 {{ includeTemplate "config/merge" (dict
   "format" "toml"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
   "replace" $replace
+  "remove" $remove
 ) }}

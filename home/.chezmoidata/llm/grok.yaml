@@ -1,0 +1,11 @@
+llm:
+  tools:
+    grok:
+      # OpenAI-shaped gateway. The selected row is served at /v1/responses;
+      # the template sets that backend.
+      supported_provider_types: [openai]
+      # First candidate whose alias resolved. The native Fast id has no
+      # alias, so it is the default only while magpie is off.
+      model:
+        - magpie/grok/${grok_primary}-build-fast@500k
+        - ${grok_primary}-build-fast
