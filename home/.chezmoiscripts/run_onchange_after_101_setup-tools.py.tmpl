@@ -1,0 +1,91 @@
+{{- $specs := list -}}
+{{- $inCI := or (eq .host_env "ci") (has (env "CI") (list "true" "1")) (eq (env "GITHUB_ACTIONS") "true") -}}
+{{- if not $inCI -}}
+  {{- range $name := keys .tools | sortAlpha -}}
+    {{- $tool := index $.tools $name -}}
+    {{- if and (hasKey $tool "setup") (includeTemplate "tool/enabled" (merge (dict "tool" $name) $) | fromJson) -}}
+      {{- $entries := dict -}}
+      {{- range $step := $tool.setup -}}
+        {{- range $arg := $step.command -}}
+          {{- if kindIs "map" $arg -}}
+            {{- $file := joinPath $.chezmoi.homeDir $.path.personal.pass (printf "%s.gpg" $arg.pass.path) -}}
+            {{- $hash := "missing" -}}
+            {{- if stat $file -}}{{- $hash = include $file | sha256sum -}}{{- end -}}
+            {{- $_ := set $entries $arg.pass.path $hash -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $specs = append $specs (dict "tool" $name "steps" $tool.setup "entries" $entries) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $specs -}}
+#!/usr/bin/env python3
+"""Apply declared tool initialization without logging command arguments."""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+SPECS = json.loads({{ $specs | toJson | quote }})
+HOME = Path.home()
+BUN = HOME / {{ .path.tool.bun | quote }}
+os.environ["PATH"] = os.pathsep.join([
+    str(BUN / "bin"), str(HOME / "bin"), str(HOME / ".local/bin"),
+    os.environ.get("PATH", ""),
+])
+
+
+def initialize(spec):
+    # Resolve every input before mutating this tool, so a missing field cannot
+    # leave a partially configured account. Never print captured CLI output.
+    commands = []
+    secrets = {}
+    try:
+        for step in spec["steps"]:
+            argv = []
+            for arg in step["command"]:
+                if isinstance(arg, str):
+                    argv.append(arg)
+                    continue
+                ref = arg["pass"]
+                key = (ref["path"], ref["field"])
+                if key not in secrets:
+                    value = subprocess.run(
+                        [str(HOME / "bin/pass-field"), *key], check=True,
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                        text=True, timeout=60,
+                    ).stdout.rstrip("\r\n")
+                    if not value.strip():
+                        raise ValueError("empty credential")
+                    secrets[key] = value
+                argv.append(secrets[key])
+            if shutil.which(argv[0]) is None:
+                raise ValueError("missing executable")
+            commands.append(argv)
+        for argv in commands:
+            subprocess.run(
+                argv, check=True, stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL, timeout=60,
+            )
+    except (OSError, ValueError, subprocess.SubprocessError):
+        print(f"Tool setup failed: {spec['tool']}; check its CLI and pass fields", file=sys.stderr)
+        return False
+    return True
+
+
+def main():
+    failed = False
+    for spec in SPECS:
+        print(f"Setup tool: {spec['tool']}")
+        if not initialize(spec):
+            failed = True
+    return int(failed)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+{{- end -}}

@@ -19,6 +19,8 @@
 # first (warn on failure), then move declared leftovers to Trash. Success means
 # all declared paths are absent. when uses the shared condition schema.
 # Command paths ignore exact targets (/** ignores its root), never a parent.
+# setup: initialization commands run by the shared tool setup executor; pass
+# arguments resolve at runtime. Retry and ownership rules: docs/tool-lifecycle.md.
 # plugin_upgrades: weekly commands, executed in order after plugin reconciliation.
 # for_each: enabled_plugins expands {source} from plugin declarations.
 # All enabled tools share one weekly chezmoi success/retry unit; individual
@@ -356,15 +358,26 @@ tools:
   magpie:
     when: *non_ci
 
-  # Bun and the shared skills manager own installation. The credential setup
-  # script feeds pass fields into CLI-owned encrypted storage. Account login
-  # stays interactive: run `ncm-cli login` after applying.
+  # Account authorization remains interactive: run `ncm-cli login` after apply.
   ncm-cli:
     when:
       enabled:
         os: [darwin, linux, windows]
       disabled:
         host_env: [ci]
+    setup:
+      - command:
+          - ncm-cli
+          - config
+          - set
+          - appId
+          - pass: {path: Personal/Tech/NetEase/Music, field: appid}
+      - command:
+          - ncm-cli
+          - config
+          - set
+          - privateKey
+          - pass: {path: Personal/Tech/NetEase/Music, field: private-key}
 
   omp:
     when: *non_ci

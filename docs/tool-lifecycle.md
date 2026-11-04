@@ -1,11 +1,64 @@
-# Disabled-tool cleanup
+# Tool lifecycle
 
-`home/.chezmoidata/tools.yaml` owns tool enablement and cleanup declarations.
+`home/.chezmoidata/tools.yaml` owns tool enablement, initialization, and cleanup.
+Package declarations own installation; agent wiring belongs in
+`home/.chezmoidata/integrations.yaml`.
+
+## Initialization
+
+A tool's `setup` list declares ordered initialization commands. Use it when the
+CLI must own its configuration format or encrypted storage; prefer a managed
+configuration file when chezmoi can safely own that file directly.
+
+```yaml
+tools:
+  example:
+    setup:
+      - command:
+          - example
+          - config
+          - set
+          - credential
+          - pass: {path: "<pass-entry>", field: "<field>"}
+```
+
+`command` is literal argv, never shell syntax. Its executable must be a string;
+remaining arguments are strings or `pass: {path, field}` references. Do not put
+secret values in literal arguments. The shared executor resolves references
+through `~/bin/pass-field` at runtime and rejects missing or empty fields.
+Rendered scripts contain declarations and encrypted-entry hashes, not plaintext
+credentials. Command output and exception details are suppressed because CLIs
+may echo secrets. Tool names identify failures; diagnose individual commands
+manually when necessary. Credentials passed as argv can still be visible to
+local process inspection while the CLI runs.
+
+`run_onchange_after_101_setup-tools.py.tmpl` runs after package setup. Only
+enabled tools participate; CI skips setup entirely. Each tool's inputs and
+executables are checked before its first command. Commands then run in order,
+stopping that tool on failure while still attempting other tools. Commands have
+a bounded execution time and must be noninteractive and idempotent. Interactive
+account authorization is a separate manual step.
+
+All declared setup shares one chezmoi success/retry unit, with no custom receipt
+or checkpoint. Declaration or encrypted pass-entry changes trigger setup. A
+failure returns nonzero, so the next apply retries all enabled setup commands,
+including commands that previously succeeded. This is not an ongoing drift
+repair mechanism: manually deleted configuration does not itself trigger setup.
+Keep independently retryable package installation and downloads outside this
+initialization phase; do not add per-tool setup scripts for declaration-shaped
+configuration. Disabling a tool stops setup but does not implicitly erase its
+credentials; cleanup requires an explicit declaration below.
+
+`scripts/test-tool-setup.py` exercises the shared executor with offline secret
+readers and CLI stubs. Validation must not configure real accounts.
+
+## Disabled-tool cleanup
+
 `remove` lists chezmoi-managed files removed when a tool is disabled. `purge`
 contains runtime cleanup entries, executed only when
 `policies.purge_disabled_tools` is enabled.
 
-## Path and command entries
+### Path and command entries
 
 Existing `purge` path strings keep their behavior: files go through
 `.chezmoiremove`; trees ending in `/**` are moved to Trash by
