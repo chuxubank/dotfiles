@@ -1,4 +1,6 @@
 {{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") -}}
+{{- $mygoReady := includeTemplate "tool/enabled" (merge (dict "tool" "mygo-cloudmusic" "require" true) .) | fromJson -}}
+{{- if $mygoReady -}}
 {{- $mygoURL := includeTemplate "github/release-asset-url" (dict
       "repo" "egoist/mygo-cloudmusic"
       "pattern" (printf "mygo-cloudmusic-*-darwin-%s.tar.gz" .chezmoi.arch)) | trim -}}
@@ -8,6 +10,7 @@
     url = {{ $mygoURL | quote }}
     stripComponents = 1
     refreshPeriod = "168h"
+{{- end }}
 {{- end }}
 {{- end }}
 

@@ -64,9 +64,9 @@ Existing `purge` path strings keep their behavior: files go through
 `.chezmoiremove`; trees ending in `/**` are moved to Trash by
 `run_after_020_purge-disabled-tools.sh.tmpl`.
 
-A command object first tries a tool's uninstaller for services, application
-files, and data, then moves any declared path leftovers to Trash. It can coexist
-with ordinary path strings for independently cleaned data:
+A command object moves its declared paths to Trash. When `command` is set, an
+available uninstaller runs first for services, application files, and data. It
+can coexist with ordinary path strings for independently cleaned data:
 
 ```yaml
 tools:
@@ -87,10 +87,11 @@ tools:
       - ".cache/example-downloads/**"
 ```
 
-- `command` is a nonempty argv array, not a shell command. Arguments and
-  environment values are literal; only a leading `{home}` expands to `HOME`.
-  `env` supplies optional per-command overrides within a subshell, not inline
-  shell assignments. Do not put credentials in these declarations.
+- `command`, when set, is a nonempty argv array, not a shell command.
+  Arguments and environment values are literal; only a leading `{home}` expands
+  to `HOME`. `env` supplies optional per-command overrides within a subshell,
+  not inline shell assignments. Do not put credentials in these declarations.
+  Omit `command` when moving `paths` to Trash is the whole cleanup.
 - `when` uses the shared host-condition schema. The command runs only when its
   tool is disabled, its own condition matches, and the purge policy is on.
 - `paths` is a nonempty list of narrow home-relative cleanup targets. A trailing
@@ -120,7 +121,7 @@ tools:
   their parent ignore and must be under tool-owned directories.
 
 Hermes declares `hermes uninstall --full --yes` inside `purge`; there is no
-parallel `uninstall` field, missing-command option, or tool-specific script.
+parallel `uninstall` field or tool-specific script.
 If a skill installer has left `~/.hermes/skills` behind, cleanup moves the
 declared Hermes tree and launcher paths to Trash even when the launcher is gone
 or the uninstaller leaves files behind. It does not change skill installation

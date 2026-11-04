@@ -131,7 +131,7 @@
     "purgeCommand": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["command", "paths"],
+      "required": ["paths"],
       "properties": {
         "command": { "$ref": "#/$defs/argv" },
         "paths": {

@@ -41,6 +41,17 @@ for scope, key, value in (("policies", "purge_disabled_tools", False), ("chezmoi
 enabled = json.loads(json.dumps(fixture))
 enabled["tools"]["fixture"]["when"] = {"enabled": True}
 assert render(enabled).strip() == ""
+no_env = json.loads(json.dumps(fixture))
+del no_env["tools"]["fixture"]["purge"][0]["env"]
+no_env_text = render(no_env)
+assert "export " not in no_env_text
+assert "trash_path \"$HOME/\"'owned'" in no_env_text
+paths_only = json.loads(json.dumps(fixture))
+del paths_only["tools"]["fixture"]["purge"][0]["command"]
+paths_only["tools"]["fixture"]["purge"][0]["paths"] = ["Applications/MyGo.app"]
+paths_text = render(paths_only)
+assert "set --" not in paths_text and "Purge disabled tool by command" not in paths_text
+assert "trash_path \"$HOME/\"'Applications/MyGo.app'" in paths_text
 
 with tempfile.TemporaryDirectory() as tmp:
     sandbox = Path(tmp)
@@ -171,5 +182,32 @@ with tempfile.TemporaryDirectory() as tmp:
     assert (home / "Trash/.hermes/skills/example").is_symlink()
     assert (shared / "SKILL.md").read_text() == "keep shared skill"
     assert unrelated.read_text() == "keep unrelated launcher"
+
+with tempfile.TemporaryDirectory() as tmp:
+    home = Path(tmp)
+    app = home / "Applications/MyGo.app"
+    app.mkdir(parents=True)
+    (app / "Info.plist").write_text("bundle")
+    bins = home / "bin"
+    bins.mkdir()
+    trash = bins / "trash"
+    trash.write_text(
+        f"#!{sys.executable}\n"
+        "import sys\nfrom pathlib import Path\n"
+        "assert sys.argv[1] == '--'\n"
+        "p = Path(sys.argv[2])\n"
+        "dest = Path.home() / 'Trash'\n"
+        "dest.mkdir(exist_ok=True)\n"
+        "p.rename(dest / p.name)\n"
+    )
+    trash.chmod(0o755)
+    script = home / "paths-only.sh"
+    script.write_text(paths_text)
+    subprocess.run(["/bin/sh", "-n", str(script)], check=True)
+    env = {**os.environ, "HOME": str(home), "PATH": str(bins)}
+    for _ in range(2):
+        subprocess.run(["/bin/sh", str(script)], env=env, check=True, capture_output=True)
+    assert not app.exists()
+    assert (home / "Trash/MyGo.app/Info.plist").read_text() == "bundle"
 
 print("ok command purge: gates, literal argv/env, uninstall warnings, Trash cleanup/retry and Hermes leftovers")

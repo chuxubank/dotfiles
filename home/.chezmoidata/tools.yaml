@@ -11,13 +11,14 @@
 # remove: chezmoi-managed dest paths deleted via .chezmoiremove when the
 # tool is off. purge: runtime data (login state, history, caches); applied
 # only when policies.purge_disabled_tools is on.
-# purge accepts path strings or {command, paths, env?, when?} objects. Command
+# purge accepts path strings or {command?, paths, env?, when?} objects. Command
 # entries run before managed files are removed; their paths declare cleanup
 # scope and must be absent after success (trailing /** checks the tree root).
-# They are never deleted by generic purges. command is literal argv, env is
-# per-command, and a leading {home} expands to HOME. Run an available command
-# first (warn on failure), then move declared leftovers to Trash. Success means
-# all declared paths are absent. when uses the shared condition schema.
+# They are never deleted by generic purges. command is optional literal argv,
+# env is per-command, and a leading {home} expands to HOME. When command is
+# set, run it first if available (warn on failure), then move declared paths
+# to Trash. Without command, only that Trash step runs. Success means all
+# declared paths are absent. when uses the shared condition schema.
 # Command paths ignore exact targets (/** ignores its root), never a parent.
 # setup: initialization commands run by the shared tool setup executor; pass
 # arguments resolve at runtime. Retry and ownership rules: docs/tool-lifecycle.md.
@@ -363,6 +364,18 @@ tools:
   # ~/.config/magpie on the VPS holds upstream keys and is not managed here.
   magpie:
     when: *non_ci
+
+  # Off. No Homebrew cask; the Applications external unpacks the GitHub
+  # tarball on darwin, outside CI. The bundle is one path in shared
+  # ~/Applications, so this names that path and no uninstaller.
+  mygo-cloudmusic:
+    when: *disabled
+    purge:
+      - when:
+          enabled:
+            os: [darwin]
+        paths:
+          - "Applications/MyGo 云音乐.app"
 
   # Account authorization remains interactive: run `ncm-cli login` after apply.
   ncm-cli:
