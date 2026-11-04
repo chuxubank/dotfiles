@@ -15,6 +15,7 @@ llm:
       model:
         - anthropic/claude-opus-5
         - openai/${gpt_primary}
+        - magpie/grok/${grok_primary}-build-fast
         - opencode/deepseek-v4-flash-free
       small_model:
         - iv/deepseek-v4-flash

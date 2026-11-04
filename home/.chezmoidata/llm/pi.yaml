@@ -2,9 +2,11 @@ llm:
   tools:
     pi:
       # Select the first candidate whose provider alias is enabled.
+      # The gateway Fast id is unsuffixed on purpose: its window suffix is
+      # a different row from the other clients' context SKUs.
       model:
         - iv-codex/${gpt_primary}
-        - magpie/auto/grok-4.7@500k
+        - magpie/grok/${grok_primary}-build-fast
         - iv-cc/claude-opus-5
         - xai/${grok_primary}
         - cursor/${grok_primary}@500k:fast

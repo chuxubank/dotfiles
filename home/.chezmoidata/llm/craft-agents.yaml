@@ -4,6 +4,7 @@ llm:
       model:
         - openai/gpt-5.5
         - anthropic/claude-opus-4-7
+        - magpie/grok/${grok_primary}-build-fast
         - opencode/deepseek-v4-flash-free
       providers:
         openai:
