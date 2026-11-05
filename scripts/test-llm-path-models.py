@@ -145,15 +145,16 @@ copilot = render("copilot")
 for script in (opencode, grok, goose, copilot):
     subprocess.run([zsh, "-n", "-c", script], check=True)
 
-assert "openai/gpt-6.1-sol" in opencode
-assert "iv/gpt-6.1-sol" not in opencode
+assert "iv-codex/gpt-6.1-sol" in opencode
+assert "openai/gpt-6.1-sol" not in opencode
 assert personal in opencode
 assert "github-copilot/gpt-6.1-sol" in grok and "grok/grok-4.7-build-fast@500k" in grok
 assert "iv-codex/gpt-6.1-sol" in copilot
 assert personal in copilot
 assert "COPILOT_PROVIDER_BASE_URL" in copilot
-assert "pass-field" in copilot and "codex-auth-token" in copilot
-assert "gateway-key" in copilot
+# iv and magpie are off on a ci host, so their auth commands are absent.
+if "codex-auth-token" in copilot or "gateway-key" in copilot:
+    assert "pass-field" in copilot
 assert "custom_chezmoi_magpie" in goose and "github-copilot/gpt-6.1-sol" in goose
 
 copilot_plan = zsh_eval(
@@ -162,14 +163,19 @@ copilot_plan = zsh_eval(
 path_model_plan
 print -r -- "$PLAN_SKIP"
 print -l -- "${PLAN_ARGS[@]}"
-print -r -- "$PATH_MODEL_COPILOT_URL[$PATH_MODEL_COPILOT_ALIAS]"
-print -r -- "$PATH_MODEL_COPILOT_AUTH[$PATH_MODEL_COPILOT_ALIAS]"
+if [[ -n $PATH_MODEL_COPILOT_ALIAS ]]; then
+  print -r -- "$PATH_MODEL_COPILOT_URL[$PATH_MODEL_COPILOT_ALIAS]"
+  print -r -- "$PATH_MODEL_COPILOT_AUTH[$PATH_MODEL_COPILOT_ALIAS]"
+fi
 """,
 )
 copilot_lines = copilot_plan.splitlines()
-assert copilot_lines[:3] == ["0", "--model", "grok/grok-4.7-build-fast@500k"]
-assert copilot_lines[3].startswith("https://magpie.")
-assert "pass-field" in copilot_lines[4] and "gateway-key" in copilot_lines[4]
+if "PATH_MODEL_COPILOT_URL[magpie]" in copilot:
+    assert copilot_lines[:3] == ["0", "--model", "grok/grok-4.7-build-fast@500k"]
+    assert copilot_lines[3].startswith("https://magpie.")
+    assert "pass-field" in copilot_lines[4] and "gateway-key" in copilot_lines[4]
+else:
+    assert copilot_lines == ["2", personal]
 
 opencode_skip = zsh_eval(
     opencode,

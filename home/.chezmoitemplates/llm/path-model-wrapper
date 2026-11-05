@@ -53,7 +53,7 @@
     {{- else -}}
       {{- fail "llm/path-model-wrapper: tool model must be a string or model/provider map" -}}
     {{- end -}}
-  {{- else if not (or (eq $tool "pi") (eq $tool "omp") (eq $tool "copilot")) -}}
+  {{- else if not (or (eq $tool "pi") (eq $tool "omp") (eq $tool "copilot") (eq $tool "opencode")) -}}
     {{- $raw = "" -}}
   {{- end -}}
   {{- if $raw -}}

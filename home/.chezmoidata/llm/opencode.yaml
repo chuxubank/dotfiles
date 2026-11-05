@@ -13,27 +13,18 @@ llm:
   tools:
     opencode:
       model:
-        - anthropic/claude-opus-5
-        - openai/${gpt_primary}
+        - iv-cc/claude-opus-5
+        - iv-codex/${gpt_primary}
         - magpie/grok/${grok_primary}-build-fast
         - opencode/deepseek-v4-flash-free
       small_model:
         - iv/deepseek-v4-flash
         - magpie/opencode-zen-free/deepseek-v4.1-flash-free
         - opencode/deepseek-v4-flash-free
+      # Same IV aliases as Pi and OMP. OpenCode writes the provider
+      # object itself, so these names do not inherit a bundled catalog.
+      provider_sets: [iv]
       providers:
-        openai:
-          provider: iv
-          models: false
-          auth_field: codex-auth-token
-        anthropic:
-          provider: iv
-          type: anthropic-messages
-          models: false
-          auth_field: cc-auth-token
-        iv:
-          provider: iv
-          auth_field: default-auth-token
         ollama:
           provider: ollama
         # Official OpenCode provider IDs. Their model lists come from the

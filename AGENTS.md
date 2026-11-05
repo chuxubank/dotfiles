@@ -111,9 +111,10 @@ default token's OpenAI surface. `iv-anthropic` is that same default token
 on the Anthropic protocol and only serves `claude-fable-5`. The bundled
 names `openai` and `anthropic` stay free for `/login`. `iv-codex` and
 `iv-cc` are not bundled providers: each catalog is the enumerated IV list
-plus models-dev metadata. opencode, craft-agents, and claude-code keep
-`openai` / `anthropic` as their own provider keys; they do not share Pi's
-`auth.json`. An alias the tool does not ship has no bundled card to inherit.
+plus models-dev metadata. OpenCode uses those same aliases and writes the
+provider object itself. craft-agents and claude-code keep `openai` /
+`anthropic` as their own provider keys. None of them share Pi's `auth.json`.
+An alias the tool does not ship has no bundled card to inherit.
 
 Because our entries merge into the bundled catalog instead of replacing it, one
 model id can exist on several providers and a bare id resolves against the

@@ -7,8 +7,6 @@ llm:
     - path: [workspace, iv]
       model: iv-codex/${gpt_primary}
       tools:
-        # Bundled provider key for the codex token. iv/ is the default token.
-        opencode: openai/${gpt_primary}
         grok: github-copilot/${gpt_primary}
         goose:
           model: github-copilot/${gpt_primary}
@@ -16,7 +14,6 @@ llm:
     - path: [workspace, personal]
       model: magpie/grok/${grok_primary}-build-fast@500k
       tools:
-        opencode: magpie/grok/${grok_primary}-build-fast@500k
         grok: grok/${grok_primary}-build-fast@500k
         goose:
           model: grok/${grok_primary}-build-fast@500k

@@ -65,8 +65,8 @@ and the model-cycle order belong to `modify_config.yml`.
 
 ## Directory defaults
 
-`llm/paths.yaml` assigns a model to a `path.toml` prefix. `model` is the Pi, OMP, and Copilot id. A `tools` entry replaces it
-for a command whose CLI uses a different spelling. `~/bin` wrappers for `pi`, `omp`,
+`llm/paths.yaml` assigns a model to a `path.toml` prefix. `model` is the Pi, OMP, OpenCode, and Copilot id. A `tools` entry
+replaces it for a command whose CLI uses a different spelling. `~/bin` wrappers for `pi`, `omp`,
 `opencode`, `grok`, `goose`, and `copilot` are ahead
 of the real binaries on `PATH` and exec those binaries. The longest prefix
 containing the startup directory wins. OMP and Grok `--cwd`, and OpenCode's
