@@ -614,6 +614,9 @@
   {{- end -}}
   {{- $_ := set $ctx.llm "default_providers" (list) -}}
   {{- $toolCfg := index $ctx.llm.tools $tool -}}
+  {{- if not (hasKey $toolCfg "providers") -}}
+    {{- $_ := set $toolCfg "providers" dict -}}
+  {{- end -}}
   {{- if eq (kindOf $toolCfg.providers) "slice" -}}
     {{- $_ := set $toolCfg "providers" (append $toolCfg.providers "magpie") -}}
   {{- else -}}
