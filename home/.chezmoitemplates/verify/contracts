@@ -625,7 +625,7 @@
   {{- end -}}
 {{- end -}}
 {{- $cc := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $magpieCtx) (dict "tool" "claude-code" "host_env" "personal" "tools" $magpieOn)) | fromJson -}}
-{{- if ne $cc.providers.magpie.type "anthropic" -}}
+{{- if ne $cc.providers.magpie.type "anthropic-messages" -}}
   {{- fail "magpie: CC must use the gateway's Anthropic protocol" -}}
 {{- end -}}
 
