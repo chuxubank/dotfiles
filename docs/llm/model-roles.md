@@ -4,6 +4,8 @@
 
 - `home/.chezmoidata/llm/common.yaml`: shared model aliases and provider definitions.
 - `home/.chezmoidata/llm/<tool>.yaml`: model candidates, effort and picker patterns.
+- `home/.chezmoidata/llm/paths.yaml`: directory prefixes for the Pi and OMP
+  launch wrappers.
 - `home/dot_omp/private_agent/modify_config.yml`: native role rendering and
   per-agent role assignments.
 
@@ -61,9 +63,37 @@ Per-agent overrides use role aliases rather than model ids. This reuses the
 same host selection instead of introducing another model table. Their mapping
 and the model-cycle order belong to `modify_config.yml`.
 
+## Directory defaults
+
+`llm/paths.yaml` assigns a model to a `path.toml` prefix. `model` is the Pi, OMP, and Copilot id. A `tools` entry replaces it
+for a command whose CLI uses a different spelling. `~/bin` wrappers for `pi`, `omp`,
+`opencode`, `grok`, `goose`, and `copilot` are ahead
+of the real binaries on `PATH` and exec those binaries. The longest prefix
+containing the startup directory wins. OMP and Grok `--cwd`, and OpenCode's
+project argument, select that directory; otherwise it is the process working
+directory. Goose inserts `--provider` and `--model` after `session` or `run`.
+
+The wrapper passes the model only for a new session. It leaves the rendered
+global default, other OMP roles, and Pi's subagent model alone. These argv
+shapes are not rewritten: an existing `--model` or `--provider`, resume,
+continue, session, and fork flags, `--help` / `--version`, and a subcommand.
+Session entry points still receive the prefix model: OMP `acp` and `launch`,
+OpenCode `acp` and `run`, and Grok `agent`. A project
+`.pi/settings.json` `defaultModel` or `.omp/config.yml` `modelRoles.default`
+wins over the prefix. A directory outside every prefix keeps that global default. Copilot
+still applies it: the wrapper resolves the qualified id against
+`llm/copilot.yaml` and exports `COPILOT_PROVIDER_*` for that alias. The
+other wrappers pass no `--model`. An unknown id, or a Copilot alias that
+did not resolve, fails the launch instead of falling through.
+
+Invoking the real binary by its absolute path skips the wrapper. Checkouts
+outside the configured prefixes, including `path.data.worktree`, do too.
+
 ## Changing a selection
 
 - Edit the owning tool data file, not generated agent config.
+- Edit `paths.yaml` for a directory default. Do not copy the model into the
+  wrappers.
 - Qualify model references when multiple aliases can serve the same id.
   Bundled login names and custom aliases have distinct ownership; see
   [ADR 0005](../adr/0005-llm-provider-aliases.md) and

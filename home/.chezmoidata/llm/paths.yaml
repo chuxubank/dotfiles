@@ -1,0 +1,23 @@
+# Directory prefixes for the launch wrappers. Behavior: docs/llm/model-roles.md.
+# Pi and OMP use `model`. `tools` replaces it for one command.
+# Grok and Goose can name GPT-6.1 Sol only as Magpie's github-copilot row.
+# They have no iv-codex provider.
+llm:
+  path_models:
+    - path: [workspace, iv]
+      model: iv-codex/${gpt_primary}
+      tools:
+        # Bundled provider key for the codex token. iv/ is the default token.
+        opencode: openai/${gpt_primary}
+        grok: github-copilot/${gpt_primary}
+        goose:
+          model: github-copilot/${gpt_primary}
+          provider: custom_chezmoi_magpie
+    - path: [workspace, personal]
+      model: magpie/grok/${grok_primary}-build-fast@500k
+      tools:
+        opencode: magpie/grok/${grok_primary}-build-fast@500k
+        grok: grok/${grok_primary}-build-fast@500k
+        goose:
+          model: grok/${grok_primary}-build-fast@500k
+          provider: custom_chezmoi_magpie

@@ -1,0 +1,436 @@
+{{- /* llm/path-model-wrapper — ~/bin launch wrappers.
+       Input: full chezmoi context plus tool.
+       llm.path_models: path is a path.toml key list. model is the Pi/OMP
+       ref. tools.<name> replaces it for that command. ${aliases} expand. */ -}}
+{{- $tool := .tool -}}
+{{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" -}}
+{{- if not (hasKey $known $tool) -}}
+  {{- fail (printf "llm/path-model-wrapper: unsupported tool %s" $tool) -}}
+{{- end -}}
+{{- $binKind := index $known $tool -}}
+{{- $bin := "" -}}
+{{- if eq $binKind "bun" -}}
+  {{- $bin = joinPath .chezmoi.homeDir .path.tool.bun "bin" $tool -}}
+{{- else -}}
+  {{- $bin = joinPath .path.usr "bin" $tool -}}
+{{- end -}}
+{{- $modelKey := $tool -}}
+{{- $rules := list -}}
+{{- $seen := dict -}}
+{{- range $rule := default (list) $.llm.path_models -}}
+  {{- if ne (kindOf $rule.path) "slice" -}}
+    {{- fail "llm/path-model-wrapper: path must be a path.toml key list" -}}
+  {{- end -}}
+  {{- $node := $.path -}}
+  {{- range $key := $rule.path -}}
+    {{- if not $node -}}
+      {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $rule.path)) -}}
+    {{- end -}}
+    {{- $node = index $node $key -}}
+  {{- end -}}
+  {{- if not $node -}}
+    {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $rule.path)) -}}
+  {{- end -}}
+  {{- $prefix := clean (joinPath $.chezmoi.homeDir $node) -}}
+  {{- if hasKey $seen $prefix -}}
+    {{- fail (printf "llm/path-model-wrapper: duplicate prefix %s" $prefix) -}}
+  {{- end -}}
+  {{- $_ := set $seen $prefix true -}}
+  {{- $raw := $rule.model -}}
+  {{- $provider := "" -}}
+  {{- $tools := dict -}}
+  {{- if hasKey $rule "tools" -}}{{- $tools = $rule.tools -}}{{- end -}}
+  {{- $override := index $tools $modelKey -}}
+  {{- if $override -}}
+    {{- if eq (kindOf $override) "string" -}}
+      {{- $raw = $override -}}
+    {{- else if eq (kindOf $override) "map" -}}
+      {{- if not $override.model -}}
+        {{- fail (printf "llm/path-model-wrapper: %s entry needs a model" $modelKey) -}}
+      {{- end -}}
+      {{- $raw = $override.model -}}
+      {{- $provider = default "" $override.provider -}}
+    {{- else -}}
+      {{- fail "llm/path-model-wrapper: tool model must be a string or model/provider map" -}}
+    {{- end -}}
+  {{- else if not (or (eq $tool "pi") (eq $tool "omp") (eq $tool "copilot")) -}}
+    {{- $raw = "" -}}
+  {{- end -}}
+  {{- if $raw -}}
+    {{- $model := includeTemplate "llm/resolve-model-alias" (dict "model" $raw "aliases" $.llm.models) -}}
+    {{- if and (or (eq $tool "pi") (eq $tool "omp")) (not (contains "/" $model)) -}}
+      {{- fail (printf "llm/path-model-wrapper: %s must be alias/id" $raw) -}}
+    {{- end -}}
+    {{- if $provider -}}
+      {{- $provider = includeTemplate "llm/resolve-model-alias" (dict "model" $provider "aliases" $.llm.models) -}}
+    {{- end -}}
+    {{- $rules = append $rules (dict "prefix" $prefix "model" $model "provider" $provider) -}}
+  {{- end -}}
+{{- end -}}
+#!/usr/bin/env zsh
+# Path default for a new {{ $tool }} session. Rules: docs/llm/model-roles.md.
+# Exec the real binary: this file is earlier on PATH and would recurse.
+
+emulate -L zsh
+
+typeset -r PATH_MODEL_TOOL={{ $tool | quote }}
+typeset -r PATH_MODEL_BIN={{ $bin | quote }}
+typeset -r PATH_MODEL_BUN={{ joinPath .chezmoi.homeDir .path.tool.bun "bin/bun" | quote }}
+typeset -r PATH_MODEL_KIND={{ if eq $tool "goose" }}"goose"{{ else }}"front"{{ end }}
+typeset -r PATH_MODEL_CWD={{ if or (eq $tool "omp") (eq $tool "grok") }}1{{ else }}0{{ end }}
+{{- if eq $tool "omp" }}
+typeset -r PATH_MODEL_COMMANDS_FILE={{ joinPath .chezmoi.homeDir .path.tool.bun "install/global/node_modules/@oh-my-pi/pi-coding-agent/src/cli-commands.ts" | quote }}
+{{- else }}
+typeset -r PATH_MODEL_COMMANDS_FILE=""
+{{- end }}
+typeset -ga PATH_MODEL_PREFIXES PATH_MODEL_MODELS PATH_MODEL_PROVIDERS
+typeset -ga PATH_MODEL_COMMAND_FALLBACK PATH_MODEL_LAUNCH
+PATH_MODEL_PREFIXES=(
+{{- range $rule := $rules }}
+  {{ $rule.prefix | quote }}
+{{- end }}
+)
+PATH_MODEL_MODELS=(
+{{- range $rule := $rules }}
+  {{ $rule.model | quote }}
+{{- end }}
+)
+PATH_MODEL_PROVIDERS=(
+{{- range $rule := $rules }}
+  {{ $rule.provider | quote }}
+{{- end }}
+)
+{{- if eq $tool "pi" }}
+PATH_MODEL_COMMAND_FALLBACK=(install remove uninstall update list config auth mcp)
+PATH_MODEL_LAUNCH=()
+{{- else if eq $tool "omp" }}
+PATH_MODEL_COMMAND_FALLBACK=(
+  auth auth-broker auth-gateway agents anonymize bench browser-relay cleanse
+  collab commit completions __complete compress config dry-balance find gc grep
+  gallery git grievances images img if-bench install join login models plugin
+  plugins predict ps say clip play share session setup shell read render skill
+  skills ssh stats stream update usage tiny-models token toks ttsr worktree wt
+  search q web-search
+)
+PATH_MODEL_LAUNCH=(launch acp)
+{{- else if eq $tool "opencode" }}
+PATH_MODEL_COMMAND_FALLBACK=(
+  completion mcp attach debug providers auth agent upgrade uninstall serve web
+  models stats export import github pr session plugin plug db
+)
+PATH_MODEL_LAUNCH=(acp run)
+{{- else if eq $tool "grok" }}
+PATH_MODEL_COMMAND_FALLBACK=(
+  clone completions dashboard doctor du disk-usage export help inspect leader
+  login logout mcp memory models plugin sessions setup trace update usage
+  version v worker worktree wrap
+)
+PATH_MODEL_LAUNCH=(agent)
+{{- else if eq $tool "copilot" }}
+PATH_MODEL_COMMAND_FALLBACK=(
+  app login help init config update version workflow sessions memories plugin
+  mcp skill instruction lsp sandbox completion
+)
+PATH_MODEL_LAUNCH=()
+{{- else }}
+PATH_MODEL_COMMAND_FALLBACK=()
+PATH_MODEL_LAUNCH=()
+{{- end }}
+
+typeset -gA PATH_MODEL_COMMANDS
+typeset -g PATH_MODEL_COMMANDS_LOADED=0
+typeset -g PLAN_SKIP=0
+typeset -ga PLAN_ARGS
+typeset -g PATH_MODEL_COPILOT_ALIAS=""
+typeset -g PATH_MODEL_COPILOT_ID=""
+{{ if eq $tool "copilot" }}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "copilot") .) | fromJson -}}
+{{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
+typeset -gA PATH_MODEL_COPILOT_URL PATH_MODEL_COPILOT_TYPE PATH_MODEL_COPILOT_WIRE PATH_MODEL_COPILOT_AUTH{{ println }}
+{{- range $alias, $p := $cfg.providers }}
+{{- if $p.base_url }}
+{{- $endpoint := includeTemplate "llm/model-endpoint" (dict "type" $p.type "base_url" $p.base_url) | fromJson -}}
+{{- $ctype := "openai" -}}
+{{- $wire := "completions" -}}
+{{- if eq $p.type "anthropic-messages" -}}
+  {{- $ctype = "anthropic" -}}
+  {{- $wire = "" -}}
+{{- else if eq $p.type "openai-responses" -}}
+  {{- $wire = "responses" -}}
+{{- end -}}
+{{- $auth := "" -}}
+{{- if $p.auth_path -}}
+  {{- $auth = printf "%s %s" (quote $passField) (quote $p.auth_path) -}}
+  {{- if $p.auth_field -}}
+    {{- $auth = printf "%s %s" $auth (quote $p.auth_field) -}}
+  {{- end -}}
+{{- end -}}
+PATH_MODEL_COPILOT_URL[{{ $alias }}]={{ $endpoint.api_base_url | quote }}{{ println }}
+PATH_MODEL_COPILOT_TYPE[{{ $alias }}]={{ $ctype | quote }}{{ println }}
+PATH_MODEL_COPILOT_WIRE[{{ $alias }}]={{ $wire | quote }}{{ println }}
+PATH_MODEL_COPILOT_AUTH[{{ $alias }}]={{ $auth | quote }}{{ println }}
+{{- end }}
+{{- end }}
+typeset -r PATH_MODEL_DEFAULT={{ $cfg.model | quote }}
+{{- else }}
+typeset -r PATH_MODEL_DEFAULT=""
+{{- end }}
+
+path_model_load_commands() {
+  (( PATH_MODEL_COMMANDS_LOADED )) && return 0
+  local name line inner part
+  local -a parts
+  for name in $PATH_MODEL_COMMAND_FALLBACK; do
+    PATH_MODEL_COMMANDS[$name]=1
+  done
+  if [[ -n $PATH_MODEL_COMMANDS_FILE && -f $PATH_MODEL_COMMANDS_FILE ]]; then
+    while IFS= read -r line; do
+      if [[ $line =~ 'name: "([^"]+)"' ]]; then
+        PATH_MODEL_COMMANDS[$match[1]]=1
+      elif [[ $line =~ 'aliases: \[(.*)\]' ]]; then
+        inner=$match[1]
+        parts=(${(s:,:)inner})
+        for part in $parts; do
+          part=${part//[\"[:space:]]/}
+          [[ -n $part ]] && PATH_MODEL_COMMANDS[$part]=1
+        done
+      fi
+    done < $PATH_MODEL_COMMANDS_FILE
+  fi
+  for name in $PATH_MODEL_LAUNCH launch acp; do
+    unset "PATH_MODEL_COMMANDS[$name]"
+  done
+  PATH_MODEL_COMMANDS_LOADED=1
+}
+
+path_model_is_command() {
+  path_model_load_commands
+  (( ${+PATH_MODEL_COMMANDS[$1]} ))
+}
+
+path_model_pick() {
+  local dir=${1:A} prefix best="" best_len=0 i field
+  field=$2
+  for (( i = 1; i <= $#PATH_MODEL_PREFIXES; i++ )); do
+    prefix=$PATH_MODEL_PREFIXES[i]
+    if [[ $dir == $prefix || $dir == $prefix/* ]]; then
+      if (( ${#prefix} > best_len )); then
+        if [[ $field == provider ]]; then
+          best=$PATH_MODEL_PROVIDERS[i]
+        else
+          best=$PATH_MODEL_MODELS[i]
+        fi
+        best_len=${#prefix}
+      fi
+    fi
+  done
+  print -r -- "$best"
+}
+
+path_model_for() { path_model_pick "$1" model }
+path_model_provider_for() { path_model_pick "$1" provider }
+
+# 0 when this argv must keep the tool's own model selection.
+# On 1, REPLY is the directory to match when the CLI names one.
+path_model_skip() {
+  if [[ $PATH_MODEL_KIND == goose ]]; then
+    path_model_skip_goose "$@"
+    return
+  fi
+  local -a args=("$@")
+  local i=1 arg
+  REPLY=""
+  while (( i <= $#args )); do
+    arg=$args[i]
+    [[ $arg == -- ]] && break
+    case $arg in
+      --model|--model=*|-m|-m=*|--provider|--provider=*|--help|-h|--version|-v|--list-models|--list-models=*|--export|--export=*)
+        return 0
+        ;;
+      --continue|-c|--resume|-r|--resume=*|--restore|--restore=*|--session|--session=*|--session-id|--session-id=*|--fork|--fork=*|--from-claude|--from-codex|--connect|--connect=*)
+        return 0
+        ;;
+      --cwd=*)
+        if (( PATH_MODEL_CWD )); then
+          REPLY=${arg#--cwd=}
+        fi
+        ;;
+      --cwd)
+        if (( PATH_MODEL_CWD )); then
+          if (( i == $#args )); then
+            return 0
+          fi
+          REPLY=$args[i+1]
+          (( i++ ))
+        fi
+        ;;
+      --*)
+        case $arg in
+          --api-key|--thinking|--models|--mode|--config|--smol|--slow|--plan|--system-prompt|--append-system-prompt|--system-prompt-template|--tools|--exclude-tools|--extension|-e|--skill|--theme|--prompt-template|--session-dir|--name|-n|--profile|--alias|--add-dir|--goal|--prewalk-into|--plan-yolo-into|--max-time|--warn-cost|--max-cost|--use-theme|--tui-mode|--approve|-a|-t|-xt|-s|--prompt|--agent|--port|--hostname|--log-level|--replay-limit)
+            (( i++ ))
+            ;;
+        esac
+        ;;
+      @*)
+        ;;
+      -*)
+        ;;
+      *)
+        if [[ $PATH_MODEL_TOOL == opencode && -z $REPLY && ( -d $arg || $arg == */* ) ]]; then
+          REPLY=$arg
+        elif path_model_is_command "$arg"; then
+          return 0
+        fi
+        ;;
+    esac
+    (( i++ ))
+  done
+  return 1
+}
+
+path_model_skip_goose() {
+  local -a args=("$@") managers=(list remove export import diagnostics rename help)
+  local i=1 arg next launch=0
+  REPLY=""
+  while (( i <= $#args )); do
+    arg=$args[i]
+    [[ $arg == -- ]] && break
+    case $arg in
+      --model|--model=*|--provider|--provider=*|--help|-h|--version|-V|--continue|--resume|-r)
+        return 0
+        ;;
+      session|run)
+        next=${args[i+1]-}
+        if (( ${managers[(I)$next]} )); then
+          return 0
+        fi
+        launch=1
+        ;;
+    esac
+    (( i++ ))
+  done
+  (( launch )) && return 1
+  return 0
+}
+
+path_model_project_pins() {
+  local dir=$1 file
+  if [[ $PATH_MODEL_TOOL == pi ]]; then
+    file=$dir/.pi/settings.json
+    [[ -f $file ]] || return 1
+    "$PATH_MODEL_BUN" -e '
+      const { JSONC } = await import("bun");
+      const { readFileSync } = await import("node:fs");
+      let data;
+      try { data = JSONC.parse(readFileSync(process.argv[1], "utf8")); }
+      catch { process.exit(1); }
+      const model = data && data.defaultModel;
+      process.exit(typeof model === "string" && model.trim() ? 0 : 1);
+    ' "$file"
+    return
+  fi
+  [[ $PATH_MODEL_TOOL == omp ]] || return 1
+  file=$dir/.omp/config.yml
+  [[ -f $file ]] || return 1
+  "$PATH_MODEL_BUN" -e '
+    const { YAML } = await import("bun");
+    const { readFileSync } = await import("node:fs");
+    let data;
+    try { data = YAML.parse(readFileSync(process.argv[1], "utf8")); }
+    catch { process.exit(1); }
+    const model = data && data.modelRoles && data.modelRoles.default;
+    const pinned = typeof model === "string" ? model.trim() !== "" : Array.isArray(model) && model.length > 0;
+    process.exit(pinned ? 0 : 1);
+  ' "$file"
+}
+
+path_model_goose_plan() {
+  local model=$1 provider=$2
+  shift 2
+  local -a pre=() rest=("$@")
+  local i=1 arg
+  while (( i <= $#rest )); do
+    arg=$rest[i]
+    if [[ $arg == session || $arg == run ]]; then
+      PLAN_ARGS=("${pre[@]}" "$arg")
+      [[ -n $provider ]] && PLAN_ARGS+=(--provider "$provider")
+      PLAN_ARGS+=(--model "$model")
+      if (( i < $#rest )); then
+        PLAN_ARGS+=("${(@)rest[i+1,-1]}")
+      fi
+      return 0
+    fi
+    pre+=("$arg")
+    (( i++ ))
+  done
+}
+
+path_model_plan() {
+  PLAN_SKIP=0
+  PLAN_ARGS=("$@")
+  if path_model_skip "$@"; then
+    PLAN_SKIP=1
+    return 0
+  fi
+  local dir=${PWD:A} model provider
+  [[ -n $REPLY ]] && dir=${REPLY:A}
+  if path_model_project_pins "$dir"; then
+    PLAN_SKIP=1
+    return 0
+  fi
+  model=$(path_model_for "$dir")
+  if [[ -z $model && -n $PATH_MODEL_DEFAULT ]]; then
+    model=$PATH_MODEL_DEFAULT
+  fi
+  [[ -z $model ]] && return 0
+  if [[ $PATH_MODEL_TOOL == copilot ]]; then
+    local alias=${model%%/*} id=${model#*/}
+    if [[ $model != */* || -z ${PATH_MODEL_COPILOT_URL[$alias]-} ]]; then
+      PLAN_SKIP=2
+      PLAN_ARGS=("$model")
+      return 0
+    fi
+    PATH_MODEL_COPILOT_ALIAS=$alias
+    PATH_MODEL_COPILOT_ID=$id
+    PLAN_ARGS=(--model "$id" "$@")
+    return 0
+  fi
+  provider=$(path_model_provider_for "$dir")
+  if [[ $PATH_MODEL_KIND == goose ]]; then
+    path_model_goose_plan "$model" "$provider" "$@"
+    return 0
+  fi
+  if [[ -n $provider ]]; then
+    PLAN_ARGS=(--provider "$provider" --model "$model" "$@")
+  else
+    PLAN_ARGS=(--model "$model" "$@")
+  fi
+}
+
+path_model_copilot_export() {
+  local alias=$PATH_MODEL_COPILOT_ALIAS
+  [[ -n $alias ]] || return 0
+  export COPILOT_PROVIDER_BASE_URL=$PATH_MODEL_COPILOT_URL[$alias]
+  export COPILOT_PROVIDER_TYPE=$PATH_MODEL_COPILOT_TYPE[$alias]
+  export COPILOT_MODEL=$PATH_MODEL_COPILOT_ID
+  if [[ -n $PATH_MODEL_COPILOT_WIRE[$alias] ]]; then
+    export COPILOT_PROVIDER_WIRE_API=$PATH_MODEL_COPILOT_WIRE[$alias]
+  fi
+  if [[ -n $PATH_MODEL_COPILOT_AUTH[$alias] ]]; then
+    export COPILOT_PROVIDER_API_KEY_COMMAND=$PATH_MODEL_COPILOT_AUTH[$alias]
+  fi
+}
+
+path_model_main() {
+  path_model_plan "$@"
+  if (( PLAN_SKIP == 2 )); then
+    print -u2 -- "copilot: llm provider is not enabled for $PLAN_ARGS[1]"
+    exit 1
+  fi
+  path_model_copilot_export
+  exec "$PATH_MODEL_BIN" "${PLAN_ARGS[@]}"
+}
+
+# Sourced by tests. An executed wrapper replaces this process.
+[[ $ZSH_EVAL_CONTEXT == *file* ]] && return 0
+path_model_main "$@"

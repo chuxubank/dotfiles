@@ -20,6 +20,8 @@ skills = "Developer/Personal/skills"
 aa = "Developer/AssaAbloy"
 asahiart = "Developer/AsahiArt"
 iv = "Developer/InfinityValley"
+# Checkout tree, not a clone. Repositories under it stay in path.personal.
+personal = "Developer/Personal"
 opentactic = "Developer/OpenTactic"
 xz = "Developer/XingZhi"
 oss = "Developer/OpenSource"

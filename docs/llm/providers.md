@@ -86,6 +86,14 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   Anthropic alias or native login remains in control. Inheritance alone must
   not select an endpoint by map iteration order. Tier-model assignments must
   belong to the chosen endpoint too.
+- **Copilot** has one BYOK endpoint per launch, not a provider registry.
+  `llm/copilot.yaml` selects it the same way as other tools. The `~/bin/copilot`
+  wrapper exports `COPILOT_PROVIDER_BASE_URL`, `COPILOT_PROVIDER_TYPE`,
+  `COPILOT_PROVIDER_WIRE_API`, and `COPILOT_PROVIDER_API_KEY_COMMAND`
+  (`pass-field` with the alias's auth path). `COPILOT_MODEL` and `--model`
+  are the upstream id. The key is not written into the script. A directory
+  prefix uses the same qualified id as Pi and OMP when `paths.yaml` has no
+  `tools.copilot` override.
 - **Grok Build** has one models endpoint. The first resolved candidate in
   `llm/grok.yaml` supplies it: `endpoints.models_base_url` is that alias's
   OpenAI base, and `{base}/models` is the picker, so every model that
