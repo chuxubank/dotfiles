@@ -1,0 +1,30 @@
+{{- /* huacnlee/cargo replaces rustup's cargo. $CARGO_HOME/bin is already ahead
+       of Homebrew's proxy, so the proxy stays in the prefix. The binary
+       updates itself; refresh weekly as a backstop. Official rustup's
+       `self update` can write its proxy over this file; the next refresh
+       puts the fork back. Windows releases are x86_64 only. */ -}}
+{{- if ne .host_env "ci" -}}
+{{- $triple := "" -}}
+{{- $ext := "tar.gz" -}}
+{{- $member := "cargo" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+  {{- if eq .chezmoi.arch "arm64" }}{{ $triple = "aarch64-apple-darwin" }}{{ else if eq .chezmoi.arch "amd64" }}{{ $triple = "x86_64-apple-darwin" }}{{ end -}}
+{{- else if eq .chezmoi.os "linux" -}}
+  {{- if eq .chezmoi.arch "arm64" }}{{ $triple = "aarch64-unknown-linux-gnu" }}{{ else if eq .chezmoi.arch "amd64" }}{{ $triple = "x86_64-unknown-linux-gnu" }}{{ end -}}
+{{- else if and (eq .chezmoi.os "windows") (eq .chezmoi.arch "amd64") -}}
+  {{- $triple = "x86_64-pc-windows-msvc" -}}
+  {{- $ext = "zip" -}}
+  {{- $member = "cargo.exe" -}}
+{{- end -}}
+{{- if $triple -}}
+{{- $url := includeTemplate "github/release-asset-url" (dict "repo" "huacnlee/cargo" "pattern" (printf "cargo-*-%s.%s" $triple $ext)) | trim -}}
+{{- if $url }}
+[{{ printf ".local/share/cargo/bin/%s" $member | quote }}]
+    type = "archive-file"
+    url = {{ $url | quote }}
+    path = {{ $member | quote }}
+    executable = true
+    refreshPeriod = "168h"
+{{- end }}
+{{- end }}
+{{- end -}}
