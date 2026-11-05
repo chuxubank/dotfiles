@@ -186,6 +186,11 @@ skills:
         source: Kotlin/kotlin-agent-skills
 
     30-personal:
+      - name:
+          - pr-worktree-handoff
+          - mitmproxy-mock
+        source: chuxubank/skills
+
       - name: bugfix-delivery
         source: chuxubank/skills
         when:
