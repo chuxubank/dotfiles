@@ -3,7 +3,7 @@ llm:
     codex:
       model:
         - iv-codex/${gpt_primary}
-        - iv-cc/claude-opus-5
+        - iv-cc/${opus_primary}
         - magpie/grok/${grok_primary}-build-fast
         - openai/${gpt_primary}
       reasoning_effort: high

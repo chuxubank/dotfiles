@@ -2,21 +2,16 @@ llm:
   tools:
     claude-code:
       supported_provider_types: [anthropic-messages]
-      # opusplan stays on the IV alias. Magpie translates this client's
-      # messages calls onto the grok row's native responses endpoint.
-      # The bare opusplan remains while both of those aliases are off.
+      # Endpoint selection only. opusplan is not an upstream id; the
+      # settings value is that client switch whenever default_models is set.
+      # Plan uses opus, execution uses sonnet, whatever provider won.
       model:
-        - anthropic/opusplan
+        - iv-cc/${sonnet_primary}
         - magpie/grok/${grok_primary}-build-fast
-        - opusplan
-      # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL env var (opus/sonnet/haiku/fable).
-      # Only emitted for the IV alias. Magpie's messages ids are not these stems.
+        - ${sonnet_primary}
+      # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL. Not gated on iv-cc.
       default_models:
-        opus: claude-opus-5
-        sonnet: claude-sonnet-5
-        haiku: claude-haiku-4-5-20251001
-      providers:
-        anthropic:
-          provider: iv
-          type: anthropic-messages
-          auth_field: cc-auth-token
+        opus: ${opus_primary}
+        sonnet: ${sonnet_primary}
+        haiku: ${haiku_primary}
+      provider_sets: [iv]

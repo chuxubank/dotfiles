@@ -206,7 +206,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "ANTHROPIC_BASE_URL" not in cfg["env"] and cfg["model"] == "opusplan"
     native = copy.deepcopy(llm)
     native["providers"]["native"] = {"api_types": ["anthropic-messages"], "base_url": "https://native.example"}
-    native["tools"]["claude-code"]["providers"] = {"anthropic": {"provider": "native"}}
+    native["tools"]["claude-code"]["providers"] = {"iv-cc": {"provider": "native"}}
     cfg = json.loads(render(cc_path, native, home))
     assert cfg["env"]["ANTHROPIC_BASE_URL"] == "https://native.example"
     llm["tools"]["claude-code"]["model"] = "gateway/vendor/model"

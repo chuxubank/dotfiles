@@ -2,23 +2,22 @@ llm:
   tools:
     craft-agents:
       model:
-        - openai/gpt-5.5
-        - anthropic/claude-opus-4-7
+        - iv-codex/${gpt_primary}
+        - iv-cc/${opus_primary}
         - magpie/grok/${grok_primary}-build-fast
         - opencode/deepseek-v4-flash-free
+      # Connection slugs are the shared IV aliases. Names stay distinct in
+      # the Craft UI; auth fields come from the iv set.
+      provider_sets: [iv]
       providers:
-        openai:
-          name: OpenAI (IV)
-          provider: iv
-          auth_field: codex-auth-token
-        anthropic:
-          name: Anthropic (IV)
-          provider: iv
-          type: anthropic-messages
-          auth_field: cc-auth-token
+        iv-codex:
+          name: IV Codex
+        iv-cc:
+          name: IV Claude
         iv:
-          provider: iv
-          auth_field: default-auth-token
+          name: IV
+        iv-anthropic:
+          name: IV Anthropic
         openrouter:
           provider: openrouter
         ollama:

@@ -14,7 +14,7 @@ default token's OpenAI surface. `iv-anthropic` stays that token's Anthropic
 surface for `claude-fable-5`: the cc group 404s that id, and the OpenAI-typed
 `iv` alias rejects `reasoning_effort`.
 
-OpenCode uses the same `iv-*` aliases. It writes its own provider object,
-so a custom id does not inherit a bundled catalog. craft-agents and
-claude-code still reuse `openai` / `anthropic` as their own provider keys.
-None of them share Pi's `auth.json`.
+OpenCode and Craft use the same `iv-*` aliases and write their own
+provider objects, so a custom id does not inherit a bundled catalog.
+Claude Code uses `iv-cc` for its single Anthropic endpoint. None of them
+share Pi's `auth.json`.

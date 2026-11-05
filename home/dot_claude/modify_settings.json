@@ -9,11 +9,11 @@
 -}}
 
 {{- /* CC has one active endpoint, not a provider registry. A qualified
-       model selects it; otherwise retain the native anthropic alias/login.
-       Never choose an endpoint by map iteration order. */ -}}
+       model selects it. A bare model uses iv-cc when that alias resolved,
+       and native login otherwise. Never choose an endpoint by map order. */ -}}
 {{- $provider := $cfg.model_provider -}}
-{{- if and (not $provider) (hasKey $cfg.providers "anthropic") -}}
-  {{- $provider = "anthropic" -}}
+{{- if and (not $provider) (hasKey $cfg.providers "iv-cc") -}}
+  {{- $provider = "iv-cc" -}}
 {{- end -}}
 {{- if $provider -}}
   {{- $ep := index $cfg.providers $provider -}}
@@ -22,10 +22,10 @@
   {{- if $ep.auth_key -}}{{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}{{- end -}}
 {{- end -}}
 
-{{- /* Map each default_models alias → ANTHROPIC_DEFAULT_<ALIAS>_MODEL
-       (opus, sonnet, haiku, fable, …). Only for the IV alias: Magpie's
-       messages ids are not these stems. */ -}}
-{{- if and (eq $provider "anthropic") (hasKey $cfg "default_models") -}}
+{{- /* Map each default_models alias → ANTHROPIC_DEFAULT_<ALIAS>_MODEL.
+       These name the opus/sonnet/haiku ids. The selected provider does
+       not decide whether they are set. */ -}}
+{{- if hasKey $cfg "default_models" -}}
   {{- range $alias, $model := $cfg.default_models -}}
     {{- $_ := set $env (printf "ANTHROPIC_DEFAULT_%s_MODEL" (upper $alias)) $model -}}
   {{- end -}}
@@ -65,12 +65,17 @@
 	"command" (joinPath .chezmoi.homeDir ".claude" "statusline.sh")
 -}}
 
+{{- /* opusplan is Claude Code's client switch when the alias defaults
+       exist: plan reads ANTHROPIC_DEFAULT_OPUS_MODEL, execution reads the
+       sonnet default. It is not an upstream model id. */ -}}
+{{- $model := $cfg.model_id -}}
+{{- if hasKey $cfg "default_models" -}}{{- $model = "opusplan" -}}{{- end -}}
 {{- $managed := dict
   "effortLevel" "medium"
   "enabledPlugins" $enabledPlugins
   "env" $env
   "extraKnownMarketplaces" $extraKnownMarketplaces
-  "model" $cfg.model_id
+  "model" $model
   "permissions" $permissions
   "skipAutoPermissionPrompt" true
   "statusLine" $statusLine

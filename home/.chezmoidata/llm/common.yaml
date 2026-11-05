@@ -5,6 +5,9 @@ llm:
   models:
     gpt_primary: gpt-6.1-sol
     grok_primary: grok-4.7
+    opus_primary: claude-opus-5-5
+    sonnet_primary: claude-sonnet-5-5
+    haiku_primary: claude-haiku-5-5
 
   # ── Data sets (model catalogs, independent from inference providers) ──
   data_sets:
