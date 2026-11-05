@@ -159,7 +159,7 @@ assert "custom_chezmoi_magpie" in goose and "github-copilot/gpt-6.1-sol" in goos
 
 copilot_plan = zsh_eval(
     copilot,
-    "cd " + json.dumps(personal_prefix) + r"""
+    "mkdir -p " + json.dumps(personal_prefix) + "\ncd " + json.dumps(personal_prefix) + r"""
 path_model_plan
 print -r -- "$PLAN_SKIP"
 print -l -- "${PLAN_ARGS[@]}"
@@ -200,7 +200,7 @@ assert grok_skip.splitlines() == ["1 /tmp/work", "0", "1 "]
 
 goose_plan = zsh_eval(
     goose,
-    "cd " + json.dumps(personal_prefix) + r"""
+    "mkdir -p " + json.dumps(personal_prefix) + "\ncd " + json.dumps(personal_prefix) + r"""
 path_model_plan session 'fix the bug'
 print -r -- "$PLAN_SKIP"
 print -l -- "${PLAN_ARGS[@]}"
