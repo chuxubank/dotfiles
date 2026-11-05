@@ -19,6 +19,7 @@ llm:
         - opencode/deepseek-v4-flash-free
       small_model:
         - iv/deepseek-v4-flash
+        - magpie/opencode-zen-free/deepseek-v4.1-flash-free
         - opencode/deepseek-v4-flash-free
       providers:
         openai:

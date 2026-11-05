@@ -2,9 +2,15 @@ llm:
   tools:
     claude-code:
       supported_provider_types: [anthropic-messages]
-      model: opusplan
+      # opusplan stays on the IV alias. Magpie is the messages row: the grok
+      # fast id is served at /v1/responses, which this client cannot call.
+      # The bare opusplan remains while both of those aliases are off.
+      model:
+        - anthropic/opusplan
+        - magpie/github-copilot/claude-opus-5
+        - opusplan
       # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL env var (opus/sonnet/haiku/fable).
-      # Only emitted when an anthropic provider resolves (i.e. iv is enabled).
+      # Only emitted for the IV alias. Magpie's messages ids are not these stems.
       default_models:
         opus: claude-opus-5
         sonnet: claude-sonnet-5
