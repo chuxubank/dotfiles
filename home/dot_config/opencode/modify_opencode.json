@@ -32,6 +32,22 @@
   {{- else -}}
     {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
   {{- end -}}
+  {{- /* Declared models are an id list. fetch-models returns id → name.
+         Dict keys must be strings, so a list index cannot be the id. */ -}}
+  {{- if eq (kindOf $source) "slice" -}}
+    {{- $mapped := dict -}}
+    {{- range $item := $source -}}
+      {{- if eq (kindOf $item) "string" -}}
+        {{- $_ := set $mapped $item $item -}}
+      {{- else if and (eq (kindOf $item) "map") (hasKey $item "id") -}}
+        {{- $mid := index $item "id" | toString -}}
+        {{- $mname := $mid -}}
+        {{- if hasKey $item "name" -}}{{- $mname = index $item "name" | toString -}}{{- end -}}
+        {{- $_ := set $mapped $mid $mname -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $source = $mapped -}}
+  {{- end -}}
   {{- range $id, $name := $source -}}
     {{- $model := dict "name" $name -}}
     {{- if hasKey $modelMetadata $id -}}{{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}{{- end -}}
