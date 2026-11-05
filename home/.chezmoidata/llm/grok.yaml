@@ -1,15 +1,11 @@
 llm:
   tools:
     grok:
-      # OpenAI-shaped endpoints. The selected row is served at /v1/responses;
-      # the template sets that backend.
+      # OpenAI-shaped endpoints. The winning alias becomes the models
+      # endpoint, so its /v1/models list is the picker.
       supported_provider_types: [openai]
       # First candidate whose alias resolved. The native Fast id has no
       # alias, so it is the default only when no earlier alias resolved.
-      # enabled_models is the picker pool. Resolved providers append their
-      # own globs (magpie/**); those aliases are registered with the winner.
       model:
         - magpie/grok/${grok_primary}-build-fast@500k
         - ${grok_primary}-build-fast
-      enabled_models:
-        - ${grok_primary}-build-fast*

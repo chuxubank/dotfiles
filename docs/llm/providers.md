@@ -81,15 +81,13 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   Anthropic alias or native login remains in control. Inheritance alone must
   not select an endpoint by map iteration order. Tier-model assignments must
   belong to the chosen endpoint too.
-- **Grok Build** takes its session default from the first resolved candidate
-  in `llm/grok.yaml`. A candidate with no alias is the native Fast id, with
-  the 500k `context_window` pin. `enabled_models` is the same pool Pi and OMP
-  use: each resolved provider appends its globs, and every alias that pool
-  names is registered, not only the winner. The config key is that alias.
-  A grok row sets `responses` because that row is served at `/v1/responses`.
-  `[auth_provider.<alias>]` runs `pass-field`. The key is not written into
-  the file. An endpoint alias that is neither the winner nor named by the
-  pool loses its entry.
+- **Grok Build** has one models endpoint. The first resolved candidate in
+  `llm/grok.yaml` supplies it: `endpoints.models_base_url` is that alias's
+  OpenAI base, and `{base}/models` is the picker, so every model that
+  provider lists can be selected. `models.default` is the candidate's
+  upstream id. `auth.auth_provider_command` runs `pass-field`. The key is
+  not written into the file. A candidate with no alias leaves the built-in
+  catalog and the native Fast id, including its 500k `context_window` pin.
 
 ## Validation
 
