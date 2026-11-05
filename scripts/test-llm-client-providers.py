@@ -273,4 +273,80 @@ command = "old"
     assert "auth_provider" not in off or "magpie" not in off["auth_provider"]
     assert off["model"]["custom"]["temperature"] == 0.1
 
-print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok magpie default")
+    # The alias comes from the candidate list and the enabled-model pool.
+    # It is not the string magpie. With no pool, only the winner is registered
+    # and a previous magpie entry is removed. A pool glob keeps magpie too.
+    routed = copy.deepcopy(grok_llm)
+    routed["default_providers"] = ["gateway", "magpie"]
+    routed["providers"]["gateway"] = {
+        "name": "Gateway",
+        "base_url": "https://other.example",
+        "api_types": ["openai"],
+        "auth": {"path": "Test/Gateway", "field": "gateway-key"},
+    }
+    routed["tools"]["grok"]["model"] = [
+        "gateway/vendor/model",
+        "magpie/grok/${grok_primary}-build-fast@500k",
+        "${grok_primary}-build-fast",
+    ]
+    chosen = parse_toml(render(
+        grok_path, routed, home, stdin=prior,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    assert chosen["models"]["default"] == "gateway"
+    gateway = chosen["model"]["gateway"]
+    assert gateway["model"] == "vendor/model", gateway
+    assert gateway["name"] == "Gateway", gateway
+    assert gateway["base_url"] == "https://other.example/v1", gateway
+    assert "api_key" not in gateway and "api_backend" not in gateway, gateway
+    assert "context_window" not in gateway, gateway
+    helper = chosen["auth_provider"]["gateway"]["command"]
+    assert helper == f"'{home / 'bin' / 'pass-field'}' 'Test/Gateway' 'gateway-key'", helper
+    assert "magpie" not in chosen["model"]
+    assert "magpie" not in chosen.get("auth_provider", {})
+    assert chosen["model"]["custom"]["temperature"] == 0.1
+    pooled = copy.deepcopy(routed)
+    pooled["providers"]["magpie"]["enabled_models"] = ["**"]
+    pooled["tools"]["grok"]["enabled_models"] = ["${grok_primary}-build-fast*"]
+    both = parse_toml(render(
+        grok_path, pooled, home, stdin=prior,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    assert both["models"]["default"] == "gateway"
+    assert both["model"]["gateway"]["model"] == "vendor/model"
+    kept = both["model"]["magpie"]
+    assert kept["model"] == "grok/grok-4.7-build-fast@500k", kept
+    assert kept["api_backend"] == "responses" and kept["vision"] is True, kept
+    assert kept["context_window"] == 500000 and "api_key" not in kept, kept
+    assert both["model"]["grok-4.7-build-fast"]["context_window"] == 500000
+
+    # Craft takes the protocol path from the provider type. The alias name
+    # does not decide whether /v1 is appended.
+    craft_llm = {
+        "models": {},
+        "default_providers": ["gateway", "router", "local", "claude", "gemini", "versioned"],
+        "providers": {
+            "gateway": {"base_url": "https://gateway.example", "models": False},
+            "router": {"base_url": "https://openrouter.ai/api", "models": False},
+            "local": {"type": "ollama", "base_url": "http://localhost:11434", "models": False},
+            "claude": {"type": "anthropic", "base_url": "https://anthropic.example", "models": False},
+            "gemini": {"type": "gemini", "base_url": "https://generativelanguage.googleapis.com", "models": False},
+            "versioned": {"base_url": "https://integrate.api.nvidia.com/v1", "models": False},
+        },
+        "tools": {"craft-agents": {"model": "gateway/vendor/model"}},
+    }
+    craft = json.loads(render("home/dot_craft-agent/config.json.tmpl", craft_llm, home))
+    bases = {item["slug"]: item.get("baseUrl") for item in craft["llmConnections"]}
+    assert bases == {
+        "gateway": "https://gateway.example/v1",
+        "router": "https://openrouter.ai/api/v1",
+        "local": "http://localhost:11434/v1",
+        "claude": "https://anthropic.example",
+        "gemini": "https://generativelanguage.googleapis.com/v1beta",
+        "versioned": "https://integrate.api.nvidia.com/v1",
+    }, bases
+    assert craft["defaultLlmConnection"] == "gateway"
+    winner = next(item for item in craft["llmConnections"] if item["slug"] == "gateway")
+    assert winner["defaultModel"] == "vendor/model", winner
+
+print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints")

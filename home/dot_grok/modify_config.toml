@@ -40,32 +40,87 @@
   "marketplace.sources" $sources
 -}}
 {{- $remove := list -}}
-{{- /* While magpie is on, new sessions use that gateway. The config key is
-       `magpie`; the upstream id is the 500k Fast row, whose native route is
-       /v1/responses. The helper prints the gateway key. A literal api_key
-       would land in this file and would also be what image tools accept. */ -}}
-{{- if eq $cfg.model_provider "magpie" -}}
-  {{- $ep := index $cfg.providers "magpie" -}}
-  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
-  {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
-  {{- $command := list (printf "'%s'" (replace "'" "'\\''" $passField)) (printf "'%s'" (replace "'" "'\\''" $ep.auth_path)) -}}
-  {{- if $ep.auth_field -}}
-    {{- $command = append $command (printf "'%s'" (replace "'" "'\\''" $ep.auth_field)) -}}
+{{- /* Same rule as Pi and OMP: the candidate list picks the session default,
+       and enabled_models is the pool. Register each pool alias that resolved
+       with a base URL, plus the winner. The key is the alias, with no dots,
+       so replace and remove stay one path segment. pass-field prints the
+       key. A literal api_key would be stored and is what image tools accept.
+       A grok row uses responses because that row is served at /v1/responses.
+       Any other alias keeps the client's backend. A resolved alias with no
+       base URL is not a Grok endpoint, so the native Fast id stays the default. */ -}}
+{{- $aliases := dict -}}
+{{- range $alias, $_ := $cfg.providers -}}{{- $_ := set $aliases $alias true -}}{{- end -}}
+{{- $wanted := dict -}}
+{{- if and $cfg.model_provider (hasKey $cfg.providers $cfg.model_provider) -}}
+  {{- $winner := index $cfg.providers $cfg.model_provider -}}
+  {{- if index $winner "base_url" -}}
+    {{- $_ := set $wanted $cfg.model_provider $cfg.model_id -}}
   {{- end -}}
-  {{- $_ := set $managed "models" (dict "default" "magpie") -}}
-  {{- $_ := set $replace "model.magpie" (dict
-    "model" $cfg.model_id
-    "name" "Magpie"
+{{- end -}}
+{{- range $pattern := default (list) (index $cfg "enabled_models") -}}
+  {{- $parts := splitList "/" $pattern -}}
+  {{- if gt (len $parts) 1 -}}
+    {{- $alias := index $parts 0 -}}
+    {{- if and (hasKey $cfg.providers $alias) (not (hasKey $wanted $alias)) -}}
+      {{- $ep := index $cfg.providers $alias -}}
+      {{- if index $ep "base_url" -}}
+        {{- $id := "" -}}
+        {{- $listed := default (list) (index (index $.llm.tools "grok") "model") -}}
+        {{- if ne (kindOf $listed) "slice" -}}{{- $listed = list $listed -}}{{- end -}}
+        {{- range $candidate := $listed -}}
+          {{- if not $id -}}
+            {{- $resolved := includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $.llm.models) -}}
+            {{- $selection := includeTemplate "llm/split-model" (dict "model" $resolved "providers" $aliases) | fromJson -}}
+            {{- if eq $selection.provider $alias -}}{{- $id = $selection.model -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if $id -}}{{- $_ := set $wanted $alias $id -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey $wanted $cfg.model_provider -}}
+  {{- $_ := set $managed "models" (dict "default" $cfg.model_provider) -}}
+{{- end -}}
+{{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
+{{- $fast500 := printf "grok/%s@500k" $grokFast -}}
+{{- range $alias, $id := $wanted -}}
+  {{- $ep := index $cfg.providers $alias -}}
+  {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- $entry := dict
+    "model" $id
+    "name" $ep.display_name
     "base_url" $endpoint.api_base_url
-    "api_backend" "responses"
-    "context_window" 500000
-    "vision" true
-    "auth_provider" "magpie"
-  ) -}}
-  {{- $_ := set $replace "auth_provider.magpie" (dict "command" (join " " $command)) -}}
-{{- else -}}
-  {{- $remove = append $remove "model.magpie" -}}
-  {{- $remove = append $remove "auth_provider.magpie" -}}
+    "auth_provider" $alias
+  -}}
+  {{- if or (hasPrefix "grok/" $id) (eq $id $grokFast) -}}
+    {{- $_ := set $entry "api_backend" "responses" -}}
+    {{- $_ := set $entry "vision" true -}}
+  {{- end -}}
+  {{- if or (eq $id $grokFast) (eq $id $fast500) (hasSuffix "@500k" $id) -}}
+    {{- $_ := set $entry "context_window" 500000 -}}
+  {{- end -}}
+  {{- $_ := set $replace (printf "model.%s" $alias) $entry -}}
+  {{- if $ep.auth_path -}}
+    {{- $helper := list (printf "'%s'" (replace "'" "'\\''" $passField)) (printf "'%s'" (replace "'" "'\\''" $ep.auth_path)) -}}
+    {{- if $ep.auth_field -}}
+      {{- $helper = append $helper (printf "'%s'" (replace "'" "'\\''" $ep.auth_field)) -}}
+    {{- end -}}
+    {{- $_ := set $replace (printf "auth_provider.%s" $alias) (dict "command" (join " " $helper)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $existing := dict -}}
+{{- $prior := trim (dig "stdin" "" .chezmoi) -}}
+{{- if $prior -}}{{- $existing = $prior | fromToml -}}{{- end -}}
+{{- $existingModels := dict -}}
+{{- $existingAuth := dict -}}
+{{- if hasKey $existing "model" -}}{{- $existingModels = index $existing "model" -}}{{- end -}}
+{{- if hasKey $existing "auth_provider" -}}{{- $existingAuth = index $existing "auth_provider" -}}{{- end -}}
+{{- range $alias, $prov := .llm.providers -}}
+  {{- if and (or (hasKey $prov "base_url") (hasKey $prov "public_domain")) (not (hasKey $wanted $alias)) -}}
+    {{- if hasKey $existingModels $alias -}}{{- $remove = append $remove (printf "model.%s" $alias) -}}{{- end -}}
+    {{- if hasKey $existingAuth $alias -}}{{- $remove = append $remove (printf "auth_provider.%s" $alias) -}}{{- end -}}
+  {{- end -}}
 {{- end -}}
 
 {{ includeTemplate "config/merge" (dict
