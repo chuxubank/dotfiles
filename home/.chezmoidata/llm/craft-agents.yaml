@@ -14,7 +14,7 @@ llm:
         anthropic:
           name: Anthropic (IV)
           provider: iv
-          type: anthropic
+          type: anthropic-messages
           auth_field: cc-auth-token
         iv:
           provider: iv

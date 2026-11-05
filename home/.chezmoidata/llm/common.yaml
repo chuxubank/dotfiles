@@ -32,7 +32,7 @@ llm:
         auth_field: codex-auth-token
       iv-cc:
         provider: iv
-        type: anthropic
+        type: anthropic-messages
         auth_field: cc-auth-token
       # The default token's Anthropic surface. claude-fable-5 needs exactly
       # this: the cc group 404s the id, and the OpenAI-typed `iv` alias is
@@ -40,7 +40,7 @@ llm:
       # one id so the group's OpenAI-format models are not mistyped.
       iv-anthropic:
         provider: iv
-        type: anthropic
+        type: anthropic-messages
         auth_field: default-auth-token
         models:
           - claude-fable-5
@@ -53,8 +53,10 @@ llm:
   # Tools override only `auth.field` to pick a different API key from the
   # same pass path; the base_url stays shared.
   #
-  # type: openai (default) | anthropic | ollama | gemini
+  # type: openai-completions (default) | openai-responses |
+  #       anthropic-messages | google-generative-ai | ollama | opencode
   #   Controls model list endpoint path and response parsing.
+  #   ollama and opencode only select that fetch; they are not inference protocols.
   #
   # Per-tool model selection lives in llm/<tool>.yaml.
   provider_conditions:
@@ -123,7 +125,7 @@ llm:
 
     google:
       name: Google
-      type: gemini
+      type: google-generative-ai
       base_url: "https://generativelanguage.googleapis.com"
       model_caches:
         google-models-api:
@@ -215,7 +217,8 @@ llm:
 
     # One gateway, on the VPS. The origin is https://magpie.<domain from
     # the same pass entry the proxy inventory uses. OpenAI-compatible
-    # clients append /v1; an anthropic or gemini type keeps the origin.
+    # clients append /v1; anthropic-messages and google-generative-ai
+    # keep the origin.
     # Pi, OMP, and Codex read the gateway key through pass-field. OpenCode
     # and Hermes have no command field, so they still receive the key.
     # The model list is GET /v1/models, cached like the other OpenAI
@@ -225,7 +228,7 @@ llm:
     # as magpie/**. A single * does not cross the slash in Pi or OMP.
     magpie:
       name: Magpie
-      api_types: [openai, anthropic, gemini]
+      api_types: [openai-completions, openai-responses, anthropic-messages, google-generative-ai]
       public_scheme: https
       public_prefix: magpie
       public_domain:

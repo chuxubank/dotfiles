@@ -8,9 +8,11 @@
        Returns empty map on failure or missing base_url.
 
        Provider types:
-         openai (default):  GET /v1/models           → .data[]  (.id, .name)
+         openai-completions (default) and openai-responses:
+                            GET /v1/models           → .data[]  (.id, .name)
          ollama:            GET /api/tags             → .models[] (.name)
-         gemini:            GET /v1beta/models?key=   → .models[] (.name, .displayName)
+         google-generative-ai:
+                            GET /v1beta/models?key=   → .models[] (.name, .displayName)
 */ -}}
 {{- $models := dict -}}
 {{- $details := dict -}}
@@ -44,7 +46,7 @@
         {{- $_ := set $models $m.name $m.name -}}
       {{- end }}
     {{- end }}
-  {{- else if eq .type "gemini" }}
+  {{- else if eq .type "google-generative-ai" }}
     {{- if hasKey $resp "models" }}
       {{- range $m := $resp.models }}
         {{- $id := $m.name -}}

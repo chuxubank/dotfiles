@@ -1,7 +1,7 @@
 llm:
   tools:
     claude-code:
-      supported_provider_types: [anthropic]
+      supported_provider_types: [anthropic-messages]
       model: opusplan
       # Each key → ANTHROPIC_DEFAULT_<KEY>_MODEL env var (opus/sonnet/haiku/fable).
       # Only emitted when an anthropic provider resolves (i.e. iv is enabled).
@@ -12,5 +12,5 @@ llm:
       providers:
         anthropic:
           provider: iv
-          type: anthropic
+          type: anthropic-messages
           auth_field: cc-auth-token

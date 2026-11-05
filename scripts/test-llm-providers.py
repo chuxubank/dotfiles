@@ -125,16 +125,16 @@ for tool in ("pi", "omp", "hermes", "opencode"):
 # is filtered, never silently rewritten to a different protocol.
 data = copy.deepcopy(fixture)
 data["default_providers"] = ["gateway", "other"]
-data["providers"]["gateway"]["api_types"] = ["openai", "anthropic", "gemini"]
+data["providers"]["gateway"]["api_types"] = ["openai-completions", "openai-responses", "anthropic-messages", "google-generative-ai"]
 data["tools"]["fixture"] = {
-    "supported_provider_types": ["anthropic"],
+    "supported_provider_types": ["anthropic-messages"],
     "enabled_models": ["other/*"],
 }
 result = render(data)
 assert set(result["providers"]) == {"gateway"}
-assert result["providers"]["gateway"]["type"] == "anthropic"
+assert result["providers"]["gateway"]["type"] == "anthropic-messages"
 assert result["enabled_models"] == ["gateway/*"]
-data["tools"]["fixture"]["providers"] = {"gateway": {"type": "openai"}}
+data["tools"]["fixture"]["providers"] = {"gateway": {"type": "openai-completions"}}
 assert render(data)["providers"] == {}
 
 print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, gates and policy")

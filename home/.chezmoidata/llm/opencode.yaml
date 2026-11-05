@@ -8,7 +8,7 @@ llm:
   #   Map:    providers:
   #             anthropic:
   #               provider: iv
-  #               type: anthropic
+  #               type: anthropic-messages
   #               auth_field: cc-auth-token
   tools:
     opencode:
@@ -27,7 +27,7 @@ llm:
           auth_field: codex-auth-token
         anthropic:
           provider: iv
-          type: anthropic
+          type: anthropic-messages
           models: false
           auth_field: cc-auth-token
         iv:

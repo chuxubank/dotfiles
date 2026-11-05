@@ -22,7 +22,7 @@
   {{- if $ep.base_url -}}
     {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
     {{- $transport := "chat_completions" -}}
-    {{- if eq $ep.type "anthropic" -}}
+    {{- if eq $ep.type "anthropic-messages" -}}
       {{- $transport = "anthropic_messages" -}}
     {{- end -}}
     {{- $entry := dict

@@ -42,7 +42,7 @@
                     anthropic:                    — alias differs from provider name
                       provider: iv
                       name: Anthropic             — optional display name override
-                      type: anthropic             — optional type override
+                      type: anthropic-messages    — optional type override
                       auth_field: cc-auth-token   — optional auth override
                       catalog: cursor             — llm.catalogs entry; its
                                                     data_set and
@@ -145,7 +145,7 @@
 
   {{- /* Some clients only speak a subset of protocols. Multi-protocol
          gateways declare api_types; a tool-level type override stays explicit. */ -}}
-  {{- $type := default (default "openai" (index $prov "type")) (index $ref "type") -}}
+  {{- $type := default (default "openai-completions" (index $prov "type")) (index $ref "type") -}}
   {{- $supported := default (list) (index $toolCfg "supported_provider_types") -}}
   {{- if and (gt (len $supported) 0) (not (has $type $supported)) (not (hasKey $ref "type")) -}}
     {{- range $candidate := default (list) (index $prov "api_types") -}}

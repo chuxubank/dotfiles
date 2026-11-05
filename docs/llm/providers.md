@@ -28,7 +28,10 @@ The merged references then pass through:
 - Provider host conditions and the `owner` tool switch.
 - The client's `supported_provider_types`. A gateway's `api_types` can supply a
   compatible protocol when its default is unsupported. An explicit reference
-  `type` is never silently changed.
+  `type` is never silently changed. Protocol ids are Pi's `KnownApi` names
+  (`openai-completions`, `openai-responses`, `anthropic-messages`,
+  `google-generative-ai`). `ollama` and `opencode` only select the model-list
+  fetch. Adapters translate those ids into the client's own field.
 - Per-tool provider policy, including the OpenRouter exclusion on Pi, OMP,
   Hermes and OpenCode. Defaults and sets cannot bypass it.
 

@@ -18,7 +18,7 @@
 {{- $anthropicResolved := false -}}
 {{- if $provider -}}
   {{- $ep := index $cfg.providers $provider -}}
-  {{- if ne $ep.type "anthropic" -}}{{- fail "claude-code requires an Anthropic Messages provider" -}}{{- end -}}
+  {{- if ne $ep.type "anthropic-messages" -}}{{- fail "claude-code requires an Anthropic Messages provider" -}}{{- end -}}
   {{- $anthropicResolved = true -}}
   {{- if $ep.base_url -}}{{- $_ := set $env "ANTHROPIC_BASE_URL" $ep.base_url -}}{{- end -}}
   {{- if $ep.auth_key -}}{{- $_ := set $env "ANTHROPIC_AUTH_TOKEN" $ep.auth_key -}}{{- end -}}

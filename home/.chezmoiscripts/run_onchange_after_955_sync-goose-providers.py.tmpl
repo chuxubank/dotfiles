@@ -10,11 +10,19 @@
       {{- $id := printf "custom_chezmoi_%s" $alias -}}
       {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
       {{- $base := $endpoint.api_base_url -}}
-      {{- if eq $ep.type "openai" -}}{{- $base = printf "%s/chat/completions" $base -}}
-      {{- else if eq $ep.type "anthropic" -}}{{- $base = printf "%s/v1/messages" (trimSuffix "/" $ep.base_url) -}}
-      {{- else if eq $ep.type "ollama" -}}{{- $base = $ep.base_url -}}{{- end -}}
+      {{- $engine := $ep.type -}}
+      {{- if eq $ep.type "openai-completions" -}}
+        {{- $base = printf "%s/chat/completions" $base -}}
+        {{- $engine = "openai" -}}
+      {{- else if eq $ep.type "anthropic-messages" -}}
+        {{- $base = printf "%s/v1/messages" (trimSuffix "/" $ep.base_url) -}}
+        {{- $engine = "anthropic" -}}
+      {{- else if eq $ep.type "ollama" -}}
+        {{- $base = $ep.base_url -}}
+        {{- $engine = "ollama" -}}
+      {{- end -}}
       {{- $def := dict
-        "name" $id "engine" $ep.type "display_name" $ep.display_name
+        "name" $id "engine" $engine "display_name" $ep.display_name
         "base_url" $base "models" (list) "dynamic_models" true
         "supports_streaming" true "requires_auth" false -}}
       {{- if hasKey $ep "headers" -}}{{- $_ := set $def "headers" $ep.headers -}}{{- end -}}

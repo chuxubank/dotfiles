@@ -1,7 +1,7 @@
 llm:
   tools:
     goose:
-      supported_provider_types: [openai, anthropic, ollama]
+      supported_provider_types: [openai-completions, anthropic-messages, ollama]
       # First resolved alias. The free model remains while magpie is off.
       model:
         - magpie/grok/${grok_primary}-build-fast

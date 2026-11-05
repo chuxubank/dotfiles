@@ -24,7 +24,7 @@
     {{- $baseURL = $endpoint.api_base_url -}}
   {{- end -}}
   {{- $isPiCompat := eq $ep.type "ollama" -}}
-  {{- $isAnthropicCompat := eq $ep.type "anthropic" -}}
+  {{- $isAnthropicCompat := eq $ep.type "anthropic-messages" -}}
   {{- $models := list -}}
   {{- if hasKey $ep "models" -}}
     {{- if eq (kindOf $ep.models) "slice" -}}

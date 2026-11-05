@@ -1,7 +1,7 @@
 llm:
   tools:
     aider:
-      supported_provider_types: [openai, anthropic, gemini, ollama]
+      supported_provider_types: [openai-completions, anthropic-messages, google-generative-ai, ollama]
       model: gemini-2.5-pro
       providers:
         gemini:

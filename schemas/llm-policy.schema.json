@@ -34,7 +34,7 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "enum": ["openai", "anthropic", "gemini", "ollama", "opencode"] }
+      "items": { "enum": ["openai-completions", "openai-responses", "anthropic-messages", "google-generative-ai", "ollama", "opencode"] }
     },
     "tool": {
       "type": "object",

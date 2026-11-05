@@ -21,18 +21,18 @@ base = {
     "providers": {
         "gateway": {
             "name": "Gateway", "base_url": "https://gateway.example",
-            "api_types": ["openai", "anthropic"],
+            "api_types": ["openai-completions", "anthropic-messages"],
             "models": ["vendor/model"],
             "auth": {"path": "Test/Gateway", "field": "gateway-key"},
         },
         "second": {"base_url": "https://second.example", "models": ["another/model"]},
-        "google": {"type": "gemini", "models": [], "base_url": "https://google.example"},
+        "google": {"type": "google-generative-ai", "models": [], "base_url": "https://google.example"},
         "openrouter": {"base_url": "https://openrouter.example"},
     },
     "tools": {
-        "aider": {"model": "gemini/native", "supported_provider_types": ["openai", "anthropic", "gemini", "ollama"]},
-        "goose": {"model": "openrouter/vendor/model", "supported_provider_types": ["openai", "anthropic", "ollama"], "providers": ["openrouter"]},
-        "claude-code": {"model": "opusplan", "supported_provider_types": ["anthropic"]},
+        "aider": {"model": "gemini/native", "supported_provider_types": ["openai-completions", "anthropic-messages", "google-generative-ai", "ollama"]},
+        "goose": {"model": "openrouter/vendor/model", "supported_provider_types": ["openai-completions", "anthropic-messages", "ollama"], "providers": ["openrouter"]},
+        "claude-code": {"model": "opusplan", "supported_provider_types": ["anthropic-messages"]},
     },
 }
 
@@ -138,7 +138,7 @@ with tempfile.TemporaryDirectory() as tmp:
         assert model["reasoning"] is False and "thinkingLevelMap" not in model and "thinking" not in model
 
     # Name-only consumers retain their existing contract.
-    template = '{{ includeTemplate "llm/fetch-models" (dict "type" "openai" "base_url" "https://offline.invalid" "auth_key" "" "cache_file" ' + json.dumps(str(model_cache)) + ') }}'
+    template = '{{ includeTemplate "llm/fetch-models" (dict "type" "openai-completions" "base_url" "https://offline.invalid" "auth_key" "" "cache_file" ' + json.dumps(str(model_cache)) + ') }}'
     names = subprocess.run(command, input=template, text=True, capture_output=True)
     assert names.returncode == 0, names.stderr
     assert json.loads(names.stdout) == {row["id"]: row.get("display_name", row["id"]) for row in rows}
@@ -197,7 +197,7 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg = json.loads(render(cc_path, llm, home))
     assert "ANTHROPIC_BASE_URL" not in cfg["env"] and cfg["model"] == "opusplan"
     native = copy.deepcopy(llm)
-    native["providers"]["native"] = {"type": "anthropic", "base_url": "https://native.example"}
+    native["providers"]["native"] = {"type": "anthropic-messages", "base_url": "https://native.example"}
     native["tools"]["claude-code"]["providers"] = {"anthropic": {"provider": "native"}}
     cfg = json.loads(render(cc_path, native, home))
     assert cfg["env"]["ANTHROPIC_BASE_URL"] == "https://native.example"
@@ -219,11 +219,11 @@ with tempfile.TemporaryDirectory() as tmp:
             "name": "Magpie",
             "base_url": "https://gateway.example",
             "owner": "magpie",
-            "api_types": ["openai", "anthropic", "gemini"],
+            "api_types": ["openai-completions", "openai-responses", "anthropic-messages", "google-generative-ai"],
             "auth": {"path": "Test/Magpie", "field": "gateway-key"},
         }},
         "tools": {"grok": {
-            "supported_provider_types": ["openai"],
+            "supported_provider_types": ["openai-completions", "openai-responses"],
             "model": [
                 "magpie/grok/${grok_primary}-build-fast@500k",
                 "${grok_primary}-build-fast",
@@ -296,7 +296,7 @@ command = "old"
     routed["providers"]["gateway"] = {
         "name": "Gateway",
         "base_url": "https://other.example",
-        "api_types": ["openai"],
+        "api_types": ["openai-completions"],
         "auth": {"path": "Test/Gateway", "field": "gateway-key"},
     }
     routed["tools"]["grok"]["model"] = [
@@ -339,8 +339,8 @@ command = "old"
             "gateway": {"base_url": "https://gateway.example", "models": False},
             "router": {"base_url": "https://openrouter.ai/api", "models": False},
             "local": {"type": "ollama", "base_url": "http://localhost:11434", "models": False},
-            "claude": {"type": "anthropic", "base_url": "https://anthropic.example", "models": False},
-            "gemini": {"type": "gemini", "base_url": "https://generativelanguage.googleapis.com", "models": False},
+            "claude": {"type": "anthropic-messages", "base_url": "https://anthropic.example", "models": False},
+            "gemini": {"type": "google-generative-ai", "base_url": "https://generativelanguage.googleapis.com", "models": False},
             "versioned": {"base_url": "https://integrate.api.nvidia.com/v1", "models": False},
         },
         "tools": {"craft-agents": {"model": "gateway/vendor/model"}},

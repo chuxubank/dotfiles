@@ -14,8 +14,12 @@
     {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
   {{- end -}}
   {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+  {{- /* LiteLLM names the vendor, not the protocol. */ -}}
   {{- $type := $ep.type -}}
-  {{- if eq $type "ollama" -}}{{- $type = "ollama_chat" -}}{{- end -}}
+  {{- if eq $type "openai-completions" -}}{{- $type = "openai" -}}
+  {{- else if eq $type "anthropic-messages" -}}{{- $type = "anthropic" -}}
+  {{- else if eq $type "google-generative-ai" -}}{{- $type = "gemini" -}}
+  {{- else if eq $type "ollama" -}}{{- $type = "ollama_chat" -}}{{- end -}}
   {{- $base := $endpoint.api_base_url -}}
   {{- if eq $ep.type "ollama" -}}{{- $base = $ep.base_url -}}{{- end -}}
   {{- range $id, $_ := $source -}}

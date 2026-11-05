@@ -1,9 +1,10 @@
 llm:
   tools:
     grok:
-      # OpenAI-shaped endpoints. The winning alias becomes the models
-      # endpoint, so its /v1/models list is the picker.
-      supported_provider_types: [openai]
+      # OpenAI-shaped endpoints. Completions and responses share the
+      # models list. The winning alias becomes that endpoint, so its
+      # /v1/models list is the picker.
+      supported_provider_types: [openai-completions, openai-responses]
       # First candidate whose alias resolved. The native Fast id has no
       # alias, so it is the default only when no earlier alias resolved.
       model:
