@@ -7,3 +7,6 @@ llm:
         gemini:
           provider: google
           auth_field: aider-gemini-api-key
+          # The list is the shared Gemini catalog. Aider's own key is only
+          # for inference; a render-time fetch of that list times out.
+          models_cache: google-models-api
