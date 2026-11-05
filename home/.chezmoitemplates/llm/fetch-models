@@ -109,6 +109,18 @@
       {{- $_ := set $model "reasoning_options" (list (dict "type" "effort" "values" $levels)) -}}
     {{- end -}}
     {{- /* Gateway pricing is USD/token; internal cost cards use USD/million. */ -}}
+    {{- /* Magpie advertises the upstream wire. Pi dispatches on that per model. */ -}}
+    {{- $nativeAPI := "" -}}
+    {{- range $endpoint := default (list) (index $raw "native_endpoints") -}}
+      {{- if not $nativeAPI -}}
+        {{- if hasSuffix "/responses" $endpoint -}}{{- $nativeAPI = "openai-responses" -}}
+        {{- else if hasSuffix "/chat/completions" $endpoint -}}{{- $nativeAPI = "openai-completions" -}}
+        {{- else if hasSuffix "/messages" $endpoint -}}{{- $nativeAPI = "anthropic-messages" -}}
+        {{- else if contains "generateContent" $endpoint -}}{{- $nativeAPI = "google-generative-ai" -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $nativeAPI -}}{{- $_ := set $model "api" $nativeAPI -}}{{- end -}}
     {{- if hasKey $raw "pricing" -}}
       {{- $cost := dict -}}
       {{- range $source, $target := dict "prompt" "input" "completion" "output" "input_cache_read" "cache_read" "input_cache_write" "cache_write" -}}

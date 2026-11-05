@@ -95,6 +95,8 @@
       {{- if hasKey $overrides $id -}}
         {{- $model = mergeOverwrite $model (deepCopy (index $overrides $id)) -}}
       {{- end -}}
+      {{- /* Only Pi dispatches on model.api. Other tools stay on the provider protocol. */ -}}
+      {{- if ne $tool "pi" -}}{{- $_ := set $model "api" $api -}}{{- end -}}
       {{- /* Inline Pi's single-consumer ProviderModelConfig projection.
              Pi takes long-context pricing as cost.tiers; OMP rows stay flat. */ -}}
       {{- $costOv := dict -}}
@@ -127,6 +129,17 @@
         "contextWindow" $contextWindow
         "maxTokens" $maxTokens
       -}}
+      {{- /* OpenAI protocols share the provider /v1 base. Messages and
+             generateContent need their own root. */ -}}
+      {{- if and (eq $tool "pi") (ne $model.api $api) $ep.base_url -}}
+        {{- $modelBase := $baseURL -}}
+        {{- if eq $model.api "anthropic-messages" -}}
+          {{- $modelBase = $ep.base_url -}}
+        {{- else if eq $model.api "google-generative-ai" -}}
+          {{- $modelBase = printf "%s/v1beta" (trimSuffix "/" $ep.base_url) -}}
+        {{- end -}}
+        {{- if ne $modelBase $baseURL -}}{{- $_ := set $entry "baseUrl" $modelBase -}}{{- end -}}
+      {{- end -}}
       {{- if and (eq true (index $model "reasoning")) (hasKey $discovered $id) -}}
         {{- range $option := default (list) (index $model "reasoning_options") -}}
           {{- if eq (index $option "type") "effort" -}}

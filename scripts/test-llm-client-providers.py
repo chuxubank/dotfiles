@@ -90,10 +90,12 @@ with tempfile.TemporaryDirectory() as tmp:
         "reasoning_levels": ["low", "high", "xhigh"],
         "pricing": {"prompt": "0.000002", "completion": "0.000006",
                     "input_cache_read": "0.0000005", "input_cache_write": "0.000003"},
+        "native_endpoints": ["/v1/responses"],
     }, {
         "id": "vendor/supported-levels", "context_length": 240000,
         "reasoning": True, "supported_reasoning_levels": [{"effort": "high"}],
-    }, {"id": "vendor/bare"}]
+        "native_endpoints": ["/v1/messages"],
+    }, {"id": "vendor/bare", "native_endpoints": ["/v1/chat/completions"]}]
     model_cache.write_text(json.dumps({"data": rows}))
     discovered = {
         "models": {},
@@ -118,8 +120,14 @@ with tempfile.TemporaryDirectory() as tmp:
         if tool == "pi":
             assert model["thinkingLevelMap"]["xhigh"] == "xhigh", model
             assert model["thinkingLevelMap"]["medium"] is None, model
+            assert model["api"] == "openai-responses" and "baseUrl" not in model, model
+            assert models["vendor/supported-levels"]["api"] == "anthropic-messages", models["vendor/supported-levels"]
+            assert models["vendor/supported-levels"]["baseUrl"] == "https://offline.invalid"
+            assert models["vendor/bare"]["api"] == "openai-completions" and "baseUrl" not in models["vendor/bare"]
         else:
             assert model["thinking"]["efforts"] == ["low", "high", "xhigh"], model
+            assert model["api"] == "openai-completions" and "baseUrl" not in model, model
+            assert models["vendor/supported-levels"]["api"] == "openai-completions"
         alternative = models["vendor/supported-levels"]
         assert alternative["contextWindow"] == 240000, alternative
         bare = models["vendor/bare"]
