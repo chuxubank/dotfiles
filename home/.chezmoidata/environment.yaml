@@ -188,6 +188,12 @@ environment:
         PASSWORD_STORE_DIR:
           homePath: [personal, pass]
 
+    # Profiles stay beside the chezmoi source. A run still chooses <name>.
+    - tool: mitmproxy
+      variables:
+        MITMPROXY_MOCK_DIR:
+          home: [.local, share, chezmoi, mitmproxy]
+
     # Bun's @cursor/sdk looks for tree-sitter next to the pi binary.
     # The natives live in this platform package.
     - tool: pi

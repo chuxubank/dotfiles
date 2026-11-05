@@ -5,7 +5,9 @@
     "file": "firmware_upgradable.json"
   },
   {
-    "pattern": ".*/remoteoperate/.*/ota"
+    "pattern": ".*/remoteoperate/.*/ota",
+    "handler": "empty",
+    "delay_seconds": 1
   },
   {
     "pattern": ".*/devices/capabilities\\?deviceType=lock.*",

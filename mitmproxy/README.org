@@ -2,22 +2,20 @@
 
 ** 启动
 
-使用 WireGuard 模式加载本地响应脚本：
+响应插件在 =mitmproxy-mock= skill 的 =scripts/map-local.py=。
+=MITMPROXY_MOCK_DIR= 是 profile 根目录。未设置 =mock_profile= 时使用 =HOST_ENV=：
 #+begin_src sh
-  mitmdump --mode wireguard -s ~/.local/share/chezmoi/mitmproxy/map-local.py
+  mitmdump --mode wireguard -s <skill>/scripts/map-local.py
 #+end_src
 
-通过 =HOST_ENV= 选择配置目录（默认 =aa=）：
-#+begin_src sh
-  HOST_ENV=iv mitmdump --mode wireguard -s ~/.local/share/chezmoi/mitmproxy/map-local.py
-#+end_src
+换一套 profile 时加 =--set mock_profile=<name>=。
 
 ** 配置
 
-配置相对于 =map-local.py= 所在目录：
-- =<HOST_ENV>/routes.json=：URL 匹配规则、响应文件和处理器名称。
-- =<HOST_ENV>/data/=：本地 JSON 响应文件。
-- =<HOST_ENV>/handlers.py=：可选的自定义处理器，以 =handle_= 为函数名前缀。
+=<name>= 是 =MITMPROXY_MOCK_DIR= 下的一个目录：
+- =routes.json=：URL 匹配规则、响应文件和处理器名称。
+- =data/=：本地 JSON 响应文件。
+- =handlers.py=：可选的自定义处理器，以 =handle_= 为函数名前缀。
 
 ** 客户端连接
 

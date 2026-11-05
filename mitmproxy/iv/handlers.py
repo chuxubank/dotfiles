@@ -1,7 +1,7 @@
 """Read-only, test-environment mocks for the three crush ritual reward UIs.
 
 No account/token logging, no real reward writes, no production interception.
-Loaded by map-local.py with HOST_ENV=iv. Each request rereads data/crush-ritual-scenario.json.
+Each request rereads data/crush-ritual-scenario.json.
 """
 import json
 import os
