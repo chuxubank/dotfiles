@@ -26,7 +26,7 @@ base = {
             "auth": {"path": "Test/Gateway", "field": "gateway-key"},
         },
         "second": {"base_url": "https://second.example", "models": ["another/model"]},
-        "google": {"type": "google-generative-ai", "models": [], "base_url": "https://google.example"},
+        "google": {"api_types": ["google-generative-ai"], "models": [], "base_url": "https://google.example"},
         "openrouter": {"base_url": "https://openrouter.example"},
     },
     "tools": {
@@ -197,7 +197,7 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg = json.loads(render(cc_path, llm, home))
     assert "ANTHROPIC_BASE_URL" not in cfg["env"] and cfg["model"] == "opusplan"
     native = copy.deepcopy(llm)
-    native["providers"]["native"] = {"type": "anthropic-messages", "base_url": "https://native.example"}
+    native["providers"]["native"] = {"api_types": ["anthropic-messages"], "base_url": "https://native.example"}
     native["tools"]["claude-code"]["providers"] = {"anthropic": {"provider": "native"}}
     cfg = json.loads(render(cc_path, native, home))
     assert cfg["env"]["ANTHROPIC_BASE_URL"] == "https://native.example"
@@ -338,9 +338,9 @@ command = "old"
         "providers": {
             "gateway": {"base_url": "https://gateway.example", "models": False},
             "router": {"base_url": "https://openrouter.ai/api", "models": False},
-            "local": {"type": "ollama", "base_url": "http://localhost:11434", "models": False},
-            "claude": {"type": "anthropic-messages", "base_url": "https://anthropic.example", "models": False},
-            "gemini": {"type": "google-generative-ai", "base_url": "https://generativelanguage.googleapis.com", "models": False},
+            "local": {"api_types": ["ollama"], "base_url": "http://localhost:11434", "models": False},
+            "claude": {"api_types": ["anthropic-messages"], "base_url": "https://anthropic.example", "models": False},
+            "gemini": {"api_types": ["google-generative-ai"], "base_url": "https://generativelanguage.googleapis.com", "models": False},
             "versioned": {"base_url": "https://integrate.api.nvidia.com/v1", "models": False},
         },
         "tools": {"craft-agents": {"model": "gateway/vendor/model"}},

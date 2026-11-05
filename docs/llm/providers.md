@@ -26,9 +26,11 @@ Use `exclude_providers` for that.
 The merged references then pass through:
 
 - Provider host conditions and the `owner` tool switch.
-- The client's `supported_provider_types`. A gateway's `api_types` can supply a
-  compatible protocol when its default is unsupported. An explicit reference
-  `type` is never silently changed. Protocol ids are Pi's `KnownApi` names
+- The client's `supported_provider_types`. A provider has no `type`: the
+  primary protocol is its first `api_types` entry, otherwise
+  `openai-completions`. Later entries supply a compatible protocol when the
+  client rejects the primary. An alias `type` pins the protocol and is never
+  silently changed. Protocol ids are Pi's `KnownApi` names
   (`openai-completions`, `openai-responses`, `anthropic-messages`,
   `google-generative-ai`). `ollama` and `opencode` only select the model-list
   fetch. Adapters translate those ids into the client's own field.

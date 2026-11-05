@@ -134,7 +134,12 @@ result = render(data)
 assert set(result["providers"]) == {"gateway"}
 assert result["providers"]["gateway"]["type"] == "anthropic-messages"
 assert result["enabled_models"] == ["gateway/*"]
+# The first api_types entry is the primary when the client accepts it.
+data["providers"]["gateway"]["api_types"] = ["anthropic-messages", "openai-completions"]
+data["tools"]["fixture"]["supported_provider_types"] = ["openai-completions", "anthropic-messages"]
+assert render(data)["providers"]["gateway"]["type"] == "anthropic-messages"
 data["tools"]["fixture"]["providers"] = {"gateway": {"type": "openai-completions"}}
+data["tools"]["fixture"]["supported_provider_types"] = ["anthropic-messages"]
 assert render(data)["providers"] == {}
 
 print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, gates and policy")

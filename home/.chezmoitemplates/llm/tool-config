@@ -42,7 +42,7 @@
                     anthropic:                    — alias differs from provider name
                       provider: iv
                       name: Anthropic             — optional display name override
-                      type: anthropic-messages    — optional type override
+                      type: anthropic-messages    — pin this alias; not renegotiated
                       auth_field: cc-auth-token   — optional auth override
                       catalog: cursor             — llm.catalogs entry; its
                                                     data_set and
@@ -51,8 +51,10 @@
        Shared defaults: llm.default_providers uses the same short/map forms.
        Merge order: defaults < provider_sets (in order) < tool providers.
        Tool exclude_providers removes aliases after all merges.
-       supported_provider_types filters incompatible protocols; api_types
-       on a provider lets a gateway negotiate a supported alternative.
+       supported_provider_types filters incompatible protocols. A provider
+       has no type: the primary is its first api_types entry, or
+       openai-completions. Later entries substitute when a client rejects
+       that primary. An alias type pins the protocol and is not renegotiated.
        A provider's `enabled_models` globs are appended as <alias>/<glob>.
           Sets:   provider_sets: [iv]             — aliases from llm.provider_sets;
                                                     a same-named `providers`
@@ -143,9 +145,16 @@
   {{- $provName := $ref.provider -}}
   {{- $prov := index $llmProviders $provName -}}
 
-  {{- /* Some clients only speak a subset of protocols. Multi-protocol
-         gateways declare api_types; a tool-level type override stays explicit. */ -}}
-  {{- $type := default (default "openai-completions" (index $prov "type")) (index $ref "type") -}}
+  {{- /* Providers have no type. The primary is the first api_types entry,
+         otherwise openai-completions. An alias type pins the protocol and
+         is not renegotiated. Later api_types entries are substitutes. */ -}}
+  {{- $type := "" -}}
+  {{- if hasKey $ref "type" -}}
+    {{- $type = index $ref "type" -}}
+  {{- else -}}
+    {{- $listed := default (list) (index $prov "api_types") -}}
+    {{- if gt (len $listed) 0 -}}{{- $type = index $listed 0 -}}{{- else -}}{{- $type = "openai-completions" -}}{{- end -}}
+  {{- end -}}
   {{- $supported := default (list) (index $toolCfg "supported_provider_types") -}}
   {{- if and (gt (len $supported) 0) (not (has $type $supported)) (not (hasKey $ref "type")) -}}
     {{- range $candidate := default (list) (index $prov "api_types") -}}

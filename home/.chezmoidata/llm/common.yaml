@@ -53,8 +53,11 @@ llm:
   # Tools override only `auth.field` to pick a different API key from the
   # same pass path; the base_url stays shared.
   #
-  # type: openai-completions (default) | openai-responses |
-  #       anthropic-messages | google-generative-ai | ollama | opencode
+  # Providers have no type. The primary protocol is the first api_types
+  # entry, otherwise openai-completions. Later entries are substitutes.
+  # An alias type pins one protocol and is not renegotiated.
+  #   openai-completions | openai-responses | anthropic-messages |
+  #   google-generative-ai | ollama | opencode
   #   Controls model list endpoint path and response parsing.
   #   ollama and opencode only select that fetch; they are not inference protocols.
   #
@@ -125,7 +128,7 @@ llm:
 
     google:
       name: Google
-      type: google-generative-ai
+      api_types: [google-generative-ai]
       base_url: "https://generativelanguage.googleapis.com"
       model_caches:
         google-models-api:
@@ -207,7 +210,7 @@ llm:
           roles: ["llm"]
 
     ollama:
-      type: ollama
+      api_types: [ollama]
       base_url: "http://localhost:11434"
       model_caches:
         ollama-models-api: {}
