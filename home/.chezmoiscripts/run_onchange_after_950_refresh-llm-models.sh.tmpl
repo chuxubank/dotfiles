@@ -101,6 +101,8 @@ refresh_models() {
       {{- $endpointInput = merge (deepCopy $provider) (dict "base_url" (printf "%s://%s.%s" (default "https" (index $provider "public_scheme")) (default "magpie" (index $provider "public_prefix")) $domain)) -}}
     {{- end -}}
   {{- end -}}
+  {{- /* Raw providers have no negotiated alias type; cache fetches use their primary protocol. */ -}}
+  {{- $endpointInput = mergeOverwrite (deepCopy $endpointInput) (dict "type" (first (default (list "openai-completions") (index $provider "api_types")))) -}}
   {{- $endpoint := includeTemplate "llm/model-endpoint" $endpointInput | fromJson -}}
   {{- $authPath := "" -}}
   {{- if hasKey $provider "auth" -}}{{- $authPath = $provider.auth.path -}}{{- end -}}

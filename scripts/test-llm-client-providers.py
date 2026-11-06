@@ -367,4 +367,79 @@ command = "old"
     winner = next(item for item in craft["llmConnections"] if item["slug"] == "gateway")
     assert winner["defaultModel"] == "vendor/model", winner
 
-print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints")
+# Cache refresh consumes raw providers, before tool-config negotiates an alias type.
+with tempfile.TemporaryDirectory() as directory:
+    home = Path(directory)
+    refresh_llm = {
+        "providers": {
+            "google": {
+                "api_types": ["google-generative-ai"],
+                "base_url": "https://generativelanguage.googleapis.com",
+                "auth": {"path": "Test/Google"},
+                "model_caches": {"google-models-api": {"auth_field": "gemini-api-key"}},
+            },
+            "google-openai": {
+                "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+                "auth": {"path": "Test/Google"},
+                "model_caches": {"google-openai-models-api": {"auth_field": "gemini-api-key"}},
+            },
+            "multi": {
+                "api_types": ["anthropic-messages", "openai-completions"],
+                "base_url": "https://multi.example",
+                "auth": {"path": "Test/Multi"},
+                "model_caches": {"iv-cc-models-api": {}},
+            },
+        },
+    }
+    script = render(
+        "home/.chezmoiscripts/run_onchange_after_950_refresh-llm-models.sh.tmpl",
+        refresh_llm, home,
+    )
+    assert '"https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000"' in script, script
+    assert '"query:key" "Test/Google" "gemini-api-key"' in script, script
+    assert '"https://multi.example/v1/models"' in script, script
+    subprocess.run(["sh", "-n"], input=script, text=True, check=True)
+
+    bindir = home / "bin"
+    bindir.mkdir()
+    pass_field = bindir / "pass-field"
+    pass_field.write_text("#!/bin/sh\nprintf '%s' fixture-key\n")
+    pass_field.chmod(0o755)
+    curl = bindir / "curl"
+    curl.write_text(
+        f"#!{sys.executable}\n"
+        "import json, os, sys\n"
+        "with open(os.environ['CURL_LOG'], 'a') as log:\n"
+        "    log.write(json.dumps(sys.argv[1:]) + '\\n')\n"
+        "if os.environ.get('CURL_FAIL'):\n"
+        "    print('curl: (22) The requested URL returned error: 401', file=sys.stderr)\n"
+        "    sys.exit(22)\n"
+        "print('{\"models\": []}')\n"
+    )
+    curl.chmod(0o755)
+    log = home / "curl-log"
+    env = {**os.environ, "PATH": f"{bindir}:{os.environ['PATH']}", "CURL_LOG": str(log), "CURL_FAIL": ""}
+    result = subprocess.run(["sh"], input=script, text=True, capture_output=True, env=env)
+    assert result.returncode == 0 and not result.stderr, result.stderr
+    calls = [json.loads(line) for line in log.read_text().splitlines()]
+    assert len(calls) == 3, calls
+    native = next(call for call in calls if "/v1beta/models?" in call[-1])
+    assert native[-1].endswith("?pageSize=1000&key=fixture-key"), native
+    assert "-H" not in native, native
+    compatible = next(call for call in calls if "/openai/models" in call[-1])
+    assert "Authorization: Bearer fixture-key" in compatible, compatible
+    multi = next(call for call in calls if "multi.example" in call[-1])
+    assert "Authorization: Bearer fixture-key" in multi, multi
+    caches = list((home / ".cache/llm/models").glob("*.json"))
+    assert len(caches) == 3, caches
+    for cache in caches:
+        cache.write_text("previous cache\n")
+    result = subprocess.run(
+        ["sh"], input=script, text=True, capture_output=True, env={**env, "CURL_FAIL": "1"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stderr.count("warning: failed to refresh provider=") == 3, result.stderr
+    assert all(cache.read_text() == "previous cache\n" for cache in caches)
+    assert not list((home / ".cache/llm/models").glob(".models.*"))
+
+print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints, model cache refresh")
