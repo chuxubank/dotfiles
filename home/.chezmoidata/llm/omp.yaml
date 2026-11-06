@@ -34,8 +34,7 @@ llm:
         # Explicit assignment lowers effort rather than inheriting @smol.
         tiny:
           - iv-codex/gpt-6-luna:low
-          - magpie/opencode-zen-free/deepseek-v4.1-flash-free
-          - xai-oauth/${grok_primary}:minimal
+          - xai-oauth/${grok_primary}:low
         plan:
           - iv-cc/${opus_primary}:xhigh
           - magpie/grok/${grok_primary}-build-fast

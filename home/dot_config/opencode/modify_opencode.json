@@ -16,6 +16,7 @@
   {{- /* Static models → use as-is; models: false → skip; otherwise fetch. */ -}}
   {{- $models := dict -}}
   {{- $modelMetadata := dict -}}
+  {{- $reasoningMeta := dict -}}
   {{- if hasKey $ep "model_metadata_args" -}}
     {{- $metadataArgs := index $ep "model_metadata_args" -}}
     {{- if hasKey $metadataMemo $metadataArgs -}}
@@ -30,7 +31,24 @@
   {{- if hasKey $ep "models" -}}
     {{- if ne (kindOf $ep.models) "bool" -}}{{- $source = $ep.models -}}{{- end -}}
   {{- else -}}
-    {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+    {{- /* Metadata carries reasoning_options. small_model cannot include a
+           #variant: OpenCode drops that string. The title agent then uses the
+           first of none, minimal, and low from the variants written below. */ -}}
+    {{- $detailed := includeTemplate "llm/fetch-models" (merge (dict "metadata" true) $ep) | fromJson -}}
+    {{- if gt (len $detailed) 0 -}}
+      {{- $reasoningMeta = $detailed -}}
+      {{- $named := dict -}}
+      {{- range $id, $meta := $detailed -}}
+        {{- $display := $id -}}
+        {{- if and (eq (kindOf $meta) "map") (hasKey $meta "name") -}}
+          {{- $display = index $meta "name" | toString -}}
+        {{- end -}}
+        {{- $_ := set $named $id $display -}}
+      {{- end -}}
+      {{- $source = $named -}}
+    {{- else -}}
+      {{- $source = includeTemplate "llm/fetch-models" $ep | fromJson -}}
+    {{- end -}}
   {{- end -}}
   {{- /* Declared models are an id list. fetch-models returns id → name.
          Dict keys must be strings, so a list index cannot be the id. */ -}}
@@ -51,6 +69,23 @@
   {{- range $id, $name := $source -}}
     {{- $model := dict "name" $name -}}
     {{- if hasKey $modelMetadata $id -}}{{- $model = mergeOverwrite (deepCopy (index $modelMetadata $id)) $model -}}{{- end -}}
+    {{- if not (hasKey $model "variants") -}}
+      {{- $meta := $model -}}
+      {{- if hasKey $reasoningMeta $id -}}{{- $meta = index $reasoningMeta $id -}}{{- end -}}
+      {{- if eq (kindOf $meta) "map" -}}
+        {{- $variants := dict -}}
+        {{- range $option := default (list) (index $meta "reasoning_options") -}}
+          {{- if and (eq (kindOf $option) "map") (eq (index $option "type") "effort") -}}
+            {{- range $level := default (list) (index $option "values") -}}
+              {{- if $level -}}
+                {{- $_ := set $variants ($level | toString) (dict "reasoningEffort" ($level | toString)) -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if gt (len $variants) 0 -}}{{- $_ := set $model "variants" $variants -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
     {{- /* Inline OpenCode's single-consumer schema allowlist projection. */ -}}
     {{- $projected := dict -}}
     {{- range $key := list "id" "name" "family" "release_date" "attachment" "reasoning" "temperature" "tool_call" "interleaved" "cost" "limit" "modalities" "status" "provider" "options" "headers" "variants" -}}

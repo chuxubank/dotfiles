@@ -28,7 +28,6 @@ llm:
         # cursor/* globs come from llm.providers.cursor.
       session_title_model:
         - iv/deepseek-v4-flash
-        - magpie/opencode-zen-free/deepseek-v4.1-flash-free
         - xai/${grok_primary}:low
       subagent_model:
         - iv-codex/${gpt_primary}
