@@ -155,7 +155,8 @@ assert "COPILOT_PROVIDER_BASE_URL" in copilot
 # iv and magpie are off on a ci host, so their auth commands are absent.
 if "codex-auth-token" in copilot or "gateway-key" in copilot:
     assert "pass-field" in copilot
-assert "custom_chezmoi_magpie" in goose and "github-copilot/gpt-6.1-sol" in goose
+assert "custom_chezmoi_iv-codex" in goose and "gpt-6.1-sol" in goose
+assert "custom_chezmoi_magpie" in goose and "grok/grok-4.7-build-fast@500k" in goose
 
 copilot_plan = zsh_eval(
     copilot,

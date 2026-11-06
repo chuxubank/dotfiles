@@ -42,7 +42,8 @@ excluded aliases do not contribute picker patterns; explicit patterns naming
 those aliases are removed too.
 
 Provider registration does not choose a default model. Model candidate lists
-select the first resolved alias as described in [model selection](model-roles.md).
+select the first resolved alias. A launch wrapper can replace that result;
+the full order is in [model selection](model-roles.md).
 `models: false` preserves the client's catalog; it does not disable the provider
 or suppress credential injection.
 

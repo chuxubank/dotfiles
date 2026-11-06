@@ -4,34 +4,66 @@
 
 - `home/.chezmoidata/llm/common.yaml`: shared model aliases and provider definitions.
 - `home/.chezmoidata/llm/<tool>.yaml`: model candidates, effort and picker patterns.
-- `home/.chezmoidata/llm/paths.yaml`: directory prefixes for the Pi and OMP
-  launch wrappers.
+- `home/.chezmoidata/llm/paths.yaml`: directory prefixes for the launch
+  wrappers.
 - `home/dot_omp/private_agent/modify_config.yml`: native role rendering and
   per-agent role assignments.
 
 Read those files for current assignments. This document describes how they
 are selected, not a second copy of the model table.
 
-## Selection flow
+## Selection order
 
-1. `llm/tool-config` merges provider references and applies host conditions,
-   owner switches, exclusions and protocol compatibility. See
+Rendering and launch are separate. Rendering decides which aliases and
+candidates exist. A `~/bin` wrapper can replace only the new session's
+model.
+
+`llm/tool-config` renders in this order:
+
+1. Merge provider references, then apply host conditions, owner switches,
+   exclusions and protocol compatibility. The merge order is in
    [provider resolution](providers.md).
-2. Shared model aliases are expanded in each candidate.
-3. Each candidate list selects the first entry whose provider alias resolved.
-   This happens during rendering; it does not probe model availability or
-   provide request-time failover when an endpoint fails.
-4. The tool's template writes the selected model into its native config.
+2. Expand shared model aliases in each candidate.
+3. Keep the first candidate whose provider alias resolved. Rendering does
+   not probe availability and does not fail over when a request fails.
+4. The tool template writes that model into its native config.
 
-An inherited provider only makes models available. To prefer it, place a
-qualified model reference in the tool's candidate list. Disabling that
-provider lets selection continue through the remaining candidates.
+An inherited provider only makes models available. Prefer it by placing a
+qualified reference in the candidate list. Disabling that provider continues
+through the remaining candidates.
+
+For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
+`goose`, and `copilot` then choose in this order:
+
+1. Argv that already selects a session: `--model` or `--provider`, resume,
+   continue, session, fork, `--help`, `--version`, or a subcommand. The
+   wrapper leaves it. OMP `acp` and `launch`, OpenCode `acp` and `run`, and
+   Grok `agent` are still new sessions. Goose inserts flags only after
+   `session` or `run`.
+2. A project pin. Pi reads `.pi/settings.json` `defaultModel`. OMP reads
+   `.omp/config.yml` `modelRoles.default`. No other tool has this pin.
+3. The longest `paths.yaml` prefix that contains the startup directory.
+   OMP and Grok `--cwd`, and OpenCode's project argument, select that
+   directory; otherwise it is the working directory. `model` is the
+   qualified id. `tools.<command>` replaces it when that CLI spells the
+   provider or the id differently. Grok has one applied endpoint, so its
+   prefix id must exist on that catalog. Goose's `provider` is the
+   `custom_chezmoi_` id and its `model` is the upstream id.
+4. No matching prefix. Copilot still resolves its own candidate list and
+   exports that alias. The other wrappers pass no `--model`, so the
+   rendered default remains.
+
+The wrapper does not change other OMP roles or Pi's separate lists. An
+unknown id, or a Copilot alias that did not resolve, fails the launch. The
+real binary's absolute path skips the wrapper. So does a checkout outside
+the prefixes, including `path.data.worktree`.
 
 Pi selects its primary model, session-title model, subagent model, and
-web-search summary model from separate lists in `pi.yaml`. OMP instead exposes named roles to its call sites.
-Plugin enablement is separate from provider resolution: an alias for an
-extension-backed provider does not load that extension. Check
-`home/.chezmoidata/plugins/pi.yaml` when changing such candidates.
+web-search summary model from separate lists in `pi.yaml`. OMP exposes
+named roles to its call sites. Plugin enablement is separate from provider
+resolution: an alias for an extension-backed provider does not load that
+extension. Check `home/.chezmoidata/plugins/pi.yaml` when changing such
+candidates.
 
 ## OMP role policy
 
@@ -62,32 +94,6 @@ work can use the active model without a separate assignment.
 Per-agent overrides use role aliases rather than model ids. This reuses the
 same host selection instead of introducing another model table. Their mapping
 and the model-cycle order belong to `modify_config.yml`.
-
-## Directory defaults
-
-`llm/paths.yaml` assigns a model to a `path.toml` prefix. `model` is the Pi, OMP, OpenCode, and Copilot id. A `tools` entry
-replaces it for a command whose CLI uses a different spelling. `~/bin` wrappers for `pi`, `omp`,
-`opencode`, `grok`, `goose`, and `copilot` are ahead
-of the real binaries on `PATH` and exec those binaries. The longest prefix
-containing the startup directory wins. OMP and Grok `--cwd`, and OpenCode's
-project argument, select that directory; otherwise it is the process working
-directory. Goose inserts `--provider` and `--model` after `session` or `run`.
-
-The wrapper passes the model only for a new session. It leaves the rendered
-global default, other OMP roles, and Pi's subagent model alone. These argv
-shapes are not rewritten: an existing `--model` or `--provider`, resume,
-continue, session, and fork flags, `--help` / `--version`, and a subcommand.
-Session entry points still receive the prefix model: OMP `acp` and `launch`,
-OpenCode `acp` and `run`, and Grok `agent`. A project
-`.pi/settings.json` `defaultModel` or `.omp/config.yml` `modelRoles.default`
-wins over the prefix. A directory outside every prefix keeps that global default. Copilot
-still applies it: the wrapper resolves the qualified id against
-`llm/copilot.yaml` and exports `COPILOT_PROVIDER_*` for that alias. The
-other wrappers pass no `--model`. An unknown id, or a Copilot alias that
-did not resolve, fails the launch instead of falling through.
-
-Invoking the real binary by its absolute path skips the wrapper. Checkouts
-outside the configured prefixes, including `path.data.worktree`, do too.
 
 ## Changing a selection
 

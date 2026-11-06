@@ -6,4 +6,7 @@ llm:
       model:
         - magpie/grok/${grok_primary}-build-fast
         - openrouter/z-ai/glm-4.5-air:free
+      # IV aliases come from the shared set. Goose writes one custom
+      # provider per alias; this list is only the extra provider.
+      provider_sets: [iv]
       providers: [openrouter]
