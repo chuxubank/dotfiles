@@ -27,8 +27,8 @@ An inherited provider only makes models available. To prefer it, place a
 qualified model reference in the tool's candidate list. Disabling that
 provider lets selection continue through the remaining candidates.
 
-Pi selects its primary model, session-title model and subagent model from
-separate lists in `pi.yaml`. OMP instead exposes named roles to its call sites.
+Pi selects its primary model, session-title model, subagent model, and
+web-search summary model from separate lists in `pi.yaml`. OMP instead exposes named roles to its call sites.
 Plugin enablement is separate from provider resolution: an alias for an
 extension-backed provider does not load that extension. Check
 `home/.chezmoidata/plugins/pi.yaml` when changing such candidates.

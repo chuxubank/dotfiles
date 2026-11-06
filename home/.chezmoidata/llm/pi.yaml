@@ -33,6 +33,11 @@ llm:
         - iv-codex/${gpt_primary}
         - magpie/grok/${grok_primary}-build-fast
         - xai/${grok_primary}
+      # One string in web-search.json. pi-web-access does not try the next
+      # candidate when that call fails, so the order is resolved here.
+      search_summary_model:
+        - magpie/grok/${grok_primary}
+        - xai/${grok_primary}
       provider_sets: [iv]
       providers:
         # Fable's adaptive reasoning is handled server-side.

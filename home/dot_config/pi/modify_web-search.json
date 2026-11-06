@@ -3,14 +3,24 @@
 {{- /* pi-web-access — schema: npm:pi-web-access README Configuration
        Dest is ~/.config/pi/web-search.json because this repo exports
        XDG_CONFIG_HOME and getWebSearchConfigDir() prefers it over ~/.pi.
-       A modify-template so API keys and /curator runtime writes survive. */ -}}
+       A modify-template so API keys and /curator runtime writes survive.
+       summaryModel comes from llm/pi.yaml search_summary_model. The
+       extension keeps that one string and does not fail over at request
+       time. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "pi") .) | fromJson -}}
+{{- $aliases := default dict .llm.models -}}
+{{- $aliasSet := dict -}}
+{{- range $alias, $_ := $cfg.providers -}}{{- $_ := set $aliasSet $alias true -}}{{- end -}}
+{{- $summaryCandidates := list -}}
+{{- range $candidate := default (list "xai/${grok_primary}") (index (index .llm.tools "pi") "search_summary_model") -}}
+  {{- $summaryCandidates = append $summaryCandidates (includeTemplate "llm/resolve-model-alias" (dict "model" $candidate "aliases" $aliases)) -}}
+{{- end -}}
+{{- $summaryModel := includeTemplate "llm/pick-model" (dict "models" $summaryCandidates "providers" $aliasSet) -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
-    "summaryModel" (includeTemplate "llm/resolve-model-alias" (dict
-      "model" "xai/${grok_primary}"
-      "aliases" (default dict .llm.models)))
+    "summaryModel" $summaryModel
     "workflow" "auto-summary"
     "autoOpenBrowser" false)
 ) -}}
