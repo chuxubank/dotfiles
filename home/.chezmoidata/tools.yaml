@@ -241,6 +241,8 @@ tools:
           - ".local/bin/hermes-agent"
           - ".local/bin/hermes-acp"
 
+  # Formula, herdrm, and the official herdr-app cask. The cask is
+  # arm64-only and self-updates. Its config is not .config/herdr.
   herdr:
     when: *disabled
     remove:
@@ -248,6 +250,10 @@ tools:
       - ".config/herdr/plugins/config/herdr-spreader/config.yaml"
     purge:
       - ".config/herdr/**"
+      - ".config/herdr-app/**"
+      # Exact file. Preferences is shared, so a string purge would ignore it.
+      - paths:
+          - "Library/Preferences/dev.herdr.app.plist"
 
   # Mac App Store app installed through brew mas, plus the managed config and
   # the macOS import helper. The helper is a bin/ script, so it is gated in
@@ -519,6 +525,11 @@ tools:
     when: *iv_only
 
   sim-use:
+    when: *disabled
+
+  # Stencil's neoterminal, from omp's author. Closed beta: no public
+  # package. tern.build is a different product and is not this switch.
+  tern:
     when: *disabled
 
   termio:

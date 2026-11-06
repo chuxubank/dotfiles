@@ -61,6 +61,7 @@ casks = [
   "gimp",
   { name = "grok-bot", owner = "grok" },
   { name = "grok-build", owner = "grok" },
+  { name = "herdr-app", owner = "herdr" },
   { name = "owo-network/brew/herdrm", owner = "herdr" },
   "iina",
   "inkscape",
