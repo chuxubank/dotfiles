@@ -6,13 +6,10 @@ llm:
         - magpie/grok/${grok_primary}-build-fast
         - xai-oauth/${grok_primary}
       reasoning_effort: high
+      # IV aliases come from the shared set. Hermes emits each alias
+      # that has an endpoint; this map is only the extra provider.
+      provider_sets: [iv]
       providers:
-        # OpenAI-compatible API providers are emitted as named Hermes custom
-        # providers. Keep the IV endpoint and credentials in the shared
-        # provider definition; this file only chooses its auth variant.
-        iv-codex:
-          provider: iv
-          auth_field: codex-auth-token
         # Hermes owns this provider's OAuth flow and bundled model catalog.
         # models: false keeps llm/tool-config from trying to enumerate it.
         xai-oauth:

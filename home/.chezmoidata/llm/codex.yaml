@@ -7,16 +7,14 @@ llm:
         - magpie/grok/${grok_primary}-build-fast
         - openai/${gpt_primary}
       reasoning_effort: high
+      # IV aliases come from the shared set. Codex writes every alias with
+      # the responses wire, so iv-cc stays completions and keeps /v1.
+      # iv-anthropic is messages-only and is not representable here.
+      provider_sets: [iv]
+      exclude_providers: [iv-anthropic]
       providers:
-        iv:
-          provider: iv
-          auth_field: default-auth-token
-        iv-codex:
-          provider: iv
-          auth_field: codex-auth-token
         iv-cc:
-          provider: iv
-          auth_field: cc-auth-token
+          type: openai-completions
         openai:
           provider: openai
         huggingface:
