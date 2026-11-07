@@ -5,10 +5,12 @@
 {{- end }}
 
 {{- if or (eq .chezmoi.os "darwin") (eq .chezmoi.os "linux") (eq .chezmoi.os "windows") }}
+{{/* The URL stays .../latest/..., so chezmoi re-downloads only when refreshPeriod elapses. */}}
 ["android"]
     type = "file"
     executable = true
     url = "https://dl.google.com/android/cli/latest/{{ if eq .chezmoi.os "linux" }}linux_x86_64{{ else if eq .chezmoi.os "windows" }}windows_x86_64{{ else }}darwin_arm64{{ end }}/android{{ if eq .chezmoi.os "windows" }}.exe{{ end }}"
+    refreshPeriod = "336h"
 {{- end }}
 
 {{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") }}
