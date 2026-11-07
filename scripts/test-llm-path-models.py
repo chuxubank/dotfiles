@@ -56,17 +56,18 @@ def zsh_eval(script, body):
     return result.stdout
 
 
-fail([{"path": "Developer/Personal", "model": "iv-codex/gpt-6.1-sol"}], "path must be a path.toml key list")
-fail([{"path": ["workspace", "missing"], "model": "iv-codex/gpt-6.1-sol"}], "unknown path workspace.missing")
+fail([{"path": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "paths must be a list of path.toml key lists")
+fail([{"paths": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "each paths entry must be a path.toml key list")
+fail([{"paths": [["workspace", "missing"]], "model": "iv-codex/gpt-6.1-sol"}], "unknown path workspace.missing")
 fail(
     [
-        {"path": ["workspace", "iv"], "model": "iv-codex/${gpt_primary}"},
-        {"path": ["workspace", "iv"], "model": "iv-codex/${gpt_primary}"},
+        {"paths": [["workspace", "iv"]], "model": "iv-codex/${gpt_primary}"},
+        {"paths": [["workspace", "iv"]], "model": "iv-codex/${gpt_primary}"},
     ],
     "duplicate prefix",
 )
-fail([{"path": ["workspace", "iv"], "model": "iv-codex/${missing_model}"}], "unknown alias")
-fail([{"path": ["workspace", "iv"], "model": "gpt-6.1-sol"}], "must be alias/id")
+fail([{"paths": [["workspace", "iv"]], "model": "iv-codex/${missing_model}"}], "unknown alias")
+fail([{"paths": [["workspace", "iv"]], "model": "gpt-6.1-sol"}], "must be alias/id")
 
 pi = render("pi")
 omp = render("omp")
@@ -88,8 +89,10 @@ done
     )
     rows = dict(line.rsplit(" ", 1) for line in listing.splitlines() if line.startswith("/"))
     personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
+    oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
     iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
     assert rows[personal_prefix] == personal
+    assert rows[oss_prefix] == personal
     assert rows[iv_prefix] == iv
     chosen = zsh_eval(
         script,
@@ -97,11 +100,12 @@ done
         + f"""
 show {json.dumps(personal_prefix + "/blog")}
 show {json.dumps(personal_prefix + "ity/blog")}
+show {json.dumps(oss_prefix + "/luvus")}
 show {json.dumps(iv_prefix + "/ivc")}
 show /tmp
 """,
     ).splitlines()
-    assert chosen == [f"[{personal}]", "[]", f"[{iv}]", "[]"]
+    assert chosen == [f"[{personal}]", "[]", f"[{personal}]", f"[{iv}]", "[]"]
 
 skip = zsh_eval(
     omp,
@@ -149,6 +153,20 @@ assert "iv-codex/gpt-6.1-sol" in opencode
 assert "openai/gpt-6.1-sol" not in opencode
 assert personal in opencode
 assert "github-copilot/gpt-6.1-sol" in grok and "grok/grok-4.7-build-fast@500k" in grok
+grok_rows = dict(
+    line.rsplit(" ", 1)
+    for line in zsh_eval(
+        grok,
+        r"""
+for (( i = 1; i <= $#PATH_MODEL_PREFIXES; i++ )); do
+  print -r -- "$PATH_MODEL_PREFIXES[i] $PATH_MODEL_MODELS[i]"
+done
+""",
+    ).splitlines()
+    if line.startswith("/")
+)
+grok_oss = next(prefix for prefix in grok_rows if prefix.endswith("/Developer/OpenSource"))
+assert grok_rows[grok_oss] == "grok/grok-4.7-build-fast@500k"
 assert "iv-codex/gpt-6.1-sol" in copilot
 assert personal in copilot
 assert "COPILOT_PROVIDER_BASE_URL" in copilot

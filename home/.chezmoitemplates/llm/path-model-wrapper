@@ -1,7 +1,8 @@
 {{- /* llm/path-model-wrapper — ~/bin launch wrappers.
        Input: full chezmoi context plus tool.
-       llm.path_models: path is a path.toml key list. model is the Pi/OMP
-       ref. tools.<name> replaces it for that command. ${aliases} expand. */ -}}
+       llm.path_models: paths is a list of path.toml key lists that share
+       one model. model is the Pi/OMP ref. tools.<name> replaces it for that
+       command. ${aliases} expand. */ -}}
 {{- $tool := .tool -}}
 {{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" -}}
 {{- if not (hasKey $known $tool) -}}
@@ -18,24 +19,13 @@
 {{- $rules := list -}}
 {{- $seen := dict -}}
 {{- range $rule := default (list) $.llm.path_models -}}
-  {{- if ne (kindOf $rule.path) "slice" -}}
-    {{- fail "llm/path-model-wrapper: path must be a path.toml key list" -}}
+  {{- if not (hasKey $rule "paths") -}}
+    {{- fail "llm/path-model-wrapper: paths must be a list of path.toml key lists" -}}
   {{- end -}}
-  {{- $node := $.path -}}
-  {{- range $key := $rule.path -}}
-    {{- if not $node -}}
-      {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $rule.path)) -}}
-    {{- end -}}
-    {{- $node = index $node $key -}}
+  {{- $paths := index $rule "paths" -}}
+  {{- if or (not $paths) (ne (kindOf $paths) "slice") -}}
+    {{- fail "llm/path-model-wrapper: paths must be a list of path.toml key lists" -}}
   {{- end -}}
-  {{- if not $node -}}
-    {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $rule.path)) -}}
-  {{- end -}}
-  {{- $prefix := clean (joinPath $.chezmoi.homeDir $node) -}}
-  {{- if hasKey $seen $prefix -}}
-    {{- fail (printf "llm/path-model-wrapper: duplicate prefix %s" $prefix) -}}
-  {{- end -}}
-  {{- $_ := set $seen $prefix true -}}
   {{- $raw := $rule.model -}}
   {{- $provider := "" -}}
   {{- $tools := dict -}}
@@ -56,15 +46,38 @@
   {{- else if not (or (eq $tool "pi") (eq $tool "omp") (eq $tool "copilot") (eq $tool "opencode")) -}}
     {{- $raw = "" -}}
   {{- end -}}
+  {{- $model := "" -}}
   {{- if $raw -}}
-    {{- $model := includeTemplate "llm/resolve-model-alias" (dict "model" $raw "aliases" $.llm.models) -}}
+    {{- $model = includeTemplate "llm/resolve-model-alias" (dict "model" $raw "aliases" $.llm.models) -}}
     {{- if and (or (eq $tool "pi") (eq $tool "omp")) (not (contains "/" $model)) -}}
       {{- fail (printf "llm/path-model-wrapper: %s must be alias/id" $raw) -}}
     {{- end -}}
     {{- if $provider -}}
       {{- $provider = includeTemplate "llm/resolve-model-alias" (dict "model" $provider "aliases" $.llm.models) -}}
     {{- end -}}
-    {{- $rules = append $rules (dict "prefix" $prefix "model" $model "provider" $provider) -}}
+  {{- end -}}
+  {{- range $path := $paths -}}
+    {{- if or (not $path) (ne (kindOf $path) "slice") -}}
+      {{- fail "llm/path-model-wrapper: each paths entry must be a path.toml key list" -}}
+    {{- end -}}
+    {{- $node := $.path -}}
+    {{- range $key := $path -}}
+      {{- if not $node -}}
+        {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $path)) -}}
+      {{- end -}}
+      {{- $node = index $node $key -}}
+    {{- end -}}
+    {{- if not $node -}}
+      {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $path)) -}}
+    {{- end -}}
+    {{- $prefix := clean (joinPath $.chezmoi.homeDir $node) -}}
+    {{- if hasKey $seen $prefix -}}
+      {{- fail (printf "llm/path-model-wrapper: duplicate prefix %s" $prefix) -}}
+    {{- end -}}
+    {{- $_ := set $seen $prefix true -}}
+    {{- if $model -}}
+      {{- $rules = append $rules (dict "prefix" $prefix "model" $model "provider" $provider) -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 #!/usr/bin/env zsh
