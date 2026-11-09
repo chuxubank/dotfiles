@@ -499,6 +499,26 @@ tools:
       - ".pi/**"
       - ".config/pi/**"
 
+  # Cask plus pinkyctl. auto_updates, so brew upgrade leaves a current copy
+  # alone. The cask requires macOS 13. Zap paths are the cask's; Preferences
+  # is shared, so the plist is an exact path.
+  pinky:
+    when:
+      enabled:
+        os:
+          type: darwin
+          version: ">=13"
+      disabled:
+        host_env: [ci]
+    purge:
+      - "Library/Application Support/Pinky/**"
+      - "Library/Caches/app.pinky.desktop/**"
+      - "Library/HTTPStorages/app.pinky.desktop/**"
+      - "Library/Logs/Pinky/**"
+      - "Library/Saved Application State/app.pinky.desktop.savedState/**"
+      - paths:
+          - "Library/Preferences/app.pinky.desktop.plist"
+
   rclone:
     when: *non_ci
     remove:

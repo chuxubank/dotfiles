@@ -16,6 +16,7 @@ casks = [
   { name = "cursor", owner = "cursor" },
   { name = "cursor-cli", owner = "cursor" },
   "d12frosted/emacs-plus/emacs-plus-app",
+  { name = "diygod/tap/pinky", owner = "pinky" },
   "dorso",
   "font-cascadia-code",
   "font-dejavu",

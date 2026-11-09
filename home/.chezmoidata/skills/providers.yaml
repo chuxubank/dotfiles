@@ -96,6 +96,11 @@ skills:
           disabled:
             host_env: ci
 
+      # The guide Connect would copy. Declared here so chezmoi stays the writer.
+      - name: pinky
+        source: DIYgod/pinky/docs
+        owner: pinky
+
       - name: ["cli-creator", "figma-implement-design"]
         source: openai/skills
         when:

@@ -222,6 +222,18 @@ mcp:
         cmd: ~/bin/iphone-use-mcp
         timeout: 30
         tool_timeout: 120
+    # pinkyctl, not pinky: coreutils owns that name. Settings › Agents ›
+    # Connect rewrites the MCP files this repo renders; leave Connect unused.
+    - name: Pinky
+      owner: pinky
+      description: Operate a real iPhone or Android phone through Pinky's gateway. Approvals run in the app. pinkyctl starts the local app when no gateway is running.
+      execution:
+        type: stdio
+        cmd: pinkyctl
+        args:
+          - mcp
+        timeout: 60
+        tool_timeout: 180
     - name: JetBrains MCP
       # Pi's built-in MCP does not support legacy SSE; mcp/pi skips this entry.
       # Replace /sse with a verified streamable HTTP endpoint when available.
