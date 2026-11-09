@@ -77,6 +77,9 @@ subprocess.run([zsh, "-n", "-c", omp], check=True)
 
 personal = "magpie/grok/grok-4.7-build-fast@500k"
 iv = "iv-codex/gpt-6.1-sol"
+# [chezmoi, workingTree] is the source passed to execute-template, not a
+# path.toml location. CI checks out somewhere other than ~/.local/share/chezmoi.
+working_tree = os.path.normpath(run("{{- .chezmoi.workingTree -}}").strip())
 for script in (pi, omp):
     assert personal in script and iv in script
     listing = zsh_eval(
@@ -89,7 +92,9 @@ done
 """,
     )
     rows = dict(line.rsplit(" ", 1) for line in listing.splitlines() if line.startswith("/"))
-    chezmoi_prefix = next(prefix for prefix in rows if prefix.endswith("/.local/share/chezmoi"))
+    chezmoi_matches = [prefix for prefix in rows if os.path.normpath(prefix) == working_tree]
+    assert chezmoi_matches, (working_tree, sorted(rows))
+    chezmoi_prefix = chezmoi_matches[0]
     personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
     oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
     iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
