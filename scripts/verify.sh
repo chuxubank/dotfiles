@@ -96,30 +96,34 @@ if ! check_schema --builtin-schema vendor.github-workflows \
 	failed=1
 fi
 
-if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$SOURCE/scripts/check-integration-semantics.py" "$SOURCE"; then
-	failed=1
-fi
-if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$SOURCE/scripts/check-plugin-manager-semantics.py" "$SOURCE"; then
-	failed=1
-fi
-if ! python3 "$SOURCE/scripts/test-integration-engine.py" "$SOURCE"; then
-	failed=1
-fi
-if ! python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"; then
-	failed=1
-fi
-for test in test-hermes-setup.py test-tool-setup.py test-tool-purge.py test-tool-upgrades.py test-llm-providers.py test-llm-client-providers.py test-llm-path-models.py; do
-	if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-		python3 "$SOURCE/scripts/$test" "$SOURCE"; then
+# Independent of each other. The state db is single-writer, so each job gets
+# a copy; the HTTP cache is safe to share.
+: >"$tmpdir/py.jobs"
+start_py() {
+	_log=$tmpdir/py.$1.log
+	_copy=$tmpdir/py.$1.boltdb
+	shift
+	if [ -f "$state" ]; then
+		cp "$state" "$_copy"
+	fi
+	(
+		CHEZMOI_VERIFY_STATE="$_copy" CHEZMOI_VERIFY_CACHE="$cache" "$@"
+	) >"$_log" 2>&1 &
+	printf '%s|%s\n' "$!" "$_log" >>"$tmpdir/py.jobs"
+}
+start_py integration-semantics python3 "$SOURCE/scripts/check-integration-semantics.py" "$SOURCE"
+start_py plugin-manager-semantics python3 "$SOURCE/scripts/check-plugin-manager-semantics.py" "$SOURCE"
+start_py integration-engine python3 "$SOURCE/scripts/test-integration-engine.py" "$SOURCE"
+start_py plugin-engine python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"
+for test in test-hermes-setup.py test-tool-setup.py test-tool-purge.py test-tool-upgrades.py test-llm-providers.py test-llm-client-providers.py test-llm-path-models.py test-agent-browser-setup.py; do
+	start_py "${test%.py}" python3 "$SOURCE/scripts/$test" "$SOURCE"
+done
+while IFS='|' read -r pid log; do
+	if ! wait "$pid"; then
 		failed=1
 	fi
-done
-if ! CHEZMOI_VERIFY_STATE="$state" CHEZMOI_VERIFY_CACHE="$cache" \
-	python3 "$SOURCE/scripts/test-agent-browser-setup.py" "$SOURCE"; then
-	failed=1
-fi
+	cat "$log"
+done <"$tmpdir/py.jobs"
 
 if ! python3 - "$SOURCE" <<'PY'; then
 import re
@@ -212,12 +216,23 @@ check_shell() {
 
 	case $interp in
 	sh | bash)
-		if ! shellcheck --severity=warning --shell="$interp" "$file"; then
-			echo "verify: shellcheck failed: $src" >&2
-			mark_syntax_failed
-		fi
+		printf '%s\n' "$file" >>"$tmpdir/shellcheck.$interp"
 		;;
 	esac
+}
+
+flush_shellcheck() {
+	interp=$1
+	list=$tmpdir/shellcheck.$interp
+	[ -s "$list" ] || return 0
+	set --
+	while IFS= read -r file; do
+		set -- "$@" "$file"
+	done <"$list"
+	if ! shellcheck --severity=warning --shell="$interp" "$@"; then
+		echo "verify: shellcheck ($interp) failed" >&2
+		mark_syntax_failed
+	fi
 }
 
 check_python() {
@@ -319,14 +334,22 @@ import sys
 from pathlib import Path
 
 source, state, cache, render_dir = map(Path, sys.argv[1:])
-templates = sorted((source / "home").rglob("*.tmpl"))
 
+def is_script(template: Path) -> bool:
+    name = template.name
+    if name.startswith(("executable_", "run_")):
+        return True
+    return b"#!" in template.read_bytes()
 
-def render(index_and_template):
-    index, template = index_and_template
-    worker = render_dir / str(index)
-    worker.mkdir()
-    worker_state = worker / "chezmoistate.boltdb"
+# Only scripts are syntax-checked. A render failure of anything else is
+# ignored later, so paying for it does not change the result.
+templates = [path for path in sorted((source / "home").rglob("*.tmpl")) if is_script(path)]
+
+def render(template):
+    rel = template.relative_to(source).as_posix()
+    worker = render_dir / rel
+    worker.parent.mkdir(parents=True, exist_ok=True)
+    worker_state = worker.with_suffix(worker.suffix + ".boltdb")
     if state.exists():
         shutil.copy2(state, worker_state)
     result = subprocess.run(
@@ -335,7 +358,7 @@ def render(index_and_template):
             "--persistent-state",
             str(worker_state),
             "--cache",
-            str(worker / "cache"),
+            str(cache),
             "execute-template",
             "--source",
             str(source),
@@ -344,23 +367,24 @@ def render(index_and_template):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    (worker / "output").write_bytes(result.stdout)
-    (worker / "stderr").write_bytes(result.stderr)
-    return index, template.relative_to(source).as_posix(), result.returncode
+    worker.write_bytes(result.stdout)
+    worker.with_suffix(worker.suffix + ".stderr").write_bytes(result.stderr)
+    return rel, result.returncode
 
-with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-    results = list(executor.map(render, enumerate(templates)))
+workers = min(8, len(templates) or 1)
+with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+    results = list(executor.map(render, templates))
 
 with (render_dir / "manifest").open("w", encoding="utf-8") as manifest:
-    for index, template, status in results:
-        print(index, template, status, sep="\t", file=manifest)
+    for template, status in results:
+        print(template, status, sep="\t", file=manifest)
 PY
 	echo "verify: could not render executable templates" >&2
 	failed=1
 fi
 
 if [ -f "$render_dir/manifest" ]; then
-while IFS='	' read -r index tmpl status; do
+while IFS='	' read -r tmpl status; do
 	case ${tmpl##*/} in
 	executable_* | run_*) is_candidate=1 ;;
 	*)
@@ -371,11 +395,11 @@ while IFS='	' read -r index tmpl status; do
 		fi
 		;;
 	esac
-	out="$render_dir/$index/output"
+	out="$render_dir/$tmpl"
 	if [ "$status" -ne 0 ]; then
 		if [ "$is_candidate" -eq 1 ]; then
 			echo "verify: template failed: $tmpl" >&2
-			cat "$render_dir/$index/stderr" >&2
+			cat "$out.stderr" >&2
 			mark_syntax_failed
 		fi
 		continue
@@ -414,6 +438,9 @@ find . \
 		first=$(sed -n '/[^[:space:]]/{p;q;}' "$file" 2>/dev/null) || continue
 		check_by_shebang "$rel" "$file" "$first"
 	done
+
+flush_shellcheck sh
+flush_shellcheck bash
 
 if [ -s "$tmpdir/syntax_failed" ]; then
 	failed=1
