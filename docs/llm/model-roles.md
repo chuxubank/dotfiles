@@ -46,6 +46,8 @@ For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
    OMP and Grok `--cwd`, and OpenCode's project argument, select that
    directory; otherwise it is the working directory. `model` is the
    qualified id; each rule's `paths` groups directory prefixes sharing it.
+   Entries are `path.toml` key lists; `[chezmoi, workingTree]` names this
+   source checkout.
    Pi, OMP, OpenCode and Grok use the qualified catalog key directly.
    Goose splits only the first slash into its native provider id and the
    intact upstream model id; custom providers use the reserved

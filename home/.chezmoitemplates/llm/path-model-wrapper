@@ -1,7 +1,8 @@
 {{- /* llm/path-model-wrapper — ~/bin launch wrappers.
        Input: full chezmoi context plus tool.
        llm.path_models: paths is a list of path.toml key lists that share
-       one provider-qualified model. Goose translates that reference to
+       one provider-qualified model. [chezmoi, workingTree] names this
+       source checkout without copying chezmoi's own location. Goose translates that reference to
        its native provider/model flags. ${aliases} expand. */ -}}
 {{- $tool := .tool -}}
 {{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" -}}
@@ -34,8 +35,17 @@
     {{- if or (not $path) (ne (kindOf $path) "slice") -}}
       {{- fail "llm/path-model-wrapper: each paths entry must be a path.toml key list" -}}
     {{- end -}}
-    {{- $node := $.path -}}
-    {{- range $key := $path -}}
+    {{- $root := $.path -}}
+    {{- $keys := $path -}}
+    {{- if eq (index $path 0) "chezmoi" -}}
+      {{- if ne (join "." $path) "chezmoi.workingTree" -}}
+        {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $path)) -}}
+      {{- end -}}
+      {{- $root = $.chezmoi -}}
+      {{- $keys = rest $path -}}
+    {{- end -}}
+    {{- $node := $root -}}
+    {{- range $key := $keys -}}
       {{- if not $node -}}
         {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $path)) -}}
       {{- end -}}
@@ -44,7 +54,8 @@
     {{- if not $node -}}
       {{- fail (printf "llm/path-model-wrapper: unknown path %s" (join "." $path)) -}}
     {{- end -}}
-    {{- $prefix := clean (joinPath $.chezmoi.homeDir $node) -}}
+    {{- $prefix := clean $node -}}
+    {{- if not (isAbs $prefix) -}}{{- $prefix = clean (joinPath $.chezmoi.homeDir $node) -}}{{- end -}}
     {{- if hasKey $seen $prefix -}}
       {{- fail (printf "llm/path-model-wrapper: duplicate prefix %s" $prefix) -}}
     {{- end -}}

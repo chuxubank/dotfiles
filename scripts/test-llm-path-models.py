@@ -59,6 +59,7 @@ def zsh_eval(script, body):
 fail([{"path": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "paths must be a list of path.toml key lists")
 fail([{"paths": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "each paths entry must be a path.toml key list")
 fail([{"paths": [["workspace", "missing"]], "model": "iv-codex/gpt-6.1-sol"}], "unknown path workspace.missing")
+fail([{"paths": [["chezmoi", "homeDir"]], "model": "iv-codex/gpt-6.1-sol"}], "unknown path chezmoi.homeDir")
 fail(
     [
         {"paths": [["workspace", "iv"]], "model": "iv-codex/${gpt_primary}"},
@@ -88,9 +89,11 @@ done
 """,
     )
     rows = dict(line.rsplit(" ", 1) for line in listing.splitlines() if line.startswith("/"))
+    chezmoi_prefix = next(prefix for prefix in rows if prefix.endswith("/.local/share/chezmoi"))
     personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
     oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
     iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
+    assert rows[chezmoi_prefix] == personal
     assert rows[personal_prefix] == personal
     assert rows[oss_prefix] == personal
     assert rows[iv_prefix] == iv
@@ -98,6 +101,7 @@ done
         script,
         "show() { local found; found=$(path_model_for \"$1\"); print -r -- \"[$found]\"; }\n"
         + f"""
+show {json.dumps(chezmoi_prefix + "/home")}
 show {json.dumps(personal_prefix + "/blog")}
 show {json.dumps(personal_prefix + "ity/blog")}
 show {json.dumps(oss_prefix + "/luvus")}
@@ -105,7 +109,7 @@ show {json.dumps(iv_prefix + "/ivc")}
 show /tmp
 """,
     ).splitlines()
-    assert chosen == [f"[{personal}]", "[]", f"[{personal}]", f"[{iv}]", "[]"]
+    assert chosen == [f"[{personal}]", f"[{personal}]", "[]", f"[{personal}]", f"[{iv}]", "[]"]
 
 skip = zsh_eval(
     omp,
