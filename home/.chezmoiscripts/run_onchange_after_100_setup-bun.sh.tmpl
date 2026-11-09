@@ -8,7 +8,8 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 {{ includeTemplate "script/windows-path" . }}
 
 if ! command -v bun >/dev/null; then
-{{- if eq .chezmoi.os "windows" }}
+{{- /* CI skips Scoop; see packages/scoop.toml. */ -}}
+{{- if and (eq .chezmoi.os "windows") (ne .host_env "ci") }}
     print -u2 -- "bun is not installed; declare it in packages/scoop.toml"
     exit 1
 {{- else }}

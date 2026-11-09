@@ -6,7 +6,8 @@ echo "󰯁 Setup uv"
 {{ includeTemplate "script/windows-path" . }}
 
 if ! command -v uv >/dev/null; then
-{{- if eq .chezmoi.os "windows" }}
+{{- /* CI skips Scoop; see packages/scoop.toml. */ -}}
+{{- if and (eq .chezmoi.os "windows") (ne .host_env "ci") }}
     print -u2 -- "uv is not installed; declare it in packages/scoop.toml"
     exit 1
 {{- else }}
