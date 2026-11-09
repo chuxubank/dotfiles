@@ -13,7 +13,8 @@
 ** 配置
 
 =<name>= 是 =MITMPROXY_MOCK_DIR= 下的一个目录：
-- =routes.json=：URL 匹配规则、响应文件和处理器名称。
+- =hosts.json=：可选的主机列表。字符串是精确主机名，=pattern= 字段是匹配整个主机名的正则。缺失或为空时不限制主机。
+- =routes.json=：路径匹配规则、响应文件和处理器名称。规则不写域名。
 - =data/=：本地 JSON 响应文件。
 - =handlers.py=：可选的自定义处理器，以 =handle_= 为函数名前缀。
 
