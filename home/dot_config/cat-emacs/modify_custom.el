@@ -65,17 +65,23 @@
 {{- includeTemplate "emacs/logview/submodes.eld" . | nindent 5 }})
    t)
  {{- end }}
+ '(gptel-model-updater-model-metadata-file
+   {{ joinPath .chezmoi.homeDir (index .path.cache "models-dev-api") | quote }})
  '(gptel-model-updater-backends
-   '(gptel--gemini
+   '((gptel--gemini :cache {{ joinPath .chezmoi.homeDir (index .path.cache "google-models-api") | quote }})
      {{- if eq .host_env "iv" }}
-     (gptel--iv :providers (all))
-     (gptel--openai :providers (all))
-     (gptel--anthropic :providers (all))
+     (gptel--iv :providers (all)
+                :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-default-models-api") | quote }})
+     (gptel--openai :providers (all)
+                    :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-codex-models-api") | quote }})
+     (gptel--anthropic :providers (all)
+                        :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-cc-models-api") | quote }})
      {{- end }}
      {{- if has "llm" .roles }}
-     gptel--llama gptel--mlx gptel--ollama
+     gptel--llama gptel--mlx
+     (gptel--ollama :cache {{ joinPath .chezmoi.homeDir (index .path.cache "ollama-models-api") | quote }})
      {{- end }}
-     gptel--openrouter))
+     (gptel--openrouter :cache {{ joinPath .chezmoi.homeDir (index .path.cache "openrouter-models-api") | quote }})))
  '(gptel-model-updater-external-targets
    '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
                           ("IV:deepseek-v4-flash"
