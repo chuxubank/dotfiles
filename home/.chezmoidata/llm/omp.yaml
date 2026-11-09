@@ -53,7 +53,6 @@ llm:
         - xai-oauth/${grok_primary}*
         - openai-codex/gpt-6*
         # cursor/* globs come from llm.providers.cursor.
-      provider_sets: [iv]
       providers:
         # The default token's Anthropic front is stricter than the cc-auth
         # one: it rejects the `strict` tool field, and rejects the oauth,

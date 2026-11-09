@@ -8,7 +8,6 @@ llm:
       reasoning_effort: high
       # IV aliases come from the shared set. Hermes emits each alias
       # that has an endpoint; this map is only the extra provider.
-      provider_sets: [iv]
       providers:
         # Hermes owns this provider's OAuth flow and bundled model catalog.
         # models: false keeps llm/tool-config from trying to enumerate it.

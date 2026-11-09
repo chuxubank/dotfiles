@@ -142,4 +142,54 @@ data["tools"]["fixture"]["providers"] = {"gateway": {"type": "openai-completions
 data["tools"]["fixture"]["supported_provider_types"] = ["anthropic-messages"]
 assert render(data)["providers"] == {}
 
-print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, gates and policy")
+# Shared sets use the same precedence as explicit sets, with tool refs last.
+data = copy.deepcopy(fixture)
+data["default_provider_sets"] = ["shared"]
+data["provider_sets"] = {"shared": {"alias": {"provider": "gateway", "headers": {"winner": "default"}}}}
+data["tools"]["fixture"] = {"providers": {"alias": {"headers": {"winner": "tool"}}}}
+assert render(data)["providers"]["alias"]["headers"] == {"winner": "tool"}
+data["tools"]["fixture"]["exclude_providers"] = ["alias"]
+assert render(data)["providers"] == {}
+data["default_provider_sets"] = ["missing"]
+render(data, error='unknown set "missing"')
+
+# Exercise the repository declarations, not a duplicate opt-in table. No
+# credentials/catalogs are fetched: CI suppresses pass, and only routing
+# fields from tool-config are returned.
+for host in ("iv", "personal", "ci"):
+    template = r'''
+{{- $ctx := mergeOverwrite (deepCopy .) (dict "host_env" HOST) -}}
+{{- $result := dict -}}
+{{- range $tool, $_ := $ctx.llm.tools -}}
+  {{- $cfg := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy $ctx) (dict "tool" $tool)) | fromJson -}}
+  {{- $iv := dict -}}
+  {{- range $alias := list "iv-codex" "iv-cc" "iv-anthropic" "iv" -}}
+    {{- if hasKey $cfg.providers $alias -}}
+      {{- $_ := set $iv $alias (pick (index $cfg.providers $alias) "type" "auth_field") -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $_ := set $result $tool (dict "providers" $iv "patterns" (default (list) (index $cfg "enabled_models"))) -}}
+{{- end -}}
+{{- $result | toJson -}}
+'''.replace("HOST", json.dumps(host))
+    result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    assert result.returncode == 0, result.stderr
+    for tool, cfg in json.loads(result.stdout).items():
+        aliases = set(cfg["providers"])
+        if host != "iv":
+            assert not aliases, (host, tool, cfg)
+            assert not any(p.startswith(("iv/", "iv-codex/", "iv-cc/", "iv-anthropic/")) for p in cfg["patterns"])
+            continue
+        expected = {"iv", "iv-codex", "iv-cc", "iv-anthropic"}
+        if tool == "codex":
+            expected.remove("iv-anthropic")
+        elif tool == "claude-code":
+            expected = {"iv-cc", "iv-anthropic"}
+        assert aliases == expected, (tool, cfg)
+        for alias, provider in cfg["providers"].items():
+            field = {"iv": "default-auth-token", "iv-anthropic": "default-auth-token", "iv-codex": "codex-auth-token", "iv-cc": "cc-auth-token"}[alias]
+            assert provider["auth_field"] == field, (tool, alias, provider)
+        if tool in ("pi", "omp"):
+            assert all(alias + "/**" in cfg["patterns"] for alias in expected), (tool, cfg)
+
+print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, IV client/host matrix and picker policy")

@@ -152,7 +152,8 @@ for script in (opencode, grok, goose, copilot):
 assert "iv-codex/gpt-6.1-sol" in opencode
 assert "openai/gpt-6.1-sol" not in opencode
 assert personal in opencode
-assert "github-copilot/gpt-6.1-sol" in grok and "grok/grok-4.7-build-fast@500k" in grok
+assert iv in grok and personal in grok
+assert "github-copilot/gpt-6.1-sol" not in grok
 grok_rows = dict(
     line.rsplit(" ", 1)
     for line in zsh_eval(
@@ -166,15 +167,14 @@ done
     if line.startswith("/")
 )
 grok_oss = next(prefix for prefix in grok_rows if prefix.endswith("/Developer/OpenSource"))
-assert grok_rows[grok_oss] == "grok/grok-4.7-build-fast@500k"
+assert grok_rows[grok_oss] == personal
 assert "iv-codex/gpt-6.1-sol" in copilot
 assert personal in copilot
 assert "COPILOT_PROVIDER_BASE_URL" in copilot
 # iv and magpie are off on a ci host, so their auth commands are absent.
 if "codex-auth-token" in copilot or "gateway-key" in copilot:
     assert "pass-field" in copilot
-assert "custom_chezmoi_iv-codex" in goose and "gpt-6.1-sol" in goose
-assert "custom_chezmoi_magpie" in goose and "grok/grok-4.7-build-fast@500k" in goose
+assert iv in goose and personal in goose
 
 copilot_plan = zsh_eval(
     copilot,
@@ -232,6 +232,17 @@ path_model_plan update
 print -r -- "$PLAN_SKIP"
 """,
 )
+for script, launch, expected in (
+    (grok, "", ["--model", iv]),
+    (goose, "session", ["session", "--provider", "custom_chezmoi_iv-codex", "--model", "gpt-6.1-sol"]),
+):
+    output = zsh_eval(
+        script,
+        f'path_model_for() {{ print -r -- {json.dumps(iv)}; }}\n'
+        + f'path_model_plan {launch}\nprint -l -- "${{PLAN_ARGS[@]}}"\n',
+    )
+    assert output.splitlines()[:len(expected)] == expected, output
+
 assert goose_plan.splitlines() == [
     "0",
     "session",

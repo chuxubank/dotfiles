@@ -7,7 +7,6 @@ llm:
         - magpie/grok/${grok_primary}-build-fast
         - gemini-2.5-pro
       # IV aliases come from the shared set. This map is only Gemini.
-      provider_sets: [iv]
       providers:
         gemini:
           provider: google

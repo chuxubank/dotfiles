@@ -49,7 +49,8 @@
                                                     data_set_providers are
                                                     defaults for the ref
        Shared defaults: llm.default_providers uses the same short/map forms.
-       Merge order: defaults < provider_sets (in order) < tool providers.
+       Merge order: default providers < default provider sets < tool
+       provider_sets (in order) < tool providers.
        Tool exclude_providers removes aliases after all merges.
        supported_provider_types filters incompatible protocols. A provider
        has no type: the primary is its first api_types entry, or
@@ -84,7 +85,8 @@
 {{- else -}}
   {{- $refs = deepCopy $defaults -}}
 {{- end -}}
-{{- range $setName := default (list) (index $toolCfg "provider_sets") -}}
+{{- $sets := concat (default (list) (index .llm "default_provider_sets")) (default (list) (index $toolCfg "provider_sets")) | uniq -}}
+{{- range $setName := $sets -}}
   {{- $set := index (default dict (index $.llm "provider_sets")) $setName -}}
   {{- if not $set -}}
     {{- fail (printf "llm provider_sets: unknown set %q" $setName) -}}

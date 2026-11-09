@@ -1,8 +1,8 @@
 {{- /* llm/path-model-wrapper — ~/bin launch wrappers.
        Input: full chezmoi context plus tool.
        llm.path_models: paths is a list of path.toml key lists that share
-       one model. model is the Pi/OMP ref. tools.<name> replaces it for that
-       command. ${aliases} expand. */ -}}
+       one provider-qualified model. Goose translates that reference to
+       its native provider/model flags. ${aliases} expand. */ -}}
 {{- $tool := .tool -}}
 {{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" -}}
 {{- if not (hasKey $known $tool) -}}
@@ -15,7 +15,6 @@
 {{- else -}}
   {{- $bin = joinPath .path.usr "bin" $tool -}}
 {{- end -}}
-{{- $modelKey := $tool -}}
 {{- $rules := list -}}
 {{- $seen := dict -}}
 {{- range $rule := default (list) $.llm.path_models -}}
@@ -27,34 +26,9 @@
     {{- fail "llm/path-model-wrapper: paths must be a list of path.toml key lists" -}}
   {{- end -}}
   {{- $raw := $rule.model -}}
-  {{- $provider := "" -}}
-  {{- $tools := dict -}}
-  {{- if hasKey $rule "tools" -}}{{- $tools = $rule.tools -}}{{- end -}}
-  {{- $override := index $tools $modelKey -}}
-  {{- if $override -}}
-    {{- if eq (kindOf $override) "string" -}}
-      {{- $raw = $override -}}
-    {{- else if eq (kindOf $override) "map" -}}
-      {{- if not $override.model -}}
-        {{- fail (printf "llm/path-model-wrapper: %s entry needs a model" $modelKey) -}}
-      {{- end -}}
-      {{- $raw = $override.model -}}
-      {{- $provider = default "" $override.provider -}}
-    {{- else -}}
-      {{- fail "llm/path-model-wrapper: tool model must be a string or model/provider map" -}}
-    {{- end -}}
-  {{- else if not (or (eq $tool "pi") (eq $tool "omp") (eq $tool "copilot") (eq $tool "opencode")) -}}
-    {{- $raw = "" -}}
-  {{- end -}}
-  {{- $model := "" -}}
-  {{- if $raw -}}
-    {{- $model = includeTemplate "llm/resolve-model-alias" (dict "model" $raw "aliases" $.llm.models) -}}
-    {{- if and (or (eq $tool "pi") (eq $tool "omp")) (not (contains "/" $model)) -}}
-      {{- fail (printf "llm/path-model-wrapper: %s must be alias/id" $raw) -}}
-    {{- end -}}
-    {{- if $provider -}}
-      {{- $provider = includeTemplate "llm/resolve-model-alias" (dict "model" $provider "aliases" $.llm.models) -}}
-    {{- end -}}
+  {{- $model := includeTemplate "llm/resolve-model-alias" (dict "model" $raw "aliases" $.llm.models) -}}
+  {{- if not (regexMatch "^[^/]+/.+" $model) -}}
+    {{- fail (printf "llm/path-model-wrapper: %s must be alias/id" $raw) -}}
   {{- end -}}
   {{- range $path := $paths -}}
     {{- if or (not $path) (ne (kindOf $path) "slice") -}}
@@ -75,9 +49,7 @@
       {{- fail (printf "llm/path-model-wrapper: duplicate prefix %s" $prefix) -}}
     {{- end -}}
     {{- $_ := set $seen $prefix true -}}
-    {{- if $model -}}
-      {{- $rules = append $rules (dict "prefix" $prefix "model" $model "provider" $provider) -}}
-    {{- end -}}
+    {{- $rules = append $rules (dict "prefix" $prefix "model" $model) -}}
   {{- end -}}
 {{- end -}}
 #!/usr/bin/env zsh
@@ -96,7 +68,7 @@ typeset -r PATH_MODEL_COMMANDS_FILE={{ joinPath .chezmoi.homeDir .path.tool.bun 
 {{- else }}
 typeset -r PATH_MODEL_COMMANDS_FILE=""
 {{- end }}
-typeset -ga PATH_MODEL_PREFIXES PATH_MODEL_MODELS PATH_MODEL_PROVIDERS
+typeset -ga PATH_MODEL_PREFIXES PATH_MODEL_MODELS
 typeset -ga PATH_MODEL_COMMAND_FALLBACK PATH_MODEL_LAUNCH
 PATH_MODEL_PREFIXES=(
 {{- range $rule := $rules }}
@@ -106,11 +78,6 @@ PATH_MODEL_PREFIXES=(
 PATH_MODEL_MODELS=(
 {{- range $rule := $rules }}
   {{ $rule.model | quote }}
-{{- end }}
-)
-PATH_MODEL_PROVIDERS=(
-{{- range $rule := $rules }}
-  {{ $rule.provider | quote }}
 {{- end }}
 )
 {{- if eq $tool "pi" }}
@@ -222,17 +189,12 @@ path_model_is_command() {
 }
 
 path_model_pick() {
-  local dir=${1:A} prefix best="" best_len=0 i field
-  field=$2
+  local dir=${1:A} prefix best="" best_len=0 i
   for (( i = 1; i <= $#PATH_MODEL_PREFIXES; i++ )); do
     prefix=$PATH_MODEL_PREFIXES[i]
     if [[ $dir == $prefix || $dir == $prefix/* ]]; then
       if (( ${#prefix} > best_len )); then
-        if [[ $field == provider ]]; then
-          best=$PATH_MODEL_PROVIDERS[i]
-        else
-          best=$PATH_MODEL_MODELS[i]
-        fi
+        best=$PATH_MODEL_MODELS[i]
         best_len=${#prefix}
       fi
     fi
@@ -240,8 +202,7 @@ path_model_pick() {
   print -r -- "$best"
 }
 
-path_model_for() { path_model_pick "$1" model }
-path_model_provider_for() { path_model_pick "$1" provider }
+path_model_for() { path_model_pick "$1"; }
 
 # 0 when this argv must keep the tool's own model selection.
 # On 1, REPLY is the directory to match when the CLI names one.
@@ -408,16 +369,16 @@ path_model_plan() {
     PLAN_ARGS=(--model "$id" "$@")
     return 0
   fi
-  provider=$(path_model_provider_for "$dir")
   if [[ $PATH_MODEL_KIND == goose ]]; then
+    provider=${model%%/*}
+    model=${model#*/}
+    if [[ $provider != (openai|anthropic|ollama|openrouter) ]]; then
+      provider=custom_chezmoi_$provider
+    fi
     path_model_goose_plan "$model" "$provider" "$@"
     return 0
   fi
-  if [[ -n $provider ]]; then
-    PLAN_ARGS=(--provider "$provider" --model "$model" "$@")
-  else
-    PLAN_ARGS=(--model "$model" "$@")
-  fi
+  PLAN_ARGS=(--model "$model" "$@")
 }
 
 path_model_copilot_export() {

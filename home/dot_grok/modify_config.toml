@@ -21,10 +21,8 @@
        5s). Deliberately not `ternary ... .isDarkMode` — that is captured once
        when chezmoi init probes AppleInterfaceStyle, so it would freeze the
        theme and not even follow a later apply. */ -}}
-{{- /* Grok 4.7 Fast at the 500k window. The catalog lists 256k and 500k and
-       defaults the selected window to 256k; context_window is that default.
-       The id is `${grok_primary}-build-fast`, the same 500k Fast choice as
-       Pi's `@500k:fast` and OMP's `-500k-fast`. */ -}}
+{{- /* Pin the native Fast fallback's context separately from gateway SKUs;
+       the native catalog otherwise selects its smaller default window. */ -}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "grok") .) | fromJson -}}
 {{- $grokFast := printf "%s-build-fast" (index .llm.models "grok_primary") -}}
 {{- $default := $grokFast -}}
@@ -39,30 +37,11 @@
   "marketplace.sources" $sources
 -}}
 {{- $remove := list -}}
-{{- /* One models endpoint is the whole picker. The winning candidate's base
-       is endpoints.models_base_url, and its /v1/models list is what can be
-       selected. models.default is that candidate's upstream id. pass-field
-       prints the key. A literal api_key would be stored. A candidate with no
-       base URL leaves the built-in catalog and the native Fast id. The model
-       table is replaced whole so a leftover row whose id contains dots can
-       be dropped. */ -}}
-{{- $winner := dict -}}
-{{- if and $cfg.model_provider (hasKey $cfg.providers $cfg.model_provider) -}}
-  {{- $candidate := index $cfg.providers $cfg.model_provider -}}
-  {{- if index $candidate "base_url" -}}
-    {{- $winner = $candidate -}}
-    {{- $_ := set $managed "models" (dict "default" $cfg.model_id) -}}
-    {{- $endpoint := includeTemplate "llm/model-endpoint" $candidate | fromJson -}}
-    {{- $_ := set $replace "endpoints.models_base_url" $endpoint.api_base_url -}}
-    {{- if $candidate.auth_path -}}
-      {{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
-      {{- $helper := list (printf "'%s'" (replace "'" "'\\''" $passField)) (printf "'%s'" (replace "'" "'\\''" $candidate.auth_path)) -}}
-      {{- if $candidate.auth_field -}}
-        {{- $helper = append $helper (printf "'%s'" (replace "'" "'\\''" $candidate.auth_field)) -}}
-      {{- end -}}
-      {{- $_ := set $replace "auth.auth_provider_command" (join " " $helper) -}}
-    {{- end -}}
-  {{- end -}}
+{{- /* A global authenticated models endpoint hides local model tables.
+       Use provider-qualified local keys instead, so choosing a model also
+       chooses its endpoint and credential without changing session auth. */ -}}
+{{- if $cfg.model -}}
+  {{- $_ := set $managed "models" (dict "default" $cfg.model) -}}
 {{- end -}}
 {{- $existing := dict -}}
 {{- $prior := trim (dig "stdin" "" .chezmoi) -}}
@@ -83,10 +62,19 @@
     {{- $_ := set $endpointAliases $alias true -}}
   {{- end -}}
 {{- end -}}
+{{- /* Include alias refs before host/protocol filtering: a disabled alias
+       must still own and remove its formerly rendered rows. */ -}}
+{{- range $refs := concat (list (default dict (index .llm "default_providers"))) (values (default dict (index .llm "provider_sets"))) (list (default dict (index (index .llm.tools "grok") "providers"))) -}}
+  {{- if eq (kindOf $refs) "slice" -}}
+    {{- range $alias := $refs -}}{{- $_ := set $endpointAliases $alias true -}}{{- end -}}
+  {{- else -}}
+    {{- range $alias, $_ := $refs -}}{{- $_ := set $endpointAliases $alias true -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- $models := dict -}}
 {{- range $key, $entry := $existingModels -}}
   {{- $drop := false -}}
-  {{- if hasKey $endpointAliases $key -}}
+  {{- if or (hasKey $endpointAliases $key) (hasKey $endpointAliases (first (splitList "/" $key))) -}}
     {{- $drop = true -}}
   {{- else if eq (kindOf $entry) "map" -}}
     {{- $mp := index $entry "model_provider" -}}
@@ -104,15 +92,70 @@
   {{- end -}}
 {{- end -}}
 {{- $_ := set $models $grokFast $fast -}}
-{{- $_ := set $replace "model" $models -}}
+{{- $providers := deepCopy $existingProviders -}}
+{{- $auth := deepCopy $existingAuth -}}
 {{- range $alias, $_ := $endpointAliases -}}
-  {{- if hasKey $existingProviders $alias -}}{{- $remove = append $remove (printf "model_providers.%s" $alias) -}}{{- end -}}
-  {{- if hasKey $existingAuth $alias -}}{{- $remove = append $remove (printf "auth_provider.%s" $alias) -}}{{- end -}}
+  {{- $_ := unset $providers $alias -}}
+  {{- $_ := unset $auth $alias -}}
 {{- end -}}
-{{- if not $winner -}}
-  {{- if hasKey $existingEndpoints "models_base_url" -}}{{- $remove = append $remove "endpoints.models_base_url" -}}{{- end -}}
-  {{- if hasKey $existingAuthTable "auth_provider_command" -}}{{- $remove = append $remove "auth.auth_provider_command" -}}{{- end -}}
+{{- $passField := joinPath .chezmoi.homeDir "bin" "pass-field" -}}
+{{- range $alias, $ep := $cfg.providers -}}
+  {{- if $ep.base_url -}}
+    {{- $endpoint := includeTemplate "llm/model-endpoint" $ep | fromJson -}}
+    {{- $backend := "chat_completions" -}}
+    {{- if eq $ep.type "openai-responses" -}}{{- $backend = "responses" -}}
+    {{- else if eq $ep.type "anthropic-messages" -}}{{- $backend = "messages" -}}{{- end -}}
+    {{- $base := trimSuffix "/" $endpoint.api_base_url -}}
+    {{- if and (eq $backend "messages") (not (hasSuffix "/v1" $base)) -}}
+      {{- $base = printf "%s/v1" $base -}}
+    {{- end -}}
+    {{- $provider := dict "base_url" $base "api_backend" $backend -}}
+    {{- if hasKey $ep "headers" -}}{{- $_ := set $provider "extra_headers" $ep.headers -}}{{- end -}}
+    {{- $usesHelper := ne $ep.auth_path "" -}}
+    {{- if $usesHelper -}}
+      {{- $args := list $ep.auth_path -}}
+      {{- if $ep.auth_field -}}{{- $args = append $args $ep.auth_field -}}{{- end -}}
+      {{- $_ := set $auth $alias (dict "command" $passField "args" $args) -}}
+    {{- else if $ep.auth_key -}}
+      {{- $_ := set $provider "api_key" $ep.auth_key -}}
+    {{- end -}}
+    {{- $_ := set $providers $alias $provider -}}
+    {{- $source := dict -}}
+    {{- if hasKey $ep "models" -}}
+      {{- if eq (kindOf $ep.models) "slice" -}}
+        {{- range $id := $ep.models -}}{{- $_ := set $source $id (dict "name" $id) -}}{{- end -}}
+      {{- else if eq (kindOf $ep.models) "map" -}}
+        {{- range $id, $name := $ep.models -}}{{- $_ := set $source $id (dict "name" $name) -}}{{- end -}}
+      {{- end -}}
+    {{- else -}}
+      {{- $source = includeTemplate "llm/fetch-models" (merge (dict "metadata" true) $ep) | fromJson -}}
+    {{- end -}}
+    {{- $metadata := dict -}}
+    {{- if hasKey $ep "model_metadata_args" -}}
+      {{- $metadata = includeTemplate "llm/fetch-data-set" ($ep.model_metadata_args | fromJson) | fromJson -}}
+    {{- end -}}
+    {{- range $id, $discovered := $source -}}
+      {{- $card := mergeOverwrite (deepCopy (default dict (index $metadata $id))) $discovered -}}
+      {{- $card = mergeOverwrite $card (deepCopy (dig "model_overrides" $id (dict) $ep)) -}}
+      {{- $entry := dict "model" $id "model_provider" $alias "name" (printf "%s/%s" $alias (default $id (index $card "name"))) -}}
+      {{- if $usesHelper -}}{{- $_ := set $entry "auth_provider" $alias -}}{{- end -}}
+      {{- $context := dig "limit" "context" 0 $card -}}
+      {{- $output := dig "limit" "output" 0 $card -}}
+      {{- if $context -}}{{- $_ := set $entry "context_window" $context -}}{{- end -}}
+      {{- if $output -}}{{- $_ := set $entry "max_completion_tokens" $output -}}{{- end -}}
+      {{- $_ := set $models (printf "%s/%s" $alias $id) $entry -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}
+{{- $_ := set $replace "model" $models -}}
+{{- $_ := set $replace "model_providers" $providers -}}
+{{- $_ := set $replace "auth_provider" $auth -}}
+{{- /* Remove the old single-endpoint mode, including a separate list URL
+       which would otherwise keep the picker locked to the old catalog. */ -}}
+{{- range $key := list "models_base_url" "models_list_url" -}}
+  {{- if hasKey $existingEndpoints $key -}}{{- $remove = append $remove (printf "endpoints.%s" $key) -}}{{- end -}}
+{{- end -}}
+{{- if hasKey $existingAuthTable "auth_provider_command" -}}{{- $remove = append $remove "auth.auth_provider_command" -}}{{- end -}}
 
 {{ includeTemplate "config/merge" (dict
   "format" "toml"

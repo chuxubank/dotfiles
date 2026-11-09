@@ -19,11 +19,12 @@ llm:
   # Inherited by every llm.tools entry. Sets and tool entries override
   # these refs; exclude_providers removes aliases for unsupported clients.
   # This adds selectable providers, not default models or OMP role targets.
+  default_provider_sets: [iv]
   default_providers: [magpie]
 
   # ── Provider sets ───────────────────────────────────────────────────
-  # Alias groups a tool pulls in with `provider_sets: [<name>]`. A tool's
-  # own `providers.<alias>` entry is deep-merged on top.
+  # Alias groups inherited through default_provider_sets or added by a
+  # tool's provider_sets. Tool provider entries are deep-merged on top.
   provider_sets:
     # Pi/OMP keep the bundled names `openai` and `anthropic` free for /login.
     # Codex token is `iv-codex`, cc token is `iv-cc`. Neither is a bundled
@@ -71,6 +72,8 @@ llm:
   providers:
     iv:
       name: IV
+      # Catalog ids can contain slashes; every served id stays selectable.
+      enabled_models: ["**"]
       data_set: models-dev
       base_url: "http://llm.invalley.co"
       model_caches:

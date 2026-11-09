@@ -14,4 +14,3 @@ llm:
         opus: ${opus_primary}
         sonnet: ${sonnet_primary}
         haiku: ${haiku_primary}
-      provider_sets: [iv]

@@ -7,6 +7,7 @@
       "type": "object",
       "properties": {
         "default_providers": { "$ref": "#/$defs/providerRefs" },
+        "default_provider_sets": { "$ref": "#/$defs/providerSets" },
         "providers": {
           "type": "object",
           "additionalProperties": {
@@ -40,6 +41,7 @@
       "type": "object",
       "properties": {
         "providers": { "$ref": "#/$defs/providerRefs" },
+        "provider_sets": { "$ref": "#/$defs/providerSets" },
         "supported_provider_types": { "$ref": "#/$defs/protocols" },
         "exclude_providers": {
           "type": "array",
@@ -47,6 +49,11 @@
           "uniqueItems": true
         }
       }
+    },
+    "providerSets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
     },
     "providerRefs": {
       "oneOf": [

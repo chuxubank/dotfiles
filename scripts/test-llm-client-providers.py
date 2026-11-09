@@ -218,8 +218,8 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg = json.loads(render(cc_path, llm, home, stdin=json.dumps(cfg)))
     assert "ANTHROPIC_BASE_URL" not in cfg["env"]
 
-    # Grok Build selects the upstream model. The alias is the provider.
-    # The native Fast pin stays, and the gateway key stays a pass-field command.
+    # Grok's local catalog keeps every alias selectable, independent of
+    # the default. Helpers stay named and never replace native session auth.
     grok_llm = {
         "models": {"grok_primary": "grok-4.7"},
         "default_providers": ["magpie"],
@@ -229,6 +229,7 @@ with tempfile.TemporaryDirectory() as tmp:
             "owner": "magpie",
             "api_types": ["openai-completions", "openai-responses", "anthropic-messages", "google-generative-ai"],
             "auth": {"path": "Test/Magpie", "field": "gateway-key"},
+            "models": ["grok/grok-4.7-build-fast@500k"],
         }},
         "tools": {"grok": {
             "supported_provider_types": ["openai-completions", "openai-responses"],
@@ -275,13 +276,18 @@ command = "old"
         tools={"magpie": {"when": {"enabled": True}}},
     ))
     grok_id = "grok/grok-4.7-build-fast@500k"
-    assert on["models"]["default"] == grok_id
-    assert on["endpoints"]["models_base_url"] == "https://gateway.example/v1"
-    helper = on["auth"]["auth_provider_command"]
-    assert helper == f"'{home / 'bin' / 'pass-field'}' 'Test/Magpie' 'gateway-key'", helper
+    assert on["models"]["default"] == "magpie/" + grok_id
+    assert "models_base_url" not in on.get("endpoints", {})
+    assert "auth_provider_command" not in on.get("auth", {})
+    assert on["auth_provider"]["magpie"] == {
+        "command": str(home / "bin/pass-field"), "args": ["Test/Magpie", "gateway-key"],
+    }
     assert "magpie" not in on["model"] and grok_id not in on["model"]
-    assert "model_providers" not in on or "magpie" not in on["model_providers"]
-    assert "auth_provider" not in on or "magpie" not in on["auth_provider"]
+    assert on["model"]["magpie/" + grok_id]["model"] == grok_id
+    assert on["model"]["magpie/" + grok_id]["auth_provider"] == "magpie"
+    assert on["model_providers"]["magpie"] == {
+        "base_url": "https://gateway.example/v1", "api_backend": "chat_completions",
+    }
     assert on["model"]["grok-4.7-build-fast"]["context_window"] == 500000
     assert on["model"]["grok-4.7-build-fast"]["temperature"] == 0.2
     assert on["model"]["custom"]["temperature"] == 0.1
@@ -297,16 +303,25 @@ command = "old"
     assert "auth_provider" not in off or "magpie" not in off["auth_provider"]
     assert off["model"]["custom"]["temperature"] == 0.1
 
-    # The winning alias is the one models endpoint. A later alias does not
-    # get a second catalog entry.
+    # Same upstream id on two providers still yields two independent rows.
+    # Messages and responses use their own native backend.
     routed = copy.deepcopy(grok_llm)
     routed["default_providers"] = ["gateway", "magpie"]
     routed["providers"]["gateway"] = {
         "name": "Gateway",
         "base_url": "https://other.example",
-        "api_types": ["openai-completions"],
+        "api_types": ["openai-responses"],
         "auth": {"path": "Test/Gateway", "field": "gateway-key"},
+        "models": ["vendor/model", grok_id],
     }
+    routed["providers"]["messages"] = {
+        "base_url": "https://messages.example",
+        "api_types": ["anthropic-messages"],
+        "models": ["vendor/model"],
+        "auth": {"path": "Test/Claude", "field": "key"},
+    }
+    routed["default_providers"].append("messages")
+    routed["tools"]["grok"]["supported_provider_types"].append("anthropic-messages")
     routed["tools"]["grok"]["model"] = [
         "gateway/vendor/model",
         "magpie/grok/${grok_primary}-build-fast@500k",
@@ -316,15 +331,63 @@ command = "old"
         grok_path, routed, home, stdin=prior,
         tools={"magpie": {"when": {"enabled": True}}},
     ))
-    assert chosen["models"]["default"] == "vendor/model"
-    assert chosen["endpoints"]["models_base_url"] == "https://other.example/v1"
-    helper = chosen["auth"]["auth_provider_command"]
-    assert helper == f"'{home / 'bin' / 'pass-field'}' 'Test/Gateway' 'gateway-key'", helper
-    assert "vendor/model" not in chosen["model"]
+    assert chosen["models"]["default"] == "gateway/vendor/model"
+    assert chosen["model_providers"]["gateway"]["base_url"] == "https://other.example/v1"
+    assert chosen["model_providers"]["gateway"]["api_backend"] == "responses"
+    assert chosen["model_providers"]["messages"]["api_backend"] == "messages"
+    assert chosen["model_providers"]["messages"]["base_url"] == "https://messages.example/v1"
+    assert chosen["model"]["messages/vendor/model"]["auth_provider"] == "messages"
+    assert chosen["model"]["gateway/" + grok_id]["model_provider"] == "gateway"
+    assert chosen["model"]["magpie/" + grok_id]["model_provider"] == "magpie"
+    assert chosen["auth_provider"]["gateway"]["args"] == ["Test/Gateway", "gateway-key"]
     assert grok_id not in chosen["model"] and "magpie" not in chosen["model"]
-    assert "model_providers" not in chosen or not chosen["model_providers"]
-    assert "magpie" not in chosen.get("auth_provider", {})
     assert chosen["model"]["custom"]["temperature"] == 0.1
+    # Discovery metadata survives the Grok projection, including slashed ids.
+    discovered_grok = copy.deepcopy(grok_llm)
+    discovered_grok["providers"]["magpie"].pop("models")
+    discovered_grok["providers"]["magpie"]["models_cache"] = "magpie-models-api"
+    rich = parse_toml(render(
+        grok_path, discovered_grok, home, stdin=prior,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    card = rich["model"]["magpie/auto/model@wide"]
+    assert card["model"] == "auto/model@wide" and card["context_window"] == 500000
+    assert card["max_completion_tokens"] == 32000 and card["auth_provider"] == "magpie"
+    assert "api_key" not in card
+
+    # Host-disabled aliases (not just provider names) must be pruned too.
+    aliased = copy.deepcopy(grok_llm)
+    aliased["providers"]["company"] = {
+        "base_url": "https://company.example", "models": ["shared/model"],
+        "when": {"enabled": {"host_env": ["iv"]}},
+    }
+    aliased["default_provider_sets"] = ["company"]
+    aliased["provider_sets"] = {"company": {"iv-codex": {"provider": "company"}}}
+    stale = prior + '''
+[model."iv-codex/shared/model"]
+model = "shared/model"
+model_provider = "iv-codex"
+[model_providers.iv-codex]
+base_url = "https://company.example/v1"
+[auth_provider.iv-codex]
+command = "old"
+'''
+    cleaned = parse_toml(render(
+        grok_path, aliased, home, stdin=stale,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    assert "iv-codex/shared/model" not in cleaned["model"]
+    assert "iv-codex" not in cleaned["model_providers"]
+    assert "iv-codex" not in cleaned["auth_provider"]
+    aliased["providers"]["company"]["when"] = {"enabled": True}
+    registered = parse_toml(render(
+        grok_path, aliased, home, stdin=stale,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    assert registered["model"]["iv-codex/shared/model"]["model"] == "shared/model"
+    assert registered["model_providers"]["iv-codex"]["base_url"] == "https://company.example/v1"
+    assert "magpie/" + grok_id in registered["model"]
+
     pooled = copy.deepcopy(routed)
     pooled["providers"]["magpie"]["enabled_models"] = ["**"]
     pooled["tools"]["grok"]["enabled_models"] = ["${grok_primary}-build-fast*"]
@@ -332,10 +395,19 @@ command = "old"
         grok_path, pooled, home, stdin=prior,
         tools={"magpie": {"when": {"enabled": True}}},
     ))
-    assert both["models"]["default"] == "vendor/model"
-    assert both["endpoints"]["models_base_url"] == "https://other.example/v1"
+    assert both["models"]["default"] == "gateway/vendor/model"
+    assert "magpie/" + grok_id in both["model"]
     assert grok_id not in both["model"] and "magpie" not in both["model"]
-    assert "model_providers" not in both or "magpie" not in both["model_providers"]
+    # Re-rendering must be idempotent and remove disabled aliases' rows.
+    again = parse_toml(render(grok_path, pooled, home, stdin=render(
+        grok_path, pooled, home, stdin=prior, tools={"magpie": {"when": {"enabled": True}}},
+    ), tools={"magpie": {"when": {"enabled": True}}}))
+    assert again == both
+    disabled = parse_toml(render(grok_path, pooled, home, stdin=render(
+        grok_path, pooled, home, stdin=prior, tools={"magpie": {"when": {"enabled": True}}},
+    ), tools={"magpie": {"when": {"enabled": False}}}))
+    assert "magpie/" + grok_id not in disabled["model"]
+    assert "magpie" not in disabled["auth_provider"]
     assert both["model"]["grok-4.7-build-fast"]["context_window"] == 500000
 
     # Craft takes the protocol path from the provider type. The alias name

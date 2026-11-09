@@ -7,4 +7,3 @@ llm:
       model:
         - iv-codex/${gpt_primary}
         - magpie/grok/${grok_primary}-build-fast@500k
-      provider_sets: [iv]

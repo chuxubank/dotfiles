@@ -45,10 +45,12 @@ For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
 3. The longest `paths.yaml` prefix that contains the startup directory.
    OMP and Grok `--cwd`, and OpenCode's project argument, select that
    directory; otherwise it is the working directory. `model` is the
-   qualified id. `tools.<command>` replaces it when that CLI spells the
-   provider or the id differently. Grok has one applied endpoint, so its
-   prefix id must exist on that catalog. Goose's `provider` is the
-   `custom_chezmoi_` id and its `model` is the upstream id.
+   qualified id; each rule's `paths` groups directory prefixes sharing it.
+   Pi, OMP, OpenCode and Grok use the qualified catalog key directly.
+   Goose splits only the first slash into its native provider id and the
+   intact upstream model id; custom providers use the reserved
+   `custom_chezmoi_` namespace. Copilot selects the alias's BYOK endpoint.
+   These native spellings belong to the adapters, not directory rules.
 4. No matching prefix. Copilot still resolves its own candidate list and
    exports that alias. The other wrappers pass no `--model`, so the
    rendered default remains.

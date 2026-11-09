@@ -23,7 +23,6 @@ llm:
         - opencode/deepseek-v4-flash-free
       # Same IV aliases as Pi and OMP. OpenCode writes the provider
       # object itself, so these names do not inherit a bundled catalog.
-      provider_sets: [iv]
       providers:
         ollama:
           provider: ollama

@@ -10,7 +10,7 @@ values; generated agent configs are not the source of truth.
 `llm/tool-config` resolves provider references in this order:
 
 1. `llm.default_providers` (omitted or empty means no defaults).
-2. The tool's `provider_sets`, in list order.
+2. `llm.default_provider_sets`, then the tool's `provider_sets`, in list order.
 3. The tool's `providers` entries.
 4. The tool's `exclude_providers`.
 
@@ -36,6 +36,11 @@ The merged references then pass through:
   fetch. Adapters translate those ids into the client's own field.
 - Per-tool provider policy, including the OpenRouter exclusion on Pi, OMP,
   Hermes and OpenCode. Defaults and sets cannot bypass it.
+
+Shared provider sets apply to every configured client; adding a client must not
+require copying the IV alias table. Host conditions and protocol compatibility
+still gate each alias. Clients with a picker allowlist inherit the provider's
+patterns, so registering a provider cannot leave its catalog unselectable.
 
 Unknown provider or set references fail rendering. Disabled, incompatible or
 excluded aliases do not contribute picker patterns; explicit patterns naming
@@ -92,16 +97,16 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   wrapper exports `COPILOT_PROVIDER_BASE_URL`, `COPILOT_PROVIDER_TYPE`,
   `COPILOT_PROVIDER_WIRE_API`, and `COPILOT_PROVIDER_API_KEY_COMMAND`
   (`pass-field` with the alias's auth path). `COPILOT_MODEL` and `--model`
-  are the upstream id. The key is not written into the script. A directory
-  prefix uses the same qualified id as Pi and OMP when `paths.yaml` has no
-  `tools.copilot` override.
-- **Grok Build** has one models endpoint. The first resolved candidate in
-  `llm/grok.yaml` supplies it: `endpoints.models_base_url` is that alias's
-  OpenAI base, and `{base}/models` is the picker, so every model that
-  provider lists can be selected. `models.default` is the candidate's
-  upstream id. `auth.auth_provider_command` runs `pass-field`. The key is
-  not written into the file. A candidate with no alias leaves the built-in
-  catalog and the native Fast id, including its 500k `context_window` pin.
+  are the upstream id. The key is not written into the script. Directory
+  rules use the same qualified reference as the other clients.
+- **Grok Build** enumerates each compatible provider into local
+  `model.<alias/upstream-id>` rows. `model_providers.<alias>` owns the endpoint
+  and backend; named `auth_provider.<alias>` helpers call `pass-field` without
+  changing native session auth. Discovery metadata supplies context and output
+  limits. The default and directory launches use the same qualified catalog
+  keys as Pi and OMP. Do not combine this with a global authenticated models
+  endpoint: that mode ignores the local model tables. Rendering removes the
+  former global endpoint and stale managed rows while preserving user entries.
 
 ## Validation
 
@@ -114,4 +119,6 @@ Native contracts: [Aider model settings](https://aider.chat/docs/config/adv-mode
 [Goose custom providers](https://github.com/aaif-goose/goose/blob/main/documentation/docs/getting-started/providers.md),
 [Goose auth.command schema](https://github.com/aaif-goose/goose/blob/main/crates/goose-providers/src/declarative.rs),
 [CC gateway protocol](https://code.claude.com/docs/en/llm-gateway-protocol),
-[Magpie gateway protocols](https://github.com/yetone/magpie/blob/v0.1.1477/docs/integrating.md).
+[Magpie gateway protocols](https://github.com/yetone/magpie/blob/v0.1.1477/docs/integrating.md),
+[Grok custom models](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-pager/docs/user-guide/11-custom-models.md),
+[Grok per-model auth](https://github.com/xai-org/grok-build/blob/main/crates/codegen/xai-grok-shell/README.md#per-model-auth-providers).

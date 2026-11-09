@@ -8,7 +8,6 @@ llm:
         - opencode/deepseek-v4-flash-free
       # Connection slugs are the shared IV aliases. Names stay distinct in
       # the Craft UI; auth fields come from the iv set.
-      provider_sets: [iv]
       providers:
         iv-codex:
           name: IV Codex
