@@ -24,6 +24,7 @@ brews = [
   "dasel",
   "dbus",
   "deb-sig/tap/double-entry-generator",
+  { name = "dev-tonholo/svg-to-compose/s2c", owner = "s2c" },
   "difftastic",
   "docx2txt",
   "dprint",

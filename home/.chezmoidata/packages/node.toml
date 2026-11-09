@@ -41,6 +41,7 @@ global = [
   { name = "@zed-industries/codex-acp", owner = "codex" },
   # Postinstall prepares the native executable; Bun must allow it to run.
   { name = "agent-browser", owner = "agent-browser", trust = true },
+  { name = "avocado", owner = "s2c" },
   { name = "clawhub", owner = "openclaw" },
   { name = "emacs-lsp-proxy", trust = true, when.enabled = false },
   { name = "lody", owner = "lody" },
@@ -48,4 +49,5 @@ global = [
   { name = "opencode-ai", owner = "opencode", trust = true },
   { name = "pi-acp", owner = "pi" },
   { name = "sentry", owner = "sentry" },
+  { name = "svgo", owner = "s2c" },
 ]

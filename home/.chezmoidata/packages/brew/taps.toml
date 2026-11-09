@@ -6,6 +6,7 @@ taps = [
   { name = "cat-emacs/tap", trusted = { formulae = ["android-project", "compose-preview"] } },
   { name = "d12frosted/emacs-plus", trusted = { cask = "emacs-plus-app" } },
   { name = "deb-sig/tap", trusted = { formula = "double-entry-generator" } },
+  { name = "dev-tonholo/svg-to-compose", trusted = { formula = "s2c" }, owner = "s2c" },
   "jimeh/emacs-builds",
   { name = "Jarvis322/tap", trusted = { cask = "sysdata" } },
   { name = "lycorp-jp/tap", trusted = { formula = "sim-use" }, owner = "sim-use" },
