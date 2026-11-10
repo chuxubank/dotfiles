@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Launch wrappers pick a model from the startup directory."""
+"""Launch wrappers pick a model from the startup directory.
+
+Expected models are the resolved llm.path_models entries, not a copied id.
+"""
 
 import json
 import os
@@ -56,27 +59,63 @@ def zsh_eval(script, body):
     return result.stdout
 
 
-fail([{"path": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "paths must be a list of path.toml key lists")
-fail([{"paths": ["workspace", "iv"], "model": "iv-codex/gpt-6.1-sol"}], "each paths entry must be a path.toml key list")
-fail([{"paths": [["workspace", "missing"]], "model": "iv-codex/gpt-6.1-sol"}], "unknown path workspace.missing")
-fail([{"paths": [["chezmoi", "homeDir"]], "model": "iv-codex/gpt-6.1-sol"}], "unknown path chezmoi.homeDir")
+def configured_path_models():
+    raw = run(
+        '{{- $out := list -}}'
+        '{{- range $rule := .llm.path_models -}}'
+        '{{- $model := includeTemplate "llm/resolve-model-alias" (dict "model" $rule.model "aliases" $.llm.models) | trim -}}'
+        '{{- $out = append $out (dict "paths" $rule.paths "model" $model) -}}'
+        '{{- end -}}'
+        '{{- $out | toJson -}}'
+    )
+    rules = json.loads(raw)
+    assert rules, "llm.path_models is empty"
+    return rules
+
+
+def model_for(rules, keys):
+    matches = [rule["model"] for rule in rules if keys in rule["paths"]]
+    assert len(matches) == 1, (keys, rules)
+    return matches[0]
+
+
+def split_qualified(model):
+    provider, sep, model_id = model.partition("/")
+    assert sep and provider and model_id, model
+    return provider, model_id
+
+
+def goose_provider(provider):
+    if provider in {"openai", "anthropic", "ollama", "openrouter"}:
+        return provider
+    return "custom_chezmoi_" + provider
+
+
+qualified = "example/model"
+fail([{"path": ["workspace", "iv"], "model": qualified}], "paths must be a list of path.toml key lists")
+fail([{"paths": ["workspace", "iv"], "model": qualified}], "each paths entry must be a path.toml key list")
+fail([{"paths": [["workspace", "missing"]], "model": qualified}], "unknown path workspace.missing")
+fail([{"paths": [["chezmoi", "homeDir"]], "model": qualified}], "unknown path chezmoi.homeDir")
 fail(
     [
-        {"paths": [["workspace", "iv"]], "model": "iv-codex/${gpt_primary}"},
-        {"paths": [["workspace", "iv"]], "model": "iv-codex/${gpt_primary}"},
+        {"paths": [["workspace", "iv"]], "model": qualified},
+        {"paths": [["workspace", "iv"]], "model": qualified},
     ],
     "duplicate prefix",
 )
-fail([{"paths": [["workspace", "iv"]], "model": "iv-codex/${missing_model}"}], "unknown alias")
-fail([{"paths": [["workspace", "iv"]], "model": "gpt-6.1-sol"}], "must be alias/id")
+fail([{"paths": [["workspace", "iv"]], "model": "example/${missing_model}"}], "unknown alias")
+fail([{"paths": [["workspace", "iv"]], "model": "bare-id"}], "must be alias/id")
 
 pi = render("pi")
 omp = render("omp")
 subprocess.run([zsh, "-n", "-c", pi], check=True)
 subprocess.run([zsh, "-n", "-c", omp], check=True)
 
-personal = "magpie/grok/grok-4.7-build-fast@500k"
-iv = "iv-codex/gpt-6.1-sol"
+rules = configured_path_models()
+personal = model_for(rules, ["workspace", "personal"])
+iv = model_for(rules, ["workspace", "iv"])
+iv_provider, iv_id = split_qualified(iv)
+personal_provider, personal_id = split_qualified(personal)
 # [chezmoi, workingTree] is the source passed to execute-template, not a
 # path.toml location. CI checks out somewhere other than ~/.local/share/chezmoi.
 working_tree = os.path.normpath(run("{{- .chezmoi.workingTree -}}").strip())
@@ -146,7 +185,7 @@ pi_skip = zsh_eval(
     r"""
 path_model_skip install pkg; print -r -- $?
 path_model_skip 'fix the bug'; print -r -- "$? $REPLY"
-path_model_skip --provider iv-codex; print -r -- $?
+path_model_skip --provider example; print -r -- $?
 """,
 )
 assert pi_skip.splitlines() == ["0", "1 ", "0"]
@@ -158,11 +197,11 @@ copilot = render("copilot")
 for script in (opencode, grok, goose, copilot):
     subprocess.run([zsh, "-n", "-c", script], check=True)
 
-assert "iv-codex/gpt-6.1-sol" in opencode
-assert "openai/gpt-6.1-sol" not in opencode
+assert iv in opencode
+assert f"openai/{iv_id}" not in opencode
 assert personal in opencode
 assert iv in grok and personal in grok
-assert "github-copilot/gpt-6.1-sol" not in grok
+assert f"github-copilot/{iv_id}" not in grok
 grok_rows = dict(
     line.rsplit(" ", 1)
     for line in zsh_eval(
@@ -177,7 +216,7 @@ done
 )
 grok_oss = next(prefix for prefix in grok_rows if prefix.endswith("/Developer/OpenSource"))
 assert grok_rows[grok_oss] == personal
-assert "iv-codex/gpt-6.1-sol" in copilot
+assert iv in copilot
 assert personal in copilot
 assert "COPILOT_PROVIDER_BASE_URL" in copilot
 # iv and magpie are off on a ci host, so their auth commands are absent.
@@ -198,9 +237,9 @@ fi
 """,
 )
 copilot_lines = copilot_plan.splitlines()
-if "PATH_MODEL_COPILOT_URL[magpie]" in copilot:
-    assert copilot_lines[:3] == ["0", "--model", "grok/grok-4.7-build-fast@500k"]
-    assert copilot_lines[3].startswith("https://magpie.")
+if f"PATH_MODEL_COPILOT_URL[{personal_provider}]" in copilot:
+    assert copilot_lines[:3] == ["0", "--model", personal_id]
+    assert copilot_lines[3].startswith("https://")
     assert "pass-field" in copilot_lines[4] and "gateway-key" in copilot_lines[4]
 else:
     assert copilot_lines == ["2", personal]
@@ -243,7 +282,7 @@ print -r -- "$PLAN_SKIP"
 )
 for script, launch, expected in (
     (grok, "", ["--model", iv]),
-    (goose, "session", ["session", "--provider", "custom_chezmoi_iv-codex", "--model", "gpt-6.1-sol"]),
+    (goose, "session", ["session", "--provider", goose_provider(iv_provider), "--model", iv_id]),
 ):
     output = zsh_eval(
         script,
@@ -256,9 +295,9 @@ assert goose_plan.splitlines() == [
     "0",
     "session",
     "--provider",
-    "custom_chezmoi_magpie",
+    goose_provider(personal_provider),
     "--model",
-    "grok/grok-4.7-build-fast@500k",
+    personal_id,
     "fix the bug",
     "---",
     "1",
