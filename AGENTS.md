@@ -75,9 +75,10 @@ block that excludes `host_env=ci`. chezmoi unpacks tar and zip archives into
 entry's `filter` and emit a tar with `format = "tar"`. Use
 `COPYFILE_DISABLE=1 tar` so symlinks stay symlinks and macOS does not add
 pax headers. Following symlinks turns a framework into both a framework and
-an app, and macOS then refuses to open the bundle. Use a weekly `refreshPeriod`
-when the app updates itself. Render the external and run `make verify`; do
-not apply it while validating.
+an app, and macOS then refuses to open the bundle. Set `exact` on a notarized
+bundle: a refresh otherwise leaves removed paths in place and breaks the seal.
+Use a weekly `refreshPeriod` when the app updates itself. Render the external
+and run `make verify`; do not apply it while validating.
 
 Do not add a `run_` script that downloads, mounts, or copies the app.
 

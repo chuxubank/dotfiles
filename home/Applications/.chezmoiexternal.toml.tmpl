@@ -44,8 +44,9 @@
 {{- end }}
 
 {{- /* Cindy publishes a notarized DMG with an Applications symlink. Archive
-       only Cindy.app so that link is not followed into a second app. The app
-       updates itself, so refresh weekly. */ -}}
+       only Cindy.app so that link is not followed into a second app. exact
+       removes paths the new archive dropped. The app updates itself, so
+       refresh weekly. */ -}}
 {{- $cindyReady := includeTemplate "tool/enabled" (merge (dict "tool" "cindy" "require" true) .) | fromJson -}}
 {{- if $cindyReady -}}
 {{- $cindyURL := includeTemplate "github/release-asset-url" (dict "repo" "makecindy/cindy" "pattern" (printf "cindy-*-darwin-%s-global.dmg" .chezmoi.arch)) | trim -}}
@@ -54,6 +55,7 @@
     type = "archive"
     format = "tar"
     url = {{ $cindyURL | quote }}
+    exact = true
     stripComponents = 1
     refreshPeriod = "168h"
     filter.command = "/bin/zsh"
