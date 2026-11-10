@@ -96,8 +96,8 @@ with tempfile.TemporaryDirectory() as tmp:
         case(tool, "shadowed")
         case(tool, "standalone", brew=False)
         case(tool, "standalone", cellar_status=1)
-        case(tool, "brewed", package_status=1, expected=1)
-        case(tool, "standalone", self_status=1, expected=1 if tool == "uv" else 0)
+        case(tool, "brewed", package_status=1, expected=0)
+        case(tool, "standalone", self_status=1, expected=0)
     case("uv", "standalone", self_status=1, refusal=True)
 
 print("ok tool upgrades")

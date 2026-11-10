@@ -7,6 +7,6 @@ source "$HOME/.zshenv"
 export PATH="${GOBIN:+$GOBIN:}$HOME/.local/bin:$PATH"
 
 if command -v gup >/dev/null; then
-  gup update
+  gup update || print -u2 -- "Could not upgrade Go binaries"
 fi
 {{ end -}}

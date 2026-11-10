@@ -8,6 +8,6 @@ SDKMAN_DIR="${SDKMAN_DIR:-$HOME/{{ .path.tool.sdkman }}}"
 
 if [[ -s $SDKMAN_DIR/bin/sdkman-init.sh ]]; then
   source "$SDKMAN_DIR/bin/sdkman-init.sh"
-  sdk selfupdate
+  sdk selfupdate || print -u2 -- "Could not upgrade SDKMAN"
 fi
 {{ end -}}

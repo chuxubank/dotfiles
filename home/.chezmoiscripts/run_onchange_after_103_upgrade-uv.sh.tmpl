@@ -16,7 +16,6 @@ if is_homebrew_binary uv; then
   echo "uv is managed by Homebrew; skipping self-update"
 else
   # Other non-standalone installs refuse self-update; that is also a skip.
-  # Every other failure stays fatal so chezmoi retries it.
   echo "Upgrade uv self"
   if ! uv_self_output=$(uv self update 2>&1); then
     if [[ $uv_self_output == *'standalone installation scripts'* ]]; then
@@ -24,7 +23,6 @@ else
     else
       print -u2 -- "$uv_self_output"
       print -u2 -- "Could not upgrade uv self"
-      had_errors=true
     fi
   elif [[ -n $uv_self_output ]]; then
     print -r -- "$uv_self_output"

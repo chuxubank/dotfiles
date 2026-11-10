@@ -1,5 +1,3 @@
-had_errors=false
-
 # Check the selected executable, not just whether the formula is installed:
 # a standalone copy can shadow Homebrew's symlink on PATH.
 is_homebrew_binary() {
@@ -10,21 +8,20 @@ is_homebrew_binary() {
   [[ -n $cellar && ${binary:A} == "${cellar:A}/"* ]]
 }
 
+# Report a failed upgrade and keep going. A non-zero run_onchange script is
+# retried on every apply and blocks every later script. The week stamp in
+# each upgrade script runs it again when the week changes.
 run_upgrade() {
   local label=$1
   shift
   echo "Upgrade $label"
   if ! "$@"; then
     print -u2 -- "Could not upgrade $label"
-    had_errors=true
   fi
 }
 
-# Self-upgrades of a toolchain binary can fail for reasons this script cannot
-# fix (the install method refuses them, or the download endpoint returns 403).
-# Those must not set had_errors: a failed run_onchange script is retried on
-# every apply and blocks every later script. Managed package upgrades stay
-# fatal so chezmoi retries them.
+# Toolchain self-upgrades can fail because the install method refuses them
+# or the download endpoint returns 403.
 run_upgrade_optional() {
   local label=$1
   shift
@@ -35,5 +32,5 @@ run_upgrade_optional() {
 }
 
 finish_upgrades() {
-  ! $had_errors
+  return 0
 }

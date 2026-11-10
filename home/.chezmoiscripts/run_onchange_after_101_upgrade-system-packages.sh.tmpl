@@ -15,7 +15,6 @@ if command -v brew >/dev/null; then
   echo "Clean Homebrew cache"
   if ! brew cleanup --prune=all -s; then
     print -u2 -- "Could not clean Homebrew cache"
-    had_errors=true
   fi
 fi
 
@@ -25,10 +24,8 @@ run_upgrade termux pkg upgrade -y
 echo "Upgrade apt"
 if ! sudo apt-get update -y; then
   print -u2 -- "Could not update apt"
-  had_errors=true
 elif ! sudo apt-get upgrade -y; then
   print -u2 -- "Could not upgrade apt"
-  had_errors=true
 fi
 {{ else if and (eq .chezmoi.os "linux") (lookPath "pacman") -}}
 run_upgrade pacman sudo pacman -Syu --noconfirm

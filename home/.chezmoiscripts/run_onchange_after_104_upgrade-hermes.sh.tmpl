@@ -8,6 +8,6 @@ export PATH="$HOME/.local/bin:$PATH"
 
 if command -v hermes >/dev/null; then
   echo "Upgrade hermes"
-  hermes update --yes
+  hermes update --yes || print -u2 -- "Could not upgrade hermes"
 fi
 {{ end -}}

@@ -8,5 +8,5 @@ upgrade_emacs() {
 {{ template "emacs/package-sync-upgrade.sh" . }}
 }
 
-upgrade_emacs
+upgrade_emacs || print -u2 -- "Could not upgrade Emacs packages"
 {{ end -}}
