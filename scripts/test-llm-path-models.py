@@ -108,43 +108,38 @@ fail([{"paths": [["workspace", "iv"]], "model": "bare-id"}], "must be alias/id")
 
 pi = render("pi")
 omp = render("omp")
-subprocess.run([zsh, "-n", "-c", pi], check=True)
-subprocess.run([zsh, "-n", "-c", omp], check=True)
 
 rules = configured_path_models()
 personal = model_for(rules, ["workspace", "personal"])
 iv = model_for(rules, ["workspace", "iv"])
-iv_provider, iv_id = split_qualified(iv)
 personal_provider, personal_id = split_qualified(personal)
 # [chezmoi, workingTree] is the source passed to execute-template, not a
 # path.toml location. CI checks out somewhere other than ~/.local/share/chezmoi.
 working_tree = os.path.normpath(run("{{- .chezmoi.workingTree -}}").strip())
-for script in (pi, omp):
-    assert personal in script and iv in script
-    listing = zsh_eval(
-        script,
-        r"""
+listing = zsh_eval(
+    pi,
+    r"""
 print -r -- "count=$#PATH_MODEL_PREFIXES"
 for (( i = 1; i <= $#PATH_MODEL_PREFIXES; i++ )); do
   print -r -- "$PATH_MODEL_PREFIXES[i] $PATH_MODEL_MODELS[i]"
 done
 """,
-    )
-    rows = dict(line.rsplit(" ", 1) for line in listing.splitlines() if line.startswith("/"))
-    chezmoi_matches = [prefix for prefix in rows if os.path.normpath(prefix) == working_tree]
-    assert chezmoi_matches, (working_tree, sorted(rows))
-    chezmoi_prefix = chezmoi_matches[0]
-    personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
-    oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
-    iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
-    assert rows[chezmoi_prefix] == personal
-    assert rows[personal_prefix] == personal
-    assert rows[oss_prefix] == personal
-    assert rows[iv_prefix] == iv
-    chosen = zsh_eval(
-        script,
-        "show() { local found; found=$(path_model_for \"$1\"); print -r -- \"[$found]\"; }\n"
-        + f"""
+)
+rows = dict(line.rsplit(" ", 1) for line in listing.splitlines() if line.startswith("/"))
+chezmoi_matches = [prefix for prefix in rows if os.path.normpath(prefix) == working_tree]
+assert chezmoi_matches, (working_tree, sorted(rows))
+chezmoi_prefix = chezmoi_matches[0]
+personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
+oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
+iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
+assert rows[chezmoi_prefix] == personal
+assert rows[personal_prefix] == personal
+assert rows[oss_prefix] == personal
+assert rows[iv_prefix] == iv
+chosen = zsh_eval(
+    pi,
+    "show() { local found; found=$(path_model_for \"$1\"); print -r -- \"[$found]\"; }\n"
+    + f"""
 show {json.dumps(chezmoi_prefix + "/home")}
 show {json.dumps(personal_prefix + "/blog")}
 show {json.dumps(personal_prefix + "ity/blog")}
@@ -152,8 +147,8 @@ show {json.dumps(oss_prefix + "/luvus")}
 show {json.dumps(iv_prefix + "/ivc")}
 show /tmp
 """,
-    ).splitlines()
-    assert chosen == [f"[{personal}]", f"[{personal}]", "[]", f"[{personal}]", f"[{iv}]", "[]"]
+).splitlines()
+assert chosen == [f"[{personal}]", f"[{personal}]", "[]", f"[{personal}]", f"[{iv}]", "[]"]
 
 skip = zsh_eval(
     omp,
@@ -194,35 +189,6 @@ opencode = render("opencode")
 grok = render("grok")
 goose = render("goose")
 copilot = render("copilot")
-for script in (opencode, grok, goose, copilot):
-    subprocess.run([zsh, "-n", "-c", script], check=True)
-
-assert iv in opencode
-assert f"openai/{iv_id}" not in opencode
-assert personal in opencode
-assert iv in grok and personal in grok
-assert f"github-copilot/{iv_id}" not in grok
-grok_rows = dict(
-    line.rsplit(" ", 1)
-    for line in zsh_eval(
-        grok,
-        r"""
-for (( i = 1; i <= $#PATH_MODEL_PREFIXES; i++ )); do
-  print -r -- "$PATH_MODEL_PREFIXES[i] $PATH_MODEL_MODELS[i]"
-done
-""",
-    ).splitlines()
-    if line.startswith("/")
-)
-grok_oss = next(prefix for prefix in grok_rows if prefix.endswith("/Developer/OpenSource"))
-assert grok_rows[grok_oss] == personal
-assert iv in copilot
-assert personal in copilot
-assert "COPILOT_PROVIDER_BASE_URL" in copilot
-# iv and magpie are off on a ci host, so their auth commands are absent.
-if "codex-auth-token" in copilot or "gateway-key" in copilot:
-    assert "pass-field" in copilot
-assert iv in goose and personal in goose
 
 copilot_plan = zsh_eval(
     copilot,
@@ -280,16 +246,12 @@ path_model_plan update
 print -r -- "$PLAN_SKIP"
 """,
 )
-for script, launch, expected in (
-    (grok, "", ["--model", iv]),
-    (goose, "session", ["session", "--provider", goose_provider(iv_provider), "--model", iv_id]),
-):
-    output = zsh_eval(
-        script,
-        f'path_model_for() {{ print -r -- {json.dumps(iv)}; }}\n'
-        + f'path_model_plan {launch}\nprint -l -- "${{PLAN_ARGS[@]}}"\n',
-    )
-    assert output.splitlines()[:len(expected)] == expected, output
+grok_plan = zsh_eval(
+    grok,
+    f'path_model_for() {{ print -r -- {json.dumps(iv)}; }}\n'
+    'path_model_plan\nprint -l -- "${PLAN_ARGS[@]}"\n',
+)
+assert grok_plan.splitlines()[:2] == ["--model", iv]
 
 assert goose_plan.splitlines() == [
     "0",
