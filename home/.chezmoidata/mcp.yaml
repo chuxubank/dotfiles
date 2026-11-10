@@ -336,3 +336,17 @@ mcp:
         envs:
           ZOTERO_LOCAL: "true"
           ZOTERO_MCP_TOOLSETS: none
+    - name: Pencil
+      owner: pen
+      description: >
+        Edits the .pen document open in Pen.app. Launch may replace this
+        entry with the app bundle's mcp-server; both commands talk to that
+        app. Apply writes this one back.
+      when:
+        enabled:
+          os: darwin
+      execution:
+        type: stdio
+        cmd: ~/bin/pen-mcp
+        timeout: 20
+        tool_timeout: 120

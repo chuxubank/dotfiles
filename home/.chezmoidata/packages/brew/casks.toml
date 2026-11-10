@@ -78,6 +78,7 @@ casks = [
   "nextcloud",
   "openusage",
   { name = "paseo", owner = "paseo" },
+  { name = "pen", owner = "pen" },
   "postman",
   "raycast",
   "sf-symbols",

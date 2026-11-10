@@ -1,0 +1,17 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "pen") .) | fromJson -}}
+{{- /* chezmoi:modify-template */ -}}
+{{- /* The desktop app owns this store (window bounds, account, provider
+       keys). enabledIntegrations is the exception. The default is every
+       client the app knows. On launch it deletes a pencil key from each of
+       those files, then writes its own entry back for ids in this list.
+       An id left out stays deleted until the next apply. These three match
+       the clients mcp.yaml renders into files the app edits. Gemini's
+       managed file is elsewhere, so it is not in this list. The app command
+       and ~/bin/pen-mcp both attach to the running desktop app. */ -}}
+{{- includeTemplate "config/merge" (dict
+  "format" "json"
+  "input" (dig "stdin" "" .chezmoi)
+  "managed" (dict)
+  "replace" (dict "enabledIntegrations" (list "claudeCodeCLI" "codexCLI" "openCodeCLI"))
+) -}}
+{{- end -}}

@@ -483,6 +483,29 @@ tools:
       # and this entry together.
       - ".paseo/**"
 
+  # Desktop cask (homebrew/cask, macOS 13+, auto_updates) plus @pen.dev/cli.
+  # Pen.app reinstalls the integrations listed in its config on every launch
+  # and deletes a pencil key from any client it knows when that client is
+  # absent from the list. The list is Claude, Codex, and OpenCode, the same
+  # clients mcp.yaml renders, so the replacement entry still reaches the app.
+  pen:
+    when:
+      enabled:
+        os:
+          type: darwin
+          version: ">=13"
+      disabled:
+        host_env: [ci]
+    remove:
+      - "Library/Application Support/Pen/config.json"
+    purge:
+      - ".pencil/**"
+      - "Library/Application Support/Pen/**"
+      - "Library/Caches/pen-updater/**"
+      - "Library/Logs/Pen/**"
+      - paths:
+          - "Library/Preferences/dev.pencil.desktop.plist"
+
   pi:
     when: *non_ci
     plugin_upgrades:

@@ -1,0 +1,9 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "pen") .) | fromJson -}}
+#!/bin/sh
+# Pen.app's stdio server. It exits unless that app is running with a document open.
+{{- $binary := "mcp-server-darwin-arm64" -}}
+{{- if eq .chezmoi.arch "amd64" -}}
+{{- $binary = "mcp-server-darwin-x64" -}}
+{{- end }}
+exec "/Applications/Pen.app/Contents/Resources/app.asar.unpacked/out/{{ $binary }}" --app desktop "$@"
+{{- end }}
