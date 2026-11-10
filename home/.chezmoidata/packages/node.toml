@@ -49,7 +49,8 @@ global = [
   { name = "emacs-lsp-proxy", trust = true, when.enabled = false },
   { name = "lody", owner = "lody" },
   { name = "openclaw", owner = "openclaw" },
-  { name = "opencode-ai", owner = "opencode", trust = true },
+  # opencode-ai is the 1.x package and does not publish 2.x.
+  { name = "@opencode/cli", owner = "opencode", trust = true },
   { name = "pi-acp", owner = "pi" },
   { name = "sentry", owner = "sentry" },
   { name = "svgo", owner = "s2c" },
