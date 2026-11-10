@@ -67,6 +67,17 @@ model-switching are rare mid-command.
 `registerShortcut` plus an overlay component rather than the editor, so it
 survives regardless.
 
+Editor undo is `Ctrl+/`. WezTerm's `DecreaseFontSize` owns physical
+`Ctrl+-`, `Ctrl+Shift+-`, and `Ctrl+_`, and `keys.lua` does not pass them
+through, so Luvus never sees them. Luvus itself does not bind `Ctrl+/` or
+`Alt+Y`. `Alt+Y` remains yank-pop: it cycles the kill ring only immediately
+after `Ctrl+Y`, and only when an older entry exists.
+
+The action keeps `ctrl+-` beside `ctrl+/`. pi-tui names the legacy `Ctrl+/`
+byte (`0x1f`) `ctrl+-`; under kitty, which this WezTerm and Luvus stack
+negotiates, the slash arrives as `ctrl+/`. An explicit list replaces Pi's
+platform default, so Windows `Ctrl+Z` and WSL `Alt+Z` are no longer undo.
+
 ## Deltas from upstream
 
 | Keys | Pi default | Current assignment | Status |
@@ -89,3 +100,7 @@ survives regardless.
 | `Alt+F` | Word right | Accept one ghost word while one shows | **Change** |
 | `Ctrl+Right` | No assignment | Accept one ghost word while one shows | **Add** |
 | `Escape` | Abort; restore queued messages | Also dismisses the ghost | **Add** |
+| `Ctrl+/` | No assignment. Undo is `Ctrl+-` on macOS/Linux, `Ctrl+Z` on Windows, and `Alt+Z` on WSL | Undo last edit | **Add** |
+| `Ctrl+-` | Undo last edit on macOS/Linux | Still bound, only so the legacy `0x1f` byte matches. WezTerm consumes the physical chord | Unchanged |
+| `Ctrl+Z` | Undo on Windows | Not bound | **Delete** |
+| `Alt+Z` | Undo on WSL | Not bound | **Delete** |

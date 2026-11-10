@@ -68,7 +68,11 @@ still cycle the filter on both agents.
 | `Ctrl+H` / `Ctrl+D` | Delete character backward / forward |
 | `Ctrl+K` / `Ctrl+U` | Delete to line end / start |
 | `Ctrl+Y` / `Alt+Y` | Yank / yank-pop |
+| `Ctrl+/` | Undo the last editor edit (Pi) |
 | `Ctrl+J` / `Shift+Enter` | New line |
+
+`Ctrl+/` is Pi only. WezTerm keeps physical `Ctrl+-` for font size; see
+[Pi](pi.md).
 
 ## Prompt history and sessions
 

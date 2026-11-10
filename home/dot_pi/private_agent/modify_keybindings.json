@@ -24,6 +24,13 @@
        keybinding ids, so Alt is the only shared assignment the config can
        reach.
 
+       Undo is Ctrl+/, Emacs C-/. WezTerm's DecreaseFontSize owns the physical
+       Ctrl+-, Ctrl+Shift+-, and Ctrl+_ chords, so they never reach Luvus or
+       Pi. The action also keeps ctrl+-: pi-tui names the legacy Ctrl+/ byte
+       (0x1f) ctrl+-, while kitty — this WezTerm and Luvus stack — reports the
+       slash as ctrl+/. An explicit list replaces Pi's platform default,
+       including Windows ctrl+z and WSL alt+z.
+
        omit() drops leftover Enter/follow-up overrides as literal dotted keys.
        config/merge remove treats dots as nested paths, so it cannot. */ -}}
 {{- $merged := includeTemplate "config/merge" (dict
@@ -38,6 +45,7 @@
     "tui.editor.cursorWordRight" (list "alt+right" "alt+f")
     "tui.editor.deleteCharForward" (list "delete" "ctrl+d")
     "tui.editor.deleteCharBackward" (list "backspace" "ctrl+h")
+    "tui.editor.undo" (list "ctrl+/" "ctrl+-")
     "tui.input.newLine" (list "shift+enter" "ctrl+j")
     "app.model.select" "alt+m"
     "app.model.cycleForward" "alt+n"

@@ -64,6 +64,7 @@ defaults are in the per-tool files.
 | =Ctrl+H= / =Ctrl+D=      | Delete character backward/forward                   |
 | =Ctrl+K= / =Ctrl+U=      | Delete to line end/start                            |
 | =Ctrl+Y= / =Alt+Y=       | Yank / yank-pop                                     |
+| =Ctrl+/=                 | Undo last edit (Pi)                                 |
 | =Ctrl+J= / =Shift+Enter= | New line                                            |
 | =Ctrl+R=                 | Reverse-search prompt history                       |
 | =Ctrl+Alt+R=             | Rename session                                      |
