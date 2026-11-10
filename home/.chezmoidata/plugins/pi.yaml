@@ -40,6 +40,15 @@ plugins:
           reviewer, oracle) with foreground/background runs and fleet view.
         source: npm:pi-subagents
 
+      # After pi-subagents: bounded batches call that package's protocol.
+      - name: pi-loop
+        description: >-
+          Scheduled, event, and self-paced /loop re-wakes, plus workflows,
+          task backlog, background command monitors, and bounded subagent
+          batches. Orchestration uses the installed pi-subagents. Persisted
+          intent is not an always-on worker.
+        source: npm:@trevonistrevon/pi-loop
+
       - name: pi-web-access
         description: >-
           Web search and URL fetching for Pi, with additional GitHub, PDF,
