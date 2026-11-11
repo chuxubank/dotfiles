@@ -109,7 +109,7 @@ casks = [
   { name = "firefox", when.enabled.disk_gb.min = 256 },
   { name = "folo", when.enabled.disk_gb.min = 256 },
   { name = "google-chrome", when.enabled.host_env = ["personal", "iv"] },
-  { name = "handy", when.enabled = { host_env = ["personal"], roles = ["llm"] } },
+  { name = "handy", when.enabled.host_env = ["personal"] },
   { name = "home-assistant", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "insta360-studio", when.enabled = { host_env = ["personal"], roles = ["studio"], disk_gb.min = 256 } },
   { name = "intellij-idea", when.enabled.host_env = ["aa"] },
