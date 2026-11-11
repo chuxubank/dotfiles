@@ -95,6 +95,16 @@ workspaces:
             dest: ivc
             name: ivc
 
+  - name: ivu
+    when: *iv_only
+    tabs:
+      - label: ivu
+        panes:
+          - <<: *pane_launch
+            path: [workspace, iv]
+            dest: ivu
+            name: ivu
+
   - name: OpenTactic
     when: *personal_only
     tabs:
