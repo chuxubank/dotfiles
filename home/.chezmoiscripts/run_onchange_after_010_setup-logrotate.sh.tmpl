@@ -4,7 +4,14 @@ set -eu
 
 logrotate_dir={{ joinPath .path.etc "logrotate.d" | quote }}
 
-mkdir -p "$logrotate_dir" \
+# elevate when writing system logrotate paths
+if [ ! -w "$logrotate_dir" ] 2>/dev/null; then
+  SUDO="sudo"
+else
+  SUDO=""
+fi
+
+$SUDO mkdir -p "$logrotate_dir" \
 {{- $tools := dict -}}
 {{- range (includeTemplate "service/services" . | fromJson) -}}
   {{- $_ := set $tools .tool true -}}
@@ -24,7 +31,7 @@ mkdir -p "$logrotate_dir" \
 {{- end -}}
 {{ $filename := .tool -}}
 {{- if not (and (hasKey . "brew") .brew) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end -}}
-cat > "$logrotate_dir/{{ $filename }}" <<'LOGROTATE'
+$SUDO tee "$logrotate_dir/{{ $filename }}" >/dev/null <<'LOGROTATE'
 {{ index $logFiles 0 | quote }}
 {
   {{ includeTemplate "service/logrotate-directives" $stdoutOpts }}
