@@ -24,12 +24,15 @@ declared_cargo=(
 installed_cargo=()
 cleanup_enabled=true
 
+typeset -A cargo_install_lines
 if command -v cargo >/dev/null; then
   if listing=$(cargo install --list); then
     installed_cargo=()
     while IFS= read -r line || [[ -n $line ]]; do
       [[ $line == [[:space:]]* || -z $line ]] && continue
-      installed_cargo+=("${line%% *}")
+      _cargo_name="${line%% *}"
+      installed_cargo+=("$_cargo_name")
+      cargo_install_lines[$_cargo_name]="$line"
     done <<<"$listing"
   else
     print -u2 -- "Could not list installed cargo crates; skipping undeclared cleanup"
@@ -42,18 +45,34 @@ else
   had_errors=true
 fi
 
-cargo_crate_installed() {
-  local crate="$1"
-  (( ${installed_cargo[(Ie)$crate]} ))
+# The list entry records the git branch from the install that wrote it.
+# This script re-runs when the declaration changes, but cargo keeps that
+# branch until the install is forced.
+cargo_source_current() {
+  local name="$1" git="$2" branch="$3"
+  local spec="${cargo_install_lines[$name]:-}" decoded
+  [[ -n $spec ]] || return 1
+  [[ -z $git ]] && return 0
+  [[ $spec == *"${git%.git}"* ]] || return 1
+  [[ -z $branch ]] && return 0
+  decoded="${spec//\%2F//}"
+  decoded="${decoded//\%2f//}"
+  [[ $decoded == *"branch=${branch}#"* || $decoded == *"branch=${branch})"* ]]
 }
 
 # CI restores CARGO_HOME/bin without .crates.toml, so `cargo install --list`
 # misses crates whose binaries are already on disk. Treat that as installed.
+# A recorded source that differs must be forced, or cargo keeps the old branch
+# and the already-exists fallback accepts it.
 install_cargo_crate() {
   local crate="$1"
   shift
   local output
-  if output=$(cargo install "$@" "$crate" 2>&1); then
+  local -a args=("$@")
+  if [[ -n ${cargo_install_lines[$crate]:-} ]]; then
+    args=(--force "${args[@]}")
+  fi
+  if output=$(cargo install "${args[@]}" "$crate" 2>&1); then
     print -- "$output"
     return 0
   fi
@@ -67,14 +86,14 @@ install_cargo_crate() {
 
 {{- range $tool := $tools }}
 {{- if eq (kindOf $tool) "map" }}
-if ! cargo_crate_installed {{ $tool.name | quote }}; then
+if ! cargo_source_current {{ $tool.name | quote }} {{ with index $tool "git" }}{{ . | quote }}{{ else }}""{{ end }} {{ with index $tool "branch" }}{{ . | quote }}{{ else }}""{{ end }}; then
 echo "Install cargo crate: {{ $tool.name }}"
 if ! install_cargo_crate {{ $tool.name | quote }}{{- if (and (index $tool "force") true) }} --force{{- end }}{{- if (and (index $tool "locked") true) }} --locked{{- end }}{{- with index $tool "version" }} --version {{ . }}{{ end }}{{- with index $tool "git" }} --git {{.}}{{ end }} {{- with index $tool "branch" }} --branch {{.}}{{ end }} {{- with index $tool "rev" }} --rev {{.}}{{ end }}{{- with index $tool "example" }} --example {{.}}{{ end }}{{- with index $tool "features" }} --features {{.}}{{ end }}; then
   had_errors=true
 fi
 fi
 {{- else }}
-if ! cargo_crate_installed {{ $tool | quote }}; then
+if ! cargo_source_current {{ $tool | quote }} "" ""; then
 echo "Install cargo crate: {{ $tool }}"
 if ! install_cargo_crate {{ $tool | quote }}; then
   had_errors=true

@@ -115,7 +115,7 @@ start_py integration-semantics python3 "$SOURCE/scripts/check-integration-semant
 start_py plugin-manager-semantics python3 "$SOURCE/scripts/check-plugin-manager-semantics.py" "$SOURCE"
 start_py integration-engine python3 "$SOURCE/scripts/test-integration-engine.py" "$SOURCE"
 start_py plugin-engine python3 "$SOURCE/scripts/test-plugin-engine.py" "$SOURCE"
-for test in test-hermes-setup.py test-tool-setup.py test-tool-purge.py test-tool-upgrades.py test-llm-providers.py test-llm-client-providers.py test-llm-path-models.py test-agent-browser-setup.py; do
+for test in test-hermes-setup.py test-tool-setup.py test-tool-purge.py test-tool-upgrades.py test-rust-setup.py test-llm-providers.py test-llm-client-providers.py test-llm-path-models.py test-agent-browser-setup.py; do
 	start_py "${test%.py}" python3 "$SOURCE/scripts/$test" "$SOURCE"
 done
 while IFS='|' read -r pid log; do
