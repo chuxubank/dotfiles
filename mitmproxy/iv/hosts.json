@@ -1,5 +1,3 @@
 [
-  {
-    "pattern": "wx-(?:test|nightly|uat|pre)\\.infinityparadise\\.com"
-  }
+  "wx-(?:test|nightly|uat|pre)\\.infinityparadise\\.com"
 ]
