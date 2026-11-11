@@ -1,9 +1,9 @@
 [packages.rust]
 cargo = [
   "cargo-update",
-  # Our OpenPGP work lives on a topic branch so the fork's main stays a clean
-  # fast-forward of upstream; see repositories.yaml.
-  { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git", branch = "codex/gpg-source-provider" },
+  # Homebrew bottles the release tag. Install the fork's main so the binary
+  # matches its upstream fast-forward.
+  { name = "beancount-language-server", git = "https://github.com/cat-emacs/beancount-language-server.git", branch = "main" },
   { name = "dot-aep", git = "https://github.com/virtualritz/dot-aep", example = "dump", owner = "dot-aep" },
   # The npm wrapper resolves upstream's released platform binary, so build the
   # fork directly to include its Rust changes.
