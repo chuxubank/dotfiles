@@ -363,6 +363,16 @@ tools:
     purge:
       - ".lody/**"
 
+  # SSH bridge for the Luvia phone client. `pair` writes grants here and a
+  # forced-command line in authorized_keys. That keys file is shared, so
+  # only this tree is purged.
+  luvia-host:
+    when:
+      enabled:
+        host_env: [personal, iv]
+    purge:
+      - ".config/luvia/**"
+
   # Client switch only. The gateway runs once on bwg-cn2-gia, not on
   # each machine: no formula, no launchd, no http://127.0.0.1:3425.
   # While this is on, the provider tables below gain

@@ -4,6 +4,7 @@ brews = [
   "agg",
   "antidote",
   "apktool",
+  { name = "asahiart/tap/luvia-host", owner = "luvia-host" },
   "asciinema",
   "aspell",
   "autorestic",
