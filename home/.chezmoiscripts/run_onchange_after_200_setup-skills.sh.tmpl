@@ -18,10 +18,12 @@ trap 'rm -rf "$skills_state_dir"' EXIT
 
 # skills 1.7.2 exits before large piped JSON finishes flushing. Give the CLI
 # a regular file for stdout, then let cat safely feed the inventory loader.
+# A lock entry whose directory is gone has path: null. split accepts only
+# strings, and one bad entry used to fail this whole inventory.
 json_names_load installed \
   'skills list -g --json > "$skills_state_dir/installed.json" && cat "$skills_state_dir/installed.json"' \
   'type == "array"' \
-  '.[].path | split("/")[-1]' \
+  '.[] | .path | select(type == "string" and length > 0) | split("/")[-1]' \
   cleanup_enabled \
   'skills'
 
