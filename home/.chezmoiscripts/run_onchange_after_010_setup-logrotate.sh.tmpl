@@ -42,6 +42,11 @@ $SUDO tee "$logrotate_dir/{{ $filename }}" >/dev/null <<'LOGROTATE'
 }
 LOGROTATE
 {{ end -}}
+{{- range (includeTemplate "service/services" (merge (dict "serviceSelect" "disabled") .) | fromJson) -}}
+{{- $filename := .tool -}}
+{{- if not (and (hasKey . "brew") .brew) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end }}
+rm -f "$logrotate_dir/{{ $filename }}"
+{{- end -}}
 {{ if eq .chezmoi.os "darwin" }}
 brew services restart logrotate
 {{ end -}}

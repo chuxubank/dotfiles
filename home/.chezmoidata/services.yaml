@@ -101,8 +101,14 @@ services:
       - "--volname"
       - rpi
 
+  # tool is the unit name, not an owner, so this does not follow uv.
+  # The rapid-mlx binary is the darwin llm-role uv tool.
   - tool: uv
     target: rapid-mlx
+    when:
+      enabled:
+        os: darwin
+        roles: ["llm"]
     programArguments:
       - home:
           - .local

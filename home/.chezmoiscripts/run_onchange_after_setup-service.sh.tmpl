@@ -8,3 +8,37 @@ set -eu
 {{ includeTemplate "service/register-linux" (merge (dict) . $) }}
 {{- end }}
 {{- end }}
+{{- range (includeTemplate "service/services" (merge (dict "serviceSelect" "disabled") .) | fromJson) }}
+{{- $label := includeTemplate "service/label" (dict "os" $.chezmoi.os "service" .) -}}
+{{- if eq $.chezmoi.os "darwin" }}
+label={{ $label | quote }}
+domain="gui/{{ $.chezmoi.uid }}"
+plist="$HOME/Library/LaunchAgents/${label}.plist"
+if launchctl print "$domain/$label" >/dev/null 2>&1; then
+  launchctl bootout "$domain/$label"
+fi
+rm -f "$plist"
+{{- if and (hasKey . "brew") .brew }}
+if command -v brew >/dev/null 2>&1; then
+  brew services stop {{ .tool | quote }} || true
+fi
+{{- end }}
+{{- else if eq $.chezmoi.os "linux" }}
+label={{ $label | quote }}
+unit="$HOME/.config/systemd/user/${label}.service"
+if [ -f "$unit" ]; then
+  if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user disable --now "$label"
+    rm -f "$unit"
+    systemctl --user daemon-reload
+  else
+    rm -f "$unit"
+  fi
+fi
+{{- if and (hasKey . "brew") .brew }}
+if command -v brew >/dev/null 2>&1; then
+  brew services stop {{ .tool | quote }} || true
+fi
+{{- end }}
+{{- end }}
+{{- end }}

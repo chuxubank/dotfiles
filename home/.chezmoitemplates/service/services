@@ -1,3 +1,7 @@
+{{- /* service/services — Service specs for this host.
+       serviceSelect "disabled" returns specs that must not be installed.
+       The default is the enabled set. Output: JSON array. */ -}}
+{{- $select := dig "serviceSelect" "enabled" . -}}
 {{- $selected := list -}}
 {{- range $service := .services -}}
   {{- $enabled := true -}}
@@ -7,7 +11,11 @@
   {{- if and $enabled (eq (kindOf $service) "map") (hasKey $service "when") -}}
     {{- $enabled = includeTemplate "when/context" (merge (dict "item" $service) $) | fromJson -}}
   {{- end -}}
-  {{- if $enabled -}}
+  {{- $keep := $enabled -}}
+  {{- if eq $select "disabled" -}}
+    {{- $keep = not $enabled -}}
+  {{- end -}}
+  {{- if $keep -}}
     {{- $selected = append $selected $service -}}
   {{- end -}}
 {{- end -}}
