@@ -47,6 +47,13 @@ plugins:
           directory. New and forked sessions start empty.
         source: npm:@getpie/pi-loop
 
+      - name: pi-goal
+        description: >-
+          One session-scoped objective. After the agent is idle it continues
+          until goal_complete, goal_blocked, goal_wait, or a budget limit.
+          State stays in the session; settings live in the Pi agent directory.
+        source: npm:@narumitw/pi-goal
+
       - name: pi-web-access
         description: >-
           Web search and URL fetching for Pi, with additional GitHub, PDF,
