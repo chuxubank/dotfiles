@@ -1,12 +1,244 @@
 [
   {
-    "pattern": "^/(?:queen/(?:game/(?:list-crush-configs|get-crush-info|get-item-detail)|script/crush-reward-info)|__ivc_mock__/crush-cover-(?:lu|sol)\\.webp)(?:\\?.*)?$",
-    "handler": "crush_ritual",
-    "delay_seconds": 0
+    "pattern": "^/iv/secret/list-chat\\?(?=[^#]*\\btab=1(?:&|$))[^#]*$",
+    "file": "ugc/list-chat-1.json"
   },
   {
-    "pattern": "/iv/collection/list-saves\\?(?=[^#]*\\btab=9(?:&|$))",
-    "file": "legacy_web_card.json",
-    "delay_seconds": 0
+    "pattern": "^/iv/secret/list-chat\\?(?=[^#]*\\btab=2(?:&|$))[^#]*$",
+    "file": "ugc/list-chat-2.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat\\?(?=[^#]*\\btab=3(?:&|$))[^#]*$",
+    "file": "ugc/list-chat-3.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat\\?(?=[^#]*\\btab=4(?:&|$))[^#]*$",
+    "file": "ugc/list-chat-4.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-edit\\?(?=[^#]*\\bevent_id=970627200(?:&|$))[^#]*$",
+    "file": "ugc/event-970627200-get-event-edit.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event\\?(?=[^#]*\\bevent_id=970627200(?:&|$))[^#]*$",
+    "file": "ugc/event-970627200-get-event.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-review-result\\?(?=[^#]*\\bevent_id=970627200(?:&|$))[^#]*$",
+    "file": "ugc/event-970627200-get-event-review-result.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-progressing-chat\\?(?=[^#]*\\bevent_id=970627200(?:&|$))[^#]*$",
+    "file": "ugc/event-970627200-progress.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-edit\\?(?=[^#]*\\bevent_id=970627201(?:&|$))[^#]*$",
+    "file": "ugc/event-970627201-get-event-edit.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event\\?(?=[^#]*\\bevent_id=970627201(?:&|$))[^#]*$",
+    "file": "ugc/event-970627201-get-event.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-review-result\\?(?=[^#]*\\bevent_id=970627201(?:&|$))[^#]*$",
+    "file": "ugc/event-970627201-get-event-review-result.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-progressing-chat\\?(?=[^#]*\\bevent_id=970627201(?:&|$))[^#]*$",
+    "file": "ugc/event-970627201-progress.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-edit\\?(?=[^#]*\\bevent_id=970627202(?:&|$))[^#]*$",
+    "file": "ugc/event-970627202-get-event-edit.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event\\?(?=[^#]*\\bevent_id=970627202(?:&|$))[^#]*$",
+    "file": "ugc/event-970627202-get-event.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-review-result\\?(?=[^#]*\\bevent_id=970627202(?:&|$))[^#]*$",
+    "file": "ugc/event-970627202-get-event-review-result.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-progressing-chat\\?(?=[^#]*\\bevent_id=970627202(?:&|$))[^#]*$",
+    "file": "ugc/event-970627202-progress.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-edit\\?(?=[^#]*\\bevent_id=970627203(?:&|$))[^#]*$",
+    "file": "ugc/event-970627203-get-event-edit.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event\\?(?=[^#]*\\bevent_id=970627203(?:&|$))[^#]*$",
+    "file": "ugc/event-970627203-get-event.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-review-result\\?(?=[^#]*\\bevent_id=970627203(?:&|$))[^#]*$",
+    "file": "ugc/event-970627203-get-event-review-result.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-progressing-chat\\?(?=[^#]*\\bevent_id=970627203(?:&|$))[^#]*$",
+    "file": "ugc/event-970627203-progress.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627200(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627200.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627200(?:&|$))[^#]*$",
+    "file": "ugc/final-980627200.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627201(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627201.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627201(?:&|$))[^#]*$",
+    "file": "ugc/final-980627201.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627202(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627202.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627202(?:&|$))[^#]*$",
+    "file": "ugc/final-980627202.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627203(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627203.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627203(?:&|$))[^#]*$",
+    "file": "ugc/final-980627203.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627204(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627204.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627204(?:&|$))[^#]*$",
+    "file": "ugc/final-980627204.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-chat-messages\\?(?=[^#]*\\buser_chat_id=980627205(?:&|$))[^#]*$",
+    "file": "ugc/chat-980627205.json"
+  },
+  {
+    "pattern": "^/iv/secret/final-chat\\?(?=[^#]*\\buser_chat_id=980627205(?:&|$))[^#]*$",
+    "file": "ugc/final-980627205.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-card(?:\\?[^#]*)?$",
+    "file": "ugc/get-card.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-card(?:\\?[^#]*)?$",
+    "file": "ugc/list-card.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-choose-card(?:\\?[^#]*)?$",
+    "file": "ugc/list-choose-card.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-tags(?:\\?[^#]*)?$",
+    "file": "ugc/get-tags.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-card-bubble(?:\\?[^#]*)?$",
+    "file": "ugc/get-card-bubble.json"
+  },
+  {
+    "pattern": "^/iv/secret/get-event-by-bubble(?:\\?[^#]*)?$",
+    "file": "ugc/get-event-by-bubble.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-comment(?:\\?[^#]*)?$",
+    "file": "ugc/list-comment.json"
+  },
+  {
+    "pattern": "^/iv/secret/list-inspired-reply(?:\\?[^#]*)?$",
+    "file": "ugc/list-inspired-reply.json"
+  },
+  {
+    "pattern": "^/iv/secret/start-chat(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/start-chat-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/edit-event(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/edit-event-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/set-event-private(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/set-event-private-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/delete-event(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/delete-event-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/delete-chat(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/delete-chat-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/action-chat(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/action-chat-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/save-chat(?:\\?[^#]*)?$",
+    "handler": "json_transition",
+    "file": "ugc/save-chat-transition.json"
+  },
+  {
+    "pattern": "^/iv/secret/mock-image\\.png$",
+    "handler": "binary",
+    "file": "mock-image.png"
+  },
+  {
+    "pattern": "^/(?:iv/secret(?:/[^?#]*)?|ws/query-secret)(?:\\?[^#]*)?$",
+    "file": "ugc/unconfigured.json"
+  },
+  {
+    "pattern": "^/queen/game/list-crush-configs(?:\\?[^#]*)?$",
+    "file": "crush/list-crush-configs.json"
+  },
+  {
+    "pattern": "^/queen/game/get-crush-info(?:\\?[^#]*)?$",
+    "file": "crush/get-crush-info.json"
+  },
+  {
+    "pattern": "^/queen/script/crush-reward-info(?:\\?[^#]*)?$",
+    "file": "crush/crush-reward-info.json"
+  },
+  {
+    "pattern": "^/queen/game/get-item-detail\\?(?=[^#]*\\bitem_id=99003001(?:&|$))[^#]*$",
+    "file": "crush/item-99003001.json"
+  },
+  {
+    "pattern": "^/queen/game/get-item-detail\\?(?=[^#]*\\bitem_id=99003002(?:&|$))[^#]*$",
+    "file": "crush/item-99003002.json"
+  },
+  {
+    "pattern": "^/queen/game/get-item-detail\\?(?=[^#]*\\bitem_id=99004501(?:&|$))[^#]*$",
+    "file": "crush/item-99004501.json"
+  },
+  {
+    "pattern": "^/__ivc_mock__/crush-cover-lu\\.webp$",
+    "handler": "binary",
+    "file": "love_journal_cover_lu.webp"
+  },
+  {
+    "pattern": "^/__ivc_mock__/crush-cover-sol\\.webp$",
+    "handler": "binary",
+    "file": "love_journal_cover_sol.webp"
+  },
+  {
+    "pattern": "^/iv/collection/list-saves\\?(?=[^#]*\\btab=9(?:&|$))[^#]*$",
+    "file": "legacy_web_card.json"
   }
 ]

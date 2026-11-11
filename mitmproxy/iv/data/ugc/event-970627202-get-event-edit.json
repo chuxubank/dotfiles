@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "event": {
+      "event_id": 970627202,
+      "card_id": 7,
+      "source_type": 1,
+      "is_private": 1,
+      "revision": 0,
+      "version_id": 9706272022,
+      "version_no": 2,
+      "review_status": 2,
+      "event_desc_original": "MOCK-2：MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+      "tags": [
+        "明信片",
+        "图书馆"
+      ],
+      "can_edit": true,
+      "approved_version_id": 9706272021
+    }
+  }
+}

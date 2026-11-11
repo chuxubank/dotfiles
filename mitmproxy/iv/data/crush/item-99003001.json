@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "item": {
+      "item_id": 99003001,
+      "item_type": 99,
+      "item_type_name": "笔记本",
+      "quantity": 1,
+      "name": "恋恋手账：恰逢其时",
+      "icon_url": "https://wx-nightly.infinityparadise.com/__ivc_mock__/crush-cover-lu.webp",
+      "description": "将你们共同经历的每一份心动珍藏在手账里。此文案、拥有状态和轮次均来自代理模拟的详情响应。",
+      "rarity": 2,
+      "is_unique": true,
+      "owned_num": 0,
+      "obtain_path": [
+        {
+          "description": "聊天轮次达到（123/600）",
+          "jump": "invalley://chat?role_id=1000001",
+          "type": 0
+        }
+      ]
+    }
+  }
+}

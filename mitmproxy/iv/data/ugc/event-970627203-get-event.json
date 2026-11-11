@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "event": {
+      "id": 970627203,
+      "card_id": 7,
+      "event_type": 2,
+      "event_desc_original": "MOCK-3：MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+      "tags": [
+        "明信片",
+        "图书馆"
+      ],
+      "is_private": 1,
+      "version_id": 9706272031,
+      "review_status": 1,
+      "create_user": {
+        "id": 0,
+        "nickname": "MOCK作者",
+        "is_event_author": true
+      },
+      "comment_count": 0
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "summary": {
+      "event_desc_rewrite": "MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+      "final_excitement": 75,
+      "final_assistant_summary": "MOCK结算：这张明信片成为了我们共同的回忆。",
+      "final_excitement_metric": {
+        "breathing": "平稳",
+        "ear_tip": "微红",
+        "eye_expression": "温柔",
+        "heartbeat": "加速",
+        "temperature": "温暖"
+      }
+    },
+    "can_share": true,
+    "event_version_id": 9706272031
+  }
+}

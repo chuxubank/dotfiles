@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "event_id": 970627203,
+    "version_id": 9706272031,
+    "version_no": 1,
+    "review_status": 2,
+    "review_time": 1794391200,
+    "reject_positions": [
+      "event_content",
+      "event_tags"
+    ],
+    "reason_text": "MOCK审核原因：仅用于客户端验证。",
+    "latest_version_id": 9706272032,
+    "can_edit": true
+  }
+}

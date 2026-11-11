@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "crush_info": {
+      "relationship": 3,
+      "level": 30,
+      "current_exp": 40,
+      "next_level_exp": 100,
+      "added_exp": 0,
+      "level_up": 0,
+      "new_level_unlock_list": [
+        {
+          "description": "",
+          "reward_description": "恋恋手账：心跳作证",
+          "type": 1
+        },
+        {
+          "description": "",
+          "reward_description": "恋恋手账：恰逢其时",
+          "type": 2,
+          "condition_description": "(聊天轮次暂未达标：123/600)"
+        }
+      ],
+      "crush_reward_items": []
+    }
+  }
+}

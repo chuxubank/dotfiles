@@ -1,0 +1,940 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "crush_configs": [
+      {
+        "level": 1,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 1 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 2,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 2 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 3,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 3 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 4,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 4 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 5,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 5 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 6,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 6 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 7,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 7 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 8,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 8 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 9,
+        "exp": 100,
+        "relationship": 1,
+        "relationship_name": "朋友",
+        "description": "等级 9 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 10,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 10 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 11,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 11 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 12,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 12 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 13,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 13 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 14,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 14 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 15,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 15 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 16,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 16 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 17,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 17 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 18,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 18 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 19,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 19 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 20,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 20 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 21,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 21 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 22,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 22 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 23,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 23 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 24,
+        "exp": 100,
+        "relationship": 2,
+        "relationship_name": "心动",
+        "description": "等级 24 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 25,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 25 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 26,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 26 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 27,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 27 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 28,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 28 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 29,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 29 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 30,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "",
+        "rewards": [
+          {
+            "type": "item",
+            "item_id": 99003001,
+            "item_num": 1,
+            "item_type": 99,
+            "name": "恋恋手账：恰逢其时",
+            "rarity": 2,
+            "icon_url": "https://wx-nightly.infinityparadise.com/__ivc_mock__/crush-cover-lu.webp",
+            "is_locked": 1
+          },
+          {
+            "type": "item",
+            "item_id": 99003002,
+            "item_num": 1,
+            "item_type": 99,
+            "name": "恋恋手账：心跳作证",
+            "rarity": 1,
+            "icon_url": "https://wx-nightly.infinityparadise.com/__ivc_mock__/crush-cover-lu.webp",
+            "is_locked": 0
+          }
+        ],
+        "more": ""
+      },
+      {
+        "level": 31,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 31 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 32,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 32 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 33,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 33 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 34,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 34 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 35,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 35 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 36,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 36 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 37,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 37 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 38,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 38 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 39,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 39 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 40,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 40 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 41,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 41 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 42,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 42 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 43,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 43 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 44,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 44 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 45,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "",
+        "rewards": [
+          {
+            "type": "item",
+            "item_id": 99004501,
+            "item_num": 1,
+            "item_type": 99,
+            "name": "恋恋手账：阵雨转晴",
+            "rarity": 1,
+            "icon_url": "https://wx-nightly.infinityparadise.com/__ivc_mock__/crush-cover-lu.webp",
+            "is_locked": 1
+          }
+        ],
+        "more": ""
+      },
+      {
+        "level": 46,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 46 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 47,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 47 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 48,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 48 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 49,
+        "exp": 100,
+        "relationship": 3,
+        "relationship_name": "信任",
+        "description": "等级 49 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 50,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 50 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 51,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 51 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 52,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 52 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 53,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 53 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 54,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 54 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 55,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 55 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 56,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 56 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 57,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 57 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 58,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 58 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 59,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 59 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 60,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 60 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 61,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 61 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 62,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 62 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 63,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 63 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 64,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 64 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 65,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 65 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 66,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 66 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 67,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 67 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 68,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 68 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 69,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 69 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 70,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 70 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 71,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 71 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 72,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 72 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 73,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 73 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 74,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 74 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 75,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 75 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 76,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 76 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 77,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 77 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 78,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 78 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 79,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 79 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 80,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 80 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 81,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 81 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 82,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 82 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 83,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 83 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 84,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 84 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 85,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 85 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 86,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 86 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 87,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 87 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 88,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 88 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 89,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 89 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 90,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 90 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 91,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 91 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 92,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 92 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 93,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 93 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 94,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 94 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 95,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 95 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 96,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 96 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 97,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 97 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 98,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 98 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 99,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 99 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      },
+      {
+        "level": 100,
+        "exp": 100,
+        "relationship": 4,
+        "relationship_name": "热恋",
+        "description": "等级 100 的成长奖励（Mock）",
+        "rewards": [],
+        "more": ""
+      }
+    ]
+  }
+}

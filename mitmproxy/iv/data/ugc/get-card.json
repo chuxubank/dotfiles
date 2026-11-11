@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "card": {
+      "id": 7,
+      "card_name": "MOCK隔离卡面",
+      "type": 1,
+      "pic_static_url": "https://wx-nightly.infinityparadise.com/iv/secret/mock-image.png",
+      "is_unlocked": true
+    }
+  }
+}

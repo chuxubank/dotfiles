@@ -1,0 +1,11 @@
+{
+  "expected": {},
+  "response": {
+    "code": 1,
+    "message": "Mock transition not prepared",
+    "data": {
+      "error_code": "MOCK_TRANSITION_NOT_PREPARED"
+    }
+  },
+  "after": {}
+}

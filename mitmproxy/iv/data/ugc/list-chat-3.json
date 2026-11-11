@@ -1,0 +1,92 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "data": [
+      {
+        "event_id": 970627200,
+        "card_id": 7,
+        "source_type": 1,
+        "is_private": 1,
+        "revision": 0,
+        "version_id": 9706272002,
+        "version_no": 2,
+        "review_status": 0,
+        "event_desc_original": "MOCK-0：MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+        "tags": [
+          "明信片",
+          "图书馆"
+        ],
+        "can_edit": true,
+        "approved_version_id": 9706272001,
+        "id": 980627204,
+        "event_type": 2,
+        "card_name": "MOCK隔离卡面",
+        "type": 1,
+        "pic_static_url": "https://wx-nightly.infinityparadise.com/iv/secret/mock-image.png",
+        "event_create_time": 1794391200,
+        "can_delete": true,
+        "latest_version_id": 9706272002,
+        "has_progressing": 0,
+        "user_chat_id": 980627204,
+        "current_round": 1,
+        "target_round": 3,
+        "current_excitement": 15,
+        "final_excitement": 75,
+        "can_share": false,
+        "capabilities": {
+          "can_start": false,
+          "can_continue": false,
+          "can_open_detail": false
+        },
+        "event_version_id": 9706272002
+      },
+      {
+        "event_id": 970627201,
+        "card_id": 7,
+        "source_type": 1,
+        "is_private": 1,
+        "revision": 0,
+        "version_id": 9706272012,
+        "version_no": 2,
+        "review_status": 1,
+        "event_desc_original": "MOCK-1：MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+        "tags": [
+          "明信片",
+          "图书馆"
+        ],
+        "can_edit": true,
+        "approved_version_id": 9706272011,
+        "id": 980627205,
+        "event_type": 2,
+        "card_name": "MOCK隔离卡面",
+        "type": 1,
+        "pic_static_url": "https://wx-nightly.infinityparadise.com/iv/secret/mock-image.png",
+        "event_create_time": 1794391200,
+        "can_delete": true,
+        "latest_version_id": 9706272012,
+        "has_progressing": 0,
+        "user_chat_id": 980627205,
+        "current_round": 1,
+        "target_round": 3,
+        "current_excitement": 15,
+        "final_excitement": 75,
+        "can_share": true,
+        "capabilities": {
+          "can_start": true,
+          "can_continue": false,
+          "can_open_detail": true
+        },
+        "event_version_id": 9706272011
+      }
+    ],
+    "pagination": {
+      "marker": "",
+      "has_more": false
+    },
+    "save_info": {
+      "saved_count": 2,
+      "saves_count": 100
+    }
+  }
+}

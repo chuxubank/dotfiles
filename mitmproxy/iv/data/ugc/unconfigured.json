@@ -1,0 +1,7 @@
+{
+  "code": 1,
+  "message": "Mock endpoint not prepared",
+  "data": {
+    "error_code": "MOCK_SCENARIO_NOT_CONFIGURED"
+  }
+}

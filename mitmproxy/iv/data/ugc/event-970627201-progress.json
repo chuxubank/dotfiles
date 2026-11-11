@@ -1,0 +1,35 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "processing": {
+      "id": 980627201,
+      "event_id": 970627201,
+      "card_id": 7,
+      "current_round": 1,
+      "target_round": 3,
+      "current_excitement": 15,
+      "target_excitement": 100,
+      "event_desc_rewrite": "MOCK验收：我和他在图书馆找到一张旧明信片，约定一起寻找当年的故事。窗外落着细雨，我们翻开旧书，发现了藏在书页里的约定。",
+      "pic_static_url": "https://wx-nightly.infinityparadise.com/iv/secret/mock-image.png",
+      "event_type": 2,
+      "status": 1,
+      "event_version_id": 9706272011,
+      "version_no": 1,
+      "review_status": 1,
+      "messages": [
+        {
+          "msg_id": "980627201-first",
+          "content": "MOCK首轮：一起读完这张明信片吧。",
+          "from": 2,
+          "content_type": 1,
+          "type": 0,
+          "role_id": 1,
+          "create_time": 1794391200000
+        }
+      ],
+      "has_progressing": 1,
+      "user_chat_id": 980627201
+    }
+  }
+}

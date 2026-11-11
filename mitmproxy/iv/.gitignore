@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+data/ugc-state.json
+data/ugc-audit.ndjson
+data/control.json
