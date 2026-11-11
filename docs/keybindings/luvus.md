@@ -33,6 +33,7 @@ Press `Ctrl+;`, then press the following key:
 | `f` | Fork the agent session | Fork the agent session | Unchanged |
 | `x` / `X` | Close the focused pane | Close the focused pane | Unchanged |
 | `z` | Zoom the focused pane | Zoom the focused pane | Unchanged |
+| `` ` `` | Open the focused pane menu | Open the focused pane menu | Unchanged |
 | `r` | Enter resize mode | Enter resize mode | Unchanged |
 | `y` | Enter copy mode | Enter copy mode | Unchanged |
 | `N` | Create a workspace | Create a workspace | Unchanged |
@@ -60,12 +61,6 @@ No prefix. `direct_keybindings` is empty by default in Luvus.
 This mirrors Herdr's `Alt+1…9` because Herdr, Zellij, and Luvus are one mux
 layer and never run at the same time. Luvus's own default reaches the same
 action through the prefix, which stays available.
-
-Not yet live: `jump_workspace_1…9` landed upstream after the 0.13.4 release, so
-the configured entries are ignored until the next version. Luvus only walks its
-known command list when building direct bindings, so unknown ids are skipped
-without an error and the binding starts working on upgrade. Until then, use
-`Ctrl+; w` / `Ctrl+; W` or the jump palette at `Ctrl+; m`.
 
 Luvus's internal tab shortcut is intentionally `Prefix+1…9`, matching the
 Herdr/Zellij mux layer. Direct `Ctrl+1…9` remains available to pane

@@ -20,18 +20,17 @@
     path = "md-babel"
 {{- end }}
 
-{{- /* Install the fork independently of the upstream Homebrew formula.
-       Keep the release pinned: upstream and fork tags are separate catalogs. */ -}}
+{{- /* Fork release, not the upstream formula: the tag catalogs differ.
+       The asset name includes the version, so resolve the fork's latest
+       release. A fixed /latest/download URL would never change. */ -}}
 {{- if and (eq .chezmoi.os "darwin") (ne .host_env "ci") (includeTemplate "tool/enabled" (merge (dict "tool" "luvus" "require" true) .) | fromJson) }}
-{{- $version := "0.14.4" -}}
-{{- $assets := dict
-    "arm64" (dict "triple" "aarch64-apple-darwin" "sha256" "6d6b2f84ebebee4432c934131fc733f9cf4aa8c80c76c700e5241980651248a0")
-    "amd64" (dict "triple" "x86_64-apple-darwin" "sha256" "106dd39679f2f9ac3e44ac7c17e2ca8e844a1428cfc1a9a944a4fb3749f5e4a3") -}}
-{{- with index $assets .chezmoi.arch }}
+{{- $triples := dict
+    "arm64" "aarch64-apple-darwin"
+    "amd64" "x86_64-apple-darwin" -}}
+{{- with index $triples .chezmoi.arch }}
 ["luvus"]
     type = "archive-file"
-    url = {{ gitHubReleaseAssetURL "chuxubank/luvus" (printf "v%s" $version) (printf "luvus-v%s-%s.tar.gz" $version .triple) | quote }}
-    checksum.sha256 = {{ .sha256 | quote }}
+    url = {{ gitHubLatestReleaseAssetURL "chuxubank/luvus" (printf "luvus-v*-%s.tar.gz" .) | quote }}
     path = "luvus"
     executable = true
 {{- end }}
