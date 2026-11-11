@@ -494,7 +494,8 @@ tools:
       # and this entry together.
       - ".paseo/**"
 
-  # Desktop cask (homebrew/cask, macOS 13+, auto_updates) plus @pen.dev/cli.
+  # Desktop cask (homebrew/cask, macOS 13+, auto_updates). The CLI and its
+  # ~/.pencil session live under pen-cli so non-macOS hosts keep the login.
   # Pen.app reinstalls the integrations listed in its config on every launch
   # and deletes a pencil key from any client it knows when that client is
   # absent from the list. The list is Claude, Codex, and OpenCode, the same
@@ -510,12 +511,17 @@ tools:
     remove:
       - "Library/Application Support/Pen/config.json"
     purge:
-      - ".pencil/**"
       - "Library/Application Support/Pen/**"
       - "Library/Caches/pen-updater/**"
       - "Library/Logs/Pen/**"
       - paths:
           - "Library/Preferences/dev.pencil.desktop.plist"
+
+  # @pen.dev/cli; signs in to ~/.pencil/session-cli.json.
+  pen-cli:
+    when: *non_ci
+    purge:
+      - ".pencil/**"
 
   pi:
     when: *non_ci
