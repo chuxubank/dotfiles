@@ -10,7 +10,8 @@ if \emacs --version 2>&1 | \grep -q 'Emacs Mac Port'; then
 else
     # emacs-nox (or any build without a window system) cannot open a
     # graphical client frame even when DISPLAY is set (e.g. box desktop).
-    if \emacs -Q --batch --eval '(kill-emacs (if (display-graphic-p) 0 1))' >/dev/null 2>&1; then
+    # --batch never has a graphic frame, so ask about the build instead.
+    if \emacs -Q --batch --eval '(kill-emacs (if (or (featurep (quote x)) (featurep (quote pgtk))) 0 1))' >/dev/null 2>&1; then
         has_gui=1
     else
         has_gui=0
