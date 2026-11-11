@@ -432,7 +432,8 @@ tools:
       - at: tail
         body: |
           if command -v opencode >/dev/null 2>&1; then
-            source <(opencode completion)
+            # A bare `completion` argument is a directory, not a subcommand.
+            source <(opencode --completions zsh)
           fi
     remove:
       - ".config/opencode/opencode.json"
