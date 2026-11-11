@@ -40,7 +40,7 @@ global = [
   { name = "@openai/codex", owner = "codex" },
   # sharp's postinstall fetches its native binary; Bun blocks lifecycle scripts
   # unless the package is trusted.
-  { name = "@pen.dev/cli", owner = "pen", trust = true },
+  { name = "@pen.dev/cli", owner = "pen-cli", trust = true },
   { name = "@zed-industries/codex-acp", owner = "codex" },
   # Postinstall prepares the native executable; Bun must allow it to run.
   { name = "agent-browser", owner = "agent-browser", trust = true },
