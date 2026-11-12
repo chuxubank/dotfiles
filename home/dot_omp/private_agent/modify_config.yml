@@ -12,9 +12,9 @@
 {{- end -}}
 
 {{- /* Per-agent model overrides are role aliases, not model ids: they
-       re-resolve per host through modelRoles, so IV gets the aggressive pick
-       and personal hosts fall back to the subscription entry without a second
-       table here. Unlisted agents keep @task. */ -}}
+       re-resolve per host through modelRoles, so hosts with the IV provider
+       get the aggressive pick and the others fall back to the subscription
+       entry without a second table here. Unlisted agents keep @task. */ -}}
 {{- $agentModels := dict
   "scout" "@smol"
   "sonic" "@smol"

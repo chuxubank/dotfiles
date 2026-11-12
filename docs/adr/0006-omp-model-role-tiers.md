@@ -10,12 +10,13 @@ company work. The obvious fix is a host conditional in
 split the decision across two files.
 
 Roles instead take candidate lists, and `llm/pick-model` selects the first entry
-whose provider alias resolved on this host. The IV aliases already carry
-`when.enabled.host_env: [iv]`, so listing an IV entry first and a subscription
-entry second expresses both tiers in one place with no conditional: on `iv` the
-IV entry wins, elsewhere it fails to resolve and the fallback takes over. This
-reuses the mechanism `model` and `slow` already used rather than adding one, and
-it keeps the per-role tier choice next to the role.
+whose provider alias resolved on this host. The IV provider's `when` decides
+which hosts resolve those aliases, so listing an IV entry first and a
+subscription entry second expresses both tiers in one place with no
+conditional: where that provider is on, the IV entry wins; elsewhere it fails
+to resolve and the fallback takes over. This reuses the mechanism `model` and
+`slow` already used rather than adding one, and it keeps the per-role tier
+choice next to the role.
 
 The consequence is that a role's effective model is not readable from the data
 file alone — it depends on which aliases resolved. `docs/llm/model-roles.md`
@@ -25,8 +26,8 @@ Verifying the non-IV tier needs an explicit render
 only ever exercises one branch.
 
 Effort is part of the tier, not a global. The IV entries spend it freely and the
-fallback entries stay lower, so the same role can be `:high` on IV and
-`:medium` on a personal host. Because effort levels are per-model, a fallback
+fallback entries stay lower, so the same role can be `:high` where IV is on and
+`:medium` where it is off. Because effort levels are per-model, a fallback
 cannot assume the level its IV sibling uses: `gpt-5.6-luna` has no `minimal`
 while `grok-4.6` does.
 

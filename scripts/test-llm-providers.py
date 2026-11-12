@@ -176,7 +176,7 @@ for host in ("iv", "personal", "ci"):
     assert result.returncode == 0, result.stderr
     for tool, cfg in json.loads(result.stdout).items():
         aliases = set(cfg["providers"])
-        if host != "iv":
+        if host not in ("iv", "personal"):
             assert not aliases, (host, tool, cfg)
             assert not any(p.startswith(("iv/", "iv-codex/", "iv-cc/", "iv-anthropic/")) for p in cfg["patterns"])
             continue
