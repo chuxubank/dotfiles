@@ -138,19 +138,18 @@ keep the alias. The rationale is in
 `home/dot_omp/private_agent/modify_config.yml` renders it into `modelRoles`.
 Each role is a candidate list resolved by first surviving provider alias: lead
 with an IV entry, which is company-funded and may spend effort freely, and
-follow with the personal-subscription entry that applies where the IV provider
-is off. Do not add a `host_env` conditional to the template for this; the
-provider `when` in `home/.chezmoidata/llm/common.yaml` already carries it.
-Role targets must also be listed in `enabled_models`, or the role resolves to
-a model the picker cannot select.
+follow with the personal-subscription entry that applies off `iv`. Do not add a
+`host_env` conditional to the template for this; the alias gating already
+carries it. Role targets must also be listed in `enabled_models`, or the role
+resolves to a model the picker cannot select.
 
 `docs/llm/model-roles.md` explains role responsibilities and selection rules;
 keep concrete assignments in the data file. Update that document only when
-those rules change. Verify a host outside that `when` explicitly — the working
-host only exercises one branch. `ci` is outside the list:
+those rules change. Verify the non-`iv` tier explicitly — the working host
+only exercises one branch:
 
 ```sh
-chezmoi execute-template '{{- $c := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "ci")) | fromJson -}}
+chezmoi execute-template '{{- $c := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}
 {{ range $r, $m := $c.default_models }}{{ $r }}={{ $m }}
 {{ end }}'
 ```

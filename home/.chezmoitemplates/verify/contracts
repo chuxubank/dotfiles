@@ -554,14 +554,12 @@
 {{- end -}}
 
 {{- /* llm/tool-config: a provider_sets alias merges with the tool's own entry,
-      its catalog resolves to rates, and the provider's picker globs are appended.
-      default_provider_sets is cleared so the live IV set does not add globs. */ -}}
+      its catalog resolves to rates, and the provider's picker globs are appended. */ -}}
 {{- $catalogCfg := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict
       "tool" "fixture"
       "host_env" "personal"
       "llm" (dict
         "default_providers" (list)
-        "default_provider_sets" (list)
         "providers" (dict "cursor" (dict "enabled_models" (list "g1*" "g2")))
         "catalogs" (dict "fixture" (dict
           "models" (dict "m" (dict

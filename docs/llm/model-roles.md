@@ -85,9 +85,8 @@ effort, then adds `default_models`. Each role may have its own candidate list.
 | `plan` | Architectural planning | Favor reasoning quality over price for infrequent calls |
 
 Role lists lead with company-funded IV candidates and retain personal
-subscription candidates for hosts where the IV provider is off. That
-provider's host condition chooses the tier; templates must not duplicate that
-policy with host-specific role tables.
+subscription candidates for other hosts. Provider host conditions choose the
+tier; templates must not duplicate that policy with host-specific role tables.
 Effort support is per model, so a personal fallback must use its own valid level.
 See [ADR 0006](../adr/0006-omp-model-role-tiers.md).
 
