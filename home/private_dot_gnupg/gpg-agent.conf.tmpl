@@ -1,6 +1,13 @@
 {{- if ne .chezmoi.os "android" -}}
 enable-ssh-support
+{{- if eq .host_env "cloud" }}
+default-cache-ttl 86400
+max-cache-ttl 86400
+allow-preset-passphrase
+allow-loopback-pinentry
+{{- else }}
 default-cache-ttl 600
 max-cache-ttl 7200
+{{- end }}
 {{- end }}
 pinentry-program {{ printf "%s/.gnupg/pinentry-wrapper" (.chezmoi.homeDir | replace "\\" "/") }}
