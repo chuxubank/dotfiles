@@ -1,6 +1,6 @@
 {{- $ctx := . -}}
 {{- $lines := list -}}
-{{- $paths := list -}}
+{{- $paths := includeTemplate "environment/static-paths" . | fromJson -}}
 {{- $variables := dict -}}
 {{- range $tool := .environment.static -}}
   {{- $enabled := includeTemplate "tool/item-enabled" (merge (dict "item" $tool) $ctx) | fromJson -}}
@@ -33,9 +33,6 @@
       {{- $lines = append $lines (printf "export %s=%s" $name ($value | quote)) -}}
     {{- end -}}
     {{- $lines = append $lines "" -}}
-    {{- range dig "path" (list) $tool -}}
-      {{- $paths = append $paths (includeTemplate "environment/value" (dict "ctx" $ctx "item" .)) -}}
-    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{ join "\n" $lines }}

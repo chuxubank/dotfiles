@@ -3,10 +3,12 @@ local mux = wezterm.mux
 local launch_menu = {}
 local default_prog
 {{- if eq .chezmoi.os "darwin" }}
+{{- $staticPaths := includeTemplate "environment/static-paths" . | fromJson }}
 local set_environment_variables = {
-  -- Finder/Dock PATH is sparse. See:
+  -- Finder/Dock does not source zshenv, so a name in ~/bin is invisible.
+  -- Prepend the static PATH from environment/static-paths. See:
   -- https://wezterm.org/faq.html#im-on-macos-and-wezterm-cannot-find-things-in-my-path
-  PATH = "{{ joinPath .path.usr "bin" }}:" .. os.getenv("PATH"),
+  PATH = {{ printf "%q" (printf "%s:" (join ":" $staticPaths)) }} .. os.getenv("PATH"),
 }
 {{- else }}
 local set_environment_variables = {}
