@@ -95,21 +95,28 @@
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}
-{{- /* Pi compacts above contextWindow - reserveTokens. Other models
-       keep the built-in 16384 reserve. */ -}}
+{{- /* modelThresholds requires native percentage support in Pi. Globstar
+       covers both native ids and gateway ids containing vendor prefixes;
+       Pi calculates against the runtime window, not a catalog snapshot. */ -}}
 {{- $_ := set $managed "compaction" (dict
+  "modelThresholds" (dict "**/grok*" 80)
   "modelOverrides" (dict
-    "iv-codex/gpt-6.1-sol" (dict
-      "reserveTokens" 650000
-    )
-    "magpie/grok/grok-4.7-build-fast@500k" (dict
-      "reserveTokens" 100000
-    )
+    "iv-codex/gpt-6.1-sol" (dict "reserveTokens" 650000)
   )
 ) -}}
+{{- $prior := default dict (dig "stdin" "" .chezmoi | fromJson) -}}
+{{- /* Retire only our former fixed Grok reserve; preserve recent-history
+       settings and all unrelated model overrides. */ -}}
+{{- $overrides := dig "compaction" "modelOverrides" (dict) $prior -}}
+{{- $oldKey := "magpie/grok/grok-4.7-build-fast@500k" -}}
+{{- if hasKey $overrides $oldKey -}}
+  {{- $old := index $overrides $oldKey -}}
+  {{- $_ := unset $old "reserveTokens" -}}
+  {{- if eq (len $old) 0 -}}{{- $_ := unset $overrides $oldKey -}}{{- end -}}
+{{- end -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
-  "input" (dig "stdin" "" .chezmoi)
+  "input" ($prior | toJson)
   "managed" $managed
   "remove" $remove
 ) -}}

@@ -44,6 +44,16 @@
        bills the long-context rate. */ -}}
 {{- $managed := dict
   "extendedContext" true
+  "compaction" (dict
+    "modelThresholds" (dict
+      "cursor/grok*" "80%"
+      "xai-oauth/grok*" "80%"
+      "magpie/auto/grok*" "80%"
+      "magpie/cursor/grok*" "80%"
+      "magpie/github-copilot/grok*" "80%"
+      "magpie/grok/grok*" "80%"
+    )
+  )
   "advisor" (dict
     "enabled" true
   )
