@@ -7,8 +7,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 {{ includeTemplate "script/reconcile" }}
 
-declared=()
-updateable=()
+typeset -aU managed declared
 installed=()
 cleanup_enabled=true
 had_errors=false
@@ -16,27 +15,14 @@ had_errors=false
 skills_state_dir=$(mktemp -d) || exit 1
 trap 'rm -rf "$skills_state_dir"' EXIT
 
-# skills 1.7.2 exits before large piped JSON finishes flushing. Give the CLI
-# a regular file for stdout, then let cat safely feed the inventory loader.
 # A lock entry whose directory is gone has path: null. split accepts only
 # strings, and one bad entry used to fail this whole inventory.
 json_names_load installed \
-  'skills list -g --json > "$skills_state_dir/installed.json" && cat "$skills_state_dir/installed.json"' \
+  'skills list -g --json' \
   'type == "array"' \
   '.[] | .path | select(type == "string" and length > 0) | split("/")[-1]' \
   cleanup_enabled \
   'skills'
-
-skill_name_is_pattern() {
-  [[ "$1" == *[\*\?\[]* ]]
-}
-
-skill_name_matches() {
-  local skill_name="$1"
-  local pattern="$2"
-
-  [[ "$skill_name" = ${~pattern} ]]
-}
 
 list_source_skills() {
   local source="$1"
@@ -72,21 +58,21 @@ resolve_skill_names() {
   shift 2
   local -a patterns=("$@")
   local -a available=()
-  local -a resolved=()
+  local -aU resolved=()
   local pattern skill_name listing
 
   for pattern in "${patterns[@]}"; do
-    if skill_name_is_pattern "$pattern"; then
+    if [[ "$pattern" == *[\*\?\[]* ]]; then
       if (( ! ${#available[@]} )); then
         listing=$(list_source_skills "$source" "$full_depth") || return 1
         available=("${(@f)listing}")
       fi
       for skill_name in "${available[@]}"; do
-        if skill_name_matches "$skill_name" "$pattern" && (( ! ${resolved[(Ie)$skill_name]} )); then
+        if [[ "$skill_name" = ${~pattern} ]]; then
           resolved+=("$skill_name")
         fi
       done
-    elif (( ! ${resolved[(Ie)$pattern]} )); then
+    else
       resolved+=("$pattern")
     fi
   done
@@ -123,8 +109,6 @@ skill_has_agent() {
 {{- range $skill := includeTemplate "skills/providers" . | fromJson }}
   {{- $agents := includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson }}
   {{- if gt (len $agents) 0 }}
-  {{- /* `skills update` loses repository subpaths and can report nested skills as deleted. */ -}}
-  {{- $directSource := eq (len (splitList "/" $skill.source)) 2 }}
 
 # {{ $skill.source }}
 patterns=({{- if kindIs "slice" $skill.name }}{{ range $i, $name := $skill.name }}{{ if $i }} {{ end }}{{ $name | quote }}{{ end }}{{ else }}{{ $skill.name | quote }}{{ end }})
@@ -135,16 +119,7 @@ if ! resolved_output=$(resolve_skill_names {{ $skill.source | quote }} "$full_de
   print -u2 -- "Could not resolve ${patterns[*]} in {{ $skill.source }}; skipping undeclared-skill cleanup"
 else
   resolved=(${(f)resolved_output})
-  for name in "${resolved[@]}"; do
-    if (( ! ${declared[(Ie)$name]} )); then
-      declared+=("$name")
-    fi
-    {{- if $directSource }}
-    if (( ! ${updateable[(Ie)$name]} )); then
-      updateable+=("$name")
-    fi
-    {{- end }}
-  done
+  managed+=("${resolved[@]}")
 
   if (( ! ${#resolved[@]} )); then
     print -u2 -- "No skills matched ${patterns[*]} in {{ $skill.source }}"
@@ -157,13 +132,9 @@ else
     if $full_depth; then
       skill_args+=(--full-depth)
     fi
-    if (( ${#patterns[@]} == 1 )) && [[ ${patterns[1]} == '*' ]]; then
-      skill_args+=(--skill '*')
-    else
-      for name in "${resolved[@]}"; do
-        skill_args+=(--skill "$name")
-      done
-    fi
+    for name in "${resolved[@]}"; do
+      skill_args+=(--skill "$name")
+    done
 
     for name in "${resolved[@]}"; do
       for agent in {{ range $i, $agent := $agents }}{{ if $i }} {{ end }}{{ $agent | quote }}{{ end }}; do
@@ -198,20 +169,18 @@ fi
   {{ end }}
 {{- end }}
 
-# Skills another installer owns (skills/external.yaml). Declared so the
-# cleanup below leaves them alone; never installed or updated here.
+# External skills are protected from cleanup, but their installer owns updates.
+declared=("${managed[@]}"
 {{- range $name := includeTemplate "skills/external" . | fromJson }}
-if (( ! ${declared[(Ie){{ $name | quote }}]} )); then
-  declared+=({{ $name | quote }})
-fi
+  {{ $name | quote }}
 {{- end }}
+)
 
 remove_undeclared cleanup_enabled installed declared \
   'skill' skills remove {} -g --yes
 
-
-if (( ${#updateable[@]} )); then
-  if ! skills update -g "${updateable[@]}"; then
+if (( ${#managed[@]} )); then
+  if ! skills update -g "${managed[@]}"; then
     had_errors=true
   fi
 fi
