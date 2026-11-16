@@ -4,7 +4,11 @@ _chezmoi-script() {
 	local -a scripts
 	local source_dir scripts_dir rel short
 
-	source_dir=${$(chezmoi source-path 2>/dev/null)} || return 1
+	if [[ -n ${CHEZMOI_SOURCE:-} ]]; then
+		source_dir=${$(chezmoi --source "$CHEZMOI_SOURCE" source-path 2>/dev/null)} || return 1
+	else
+		source_dir=${$(chezmoi source-path 2>/dev/null)} || return 1
+	fi
 	scripts_dir=$source_dir/.chezmoiscripts
 	[[ -d $scripts_dir ]] || return 1
 
@@ -14,11 +18,16 @@ _chezmoi-script() {
 		short=${rel##*/}
 		short=${short%.tmpl}
 		short=${short%.sh}
-		short=${short#run_once_}
-		short=${short#run_onchange_}
+		short=${short%.py}
+		short=${short%.ps1}
+		short=${short#run_}
+		short=${short#once_}
+		short=${short#onchange_}
 		short=${short#before_}
 		short=${short#after_}
-		short=${short##[0-9]#_}
+		while [[ $short == [0-9]*_* ]]; do
+			short=${short#[0-9]*_}
+		done
 		scripts+=("$short:$rel" "$rel")
 	done
 

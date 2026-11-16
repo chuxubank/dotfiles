@@ -28,7 +28,9 @@ export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 export LIBRARY_PATH=$LIBRARY_PATH:{{ joinPath .path.usr "lib" }}
 
 # ssh
-export SSH_ASKPASS="$(brew --prefix ssh-askpass)/bin/ssh-askpass"
+# Homebrew links formulae under $HOMEBREW_PREFIX/opt. Do not call
+# `brew --prefix` here; this file runs for every login shell.
+export SSH_ASKPASS="$HOMEBREW_PREFIX/opt/ssh-askpass/bin/ssh-askpass"
 export SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh"
 {{- end }}
 
@@ -48,16 +50,16 @@ fi
 
 {{- if $brewBin }}
 dotfiles_dynamic_path+=(
-  "$(brew --prefix awk)/bin"
-  "$(brew --prefix bind)/bin"
-  "$(brew --prefix bison)/bin"
-  "$(brew --prefix curl)/bin"
-  "$(brew --prefix grep)/libexec/gunbin"
-  "$(brew --prefix python)/libexec/bin"
-  "$(brew --prefix ruby)/bin"
-  "$(gem env gemdir)/bin"
-  "$(brew --prefix rustup)/bin"
-  "$(brew --prefix sqlite)/bin"
+  "$HOMEBREW_PREFIX/opt/awk/bin"
+  "$HOMEBREW_PREFIX/opt/bind/bin"
+  "$HOMEBREW_PREFIX/opt/bison/bin"
+  "$HOMEBREW_PREFIX/opt/curl/bin"
+  "$HOMEBREW_PREFIX/opt/grep/libexec/gnubin"
+  "$HOMEBREW_PREFIX/opt/python/libexec/bin"
+  "$HOMEBREW_PREFIX/opt/ruby/bin"
+  "$HOMEBREW_PREFIX"/lib/ruby/gems/*/bin(NOn[1])
+  "$HOMEBREW_PREFIX/opt/rustup/bin"
+  "$HOMEBREW_PREFIX/opt/sqlite/bin"
 )
 {{- end }}
 

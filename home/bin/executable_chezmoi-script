@@ -11,6 +11,9 @@ Render and run one chezmoi script from .chezmoiscripts.
 SCRIPT may be a short name (setup-skills), a numbered stem
 (200_setup-skills), a basename, or a path relative to .chezmoiscripts.
 
+CHEZMOI_SOURCE, when set, is the repository passed to chezmoi --source.
+Unset, chezmoi's configured source is used.
+
 Options:
   -l, --list    list scripts (default when SCRIPT is omitted)
   -n, --dry-run print the matched source path and exit
@@ -33,14 +36,13 @@ script_stem() {
   _base=${1##*/}
   _base=${_base%.tmpl}
   _base=${_base%.sh}
-  case $_base in
-    run_once_*) _base=${_base#run_once_} ;;
-    run_onchange_*) _base=${_base#run_onchange_} ;;
-  esac
-  case $_base in
-    before_*) _base=${_base#before_} ;;
-    after_*) _base=${_base#after_} ;;
-  esac
+  _base=${_base%.py}
+  _base=${_base%.ps1}
+  _base=${_base#run_}
+  _base=${_base#once_}
+  _base=${_base#onchange_}
+  _base=${_base#before_}
+  _base=${_base#after_}
   printf '%s\n' "$_base"
 }
 
@@ -49,13 +51,10 @@ script_short() {
   while :
   do
     case $_stem in
-      [0-9]*) _stem=${_stem#?} ;;
+      [0-9]*_*) _stem=${_stem#[0-9]*_} ;;
       *) break ;;
     esac
   done
-  case $_stem in
-    _*) _stem=${_stem#_} ;;
-  esac
   printf '%s\n' "$_stem"
 }
 
@@ -69,10 +68,15 @@ score_script() {
   _base=${_rel##*/}
   _stem=$(script_stem "$_rel")
   _short=$(script_short "$_rel")
+  _bare=${_base%.tmpl}
+  _bare=${_bare%.sh}
+  _bare=${_bare%.py}
+  _bare=${_bare%.ps1}
 
   if [ "$_rel" = "$_query" ] ||
     [ "$_base" = "$_query" ] ||
-    [ "${_base%.tmpl}" = "$_query" ]; then
+    [ "${_base%.tmpl}" = "$_query" ] ||
+    [ "$_bare" = "$_query" ]; then
     printf '%s\n' 1
     return
   fi
@@ -151,7 +155,20 @@ fi
 
 command -v chezmoi >/dev/null || die "chezmoi is not on PATH"
 
-source_dir=$(chezmoi source-path) || die "could not resolve chezmoi source-path"
+cm() {
+  if [ -n "${CHEZMOI_SOURCE:-}" ]; then
+    chezmoi --source "$CHEZMOI_SOURCE" "$@"
+  else
+    chezmoi "$@"
+  fi
+}
+
+if [ -n "${CHEZMOI_SOURCE:-}" ]; then
+  source_dir=$(cm source-path) ||
+    die "could not resolve chezmoi source-path from CHEZMOI_SOURCE=$CHEZMOI_SOURCE"
+else
+  source_dir=$(cm source-path) || die "could not resolve chezmoi source-path"
+fi
 scripts_dir=$source_dir/.chezmoiscripts
 [ -d "$scripts_dir" ] || die "missing $scripts_dir"
 
@@ -209,7 +226,7 @@ if [ "$mode" = dry-run ]; then
 fi
 
 if [ "${abs%.tmpl}" != "$abs" ]; then
-  rendered=$(chezmoi execute-template <"$abs") ||
+  rendered=$(cm execute-template <"$abs") ||
     die "failed to render $rel"
 else
   rendered=$(cat "$abs")
