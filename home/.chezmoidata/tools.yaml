@@ -109,6 +109,16 @@ tools:
             source <(command carapace _carapace)
           fi
 
+  # ChatGPT.app is the renamed Codex desktop app. Not the `codex` CLI
+  # switch. The cask zap owns its Library paths; ~/.codex stays with the CLI.
+  chatgpt: {}
+
+  # Claude.app. Not the `claude-code` CLI switch. No zap purge: the support
+  # directory already exists, and an off switch must not trash it.
+  claude:
+    when: *disabled
+
+  # CLI via bun. Desktop app is the `claude` switch.
   claude-code:
     when: *disabled
     plugin_upgrades:
@@ -140,8 +150,9 @@ tools:
   compose-preview:
     when: *non_ci
 
+  # CLI via bun. Desktop app is the `chatgpt` switch.
   codex:
-    when: *disabled
+    when: *non_ci
     zshrc:
       - at: tail
         body: |

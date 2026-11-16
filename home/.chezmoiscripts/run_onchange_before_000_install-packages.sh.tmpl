@@ -69,7 +69,9 @@ fi
 if ! command -v brew >/dev/null 2>&1; then
 	echo "Homebrew is required for package installation" >&2
 	had_errors=true
-elif ! brew bundle --quiet --force-cleanup --no-upgrade --file=- <<EOF
+# Dropped casks are zapped only while purge_disabled_tools is on.
+# Casks that stay in the Brewfile are not zapped.
+elif ! brew bundle --quiet --force-cleanup --no-upgrade{{ if includeTemplate "policy/enabled" (merge (dict "policy" "purge_disabled_tools") .) | fromJson }} --zap{{ end }} --file=- <<EOF
 {{ template "Brewfile" . -}}
 EOF
 then

@@ -21,7 +21,7 @@ Local and CI verification is the same command: `make verify`.
 
 **Tool lifecycle.** A name in `tools.yaml` is the enablement switch. Packages, skill providers, skill agents, and defaults affiliate with `owner`. Services and environment groups use `tool` as identity and set `owner` only when they should follow the switch. `when.*.tool` on skills/mcp/plugins is the target agent, not the owner. Every `owner` must be declared.
 
-**Destructive operations.** `remove` deletes chezmoi-managed dest files when a tool is off. `purge` deletes runtime data and is off unless `policies.purge_disabled_tools` is on. `policies.uninstall_microsoft_edge` is the Edge zap switch. Open-world package uninstall (uv/bun/sdkman/cargo) still removes undeclared inventory names; that is reconcile, not purge.
+**Destructive operations.** `remove` deletes chezmoi-managed dest files when a tool is off. `purge` deletes runtime data and is off unless `policies.purge_disabled_tools` is on. That policy also zaps Homebrew casks removed by `brew bundle --force-cleanup`. `policies.uninstall_microsoft_edge` is the Edge zap switch. Open-world package uninstall (uv/bun/sdkman/cargo) still removes undeclared inventory names; that is reconcile, not purge.
 
 **Remote execution.** Bootstrap installers use the vendor script (chezmoi.io/get, bun, uv, SDKMAN, Homebrew). `make plan` is the non-writing dry-run. `./install.sh` with no flags still `init --apply` on a new machine. Personal git sources (skills, some plugins) may follow a branch.
 

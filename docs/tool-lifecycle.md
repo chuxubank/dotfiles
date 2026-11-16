@@ -58,6 +58,12 @@ readers and CLI stubs. Validation must not configure real accounts.
 contains runtime cleanup entries, executed only when
 `policies.purge_disabled_tools` is enabled.
 
+On macOS that policy also passes `--zap` to `brew bundle --force-cleanup`.
+Cleanup still removes casks that left the Brewfile when the policy is off.
+Zap deletes the files named by each dropped cask and does not run for casks
+that remain installed. Leave those paths in the cask; do not copy them into
+`purge`.
+
 ### Path and command entries
 
 Existing `purge` path strings keep their behavior: files go through
