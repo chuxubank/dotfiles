@@ -104,7 +104,11 @@
     "iv-codex/gpt-6.1-sol" (dict "reserveTokens" 650000)
   )
 ) -}}
-{{- $prior := default dict (dig "stdin" "" .chezmoi | fromJson) -}}
+{{- $in := trim (dig "stdin" "" .chezmoi) -}}
+{{- $prior := dict -}}
+{{- if gt (len $in) 0 -}}
+  {{- $prior = default dict ($in | fromJson) -}}
+{{- end -}}
 {{- /* Retire only our former fixed Grok reserve; preserve recent-history
        settings and all unrelated model overrides. */ -}}
 {{- $overrides := dig "compaction" "modelOverrides" (dict) $prior -}}

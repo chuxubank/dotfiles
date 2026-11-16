@@ -10,7 +10,7 @@
     name = Misaka
     email = chuxubank@qq.com
 
-[includeIf "gitdir:~/Developer/AA/"]
+[includeIf "gitdir:~/{{ .path.workspace.aa }}/"]
     path = config_aa
 
 [includeIf "gitdir:~/{{ .path.workspace.iv }}/"]

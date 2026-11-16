@@ -1,2 +1,4 @@
 .aider*
 /.agent-shell/
+/.pi/
+/.ruff_cache/

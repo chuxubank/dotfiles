@@ -1,6 +1,6 @@
 {{- /* package/items — Enabled package entries for one path.
        Maps with `ensure = "absent"` are omitted here and collected as
-       tombstones via package/names-all (open-world uninstall). */ -}}
+       tombstones via package/lines-all (open-world uninstall). */ -}}
 {{- $selected := list -}}
 {{- $list := .ctx -}}
 {{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}

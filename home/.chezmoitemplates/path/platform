@@ -27,7 +27,7 @@
 # windows
     usr = "C:/Program Files"
 	etc = "C:/ProgramData"
-    gh = "'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe'"
+    gh = "'C:/Program Files/GitHub CLI/gh.exe'"
     log = {{- joinPath "AppData" "Local" "Temp" | quote }}
 	zotero = {{- joinPath "AppData" "Roaming" "Zotero" "Zotero" | quote }}
 {{- else if eq $os "android" }}

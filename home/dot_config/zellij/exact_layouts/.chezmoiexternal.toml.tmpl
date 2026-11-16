@@ -12,5 +12,5 @@
     type = "file"
     url = {{ $empty | quote }}
     filter.command = {{ $chezmoi | quote }}
-    filter.args = ["execute-template", {{ printf "{{ includeTemplate \"zellij/layout-named\" (merge (dict \"workspaceName\" %q) .) }}" .name | quote }}]
+    filter.args = ["execute-template", {{ printf "{{- $name := %q -}}{{- $selected := list -}}{{- range includeTemplate \"workspace/items\" . | fromJson -}}{{- if eq .name $name -}}{{- $selected = append $selected . -}}{{- end -}}{{- end -}}{{- includeTemplate \"zellij/layout\" (dict \"workspaces\" $selected) -}}" .name | quote }}]
 {{ end -}}

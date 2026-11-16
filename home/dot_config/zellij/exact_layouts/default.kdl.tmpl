@@ -28,7 +28,12 @@ layout {
     tab name="proxy" cwd="{{- joinPath .chezmoi.homeDir .path.personal.proxy -}}" {
         pane split_direction="vertical" {
             pane command="tail" {
-                args "-f" {{ joinPath .chezmoi.homeDir .path.log "sing-box" "sing-box.log" | quote }}
+                {{- $log := includeTemplate "service/log-path" (dict "path" .path "parts" (list "sing-box") "file" "sing-box.log") -}}
+                {{- /* path.log is absolute on darwin/linux and relative on windows. */ -}}
+                {{- if and (not (osIsAbs $log)) (not (regexMatch "^[A-Za-z]:" $log)) -}}
+                  {{- $log = joinPath .chezmoi.homeDir $log -}}
+                {{- end }}
+                args "-f" {{ $log | quote }}
             }
             pane
         }

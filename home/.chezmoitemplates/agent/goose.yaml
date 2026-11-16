@@ -66,7 +66,31 @@ extensions:
     timeout: 300
     bundled: true
     available_tools: []
-{{ includeTemplate "mcp/goose-extensions" . | indent 2}}
+{{ $extensions := dict -}}
+{{- /* https://block.github.io/goose/docs/guides/config-file/#extensions-configuration */ -}}
+{{- $all := includeTemplate "mcp/servers" (merge (dict "tool" "goose") $) | fromJson -}}
+{{- range $s := $all -}}
+  {{- $ext := dict
+    "enabled" $s.enabled
+    "type" $s.type
+    "name" $s.name_snake
+    "description" $s.description
+  -}}
+  {{- if eq $s.type "stdio" -}}
+    {{- $_ := set $ext "cmd" $s.cmd -}}
+    {{- $_ := set $ext "args" $s.args -}}
+  {{- else if or (eq $s.type "http") (eq $s.type "sse") -}}
+    {{- $_ := set $ext "uri" $s.uri -}}
+  {{- end -}}
+  {{- if gt (len $s.envs) 0 -}}
+    {{- $_ := set $ext "envs" $s.envs -}}
+  {{- end -}}
+  {{- $_ := set $ext "timeout" $s.timeout -}}
+  {{- $_ := set $ext "bundled" nil -}}
+  {{- $_ := set $ext "display_name" $s.display -}}
+  {{- $_ := set $extensions $s.name $ext -}}
+{{- end -}}
+{{ toYaml $extensions | indent 2}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "goose") .) | fromJson }}
 GOOSE_MODEL: {{ $cfg.model_id | quote }}
 {{- if $cfg.model_provider }}

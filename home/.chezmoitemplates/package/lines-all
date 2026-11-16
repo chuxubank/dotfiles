@@ -1,4 +1,18 @@
-{{- /* package/lines-all — Unquoted unique names, one per line, unfiltered. */ -}}
-{{- range $name := includeTemplate "package/names-all" . | fromJson }}
+{{- /* package/lines-all — Unquoted unique names, one per line, unfiltered.
+       Ignores when/owner and ensure. Optional .prefix is prepended. */ -}}
+{{- $list := .ctx -}}
+{{- range (prepend .path "packages") -}}{{- $list = index $list . -}}{{- end -}}
+{{- $prefix := dig "prefix" "" . -}}
+{{- $names := list -}}
+{{- range $package := $list -}}
+  {{- $name := $package -}}
+  {{- if eq (kindOf $package) "map" -}}
+    {{- $name = index $package "name" -}}
+  {{- end -}}
+  {{- if $name -}}
+    {{- $names = append $names (printf "%s%s" $prefix $name) -}}
+  {{- end -}}
+{{- end -}}
+{{- range $name := $names | uniq }}
 {{ $name }}
 {{- end -}}
