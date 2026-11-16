@@ -82,7 +82,6 @@
   "marketplaces" $marketplaces
   "personality" "pragmatic"
   "features" (dict
-    "multi_agent" true
     "goals" true
     "shell_snapshot" true
     "unified_exec" true
@@ -94,6 +93,10 @@
        deletes, so servers retired from mcp.yaml linger in the existing
        config forever and stay enabled. Prune them explicitly. */ -}}
 {{- $remove := list -}}
+{{- /* Explicit `[features].multi_agent` warns on startup and only selects
+       the V1 fallback, which stays on by default. Merge never drops an
+       omitted key, so delete the stale one. */ -}}
+{{- $remove = append $remove "features.multi_agent" -}}
 {{- range $key := includeTemplate "mcp/retired" . | fromJson -}}
   {{- $remove = append $remove (printf "mcp_servers.%s" $key) -}}
 {{- end -}}
