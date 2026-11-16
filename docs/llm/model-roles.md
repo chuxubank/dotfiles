@@ -33,7 +33,7 @@ qualified reference in the candidate list. Disabling that provider continues
 through the remaining candidates.
 
 For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
-`goose`, and `copilot` then choose in this order:
+`goose`, `copilot`, and `codex` then choose in this order:
 
 1. Argv that already selects a session: `--model` or `--provider`, resume,
    continue, session, fork, `--help`, `--version`, or a subcommand. The
@@ -52,10 +52,18 @@ For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
    Goose splits only the first slash into its native provider id and the
    intact upstream model id; custom providers use the reserved
    `custom_chezmoi_` namespace. Copilot selects the alias's BYOK endpoint.
+   Codex splits the same reference into `-c model_provider` and `-c model`.
+   It keeps the single `model_catalog_json`; that file is not filtered by
+   provider, so it lists the rendered provider and every directory-selected
+   provider, and slugs cannot overlap. A path alias Codex has not enabled
+   fails the launch. `exec` and `review` are new sessions; `exec resume` and
+   `exec fork` are not. `-C` / `--cd` selects the directory. The desktop app
+   does not use this wrapper.
    These native spellings belong to the adapters, not directory rules.
 4. No matching prefix. Copilot still resolves its own candidate list and
    exports that alias. The other wrappers pass no `--model`, so the
-   rendered default remains.
+   rendered default remains. Codex then keeps the rendered provider. The
+   catalog file stays the same either way.
 
 The wrapper does not change other OMP roles or Pi's separate lists. An
 unknown id, or a Copilot alias that did not resolve, fails the launch. The

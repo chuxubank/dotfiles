@@ -253,6 +253,44 @@ grok_plan = zsh_eval(
 )
 assert grok_plan.splitlines()[:2] == ["--model", iv]
 
+codex = render("codex")
+codex_plan = zsh_eval(
+    codex,
+    "mkdir -p " + json.dumps(personal_prefix) + "\ncd " + json.dumps(personal_prefix) + r"""
+path_model_plan 'fix the bug'
+print -r -- "$PLAN_SKIP"
+print -l -- "${PLAN_ARGS[@]}"
+print -r -- "---"
+path_model_plan exec resume last
+print -r -- "$PLAN_SKIP"
+print -r -- "---"
+path_model_plan --model other
+print -r -- "$PLAN_SKIP"
+print -r -- "---"
+path_model_plan -C /tmp exec elsewhere
+print -r -- "$PLAN_SKIP"
+print -l -- "${PLAN_ARGS[@]}"
+print -r -- "---"
+path_model_plan app
+print -r -- "$PLAN_SKIP"
+""",
+)
+codex_lines = codex_plan.splitlines()
+separator = codex_lines.index("---")
+launch, rest = codex_lines[:separator], codex_lines[separator + 1 :]
+assert rest == ["1", "---", "1", "---", "0", "-C", "/tmp", "exec", "elsewhere", "---", "1"]
+if f'path_model_codex_alias="{personal_provider}"' in codex:
+    assert launch == [
+        "0",
+        "-c",
+        f'model_provider="{personal_provider}"',
+        "-c",
+        f'model="{personal_id}"',
+        "fix the bug",
+    ]
+else:
+    assert launch == ["2", personal_provider]
+
 assert goose_plan.splitlines() == [
     "0",
     "session",

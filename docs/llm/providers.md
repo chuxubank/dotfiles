@@ -92,6 +92,11 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   Anthropic alias or native login remains in control. Inheritance alone must
   not select an endpoint by map iteration order. Tier-model assignments must
   belong to the chosen endpoint too.
+- **Codex** keeps one provider per session. Project config cannot select it.
+  `model_catalog_json` is one file for every launch, including the desktop
+  app; Codex does not filter it by provider. A directory launch sets only
+  `model_provider` and `model`. The file lists the rendered provider and every
+  directory-selected provider, and a repeated slug fails the render.
 - **Copilot** has one BYOK endpoint per launch, not a provider registry.
   `llm/copilot.yaml` selects it the same way as other tools. The `~/bin/copilot`
   wrapper exports `COPILOT_PROVIDER_BASE_URL`, `COPILOT_PROVIDER_TYPE`,

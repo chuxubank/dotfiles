@@ -1,0 +1,17 @@
+{{- /* llm/codex-catalog-providers — Aliases a Codex directory launch can select.
+       Input: full chezmoi context.
+       Output: JSON list of provider aliases that both a path rule names and
+       Codex has enabled. Other path aliases are omitted; the wrapper rejects
+       them instead of launching with the wrong catalog. */ -}}
+{{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $aliases := list -}}
+{{- $seen := dict -}}
+{{- range $rule := default (list) .llm.path_models -}}
+  {{- $model := includeTemplate "llm/resolve-model-alias" (dict "model" $rule.model "aliases" $.llm.models) | trim -}}
+  {{- $alias := index (splitList "/" $model) 0 -}}
+  {{- if and $alias (not (hasKey $seen $alias)) (hasKey $cfg.providers $alias) -}}
+    {{- $_ := set $seen $alias true -}}
+    {{- $aliases = append $aliases $alias -}}
+  {{- end -}}
+{{- end -}}
+{{- $aliases | toJson -}}

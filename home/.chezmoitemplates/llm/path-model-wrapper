@@ -5,7 +5,7 @@
        source checkout without copying chezmoi's own location. Goose translates that reference to
        its native provider/model flags. ${aliases} expand. */ -}}
 {{- $tool := .tool -}}
-{{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" -}}
+{{- $known := dict "pi" "bun" "omp" "bun" "opencode" "bun" "copilot" "bun" "grok" "brew" "goose" "brew" "codex" "bun" -}}
 {{- if not (hasKey $known $tool) -}}
   {{- fail (printf "llm/path-model-wrapper: unsupported tool %s" $tool) -}}
 {{- end -}}
@@ -72,7 +72,7 @@ emulate -L zsh
 typeset -r PATH_MODEL_TOOL={{ $tool | quote }}
 typeset -r PATH_MODEL_BIN={{ $bin | quote }}
 typeset -r PATH_MODEL_BUN={{ joinPath .chezmoi.homeDir .path.tool.bun "bin/bun" | quote }}
-typeset -r PATH_MODEL_KIND={{ if eq $tool "goose" }}"goose"{{ else }}"front"{{ end }}
+typeset -r PATH_MODEL_KIND={{ if eq $tool "goose" }}"goose"{{ else if eq $tool "codex" }}"codex"{{ else }}"front"{{ end }}
 typeset -r PATH_MODEL_CWD={{ if or (eq $tool "omp") (eq $tool "grok") }}1{{ else }}0{{ end }}
 {{- if eq $tool "omp" }}
 typeset -r PATH_MODEL_COMMANDS_FILE={{ joinPath .chezmoi.homeDir .path.tool.bun "install/global/node_modules/@oh-my-pi/pi-coding-agent/src/cli-commands.ts" | quote }}
@@ -123,6 +123,18 @@ PATH_MODEL_COMMAND_FALLBACK=(
   mcp skill instruction lsp sandbox completion
 )
 PATH_MODEL_LAUNCH=()
+{{- else if eq $tool "codex" }}
+PATH_MODEL_COMMAND_FALLBACK=(
+  agents login logout mcp plugin app-server remote-control app completion
+  update doctor sandbox debug apply a resume queue archive delete
+  migrate-rollouts migrate-nfs-db unarchive fork cloud exec-server features help
+)
+PATH_MODEL_LAUNCH=(exec e review)
+typeset -gA PATH_MODEL_CODEX_PROVIDER_OK
+{{- range $alias := includeTemplate "llm/codex-catalog-providers" . | fromJson }}
+path_model_codex_alias={{ $alias | quote }}
+PATH_MODEL_CODEX_PROVIDER_OK[$path_model_codex_alias]=1
+{{- end }}
 {{- else }}
 PATH_MODEL_COMMAND_FALLBACK=()
 PATH_MODEL_LAUNCH=()
@@ -222,6 +234,10 @@ path_model_skip() {
     path_model_skip_goose "$@"
     return
   fi
+  if [[ $PATH_MODEL_KIND == codex ]]; then
+    path_model_skip_codex "$@"
+    return
+  fi
   local -a args=("$@")
   local i=1 arg
   REPLY=""
@@ -264,6 +280,62 @@ path_model_skip() {
         if [[ $PATH_MODEL_TOOL == opencode && -z $REPLY && ( -d $arg || $arg == */* ) ]]; then
           REPLY=$arg
         elif path_model_is_command "$arg"; then
+          return 0
+        fi
+        ;;
+    esac
+    (( i++ ))
+  done
+  return 1
+}
+
+path_model_skip_codex() {
+  local -a args=("$@")
+  local i=1 arg next
+  REPLY=""
+  while (( i <= $#args )); do
+    arg=$args[i]
+    [[ $arg == -- ]] && break
+    case $arg in
+      --model|--model=*|-m|-m=*|--oss|--local-provider|--local-provider=*|--profile|--profile=*|-p|-p=*|--help|-h|--version)
+        return 0
+        ;;
+      -c|--config)
+        if (( i == $#args )); then
+          return 0
+        fi
+        next=$args[i+1]
+        (( i++ ))
+        if [[ $next == model=* || $next == model_provider=* || $next == model_catalog_json=* ]]; then
+          return 0
+        fi
+        ;;
+      -c=*|--config=*)
+        next=${arg#*=}
+        if [[ $next == model=* || $next == model_provider=* || $next == model_catalog_json=* ]]; then
+          return 0
+        fi
+        ;;
+      -C|--cd)
+        if (( i == $#args )); then
+          return 0
+        fi
+        REPLY=$args[i+1]
+        (( i++ ))
+        ;;
+      -C=*|--cd=*)
+        REPLY=${arg#*=}
+        ;;
+      exec|e)
+        next=${args[i+1]-}
+        if [[ $next == resume || $next == fork || $next == help ]]; then
+          return 0
+        fi
+        ;;
+      review)
+        ;;
+      *)
+        if path_model_is_command "$arg"; then
           return 0
         fi
         ;;
@@ -329,6 +401,25 @@ path_model_project_pins() {
   ' "$file"
 }
 
+path_model_codex_plan() {
+  local model=$1 provider id
+  shift
+  provider=${model%%/*}
+  id=${model#*/}
+  if [[ -z ${PATH_MODEL_CODEX_PROVIDER_OK[$provider]-} ]]; then
+    PLAN_SKIP=2
+    PLAN_ARGS=("$provider")
+    return 0
+  fi
+  id=${id//\\/\\\\}
+  id=${id//\"/\\\"}
+  PLAN_ARGS=(
+    -c "model_provider=\"${provider}\""
+    -c "model=\"${id}\""
+    "$@"
+  )
+}
+
 path_model_goose_plan() {
   local model=$1 provider=$2
   shift 2
@@ -368,6 +459,10 @@ path_model_plan() {
     model=$PATH_MODEL_DEFAULT
   fi
   [[ -z $model ]] && return 0
+  if [[ $PATH_MODEL_KIND == codex ]]; then
+    path_model_codex_plan "$model" "$@"
+    return 0
+  fi
   if [[ $PATH_MODEL_TOOL == copilot ]]; then
     local alias=${model%%/*} id=${model#*/}
     if [[ $model != */* || -z ${PATH_MODEL_COPILOT_URL[$alias]-} ]]; then
@@ -409,7 +504,7 @@ path_model_copilot_export() {
 path_model_main() {
   path_model_plan "$@"
   if (( PLAN_SKIP == 2 )); then
-    print -u2 -- "copilot: llm provider is not enabled for $PLAN_ARGS[1]"
+    print -u2 -- "$PATH_MODEL_TOOL: llm provider is not enabled for $PLAN_ARGS[1]"
     exit 1
   fi
   path_model_copilot_export
