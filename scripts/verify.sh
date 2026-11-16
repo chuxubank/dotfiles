@@ -71,30 +71,106 @@ run_template() {
 }
 
 # Validate static declaration contracts before templates consume typed fields.
-for schema in tools packages skills defaults plugins llm-policy integrations plugin-managers; do
-	check_schema --check-metaschema "$SOURCE/schemas/$schema.schema.json" || exit 1
-done
-for domain in tools defaults integrations plugin-managers; do
-	check_schema --schemafile "$SOURCE/schemas/$domain.schema.json" \
-		--regex-variant python "$SOURCE/home/.chezmoidata/$domain.yaml" || exit 1
-done
-check_schema --schemafile "$SOURCE/schemas/packages.schema.json" \
-	--regex-variant python "$SOURCE"/home/.chezmoidata/packages/*.toml \
-	"$SOURCE"/home/.chezmoidata/packages/brew/*.toml || exit 1
-check_schema --schemafile "$SOURCE/schemas/skills.schema.json" \
-	--regex-variant python "$SOURCE"/home/.chezmoidata/skills/*.yaml || exit 1
-check_schema --schemafile "$SOURCE/schemas/plugins.schema.json" \
-	--regex-variant python "$SOURCE"/home/.chezmoidata/plugins/*.yaml || exit 1
-check_schema --schemafile "$SOURCE/schemas/llm-policy.schema.json" \
-	--regex-variant python "$SOURCE"/home/.chezmoidata/llm/*.yaml || exit 1
+# One interpreter load when uvx is available. Exit 1 aborts on data/schema
+# failures; exit 2 is only the workflow file, which must not hide later checks.
+# Without uvx, the pinned check-jsonschema binary still batches metaschemas.
+schema_status=0
+if command -v uvx >/dev/null 2>&1; then
+	uvx --from "check-jsonschema==$CHECK_JSONSCHEMA_VERSION" python3 - "$SOURCE" <<'PY' || schema_status=$?
+import sys
+from pathlib import Path
+
+from check_jsonschema.cli import main
+
+source = Path(sys.argv[1])
+
+
+def run(args):
+    code = main.main(list(args), standalone_mode=False)
+    return int(code or 0)
+
+
+def instances(schema, paths):
+    files = [str(path) for path in paths]
+    if not files:
+        print(f"verify: no files for {schema.name}", file=sys.stderr)
+        return 1
+    return run(
+        ["--schemafile", str(schema), "--regex-variant", "python", *files]
+    )
+
+
+schemas = sorted((source / "schemas").glob("*.schema.json"))
+if not schemas or run(["--check-metaschema", *[str(path) for path in schemas]]):
+    sys.exit(1)
+
+data = source / "home/.chezmoidata"
+packages = data / "packages"
+groups = (
+    ("tools.schema.json", [data / "tools.yaml"]),
+    ("defaults.schema.json", [data / "defaults.yaml"]),
+    ("integrations.schema.json", [data / "integrations.yaml"]),
+    ("plugin-managers.schema.json", [data / "plugin-managers.yaml"]),
+    (
+        "packages.schema.json",
+        sorted(packages.glob("*.toml")) + sorted((packages / "brew").glob("*.toml")),
+    ),
+    ("skills.schema.json", sorted((data / "skills").glob("*.yaml"))),
+    ("plugins.schema.json", sorted((data / "plugins").glob("*.yaml"))),
+    ("llm-policy.schema.json", sorted((data / "llm").glob("*.yaml"))),
+)
+for name, paths in groups:
+    if instances(source / "schemas" / name, paths):
+        sys.exit(1)
+if run(
+    [
+        "--builtin-schema",
+        "vendor.github-workflows",
+        str(source / ".github/workflows/ci.yaml"),
+    ]
+):
+    sys.exit(2)
+sys.exit(0)
+PY
+else
+	check_schema --check-metaschema "$SOURCE"/schemas/*.schema.json || schema_status=1
+	if [ "$schema_status" -eq 0 ]; then
+		for domain in tools defaults integrations plugin-managers; do
+			check_schema --schemafile "$SOURCE/schemas/$domain.schema.json" \
+				--regex-variant python "$SOURCE/home/.chezmoidata/$domain.yaml" || schema_status=1
+			[ "$schema_status" -eq 0 ] || break
+		done
+	fi
+	if [ "$schema_status" -eq 0 ]; then
+		check_schema --schemafile "$SOURCE/schemas/packages.schema.json" \
+			--regex-variant python "$SOURCE"/home/.chezmoidata/packages/*.toml \
+			"$SOURCE"/home/.chezmoidata/packages/brew/*.toml || schema_status=1
+	fi
+	if [ "$schema_status" -eq 0 ]; then
+		check_schema --schemafile "$SOURCE/schemas/skills.schema.json" \
+			--regex-variant python "$SOURCE"/home/.chezmoidata/skills/*.yaml || schema_status=1
+	fi
+	if [ "$schema_status" -eq 0 ]; then
+		check_schema --schemafile "$SOURCE/schemas/plugins.schema.json" \
+			--regex-variant python "$SOURCE"/home/.chezmoidata/plugins/*.yaml || schema_status=1
+	fi
+	if [ "$schema_status" -eq 0 ]; then
+		check_schema --schemafile "$SOURCE/schemas/llm-policy.schema.json" \
+			--regex-variant python "$SOURCE"/home/.chezmoidata/llm/*.yaml || schema_status=1
+	fi
+	if [ "$schema_status" -eq 0 ]; then
+		check_schema --builtin-schema vendor.github-workflows \
+			"$SOURCE/.github/workflows/ci.yaml" || schema_status=2
+	fi
+fi
+if [ "$schema_status" -eq 2 ]; then
+	failed=1
+elif [ "$schema_status" -ne 0 ]; then
+	exit 1
+fi
 
 run_template verify/contracts
 run_template verify/model
-
-if ! check_schema --builtin-schema vendor.github-workflows \
-	"$SOURCE/.github/workflows/ci.yaml"; then
-	failed=1
-fi
 
 # Independent of each other. The state db is single-writer, so each job gets
 # a copy; the HTTP cache is safe to share.
@@ -328,92 +404,118 @@ render_dir="$tmpdir/rendered-templates"
 mkdir -p "$render_dir"
 if ! python3 - "$SOURCE" "$state" "$cache" "$render_dir" <<'PY'; then
 import concurrent.futures
+import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 source, state, cache, render_dir = map(Path, sys.argv[1:])
+home = source / "home"
+# Fresh-machine modify templates see an empty destination, not a missing key.
+empty_stdin = b'{{- $_ := set .chezmoi "stdin" "" -}}\n'
 
-def is_script(template: Path) -> bool:
+
+def kind_of(template: Path):
+    relative = template.relative_to(home).as_posix()
+    if relative == ".chezmoi.toml.tmpl" or relative.startswith(".chezmoitemplates/"):
+        return None
     name = template.name
-    if name.startswith(("executable_", "run_")):
-        return True
-    return b"#!" in template.read_bytes()
+    # modify_* is the destination-merge contract, even without a .tmpl suffix.
+    if name.startswith("modify_"):
+        return "modify"
+    if not name.endswith(".tmpl"):
+        return None
+    if name.startswith(("executable_", "run_")) or b"#!" in template.read_bytes():
+        return "script"
+    return "template"
 
-# Only scripts are syntax-checked. A render failure of anything else is
-# ignored later, so paying for it does not change the result.
-templates = [path for path in sorted((source / "home").rglob("*.tmpl")) if is_script(path)]
 
-def render(template):
-    rel = template.relative_to(source).as_posix()
-    worker = render_dir / rel
-    worker.parent.mkdir(parents=True, exist_ok=True)
-    worker_state = worker.with_suffix(worker.suffix + ".boltdb")
+items = []
+for path in sorted(home.rglob("*")):
+    if not path.is_file():
+        continue
+    kind = kind_of(path)
+    if kind:
+        items.append((kind, path))
+
+
+def render_chunk(index_chunk):
+    index, chunk = index_chunk
+    # bolt is single-writer. Renders inside one worker are sequential, so they
+    # share a copy instead of cloning the state db for every template.
+    worker_state = render_dir / f"worker-{index}.boltdb"
     if state.exists():
         shutil.copy2(state, worker_state)
-    result = subprocess.run(
-        [
-            "chezmoi",
-            "--persistent-state",
-            str(worker_state),
-            "--cache",
-            str(cache),
-            "execute-template",
-            "--source",
-            str(source),
-        ],
-        input=template.read_bytes(),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    worker.write_bytes(result.stdout)
-    worker.with_suffix(worker.suffix + ".stderr").write_bytes(result.stderr)
-    return rel, result.returncode
+    env = os.environ.copy()
+    # safe/pass must not touch the live store while verification renders.
+    env["CI"] = "true"
+    rendered = []
+    for kind, template in chunk:
+        rel = template.relative_to(source).as_posix()
+        worker = render_dir / rel
+        worker.parent.mkdir(parents=True, exist_ok=True)
+        data = template.read_bytes()
+        if kind == "modify":
+            data = empty_stdin + data
+        result = subprocess.run(
+            [
+                "chezmoi",
+                "--persistent-state",
+                str(worker_state),
+                "--cache",
+                str(cache),
+                "execute-template",
+                "--source",
+                str(source),
+            ],
+            input=data,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+            check=False,
+        )
+        worker.write_bytes(result.stdout)
+        worker.with_suffix(worker.suffix + ".stderr").write_bytes(result.stderr)
+        rendered.append((kind, rel, result.returncode))
+    return rendered
 
-workers = min(8, len(templates) or 1)
+
+workers = min(8, len(items) or 1)
+chunks = [items[i::workers] for i in range(workers)]
 with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-    results = list(executor.map(render, templates))
+    groups = executor.map(render_chunk, enumerate(c for c in chunks if c))
+results = [item for group in groups for item in group]
+results.sort(key=lambda item: item[1])
 
 with (render_dir / "manifest").open("w", encoding="utf-8") as manifest:
-    for template, status in results:
-        print(template, status, sep="\t", file=manifest)
+    for kind, template, status in results:
+        print(kind, template, status, sep="\t", file=manifest)
 PY
-	echo "verify: could not render executable templates" >&2
+	echo "verify: could not render templates" >&2
 	failed=1
 fi
 
 if [ -f "$render_dir/manifest" ]; then
-while IFS='	' read -r tmpl status; do
-	case ${tmpl##*/} in
-	executable_* | run_*) is_candidate=1 ;;
-	*)
-		if grep -q '#!' "$tmpl"; then
-			is_candidate=1
-		else
-			is_candidate=0
-		fi
-		;;
-	esac
+while IFS='	' read -r kind tmpl status; do
 	out="$render_dir/$tmpl"
 	if [ "$status" -ne 0 ]; then
-		if [ "$is_candidate" -eq 1 ]; then
-			echo "verify: template failed: $tmpl" >&2
-			cat "$out.stderr" >&2
-			mark_syntax_failed
-		fi
+		echo "verify: template failed: $tmpl" >&2
+		cat "$out.stderr" >&2
+		mark_syntax_failed
 		continue
 	fi
+	# Syntax checks stay on script templates. modify_* and other configs are
+	# only required to render, including an empty fresh-machine stdin.
+	[ "$kind" = script ] || continue
 	stripped=$(tr -d '[:space:]' <"$out")
 	[ -n "$stripped" ] || continue
 	first=$(sed -n '/[^[:space:]]/{p;q;}' "$out")
 	case $first in
 	'#!'*) ;;
 	*)
-		if [ "$is_candidate" -eq 1 ]; then
-			echo "verify: executable template has no shebang: $tmpl" >&2
-			mark_syntax_failed
-		fi
+		echo "verify: executable template has no shebang: $tmpl" >&2
+		mark_syntax_failed
 		continue
 		;;
 	esac

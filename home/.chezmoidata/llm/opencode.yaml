@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/llm-policy.schema.json
 llm:
   # opencode model defaults (llm/opencode.yaml). Providers listed here
   # reference llm.providers from llm/common.yaml and override only the auth

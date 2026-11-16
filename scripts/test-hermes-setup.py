@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -23,39 +24,66 @@ for flag, variable in (
 command.extend(["execute-template", "--source", str(root)])
 
 
-def render(path, host="iv", platform="linux", extra="", enabled_fixture=True):
-    prefix = (
+def render_cases(defines, cases, prelude=""):
+    """Render the gate matrix and effort configs in one chezmoi process."""
+    parts = [prelude]
+    for name, body in defines.items():
+        parts.append("{{ define " + json.dumps(name) + " }}" + body + "{{ end }}")
+    for key, preamble, define_name, dot in cases:
+        quoted_key = json.dumps(key)
+        parts.append(preamble)
+        parts.append(
+            "{{ printf " + json.dumps("@@CASE:%s@@") + " " + quoted_key + " }}"
+            "{{ template " + json.dumps(define_name) + " " + dot + " }}"
+            "{{ printf " + json.dumps("@@END:%s@@") + " " + quoted_key + " }}"
+        )
+    result = subprocess.run(
+        command,
+        input="".join(parts),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    found = dict(re.findall(r"@@CASE:(.*?)@@(.*?)@@END:\1@@", result.stdout, flags=re.DOTALL))
+    missing = [key for key, _, _, _ in cases if key not in found]
+    if missing:
+        raise AssertionError("missing template output for " + ", ".join(missing))
+    return found
+
+
+def gate(host, platform, enabled_fixture):
+    preamble = (
         '{{- $_ := set . "host_env" ' + json.dumps(host) + " -}}"
         '{{- $_ := set .chezmoi "os" ' + json.dumps(platform) + " -}}"
     )
     # Test installation independently of the live switch; keep exercising the
     # IV-only branch even while Hermes is disabled in the actual declarations.
     if enabled_fixture:
-        prefix += '{{- $_ := set .tools.hermes "when" (dict "enabled" (dict "host_env" (list "iv"))) -}}'
-    return subprocess.run(
-        command,
-        input=prefix + extra + path.read_text(),
-        text=True,
-        capture_output=True,
-        check=True,
-    ).stdout
+        preamble += (
+            '{{- $_ := set .tools.hermes "when" (dict "enabled" (dict "host_env" (list "iv"))) -}}'
+        )
+    else:
+        preamble += '{{- $_ := set .tools.hermes "when" $savedWhen -}}'
+    return preamble
 
 
-setup = render(setup_path)
-upgrade = render(upgrade_path)
-assert setup.startswith("#!/bin/sh")
-assert render(setup_path, platform="darwin").startswith("#!/bin/sh")
-assert render(setup_path, platform="windows").strip() == ""
-assert render(upgrade_path, platform="windows").strip() == ""
-for host in ("personal", "aa", "ci"):
-    assert render(setup_path, host=host).strip() == ""
-    assert render(upgrade_path, host=host).strip() == ""
-for host in ("iv", "personal", "aa", "ci"):
-    assert render(setup_path, host=host, enabled_fixture=False).strip() == ""
-    assert render(upgrade_path, host=host, enabled_fixture=False).strip() == ""
-assert not (root / "home/.chezmoiscripts/run_onchange_after_100_setup-hermes.sh.tmpl").exists()
+cases = []
+for key, host, platform, enabled_fixture, defines in (
+    ("iv-linux", "iv", "linux", True, ("setup", "upgrade")),
+    ("iv-darwin", "iv", "darwin", True, ("setup",)),
+    ("iv-windows", "iv", "windows", True, ("setup", "upgrade")),
+    ("personal-linux", "personal", "linux", True, ("setup", "upgrade")),
+    ("aa-linux", "aa", "linux", True, ("setup", "upgrade")),
+    ("ci-linux", "ci", "linux", True, ("setup", "upgrade")),
+    ("off-iv", "iv", "linux", False, ("setup", "upgrade")),
+    ("off-personal", "personal", "linux", False, ("setup", "upgrade")),
+    ("off-aa", "aa", "linux", False, ("setup", "upgrade")),
+    ("off-ci", "ci", "linux", False, ("setup", "upgrade")),
+):
+    preamble = gate(host, platform, enabled_fixture)
+    for define_name in defines:
+        cases.append((f"{key}|{define_name}", preamble, define_name, "."))
 
-# Replace the whole LLM tree: no real tokens or live catalogs are read.
 fixture = {
     "models": {},
     "providers": {"fixture": {"base_url": "https://example.invalid"}},
@@ -69,17 +97,46 @@ fixture = {
 }
 for effort in ("high", "low"):
     fixture["tools"]["hermes"]["reasoning_effort"] = effort
-    extra = (
-        '{{- $_ := set . "llm" ('
-        + json.dumps(json.dumps(fixture))
-        + " | fromJson) -}}"
+    payload = json.dumps(json.dumps(fixture))
+    preamble = (
+        '{{- $_ := set . "host_env" "iv" -}}'
+        '{{- $_ := set .chezmoi "os" "linux" -}}'
+        '{{- $_ := set .tools.hermes "when" (dict "enabled" (dict "host_env" (list "iv"))) -}}'
+        '{{- $_ := set . "llm" (' + payload + " | fromJson) -}}"
         '{{- $_ := set .chezmoi "stdin" "agent:\\n  reasoning_effort: medium\\n  max_iterations: 17\\n" -}}'
     )
-    rendered = render(config_path, extra=extra)
-    assert f"reasoning_effort: {effort}" in rendered
-    assert "max_iterations: 17" in rendered
-    assert "provider: custom:iv-codex" in rendered
-    assert "default: fixture-model" in rendered
+    cases.append((f"effort-{effort}", preamble, "config", "."))
+
+rendered = render_cases(
+    {
+        "setup": setup_path.read_text(),
+        "upgrade": upgrade_path.read_text(),
+        "config": config_path.read_text(),
+    },
+    cases,
+    prelude='{{- $savedWhen := index .tools.hermes "when" -}}',
+)
+
+setup = rendered["iv-linux|setup"]
+upgrade = rendered["iv-linux|upgrade"]
+assert setup.startswith("#!/bin/sh")
+assert rendered["iv-darwin|setup"].startswith("#!/bin/sh")
+assert rendered["iv-windows|setup"].strip() == ""
+assert rendered["iv-windows|upgrade"].strip() == ""
+for host in ("personal", "aa", "ci"):
+    assert rendered[f"{host}-linux|setup"].strip() == ""
+    assert rendered[f"{host}-linux|upgrade"].strip() == ""
+for host in ("iv", "personal", "aa", "ci"):
+    assert rendered[f"off-{host}|setup"].strip() == ""
+    assert rendered[f"off-{host}|upgrade"].strip() == ""
+assert not (root / "home/.chezmoiscripts/run_onchange_after_100_setup-hermes.sh.tmpl").exists()
+
+for effort in ("high", "low"):
+    text = rendered[f"effort-{effort}"]
+    assert f"reasoning_effort: {effort}" in text
+    assert "max_iterations: 17" in text
+    assert "provider: custom:iv-codex" in text
+    assert "default: fixture-model" in text
 
 with tempfile.TemporaryDirectory() as tmp:
     sandbox = Path(tmp)

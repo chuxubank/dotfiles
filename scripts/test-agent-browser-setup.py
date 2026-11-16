@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -19,21 +20,6 @@ for flag, variable in (
         command.extend([flag, os.environ[variable]])
 command.extend(["execute-template", "--source", str(root)])
 
-
-def render(source, host="iv", platform="darwin", arch="arm64", disabled=False):
-    prefix = (
-        '{{- $_ := set . "host_env" ' + json.dumps(host) + " -}}"
-        '{{- $_ := set .chezmoi "os" ' + json.dumps(platform) + " -}}"
-        '{{- $_ := set .chezmoi "arch" ' + json.dumps(arch) + " -}}"
-    )
-    if disabled:
-        prefix += '{{- $_ := set .tools "agent-browser" (dict "when" (dict "enabled" false)) -}}'
-    return subprocess.run(
-        command, input=prefix + source, text=True, capture_output=True, check=True
-    ).stdout
-
-
-# Real declarations must converge together, including the disabled/CI cases.
 manifest_template = '''
 {{- $packages := includeTemplate "package/items" (dict "ctx" . "path" (list "node" "global")) | fromJson -}}
 {{- $agents := list -}}
@@ -44,7 +30,48 @@ manifest_template = '''
 {{- end -}}
 {{- dict "packages" $packages "agents" $agents | toJson -}}
 '''
-for host, platform, arch, enabled in (
+
+
+def render_cases(defines, cases, prelude=""):
+    """Render every case in one chezmoi process.
+
+    Each define has its own variable scope per execution. preambles mutate the
+    shared root context and must not print.
+    """
+    parts = [prelude]
+    for name, body in defines.items():
+        parts.append("{{ define " + json.dumps(name) + " }}" + body + "{{ end }}")
+    for key, preamble, define_name, dot in cases:
+        quoted_key = json.dumps(key)
+        parts.append(preamble)
+        parts.append(
+            "{{ printf " + json.dumps("@@CASE:%s@@") + " " + quoted_key + " }}"
+            "{{ template " + json.dumps(define_name) + " " + dot + " }}"
+            "{{ printf " + json.dumps("@@END:%s@@") + " " + quoted_key + " }}"
+        )
+    result = subprocess.run(
+        command,
+        input="".join(parts),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    found = dict(re.findall(r"@@CASE:(.*?)@@(.*?)@@END:\1@@", result.stdout, flags=re.DOTALL))
+    missing = [key for key, _, _, _ in cases if key not in found]
+    if missing:
+        raise AssertionError("missing template output for " + ", ".join(missing))
+    return found
+
+
+def ctx(host, platform, arch):
+    return (
+        '{{- $_ := set . "host_env" ' + json.dumps(host) + " -}}"
+        '{{- $_ := set .chezmoi "os" ' + json.dumps(platform) + " -}}"
+        '{{- $_ := set .chezmoi "arch" ' + json.dumps(arch) + " -}}"
+    )
+
+
+matrix = (
     ("iv", "darwin", "arm64", True),
     ("personal", "darwin", "amd64", True),
     ("personal", "linux", "amd64", True),
@@ -52,8 +79,35 @@ for host, platform, arch, enabled in (
     ("personal", "windows", "amd64", True),
     ("ci", "linux", "amd64", False),
     ("personal", "android", "arm64", False),
-):
-    manifest = json.loads(render(manifest_template, host, platform, arch))
+)
+# Execution below also needs host iv on linux/amd64 and windows/amd64.
+extra_setup = (("linux", "amd64"), ("windows", "amd64"))
+cases = []
+for host, platform, arch, _enabled in matrix:
+    preamble = ctx(host, platform, arch)
+    key = f"{host}|{platform}|{arch}"
+    cases.append((key + "|manifest", preamble, "manifest", "."))
+    cases.append((key + "|setup", preamble, "setup", "."))
+for platform, arch in extra_setup:
+    cases.append((f"iv|{platform}|{arch}|setup", ctx("iv", platform, arch), "setup", "."))
+disabled = ctx("iv", "darwin", "arm64") + (
+    '{{- $_ := set .tools "agent-browser" (dict "when" (dict "enabled" false)) -}}'
+)
+cases.append(("disabled|manifest", disabled, "manifest", "."))
+cases.append(("disabled|setup", disabled, "setup", "."))
+cases.append(("bun", '{{- $_ := set . "host_env" .host_env -}}', "bun", "."))
+rendered = render_cases(
+    {
+        "manifest": manifest_template,
+        "setup": setup_path.read_text(),
+        "bun": "{{ .path.tool.bun }}",
+    },
+    cases,
+)
+
+for host, platform, arch, enabled in matrix:
+    key = f"{host}|{platform}|{arch}"
+    manifest = json.loads(rendered[key + "|manifest"])
     packages = [
         item for item in manifest["packages"]
         if isinstance(item, dict) and item["name"] == "agent-browser"
@@ -64,23 +118,22 @@ for host, platform, arch, enabled in (
         assert "pi" in manifest["agents"]
     else:
         assert manifest["agents"] == []
-    setup = render(setup_path.read_text(), host, platform, arch)
-    assert bool(setup.strip()) == enabled
+    assert bool(rendered[key + "|setup"].strip()) == enabled
 
-manifest = json.loads(render(manifest_template, disabled=True))
+disabled_manifest = json.loads(rendered["disabled|manifest"])
 assert not any(
     isinstance(item, dict) and item["name"] == "agent-browser"
-    for item in manifest["packages"]
+    for item in disabled_manifest["packages"]
 )
-assert manifest["agents"] == []
-assert not render(setup_path.read_text(), disabled=True).strip()
+assert disabled_manifest["agents"] == []
+assert not rendered["disabled|setup"].strip()
 
 with tempfile.TemporaryDirectory() as tmp:
     sandbox = Path(tmp)
     log = sandbox / "calls.log"
     # The script prepends this rendered Bun bin. No host PATH during execution:
     # an absolute zsh -f bypasses user startup files and no real installer exists.
-    bun_path = render('{{ .path.tool.bun }}').strip()
+    bun_path = rendered["bun"].strip()
     bins = sandbox / bun_path / "bin"
     bins.mkdir(parents=True)
     binary = bins / "agent-browser"
@@ -98,7 +151,7 @@ with tempfile.TemporaryDirectory() as tmp:
         ("darwin", "arm64"), ("linux", "amd64"), ("windows", "amd64")
     ):
         script = sandbox / "setup.zsh"
-        script.write_text(render(setup_path.read_text(), platform=platform, arch=arch))
+        script.write_text(rendered[f"iv|{platform}|{arch}|setup"])
         subprocess.run(["/bin/zsh", "-n", str(script)], check=True)
         log.unlink(missing_ok=True)
         subprocess.run(["/bin/zsh", "-f", str(script)], env=env, check=True, capture_output=True)
@@ -112,12 +165,12 @@ with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(["/bin/zsh", "-f", str(script)], env=env, check=True, capture_output=True)
         assert log.read_text() == "install\ninstall\ninstall\n"
 
-    script.write_text(render(setup_path.read_text(), platform="linux", arch="arm64"))
+    script.write_text(rendered["iv|linux|arm64|setup"])
     log.unlink()
     subprocess.run(["/bin/zsh", "-f", str(script)], env=env, check=True, capture_output=True)
     assert not log.exists(), "unsupported Chrome download must not run on Linux ARM"
 
-    script.write_text(render(setup_path.read_text()))
+    script.write_text(rendered["iv|darwin|arm64|setup"])
     binary.unlink()
     missing = subprocess.run(["/bin/zsh", "-f", str(script)], env=env, capture_output=True)
     assert missing.returncode == 127, "missing CLI must keep setup retryable"

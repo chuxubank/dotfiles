@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,28 +29,83 @@ fixture = {
 }
 
 
-def render(data):
-    prefix = '{{- $_ := set . "tools" (dict) -}}{{- $ := mergeOverwrite (deepCopy .) (' + json.dumps(json.dumps(data)) + " | fromJson) -}}{{- with $ -}}"
-    return subprocess.run(command, input=prefix + source + "{{ end }}", text=True, capture_output=True, check=True).stdout
+def render_cases(defines, cases):
+    """Render every purge variant in one chezmoi process."""
+    parts = []
+    for name, body in defines.items():
+        parts.append("{{ define " + json.dumps(name) + " }}" + body + "{{ end }}")
+    for key, preamble, define_name, dot in cases:
+        quoted_key = json.dumps(key)
+        parts.append(preamble)
+        parts.append(
+            "{{ printf " + json.dumps("@@CASE:%s@@") + " " + quoted_key + " }}"
+            "{{ template " + json.dumps(define_name) + " " + dot + " }}"
+            "{{ printf " + json.dumps("@@END:%s@@") + " " + quoted_key + " }}"
+        )
+    result = subprocess.run(
+        command,
+        input="".join(parts),
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    found = dict(re.findall(r"@@CASE:(.*?)@@(.*?)@@END:\1@@", result.stdout, flags=re.DOTALL))
+    missing = [key for key, _, _, _ in cases if key not in found]
+    if missing:
+        raise AssertionError("missing template output for " + ", ".join(missing))
+    return found
 
 
-script_text = render(fixture)
+def preamble(data):
+    # Clear tools on a copy first: mergeOverwrite keeps sibling tools otherwise.
+    payload = json.dumps(json.dumps(data))
+    return (
+        '{{- $base := deepCopy . -}}'
+        '{{- $_ := set $base "tools" (dict) -}}'
+        '{{- $ctx := mergeOverwrite (deepCopy $base) (' + payload + " | fromJson) -}}"
+    )
+
+
+variants = [("fixture", fixture)]
 for scope, key, value in (("policies", "purge_disabled_tools", False), ("chezmoi", "os", "darwin")):
     disabled = json.loads(json.dumps(fixture))
     disabled[scope][key] = value
-    assert render(disabled).strip() == ""
+    variants.append((f"off-{scope}", disabled))
 enabled = json.loads(json.dumps(fixture))
 enabled["tools"]["fixture"]["when"] = {"enabled": True}
-assert render(enabled).strip() == ""
+variants.append(("enabled", enabled))
 no_env = json.loads(json.dumps(fixture))
 del no_env["tools"]["fixture"]["purge"][0]["env"]
-no_env_text = render(no_env)
-assert "export " not in no_env_text
-assert "trash_path \"$HOME/\"'owned'" in no_env_text
+variants.append(("no-env", no_env))
 paths_only = json.loads(json.dumps(fixture))
 del paths_only["tools"]["fixture"]["purge"][0]["command"]
 paths_only["tools"]["fixture"]["purge"][0]["paths"] = ["Applications/MyGo.app"]
-paths_text = render(paths_only)
+variants.append(("paths-only", paths_only))
+cases = [(key, preamble(data), "purge", "$ctx") for key, data in variants]
+# Same JSON round-trip the declarations use, with the live switch forced off.
+cases.append((
+    "hermes",
+    (
+        '{{- $hermesObj := .tools.hermes | toJson | fromJson -}}'
+        '{{- $_ := set $hermesObj "when" (dict "enabled" false) -}}'
+        '{{- $hermesData := dict "tools" (dict "hermes" $hermesObj) '
+        '"policies" (dict "purge_disabled_tools" true) "chezmoi" (dict "os" "linux") -}}'
+        '{{- $base := deepCopy . -}}'
+        '{{- $_ := set $base "tools" (dict) -}}'
+        '{{- $ctx := mergeOverwrite (deepCopy $base) $hermesData -}}'
+    ),
+    "purge",
+    "$ctx",
+))
+rendered = render_cases({"purge": source}, cases)
+script_text = rendered["fixture"]
+assert rendered["off-policies"].strip() == ""
+assert rendered["off-chezmoi"].strip() == ""
+assert rendered["enabled"].strip() == ""
+no_env_text = rendered["no-env"]
+assert "export " not in no_env_text
+assert "trash_path \"$HOME/\"'owned'" in no_env_text
+paths_text = rendered["paths-only"]
 assert "set --" not in paths_text and "Purge disabled tool by command" not in paths_text
 assert "trash_path \"$HOME/\"'Applications/MyGo.app'" in paths_text
 
@@ -140,11 +196,6 @@ with tempfile.TemporaryDirectory() as tmp:
         else:
             assert owned.exists(), case
 
-# Reproduce the live Hermes shape without touching any real files.
-hermes = json.loads(subprocess.run(
-    command, input='{{ .tools.hermes | toJson }}', text=True, capture_output=True, check=True,
-).stdout)
-hermes["when"] = {"enabled": False}
 with tempfile.TemporaryDirectory() as tmp:
     home = Path(tmp)
     bins = home / "bin"
@@ -170,10 +221,7 @@ with tempfile.TemporaryDirectory() as tmp:
     )
     trash.chmod(0o755)
     script = home / "hermes-purge.sh"
-    script.write_text(render({
-        "tools": {"hermes": hermes}, "policies": {"purge_disabled_tools": True},
-        "chezmoi": {"os": "linux"},
-    }))
+    script.write_text(rendered["hermes"])
     subprocess.run(["/bin/sh", "-n", str(script)], check=True)
     env = {**os.environ, "HOME": str(home), "PATH": str(bins)}
     for _ in range(2):

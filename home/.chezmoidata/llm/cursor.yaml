@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../../schemas/llm-policy.schema.json
 llm:
   # Price catalogs for providers whose tool ships no pricing. A provider
   # opts in with `catalog: <name>`; llm/tool-config resolves it.
