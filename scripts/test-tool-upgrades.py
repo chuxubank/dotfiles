@@ -8,15 +8,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import render
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, variable in (
-    ("--persistent-state", "CHEZMOI_VERIFY_STATE"),
-    ("--cache", "CHEZMOI_VERIFY_CACHE"),
-):
-    if os.environ.get(variable):
-        command.extend([flag, os.environ[variable]])
-command.extend(["execute-template", "--source", str(root)])
 prefix = '{{- $_ := set . "host_env" "personal" -}}'
 zsh = shutil.which("zsh")
 
@@ -26,10 +20,7 @@ with tempfile.TemporaryDirectory() as tmp:
     for number, tool in ((102, "bun"), (103, "uv")):
         template = root / f"home/.chezmoiscripts/run_onchange_after_{number}_upgrade-{tool}.sh.tmpl"
         script = sandbox / f"{tool}.zsh"
-        script.write_text(subprocess.run(
-            command, input=prefix + template.read_text(), text=True,
-            capture_output=True, check=True,
-        ).stdout)
+        script.write_text(render(root, template.read_text(), prefix=prefix))
         subprocess.run([zsh, "-n", str(script)], check=True)
         scripts[tool] = script
 
@@ -76,8 +67,13 @@ with tempfile.TemporaryDirectory() as tmp:
             "MOCK_SELF_STATUS": str(self_status), "MOCK_PACKAGE_STATUS": str(package_status),
             "MOCK_REFUSAL": "1" if refusal else "0",
         }
-        result = subprocess.run([zsh, "-f", str(scripts[tool])], env=env,
-                                text=True, capture_output=True)
+        result = subprocess.run(
+            [zsh, "-f", str(scripts[tool])],
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
         assert result.returncode == expected, (tool, layout, result.stdout, result.stderr)
         calls = log.read_text().splitlines()
         self_call = "bun upgrade" if tool == "bun" else "uv self update"

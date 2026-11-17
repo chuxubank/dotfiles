@@ -8,15 +8,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import render
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, variable in (
-    ("--persistent-state", "CHEZMOI_VERIFY_STATE"),
-    ("--cache", "CHEZMOI_VERIFY_CACHE"),
-):
-    if os.environ.get(variable):
-        command.extend([flag, os.environ[variable]])
-command.extend(["execute-template", "--source", str(root)])
 prefix = (
     '{{- $_ := set . "host_env" "personal" -}}'
     '{{- $_ := set .chezmoi "os" "darwin" -}}'
@@ -53,9 +47,7 @@ def installs(log):
 with tempfile.TemporaryDirectory() as tmp:
     sandbox = Path(tmp)
     script = sandbox / "setup.zsh"
-    script.write_text(subprocess.run(
-        command, input=prefix + template, text=True, capture_output=True, check=True,
-    ).stdout)
+    script.write_text(render(root, template, prefix=prefix))
     subprocess.run([zsh, "-n", str(script)], check=True)
     rendered = script.read_text()
     assert 'cargo_source_current "lsp-proxy" "https://github.com/cat-emacs/lsp-proxy.git" "main"' in rendered
@@ -82,6 +74,7 @@ with tempfile.TemporaryDirectory() as tmp:
         log.write_text("")
         result = subprocess.run(
             [zsh, "-f", str(script)],
+            check=False,
             env={
                 **os.environ,
                 "HOME": str(home),
@@ -106,3 +99,5 @@ with tempfile.TemporaryDirectory() as tmp:
     assert installs(run(MISSING)) == [
         "cargo install --git https://github.com/chuxubank/starlists starlists"
     ]
+
+print("ok rust setup: branch reinstall and missing crate")

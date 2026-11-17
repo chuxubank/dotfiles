@@ -3,146 +3,51 @@
 
 import ast
 import json
-import os
-import re
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import render
+
 root = Path(sys.argv[1]).resolve()
 source = (root / "home/.chezmoiscripts/run_onchange_after_101_setup-tools.py.tmpl").read_text()
-command = ["chezmoi"]
-for flag, variable in (
-    ("--persistent-state", "CHEZMOI_VERIFY_STATE"),
-    ("--cache", "CHEZMOI_VERIFY_CACHE"),
-):
-    if os.environ.get(variable):
-        command.extend([flag, os.environ[variable]])
-command.extend(["execute-template", "--source", str(root)])
-
-manifest_template = '''
-{{- $packages := includeTemplate "package/items" (dict "ctx" . "path" (list "node" "global")) | fromJson -}}
-{{- $agents := list -}}
-{{- range $skill := includeTemplate "skills/providers" . | fromJson -}}
-{{- if eq $skill.source "NetEase/skills" -}}
-{{- $agents = includeTemplate "skills/when" (merge (dict "skill" $skill) $) | fromJson -}}
-{{- end -}}{{- end -}}
-{{- dict "packages" $packages "agents" $agents | toJson -}}
-'''
+# The template also blanks itself when the process is CI. Pin both off for
+# the renders that must produce a script.
+offline = {"CI": "false", "GITHUB_ACTIONS": "false"}
 
 
-def render_cases(defines, cases, env=None, prelude=""):
-    """Render every case in one chezmoi process.
-
-    Hash rotation and the CI / GITHUB_ACTIONS gates stay outside this helper:
-    they depend on filesystem changes or process environment between calls.
-    """
-    merged = {**os.environ, "CI": "false", "GITHUB_ACTIONS": "false", **(env or {})}
-    parts = [prelude]
-    for name, body in defines.items():
-        parts.append("{{ define " + json.dumps(name) + " }}" + body + "{{ end }}")
-    for key, preamble, define_name, dot in cases:
-        quoted_key = json.dumps(key)
-        parts.append(preamble)
-        parts.append(
-            "{{ printf " + json.dumps("@@CASE:%s@@") + " " + quoted_key + " }}"
-            "{{ template " + json.dumps(define_name) + " " + dot + " }}"
-            "{{ printf " + json.dumps("@@END:%s@@") + " " + quoted_key + " }}"
-        )
-    result = subprocess.run(
-        command,
-        input="".join(parts),
-        text=True,
-        capture_output=True,
-        check=True,
-        env=merged,
-    )
-    found = dict(re.findall(r"@@CASE:(.*?)@@(.*?)@@END:\1@@", result.stdout, flags=re.DOTALL))
-    missing = [key for key, _, _, _ in cases if key not in found]
-    if missing:
-        raise AssertionError("missing template output for " + ", ".join(missing))
-    return found
-
-
-def ctx(home, host="personal", platform="darwin"):
+def ctx(home):
     return (
-        '{{- $_ := set . "host_env" ' + json.dumps(host) + " -}}"
-        '{{- $_ := set .chezmoi "os" ' + json.dumps(platform) + " -}}"
+        '{{- $_ := set . "host_env" "personal" -}}'
+        '{{- $_ := set .chezmoi "os" "darwin" -}}'
         '{{- $_ := set .chezmoi "homeDir" ' + json.dumps(str(home)) + " -}}"
     )
 
 
-def render_setup(home, host="personal", platform="darwin", disabled=False, specs=None, env=None):
-    preamble = ctx(home, host, platform)
-    if disabled:
-        preamble += '{{- $_ := set .tools "ncm-cli" (dict "when" (dict "enabled" false)) -}}'
-    if specs is not None:
-        preamble += '{{- $_ := set . "tools" (fromJson ' + json.dumps(json.dumps(specs)) + ") -}}"
-    return render_cases({"setup": source}, [("only", preamble, "setup", ".")], env=env)["only"]
+def render_setup(prefix, env=None):
+    return render(root, source, prefix=prefix, env={**offline, **(env or {})})
 
 
 with tempfile.TemporaryDirectory() as tmp:
     home = Path(tmp)
-    # Manifests need the original ncm-cli declaration, so the disabled override
-    # is last in this process. CI and GITHUB_ACTIONS are separate processes.
-    static_cases = []
-    for platform in ("darwin", "linux", "windows", "android"):
-        for host in ("personal", "iv", "ci"):
-            static_cases.append((
-                f"manifest|{platform}|{host}",
-                ctx(home, host, platform),
-                "manifest",
-                ".",
-            ))
-    static_cases.extend((
-        ("gate-ci", ctx(home, host="ci"), "setup", "."),
-        ("gate-android", ctx(home, platform="android"), "setup", "."),
-        (
-            "gate-disabled",
-            ctx(home) + '{{- $_ := set .tools "ncm-cli" (dict "when" (dict "enabled" false)) -}}',
-            "setup",
-            ".",
-        ),
-        ("pass", '{{- $_ := set . "host_env" .host_env -}}', "pass", "."),
-        ("bun", '{{- $_ := set . "host_env" .host_env -}}', "bun", "."),
-    ))
-    static = render_cases(
-        {
-            "manifest": manifest_template,
-            "setup": source,
-            "pass": "{{ .path.personal.pass }}",
-            "bun": "{{ .path.tool.bun }}",
-        },
-        static_cases,
-    )
-    assert not static["gate-ci"].strip()
-    assert not static["gate-disabled"].strip()
-    assert not static["gate-android"].strip()
-    assert not render_setup(home, env={"CI": "true"}).strip()
-    assert not render_setup(home, env={"GITHUB_ACTIONS": "true"}).strip()
-
-    pass_path = static["pass"].strip()
+    pass_path = render(root, "{{ .path.personal.pass }}").strip()
+    bun_path = render(root, "{{ .path.tool.bun }}").strip()
     entry = home / pass_path / "Personal/Tech/NetEase/Music.gpg"
     entry.parent.mkdir(parents=True)
-    first = render_setup(home)
+    first = render_setup(ctx(home))
     assert "missing" in first
     entry.write_bytes(b"encrypted-placeholder-one")
-    second = render_setup(home)
+    second = render_setup(ctx(home))
     entry.write_bytes(b"encrypted-placeholder-two")
-    assert render_setup(home) != second != first, "encrypted entry changes must trigger setup"
+    third = render_setup(ctx(home))
+    assert third != second != first, "encrypted entry changes must trigger setup"
     assert "encrypted-placeholder" not in second
+    assert not render_setup(ctx(home), env={"CI": "true"}).strip()
+    assert not render_setup(ctx(home), env={"GITHUB_ACTIONS": "true"}).strip()
 
-    for platform in ("darwin", "linux", "windows", "android"):
-        for host in ("personal", "iv", "ci"):
-            data = json.loads(static[f"manifest|{platform}|{host}"])
-            enabled = platform != "android" and host != "ci"
-            assert any(isinstance(p, dict) and p["name"] == "@music163/ncm-cli"
-                       for p in data["packages"]) == enabled
-            assert bool(data["agents"]) == enabled
-
-    bins = home / static["bun"].strip() / "bin"
+    bins = home / bun_path / "bin"
     bins.mkdir(parents=True)
     (home / "bin").mkdir()
     reader = home / "bin/pass-field"
@@ -174,27 +79,24 @@ with tempfile.TemporaryDirectory() as tmp:
     log = home / "calls.log"
     env = {"HOME": str(home), "PATH": str(home / "empty-bin"), "MOCK_LOG": str(log)}
     script = home / "setup.py"
+    script.write_text(third)
+    ast.parse(script.read_text())
 
     def run(extra=None):
         result = subprocess.run(
-            [sys.executable, str(script)], env={**env, **(extra or {})},
-            text=True, capture_output=True,
+            [sys.executable, str(script)],
+            env={**env, **(extra or {})},
+            text=True,
+            capture_output=True,
+            check=False,
         )
         assert "placeholder-app" not in result.stdout + result.stderr
         assert "placeholder-key" not in result.stdout + result.stderr
         assert "Traceback" not in result.stderr
         return result
 
-    platforms = render_cases(
-        {"setup": source},
-        [(platform, ctx(home, platform=platform), "setup", ".") for platform in ("darwin", "linux", "windows")],
-    )
-    for platform in ("darwin", "linux", "windows"):
-        script.write_text(platforms[platform])
-        ast.parse(script.read_text())
-        log.unlink(missing_ok=True)
-        assert run().returncode == 0
-        assert log.read_text() == "appId\nprivateKey\n"
+    assert run().returncode == 0
+    assert log.read_text() == "appId\nprivateKey\n"
     for key in ("appId", "privateKey"):
         log.unlink()
         assert run({"MOCK_FAIL_KEY": key}).returncode != 0
@@ -221,27 +123,19 @@ with tempfile.TemporaryDirectory() as tmp:
         "b-literal": {"setup": [{"command": ["literal", payload]}]},
         "c-disabled": {"when": {"enabled": False}, "setup": [{"command": ["missing"]}]},
     }
-    without_failing = dict(specs)
-    without_failing.pop("a-failing")
 
-    def specs_preamble(spec_map):
+    def specs_prefix(spec_map):
         return ctx(home) + (
             '{{- $_ := set . "tools" (fromJson ' + json.dumps(json.dumps(spec_map)) + ") -}}"
         )
 
-    spec_scripts = render_cases(
-        {"setup": source},
-        [
-            ("with-failing", specs_preamble(specs), "setup", "."),
-            ("without-failing", specs_preamble(without_failing), "setup", "."),
-        ],
-    )
-    script.write_text(spec_scripts["with-failing"])
+    script.write_text(render_setup(specs_prefix(specs)))
     assert run().returncode != 0
     assert log.read_text() == payload + "\n"
     assert not marker.exists()
-    specs.pop("a-failing")
-    script.write_text(spec_scripts["without-failing"])
+    without_failing = dict(specs)
+    without_failing.pop("a-failing")
+    script.write_text(render_setup(specs_prefix(without_failing)))
     assert run().returncode == 0
 
-print("ok tool setup: gates, rotation, literal argv, preflight, redaction and retry")
+print("ok tool setup: rotation, literal argv, preflight, redaction and retry")

@@ -3,18 +3,14 @@
 
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import render
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, key in (("--persistent-state", "CHEZMOI_VERIFY_STATE"), ("--cache", "CHEZMOI_VERIFY_CACHE")):
-    if os.environ.get(key):
-        command.extend([flag, os.environ[key]])
-command.extend(["execute-template", "--source", str(root)])
 source = (root / "home/.chezmoiscripts/run_before_010_purge-disabled-tool-commands.sh.tmpl").read_text()
 literal = "dollar $HOME; quote ' and `touch injected`"
 fixture = {
@@ -29,33 +25,6 @@ fixture = {
 }
 
 
-def render_cases(defines, cases):
-    """Render every purge variant in one chezmoi process."""
-    parts = []
-    for name, body in defines.items():
-        parts.append("{{ define " + json.dumps(name) + " }}" + body + "{{ end }}")
-    for key, preamble, define_name, dot in cases:
-        quoted_key = json.dumps(key)
-        parts.append(preamble)
-        parts.append(
-            "{{ printf " + json.dumps("@@CASE:%s@@") + " " + quoted_key + " }}"
-            "{{ template " + json.dumps(define_name) + " " + dot + " }}"
-            "{{ printf " + json.dumps("@@END:%s@@") + " " + quoted_key + " }}"
-        )
-    result = subprocess.run(
-        command,
-        input="".join(parts),
-        text=True,
-        capture_output=True,
-        check=True,
-    )
-    found = dict(re.findall(r"@@CASE:(.*?)@@(.*?)@@END:\1@@", result.stdout, flags=re.DOTALL))
-    missing = [key for key, _, _, _ in cases if key not in found]
-    if missing:
-        raise AssertionError("missing template output for " + ", ".join(missing))
-    return found
-
-
 def preamble(data):
     # Clear tools on a copy first: mergeOverwrite keeps sibling tools otherwise.
     payload = json.dumps(json.dumps(data))
@@ -64,6 +33,11 @@ def preamble(data):
         '{{- $_ := set $base "tools" (dict) -}}'
         '{{- $ctx := mergeOverwrite (deepCopy $base) (' + payload + " | fromJson) -}}"
     )
+
+
+def render_purge(prefix):
+    # The declarations build a merged context; run the script template as that dot.
+    return render(root, "{{- with $ctx -}}\n" + source + "{{- end -}}", prefix=prefix)
 
 
 variants = [("fixture", fixture)]
@@ -81,23 +55,16 @@ paths_only = json.loads(json.dumps(fixture))
 del paths_only["tools"]["fixture"]["purge"][0]["command"]
 paths_only["tools"]["fixture"]["purge"][0]["paths"] = ["Applications/MyGo.app"]
 variants.append(("paths-only", paths_only))
-cases = [(key, preamble(data), "purge", "$ctx") for key, data in variants]
-# Same JSON round-trip the declarations use, with the live switch forced off.
-cases.append((
-    "hermes",
-    (
-        '{{- $hermesObj := .tools.hermes | toJson | fromJson -}}'
-        '{{- $_ := set $hermesObj "when" (dict "enabled" false) -}}'
-        '{{- $hermesData := dict "tools" (dict "hermes" $hermesObj) '
-        '"policies" (dict "purge_disabled_tools" true) "chezmoi" (dict "os" "linux") -}}'
-        '{{- $base := deepCopy . -}}'
-        '{{- $_ := set $base "tools" (dict) -}}'
-        '{{- $ctx := mergeOverwrite (deepCopy $base) $hermesData -}}'
-    ),
-    "purge",
-    "$ctx",
-))
-rendered = render_cases({"purge": source}, cases)
+rendered = {key: render_purge(preamble(data)) for key, data in variants}
+rendered["hermes"] = render_purge(
+    '{{- $hermesObj := .tools.hermes | toJson | fromJson -}}'
+    '{{- $_ := set $hermesObj "when" (dict "enabled" false) -}}'
+    '{{- $hermesData := dict "tools" (dict "hermes" $hermesObj) '
+    '"policies" (dict "purge_disabled_tools" true) "chezmoi" (dict "os" "linux") -}}'
+    '{{- $base := deepCopy . -}}'
+    '{{- $_ := set $base "tools" (dict) -}}'
+    '{{- $ctx := mergeOverwrite (deepCopy $base) $hermesData -}}'
+)
 script_text = rendered["fixture"]
 assert rendered["off-policies"].strip() == ""
 assert rendered["off-chezmoi"].strip() == ""
@@ -173,9 +140,13 @@ with tempfile.TemporaryDirectory() as tmp:
         uname.chmod(0o755)
         log = home / "trash.jsonl"
         calls_log = home / "calls.json"
-        env = {**os.environ, "HOME": str(home), "PATH": str(bins), "CASE": case,
-               "TRASH_LOG": str(log), "MOCK_LOG": str(calls_log)}
-        result = subprocess.run(["/bin/sh", str(script)], env=env, text=True, capture_output=True)
+        env = {
+            **os.environ, "HOME": str(home), "PATH": str(bins), "CASE": case,
+            "TRASH_LOG": str(log), "MOCK_LOG": str(calls_log),
+        }
+        result = subprocess.run(
+            ["/bin/sh", str(script)], env=env, text=True, capture_output=True, check=False,
+        )
         assert result.returncode == expected, (case, result.returncode, result.stderr)
         assert shared.read_text() == "must survive cleanup", "must not follow skill symlinks"
         assert not (home / "injected").exists()
