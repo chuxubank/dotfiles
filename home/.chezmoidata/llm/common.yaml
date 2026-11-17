@@ -10,6 +10,15 @@ llm:
     sonnet_primary: claude-sonnet-5-5
     haiku_primary: claude-haiku-5-5
 
+  # Compaction starts once context use passes this percent of the window.
+  # match is tested against provider/id. The only form is **/name*: **
+  # crosses slashes, and * is the rest of the final segment. Pi and OMP
+  # render this into their own settings; the percent stays here.
+  compaction:
+    thresholds:
+      - match: "**/grok*"
+        percent: 80
+
   # ── Data sets (model catalogs, independent from inference providers) ──
   data_sets:
     models-dev:

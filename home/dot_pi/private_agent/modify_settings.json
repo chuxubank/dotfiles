@@ -95,29 +95,83 @@
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}
-{{- /* modelThresholds requires native percentage support in Pi. Globstar
-       covers both native ids and gateway ids containing vendor prefixes;
-       Pi calculates against the runtime window, not a catalog snapshot. */ -}}
-{{- $_ := set $managed "compaction" (dict
-  "modelThresholds" (dict "**/grok*" 80)
-  "modelOverrides" (dict
-    "iv-codex/gpt-6.1-sol" (dict "reserveTokens" 650000)
-  )
-) -}}
+{{- /* Pi stores a fixed reserveTokens. llm.compaction.thresholds says
+       when, as a percent of the window; the reserve is the rest.
+       Windows come from the catalogs this apply already writes: declared
+       Pi models, a Cursor @256k/@500k id, and the xAI models.dev card.
+       The next apply picks up a window or threshold change. Cards under
+       128k are image or video, not a chat window. */ -}}
+{{- $rules := includeTemplate "llm/compaction-thresholds" . | fromJson -}}
+{{- $windows := dict -}}
+{{- $catalog := includeTemplate "llm/custom-providers" (merge (dict "tool" "pi") .) | fromJson -}}
+{{- range $alias, $provider := $catalog -}}
+  {{- range $model := default (list) (index $provider "models") -}}
+    {{- $id := printf "%v" (index $model "id") -}}
+    {{- $window := int (default 0 (index $model "contextWindow")) -}}
+    {{- if ge $window 128000 -}}
+      {{- $_ := set $windows (printf "%s/%s" $alias $id) $window -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $id, $_ := default (dict) (index $provider "modelOverrides") -}}
+    {{- $key := printf "%s/%s" $alias $id -}}
+    {{- if not (hasKey $windows $key) -}}
+      {{- $mark := regexFind "@[0-9]+[kKmM]" $id -}}
+      {{- if $mark -}}
+        {{- $n := int (regexFind "[0-9]+" $mark) -}}
+        {{- $window := mul $n 1000 -}}
+        {{- if or (hasSuffix "m" $mark) (hasSuffix "M" $mark) -}}{{- $window = mul $n 1000000 -}}{{- end -}}
+        {{- if ge $window 128000 -}}{{- $_ := set $windows $key $window -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if hasKey $cfg.providers "xai" -}}
+  {{- $ds := index .llm.data_sets "models-dev" -}}
+  {{- $dsFile := index .path.cache $ds.file_path -}}
+  {{- if not (hasPrefix "/" $dsFile) -}}{{- $dsFile = joinPath .chezmoi.homeDir $dsFile -}}{{- end -}}
+  {{- $xai := includeTemplate "llm/fetch-data-set" (dict "type" "models-dev" "file" $dsFile "provider" "xai") | fromJson -}}
+  {{- range $id, $card := $xai -}}
+    {{- $key := printf "xai/%s" $id -}}
+    {{- if not (hasKey $windows $key) -}}
+      {{- $window := int (dig "limit" "context" 0 $card) -}}
+      {{- if ge $window 128000 -}}{{- $_ := set $windows $key $window -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $modelOverrides := dict -}}
+{{- range $key, $window := $windows -}}
+  {{- $percent := 0 -}}
+  {{- $best := 0 -}}
+  {{- range $rule := $rules -}}
+    {{- if and (regexMatch $rule.regex $key) (gt (len $rule.match) $best) -}}
+      {{- $best = len $rule.match -}}
+      {{- $percent = int $rule.percent -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if gt $percent 0 -}}
+    {{- $_ := set $modelOverrides $key (dict "reserveTokens" (div (mul (int $window) (sub 100 $percent)) 100)) -}}
+  {{- end -}}
+{{- end -}}
+{{- /* Not a window percent: this model compacts far earlier than the default reserve. */ -}}
+{{- $_ := set $modelOverrides "iv-codex/gpt-6.1-sol" (dict "reserveTokens" 650000) -}}
+{{- $_ := set $managed "compaction" (dict "modelOverrides" $modelOverrides) -}}
 {{- $in := trim (dig "stdin" "" .chezmoi) -}}
 {{- $prior := dict -}}
 {{- if gt (len $in) 0 -}}
   {{- $prior = default dict ($in | fromJson) -}}
 {{- end -}}
-{{- /* Retire only our former fixed Grok reserve; preserve recent-history
-       settings and all unrelated model overrides. */ -}}
-{{- $overrides := dig "compaction" "modelOverrides" (dict) $prior -}}
-{{- $oldKey := "magpie/grok/grok-4.7-build-fast@500k" -}}
-{{- if hasKey $overrides $oldKey -}}
-  {{- $old := index $overrides $oldKey -}}
-  {{- $_ := unset $old "reserveTokens" -}}
-  {{- if eq (len $old) 0 -}}{{- $_ := unset $overrides $oldKey -}}{{- end -}}
+{{- /* Drop the unused percent table and any earlier Grok reserve, then
+       let the computed overrides replace them. Other models stay. */ -}}
+{{- $compaction := dig "compaction" (dict) $prior -}}
+{{- $_ := unset $compaction "modelThresholds" -}}
+{{- $priorOverrides := dig "modelOverrides" (dict) $compaction -}}
+{{- $drop := list -}}
+{{- range $key, $_ := $priorOverrides -}}
+  {{- range $rule := $rules -}}
+    {{- if regexMatch $rule.regex $key -}}{{- $drop = append $drop $key -}}{{- end -}}
+  {{- end -}}
 {{- end -}}
+{{- range $key := $drop -}}{{- $_ := unset $priorOverrides $key -}}{{- end -}}
 {{- includeTemplate "config/merge" (dict
   "format" "json"
   "input" ($prior | toJson)

@@ -2,7 +2,7 @@
 
 ## Sources of truth
 
-- `home/.chezmoidata/llm/common.yaml`: shared model aliases and provider definitions.
+- `home/.chezmoidata/llm/common.yaml`: shared model aliases, provider definitions, and compaction thresholds.
 - `home/.chezmoidata/llm/<tool>.yaml`: model candidates, effort and picker patterns.
 - `home/.chezmoidata/llm/paths.yaml`: directory prefixes for the launch
   wrappers.

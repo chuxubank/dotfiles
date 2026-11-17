@@ -8,6 +8,7 @@
       "properties": {
         "default_providers": { "$ref": "#/$defs/providerRefs" },
         "default_provider_sets": { "$ref": "#/$defs/providerSets" },
+        "compaction": { "$ref": "#/$defs/compaction" },
         "providers": {
           "type": "object",
           "additionalProperties": {
@@ -31,6 +32,26 @@
     }
   },
   "$defs": {
+    "compaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thresholds"],
+      "properties": {
+        "thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["match", "percent"],
+            "properties": {
+              "match": { "type": "string", "pattern": "^\\*\\*/[A-Za-z0-9][A-Za-z0-9._-]*\\*$" },
+              "percent": { "type": "integer", "minimum": 1, "maximum": 99 }
+            }
+          }
+        }
+      }
+    },
     "protocols": {
       "type": "array",
       "minItems": 1,

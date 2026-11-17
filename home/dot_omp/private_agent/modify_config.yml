@@ -42,18 +42,35 @@
        rule sets that threshold at 256000, so grok-4.7-500k-fast displays
        256k. xai-oauth is exempt and already shows 500k. Above 256k, Fast
        bills the long-context rate. */ -}}
+{{- /* OMP accepts provider/id or a prefix whose only star is the last
+       character. Each shared rule becomes alias/name* for every alias,
+       plus alias/dirs/name* when a catalog id has directories before
+       that final segment. The percent comes from llm.compaction. */ -}}
+{{- $rules := includeTemplate "llm/compaction-thresholds" . | fromJson -}}
+{{- $thresholds := dict -}}
+{{- range $rule := $rules -}}
+  {{- $pct := printf "%v%%" (int $rule.percent) -}}
+  {{- range $alias, $_ := $cfg.providers -}}
+    {{- $_ := set $thresholds (printf "%s/%s*" $alias $rule.stem) $pct -}}
+  {{- end -}}
+{{- end -}}
+{{- $catalog := includeTemplate "llm/custom-providers" (merge (dict "tool" "omp") .) | fromJson -}}
+{{- range $alias, $provider := $catalog -}}
+  {{- range $model := default (list) (index $provider "models") -}}
+    {{- $id := printf "%v" (index $model "id") -}}
+    {{- $key := printf "%s/%s" $alias $id -}}
+    {{- range $rule := $rules -}}
+      {{- if regexMatch $rule.regex $key -}}
+        {{- $head := initial (splitList "/" $id) -}}
+        {{- $dir := "" -}}
+        {{- if gt (len $head) 0 -}}{{- $dir = printf "%s/" (join "/" $head) -}}{{- end -}}
+        {{- $_ := set $thresholds (printf "%s/%s%s*" $alias $dir $rule.stem) (printf "%v%%" (int $rule.percent)) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- $managed := dict
   "extendedContext" true
-  "compaction" (dict
-    "modelThresholds" (dict
-      "cursor/grok*" "80%"
-      "xai-oauth/grok*" "80%"
-      "magpie/auto/grok*" "80%"
-      "magpie/cursor/grok*" "80%"
-      "magpie/github-copilot/grok*" "80%"
-      "magpie/grok/grok*" "80%"
-    )
-  )
   "advisor" (dict
     "enabled" true
   )
@@ -103,6 +120,6 @@
   "format" "yaml"
   "input" (dig "stdin" "" .chezmoi)
   "managed" $managed
-  "replace" (dict "modelRoles" $roles "isolation.backend" "auto")
+  "replace" (dict "modelRoles" $roles "isolation.backend" "auto" "compaction.modelThresholds" $thresholds)
   "remove" (list "task.isolation.mode")
 ) -}}

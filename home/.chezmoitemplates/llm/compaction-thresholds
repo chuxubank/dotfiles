@@ -1,0 +1,36 @@
+{{- /* llm/compaction-thresholds — Shared compaction rules.
+       Input: root context (.llm.compaction.thresholds).
+       Output: JSON list of {match, stem, regex, percent}.
+
+       match is a double-star prefix plus a final-segment name and a
+       trailing star, tested against provider/id. The double star crosses
+       slashes; the trailing star consumes the rest of the last segment.
+       stem is that name. regex is the same rule for regexMatch.
+       percent is 1-99. */ -}}
+{{- $rules := dig "compaction" "thresholds" (list) .llm -}}
+{{- if eq (len $rules) 0 -}}
+  {{- fail "llm.compaction.thresholds is empty" -}}
+{{- end -}}
+{{- $out := list -}}
+{{- range $rule := $rules -}}
+  {{- $match := printf "%v" (index $rule "match") -}}
+  {{- if not (regexMatch "^\\*\\*/[A-Za-z0-9][A-Za-z0-9._-]*\\*$" $match) -}}
+    {{- fail (printf "llm.compaction.thresholds match %q must look like **/name*" $match) -}}
+  {{- end -}}
+  {{- $percent := int (index $rule "percent") -}}
+  {{- if or (le $percent 0) (ge $percent 100) -}}
+    {{- fail (printf "llm.compaction.thresholds percent %v is outside 1–99" $percent) -}}
+  {{- end -}}
+  {{- $stem := trimSuffix "*" (trimPrefix "**/" $match) -}}
+  {{- $quoted := $stem -}}
+  {{- range $char := list "." "+" "?" "(" ")" "[" "]" "{" "}" "|" "^" "$" -}}
+    {{- $quoted = replace $char (printf "\\%s" $char) $quoted -}}
+  {{- end -}}
+  {{- $out = append $out (dict
+        "match" $match
+        "stem" $stem
+        "regex" (printf "(^|.*/)%s[^/]*$" $quoted)
+        "percent" $percent
+  ) -}}
+{{- end -}}
+{{- toJson $out -}}
