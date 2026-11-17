@@ -2,3 +2,4 @@
 /.agent-shell/
 /.pi/
 /.ruff_cache/
+__pycache__/
