@@ -20,6 +20,9 @@ wezterm.on("gui-startup", function(cmd)
     if wezterm.target_triple == "x86_64-pc-windows-msvc" then
       spawn = {}
     else
+      -- Attach only. Restarting the detached server here would drop panes
+      -- that are supposed to survive the client. See
+      -- docs/adr/0011-wezterm-luvus-server.md.
       spawn = { args = { "luvus" } }
     end
   end
