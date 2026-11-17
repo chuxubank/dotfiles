@@ -290,6 +290,56 @@ if f'path_model_codex_alias="{personal_provider}"' in codex:
     ]
 else:
     assert launch == ["2", personal_provider]
+yolo = zsh_eval(
+    codex,
+    r"""
+PLAN_ARGS=(exec resume last)
+path_model_bypass
+print -l -- "${PLAN_ARGS[@]}"
+print -r -- "---"
+PLAN_ARGS=(--yolo login)
+path_model_bypass
+print -l -- "${PLAN_ARGS[@]}"
+print -r -- "---"
+PLAN_ARGS=(-- --yolo)
+path_model_bypass
+print -l -- "${PLAN_ARGS[@]}"
+""",
+)
+assert yolo.splitlines() == [
+    "--yolo",
+    "exec",
+    "resume",
+    "last",
+    "---",
+    "--yolo",
+    "login",
+    "---",
+    "--yolo",
+    "--",
+    "--yolo",
+]
+
+
+def bypass(tool, args):
+    body = "PLAN_ARGS=(" + " ".join(json.dumps(arg) for arg in args) + ")\n"
+    body += 'path_model_bypass\nprint -l -- "${PLAN_ARGS[@]}"\n'
+    return zsh_eval(render(tool), body).splitlines()
+
+
+assert bypass("omp", ["launch"])[:1] == ["--approval-mode=yolo"]
+assert bypass("omp", ["--auto-approve", "launch"]) == ["--auto-approve", "launch"]
+assert bypass("opencode", ["run", "x"])[:1] == ["--auto"]
+assert bypass("grok", ["agent"])[:2] == ["--permission-mode", "bypassPermissions"]
+assert bypass("grok", ["--permission-mode", "plan"]) == ["--permission-mode", "plan"]
+assert bypass("copilot", []) == ["--yolo"]
+assert bypass("pi", ["hi"]) == ["hi"]
+goose_mode = zsh_eval(
+    render("goose"),
+    'unset GOOSE_MODE\npath_model_apply_defaults\nprint -r -- "$GOOSE_MODE"\n'
+    'GOOSE_MODE=ask\npath_model_apply_defaults\nprint -r -- "$GOOSE_MODE"\n',
+)
+assert goose_mode.splitlines() == ["auto", "ask"]
 
 assert goose_plan.splitlines() == [
     "0",

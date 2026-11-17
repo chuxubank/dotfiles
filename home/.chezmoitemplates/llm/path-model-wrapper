@@ -81,6 +81,7 @@ typeset -r PATH_MODEL_COMMANDS_FILE=""
 {{- end }}
 typeset -ga PATH_MODEL_PREFIXES PATH_MODEL_MODELS
 typeset -ga PATH_MODEL_COMMAND_FALLBACK PATH_MODEL_LAUNCH
+typeset -ga PATH_MODEL_BYPASS PATH_MODEL_BYPASS_SEEN
 PATH_MODEL_PREFIXES=(
 {{- range $rule := $rules }}
   {{ $rule.prefix | quote }}
@@ -104,12 +105,16 @@ PATH_MODEL_COMMAND_FALLBACK=(
   search q web-search
 )
 PATH_MODEL_LAUNCH=(launch acp)
+PATH_MODEL_BYPASS=(--approval-mode=yolo)
+PATH_MODEL_BYPASS_SEEN=(--approval-mode --auto-approve)
 {{- else if eq $tool "opencode" }}
 PATH_MODEL_COMMAND_FALLBACK=(
   completion mcp attach debug providers auth agent upgrade uninstall serve web
   models stats export import github pr session plugin plug db
 )
 PATH_MODEL_LAUNCH=(acp run)
+PATH_MODEL_BYPASS=(--auto)
+PATH_MODEL_BYPASS_SEEN=(--auto)
 {{- else if eq $tool "grok" }}
 PATH_MODEL_COMMAND_FALLBACK=(
   clone completions dashboard doctor du disk-usage export help inspect leader
@@ -117,12 +122,16 @@ PATH_MODEL_COMMAND_FALLBACK=(
   version v worker worktree wrap
 )
 PATH_MODEL_LAUNCH=(agent)
+PATH_MODEL_BYPASS=(--permission-mode bypassPermissions)
+PATH_MODEL_BYPASS_SEEN=(--permission-mode --always-approve)
 {{- else if eq $tool "copilot" }}
 PATH_MODEL_COMMAND_FALLBACK=(
   app login help init config update version workflow sessions memories plugin
   mcp skill instruction lsp sandbox completion
 )
 PATH_MODEL_LAUNCH=()
+PATH_MODEL_BYPASS=(--yolo)
+PATH_MODEL_BYPASS_SEEN=(--yolo --allow-all)
 {{- else if eq $tool "codex" }}
 PATH_MODEL_COMMAND_FALLBACK=(
   agents login logout mcp plugin app-server remote-control app completion
@@ -130,6 +139,8 @@ PATH_MODEL_COMMAND_FALLBACK=(
   migrate-rollouts migrate-nfs-db unarchive fork cloud exec-server features help
 )
 PATH_MODEL_LAUNCH=(exec e review)
+PATH_MODEL_BYPASS=(--yolo)
+PATH_MODEL_BYPASS_SEEN=(--yolo --dangerously-bypass-approvals-and-sandbox)
 typeset -gA PATH_MODEL_CODEX_PROVIDER_OK
 {{- range $alias := includeTemplate "llm/codex-catalog-providers" . | fromJson }}
 path_model_codex_alias={{ $alias | quote }}
@@ -501,6 +512,26 @@ path_model_copilot_export() {
   fi
 }
 
+# A shell alias does not reach a non-interactive launch.
+path_model_bypass() {
+  (( ${#PATH_MODEL_BYPASS} )) || return 0
+  local arg seen
+  for arg in "${PLAN_ARGS[@]}"; do
+    [[ $arg == -- ]] && break
+    for seen in "${PATH_MODEL_BYPASS_SEEN[@]}"; do
+      [[ $arg == $seen || $arg == ${seen}=* ]] && return 0
+    done
+  done
+  PLAN_ARGS=("${PATH_MODEL_BYPASS[@]}" "${PLAN_ARGS[@]}")
+}
+
+path_model_apply_defaults() {
+  path_model_bypass
+  if [[ $PATH_MODEL_TOOL == goose && -z ${GOOSE_MODE-} ]]; then
+    export GOOSE_MODE=auto
+  fi
+}
+
 path_model_main() {
   path_model_plan "$@"
   if (( PLAN_SKIP == 2 )); then
@@ -508,6 +539,7 @@ path_model_main() {
     exit 1
   fi
   path_model_copilot_export
+  path_model_apply_defaults
   exec "$PATH_MODEL_BIN" "${PLAN_ARGS[@]}"
 }
 

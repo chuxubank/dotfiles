@@ -156,10 +156,11 @@ tools:
     zshrc:
       - at: tail
         body: |
+          # --yolo is inserted by the ~/bin/codex wrapper. An alias would miss
+          # non-interactive launches and would not expand inside that wrapper.
           if command -v codex >/dev/null 2>&1; then
             eval "$(codex completion zsh)"
           fi
-          alias codex="codex --yolo"
     plugin_upgrades:
       - command: [codex, plugin, marketplace, upgrade]
     remove:

@@ -53,6 +53,9 @@ For a new session, the wrappers for `pi`, `omp`, `opencode`, `grok`,
    intact upstream model id; custom providers use the reserved
    `custom_chezmoi_` namespace. Copilot selects the alias's BYOK endpoint.
    Codex splits the same reference into `-c model_provider` and `-c model`.
+   Each wrapper inserts that tool's approval bypass unless argv already sets
+   one. Goose sets `GOOSE_MODE=auto` only when it is unset. Pi has no bypass
+   flag. The flag list is in `llm/path-model-wrapper`.
    It keeps the single `model_catalog_json`; that file is not filtered by
    provider, so it lists the rendered provider and every directory-selected
    provider, and slugs cannot overlap. A path alias Codex has not enabled
