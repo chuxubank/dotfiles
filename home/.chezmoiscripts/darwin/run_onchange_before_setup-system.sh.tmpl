@@ -6,5 +6,22 @@ echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }
 # make sure spotlight index on to let mas work
 # sudo mdutil -Eai on
 
-networksetup -setdnsservers Wi-Fi 223.5.5.5
+# Queries follow the default-route service. Wi-Fi alone leaves every other
+# service on DHCP resolvers.
+if ! services_text=$(networksetup -listallnetworkservices); then
+  print -u2 -- "could not list network services"
+  exit 1
+fi
+services=("${(@f)services_text}")
+failed=0
+for service in "${services[@]}"; do
+  [[ $service == 'An asterisk (*) denotes that a network service is disabled.' ]] && continue
+  [[ -z $service ]] && continue
+  service=${service#\*}
+  if ! networksetup -setdnsservers "$service" 223.5.5.5; then
+    print -u2 -- "could not set DNS for $service"
+    failed=1
+  fi
+done
+exit "$failed"
 {{ end -}}
