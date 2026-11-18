@@ -22,6 +22,24 @@ services:
       PASSWORD_STORE_DIR:
         homePath: pass
 
+  # One-shot submit on the CLI's own cadence, not `tokens serve`: that exits
+  # until login, and KeepAlive would relaunch the exit.
+  - tool: tokens
+    owner: tokens
+    brew: true
+    when:
+      enabled:
+        os: darwin
+    logrotate:
+      stderr:
+        rotate: 2
+        interval: weekly
+    runAtLoad: true
+    startInterval: 1800
+    programArguments:
+      - usrBin: tokens
+      - submit
+
   - tool: freedesktop
     target: dbus-session
     limitLoadToSessionType: false
