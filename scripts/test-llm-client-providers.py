@@ -145,14 +145,20 @@ with tempfile.TemporaryDirectory() as tmp:
         assert model["contextWindow"] == 300000 and model["maxTokens"] == 32000, model
         assert model["reasoning"] is False and "thinkingLevelMap" not in model and "thinking" not in model
 
-    # Compaction policies merge without deleting unrelated model customizations.
+    # Compaction follows the fixture rules and model aliases, not a pinned id.
+    # Pi drops the percent table and matching reserves. OMP replaces the
+    # threshold table with one selector per alias.
     compaction_llm = copy.deepcopy(discovered)
-    compaction_llm["models"] = {"grok_primary": "grok-fixture"}
+    compaction_llm["models"] = {"grok_primary": "grok-fixture", "gpt_primary": "gpt-fixture"}
+    compaction_llm["compaction"] = {"thresholds": [
+        {"match": "**/${grok_primary}*", "percent": 80},
+        {"match": "**/${gpt_primary}*", "reserve_tokens": 424242},
+    ]}
     compaction_llm["tools"] = {
         "pi": {"model": "magpie/auto/model@wide"},
         "omp": {"model": "magpie/auto/model@wide"},
     }
-    old_grok = "magpie/grok/grok-4.7-build-fast@500k"
+    old_grok = "magpie/grok/grok-fixture-old@500k"
     prior_compaction = {"compaction": {
         "enabled": True,
         "modelThresholds": {"other/model": 65},
@@ -164,21 +170,21 @@ with tempfile.TemporaryDirectory() as tmp:
     pi_path = "home/dot_pi/private_agent/modify_settings.json"
     pi = json.loads(render(pi_path, compaction_llm, home, stdin=json.dumps(prior_compaction)))
     assert pi["runtimeOnly"] is True
-    assert pi["compaction"]["modelThresholds"] == {"other/model": 65, "**/grok*": 80}
-    assert pi["compaction"]["modelOverrides"][old_grok] == {"keepRecentTokens": 4321}
+    assert "modelThresholds" not in pi["compaction"]
+    assert old_grok not in pi["compaction"]["modelOverrides"]
     assert pi["compaction"]["modelOverrides"]["other/model"] == {"reserveTokens": 12345}
-    assert pi["compaction"]["modelOverrides"]["iv-codex/gpt-6.1-sol"] == {"reserveTokens": 650000}
+    gpt_overrides = {
+        key: value for key, value in pi["compaction"]["modelOverrides"].items()
+        if key.endswith("/gpt-fixture")
+    }
+    assert gpt_overrides == {"magpie/gpt-fixture": {"reserveTokens": 424242}}
     assert json.loads(render(pi_path, compaction_llm, home, stdin=json.dumps(pi))) == pi
     prior_compaction["compaction"]["modelOverrides"][old_grok].pop("keepRecentTokens")
     pi = json.loads(render(pi_path, compaction_llm, home, stdin=json.dumps(prior_compaction)))
     assert old_grok not in pi["compaction"]["modelOverrides"]
     omp_path = "home/dot_omp/private_agent/modify_config.yml"
     omp = json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(prior_compaction)))
-    thresholds = omp["compaction"]["modelThresholds"]
-    assert thresholds["other/model"] == 65
-    for selector in ("cursor/grok*", "xai-oauth/grok*", "magpie/auto/grok*", "magpie/cursor/grok*",
-                     "magpie/github-copilot/grok*", "magpie/grok/grok*"):
-        assert thresholds[selector] == "80%", thresholds
+    assert omp["compaction"]["modelThresholds"] == {"magpie/grok-fixture*": "80%"}
     assert omp["compaction"]["modelOverrides"]["other/model"] == {"reserveTokens": 12345}
     assert omp["runtimeOnly"] is True
     assert json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(omp))) == omp

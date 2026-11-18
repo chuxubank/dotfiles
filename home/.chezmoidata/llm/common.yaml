@@ -4,7 +4,7 @@ llm:
   # Tool configs reference these as ${name}; llm/tool-config expands them
   # before provider selection. Keep provider aliases in each tool config.
   models:
-    gpt_primary: gpt-6.1-sol
+    gpt_primary: gpt-6.2-sol
     grok_primary: grok-4.7
     opus_primary: claude-opus-5-5
     sonnet_primary: claude-sonnet-5-5
@@ -12,12 +12,17 @@ llm:
 
   # Compaction starts once context use passes this percent of the window.
   # match is tested against provider/id. The only form is **/name*: **
-  # crosses slashes, and * is the rest of the final segment. Pi and OMP
-  # render this into their own settings; the percent stays here.
+  # crosses slashes, and * is the rest of the final segment. ${name}
+  # expands from llm.models. Pi and OMP render a percent into their own
+  # settings. reserve_tokens is an absolute Pi reserve for an id with no
+  # catalog window to derive one; OMP only stores a percent, so it skips
+  # that rule.
   compaction:
     thresholds:
-      - match: "**/grok*"
+      - match: "**/${grok_primary}*"
         percent: 80
+      - match: "**/${gpt_primary}*"
+        reserve_tokens: 650000
 
   # ── Data sets (model catalogs, independent from inference providers) ──
   data_sets:

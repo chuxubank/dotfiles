@@ -95,10 +95,11 @@
 {{- if hasKey $cfg "enabled_models" -}}
   {{- $_ := set $managed "enabledModels" $cfg.enabled_models -}}
 {{- end -}}
-{{- /* Pi stores a fixed reserveTokens. llm.compaction.thresholds says
-       when, as a percent of the window; the reserve is the rest.
-       Windows come from the catalogs this apply already writes: declared
-       Pi models, a Cursor @256k/@500k id, and the xAI models.dev card.
+{{- /* Pi stores a fixed reserveTokens. A percent rule says when, as a
+       share of the window; the reserve is the rest. reserve_tokens is
+       already that reserve. Windows come from the catalogs this apply
+       already writes: declared Pi models, a Cursor @256k/@500k id, and
+       the xAI models.dev card.
        The next apply picks up a window or threshold change. Cards under
        128k are image or video, not a chat window. */ -}}
 {{- $rules := includeTemplate "llm/compaction-thresholds" . | fromJson -}}
@@ -141,19 +142,38 @@
 {{- $modelOverrides := dict -}}
 {{- range $key, $window := $windows -}}
   {{- $percent := 0 -}}
+  {{- $reserve := 0 -}}
   {{- $best := 0 -}}
   {{- range $rule := $rules -}}
     {{- if and (regexMatch $rule.regex $key) (gt (len $rule.match) $best) -}}
       {{- $best = len $rule.match -}}
-      {{- $percent = int $rule.percent -}}
+      {{- $percent = 0 -}}
+      {{- $reserve = 0 -}}
+      {{- if hasKey $rule "reserve_tokens" -}}
+        {{- $reserve = int $rule.reserve_tokens -}}
+      {{- else -}}
+        {{- $percent = int $rule.percent -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
-  {{- if gt $percent 0 -}}
+  {{- if gt $reserve 0 -}}
+    {{- $_ := set $modelOverrides $key (dict "reserveTokens" $reserve) -}}
+  {{- else if gt $percent 0 -}}
     {{- $_ := set $modelOverrides $key (dict "reserveTokens" (div (mul (int $window) (sub 100 $percent)) 100)) -}}
   {{- end -}}
 {{- end -}}
-{{- /* Not a window percent: this model compacts far earlier than the default reserve. */ -}}
-{{- $_ := set $modelOverrides "iv-codex/gpt-6.1-sol" (dict "reserveTokens" 650000) -}}
+{{- /* No catalog window, so the reserve cannot be derived. Pi keys are
+       exact provider/id; unknown ids are ignored. */ -}}
+{{- range $rule := $rules -}}
+  {{- if hasKey $rule "reserve_tokens" -}}
+    {{- range $alias, $_ := $cfg.providers -}}
+      {{- $key := printf "%s/%s" $alias $rule.stem -}}
+      {{- if not (hasKey $modelOverrides $key) -}}
+        {{- $_ := set $modelOverrides $key (dict "reserveTokens" (int $rule.reserve_tokens)) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- $_ := set $managed "compaction" (dict "modelOverrides" $modelOverrides) -}}
 {{- $in := trim (dig "stdin" "" .chezmoi) -}}
 {{- $prior := dict -}}
@@ -168,7 +188,7 @@
 {{- $drop := list -}}
 {{- range $key, $_ := $priorOverrides -}}
   {{- range $rule := $rules -}}
-    {{- if regexMatch $rule.regex $key -}}{{- $drop = append $drop $key -}}{{- end -}}
+    {{- if and (hasKey $rule "percent") (regexMatch $rule.regex $key) -}}{{- $drop = append $drop $key -}}{{- end -}}
   {{- end -}}
 {{- end -}}
 {{- range $key := $drop -}}{{- $_ := unset $priorOverrides $key -}}{{- end -}}

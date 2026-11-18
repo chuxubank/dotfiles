@@ -45,13 +45,16 @@
 {{- /* OMP accepts provider/id or a prefix whose only star is the last
        character. Each shared rule becomes alias/name* for every alias,
        plus alias/dirs/name* when a catalog id has directories before
-       that final segment. The percent comes from llm.compaction. */ -}}
+       that final segment. The percent comes from llm.compaction.
+       reserve_tokens is an absolute Pi reserve, so OMP skips that rule. */ -}}
 {{- $rules := includeTemplate "llm/compaction-thresholds" . | fromJson -}}
 {{- $thresholds := dict -}}
 {{- range $rule := $rules -}}
-  {{- $pct := printf "%v%%" (int $rule.percent) -}}
-  {{- range $alias, $_ := $cfg.providers -}}
-    {{- $_ := set $thresholds (printf "%s/%s*" $alias $rule.stem) $pct -}}
+  {{- if hasKey $rule "percent" -}}
+    {{- $pct := printf "%v%%" (int $rule.percent) -}}
+    {{- range $alias, $_ := $cfg.providers -}}
+      {{- $_ := set $thresholds (printf "%s/%s*" $alias $rule.stem) $pct -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- $catalog := includeTemplate "llm/custom-providers" (merge (dict "tool" "omp") .) | fromJson -}}
@@ -60,7 +63,7 @@
     {{- $id := printf "%v" (index $model "id") -}}
     {{- $key := printf "%s/%s" $alias $id -}}
     {{- range $rule := $rules -}}
-      {{- if regexMatch $rule.regex $key -}}
+      {{- if and (hasKey $rule "percent") (regexMatch $rule.regex $key) -}}
         {{- $head := initial (splitList "/" $id) -}}
         {{- $dir := "" -}}
         {{- if gt (len $head) 0 -}}{{- $dir = printf "%s/" (join "/" $head) -}}{{- end -}}

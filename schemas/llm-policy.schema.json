@@ -43,11 +43,16 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["match", "percent"],
+            "required": ["match"],
             "properties": {
-              "match": { "type": "string", "pattern": "^\\*\\*/[A-Za-z0-9][A-Za-z0-9._-]*\\*$" },
-              "percent": { "type": "integer", "minimum": 1, "maximum": 99 }
-            }
+              "match": { "type": "string", "pattern": "^\\*\\*/(\\$\\{[a-z][a-z0-9_]*\\}|[A-Za-z0-9][A-Za-z0-9._-]*)\\*$" },
+              "percent": { "type": "integer", "minimum": 1, "maximum": 99 },
+              "reserve_tokens": { "type": "integer", "minimum": 1 }
+            },
+            "oneOf": [
+              { "required": ["percent"], "not": { "required": ["reserve_tokens"] } },
+              { "required": ["reserve_tokens"], "not": { "required": ["percent"] } }
+            ]
           }
         }
       }
