@@ -81,6 +81,7 @@ brews = [
   "node",
   "ocrmypdf",
   "openapi-generator",
+  { name = "owo-network/brew/tokens", owner = "tokens" },
   "oxipng",
   "p7zip",
   "pandoc",

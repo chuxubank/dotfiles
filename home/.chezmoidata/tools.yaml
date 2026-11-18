@@ -634,6 +634,14 @@ tools:
       # those, and the bundled skill symlinks live in shared agent trees.
       - ".local/state/terminal-browser/**"
 
+  # tokens.ci leaderboard. `tokens serve` exits until `tokens login`, and the
+  # formula's keep_alive would relaunch that exit, so apply does not start
+  # the service. After login: `brew services start tokens`.
+  tokens:
+    when: *non_ci
+    purge:
+      - ".config/tokens/**"
+
   warp:
     when:
       enabled:

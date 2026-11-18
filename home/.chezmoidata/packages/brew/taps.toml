@@ -12,7 +12,9 @@ taps = [
   "jimeh/emacs-builds",
   { name = "Jarvis322/tap", trusted = { cask = "sysdata" } },
   { name = "lycorp-jp/tap", trusted = { formula = "sim-use" }, owner = "sim-use" },
-  { name = "owo-network/brew", trusted = { cask = "herdrm" }, owner = "herdr" },
+  # Shared by herdrm and tokens. No owner: herdr is off, and that switch
+  # must not drop the tap tokens needs. CI installs neither package.
+  { name = "owo-network/brew", trusted = { cask = "herdrm", formula = "tokens" }, when.disabled.host_env = ["ci"] },
   "railwaycat/emacsmacport",
   { name = "sikarugir-app/sikarugir", trusted = { cask = "sikarugir" }, when.enabled = { host_env = ["personal"], roles = ["game"] } },
   { name = "stablyai/orca", trusted = { cask = "orca" }, owner = "orca" },
