@@ -43,6 +43,7 @@
     )
     "layout" (dict
       "agent_title" true
+      "diff_provider" "difftastic"
       "files_show_hidden" true
     )
     "notifications" (dict
