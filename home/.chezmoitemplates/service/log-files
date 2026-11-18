@@ -1,6 +1,6 @@
-{{- $isBrew := and (hasKey .service "brew") .service.brew -}}
+{{- $brew := includeTemplate "service/brew" .service -}}
 {{- $logBase := "" -}}
-{{- if $isBrew -}}{{- $logBase = .service.tool -}}
+{{- if $brew -}}{{- $logBase = .service.tool -}}
 {{- else -}}{{- $logBase = .service.target -}}{{- end -}}
 {{- $stdoutFile := printf "%s-stdout.log" $logBase -}}
 {{- $stderrFile := printf "%s-stderr.log" $logBase -}}
@@ -10,4 +10,9 @@
 {{- $stderr := includeTemplate "service/log-path" (dict "path" .ctx.path "parts" (list .service.tool) "file" $stderrFile) -}}
 {{- if hasKey .service "standardOutPath" -}}{{- $stdout = .service.standardOutPath -}}{{- end -}}
 {{- if hasKey .service "standardErrorPath" -}}{{- $stderr = .service.standardErrorPath -}}{{- end -}}
+{{- if eq $brew "formula" -}}
+  {{- $brewLog := joinPath .ctx.path.usr "var/log" (printf "%s.log" .service.tool) -}}
+  {{- if not (hasKey .service "standardOutPath") -}}{{- $stdout = $brewLog -}}{{- end -}}
+  {{- if not (hasKey .service "standardErrorPath") -}}{{- $stderr = $brewLog -}}{{- end -}}
+{{- end -}}
 {{- list $stdout $stderr | toJson -}}

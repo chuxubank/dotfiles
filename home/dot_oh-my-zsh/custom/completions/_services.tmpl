@@ -15,7 +15,7 @@ _services() {
 	service_names=(
 {{- $tools := dict }}
 {{- range (includeTemplate "service/services" . | fromJson) }}
-	{{- $isBrew := and (hasKey . "brew") .brew }}
+	{{- $isBrew := includeTemplate "service/brew" . }}
 	{{- $name := .tool }}
 	{{- if not $isBrew }}{{- $name = printf "%s.%s" .tool .target }}{{- end }}
 	{{- if not (hasKey $tools .tool) }}

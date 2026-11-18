@@ -1,5 +1,5 @@
 {{- $label := "" -}}
-{{- if and (hasKey .service "brew") .service.brew -}}
+{{- if includeTemplate "service/brew" .service -}}
   {{- if eq .os "darwin" -}}
     {{- /* Homebrew 6 dest/label is sh.brew.<formula> (was homebrew.mxcl.<formula>). */ -}}
     {{- $label = printf "sh.brew.%s" .service.tool -}}

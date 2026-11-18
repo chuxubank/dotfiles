@@ -1,8 +1,8 @@
-{{- $isBrew := and (hasKey . "brew") .brew -}}
+{{- $brew := includeTemplate "service/brew" . -}}
 {{- $hasBrew := lookPath "brew" -}}
 {{- $logBase := "" -}}
 {{- $label := includeTemplate "service/label" (dict "os" .chezmoi.os "service" .) -}}
-{{- if $isBrew -}}
+{{- if $brew -}}
   {{- $logBase = .tool -}}
 {{- else -}}
   {{- $logBase = .target -}}
@@ -17,12 +17,19 @@
 {{- $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
 {{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
 {{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
+{{- if eq $brew "formula" }}
+{{- if $hasBrew }}
+brew services restart {{ .tool }}
+{{- else }}
+echo "Homebrew is required to register {{ .tool }}"
+{{- end }}
+{{- else -}}
 {{- $execStart := list -}}
 {{- range .programArguments -}}
   {{- $execStart = append $execStart (includeTemplate "service/value" (dict "ctx" $ "item" .)) -}}
 {{- end -}}
 {{- $unit := includeTemplate "service/systemd-unit" (dict "label" $label "stdout" $stdout "stderr" $stderr "execStart" $execStart "service" .) -}}
-{{- if and $isBrew $hasBrew }}
+{{- if and (eq $brew "file") $hasBrew }}
 brew services restart {{ .tool }} --file=/dev/stdin <<'SYSTEMD'
 {{ $unit }}SYSTEMD
 {{- else }}
@@ -40,4 +47,5 @@ systemctl --user start {{ $label }}
 else
 echo "systemd user session unavailable; skipping {{ $label }}"
 fi
+{{- end -}}
 {{- end -}}

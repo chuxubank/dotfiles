@@ -1,6 +1,8 @@
+# brew: file — generate the plist and install it with brew services.
+# brew: formula — register the formula's own service; do not replace it.
 services:
   - tool: isync
-    brew: true
+    brew: file
     logrotate:
       stderr:
         rotate: 2
@@ -22,23 +24,13 @@ services:
       PASSWORD_STORE_DIR:
         homePath: pass
 
-  # One-shot submit on the CLI's own cadence, not `tokens serve`: that exits
-  # until login, and KeepAlive would relaunch the exit.
+  # The formula defines `tokens serve`.
   - tool: tokens
     owner: tokens
-    brew: true
+    brew: formula
     when:
       enabled:
         os: darwin
-    logrotate:
-      stderr:
-        rotate: 2
-        interval: weekly
-    runAtLoad: true
-    startInterval: 1800
-    programArguments:
-      - usrBin: tokens
-      - submit
 
   - tool: freedesktop
     target: dbus-session

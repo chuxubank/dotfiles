@@ -18,7 +18,7 @@ if launchctl print "$domain/$label" >/dev/null 2>&1; then
   launchctl bootout "$domain/$label"
 fi
 rm -f "$plist"
-{{- if and (hasKey . "brew") .brew }}
+{{- if includeTemplate "service/brew" . }}
 if command -v brew >/dev/null 2>&1; then
   brew services stop {{ .tool | quote }} || true
 fi
@@ -35,7 +35,7 @@ if [ -f "$unit" ]; then
     rm -f "$unit"
   fi
 fi
-{{- if and (hasKey . "brew") .brew }}
+{{- if includeTemplate "service/brew" . }}
 if command -v brew >/dev/null 2>&1; then
   brew services stop {{ .tool | quote }} || true
 fi

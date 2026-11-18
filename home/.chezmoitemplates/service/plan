@@ -5,9 +5,9 @@
 {{- $os := .chezmoi.os -}}
 {{- $out := list -}}
 {{- range $service := includeTemplate "service/services" . | fromJson -}}
-  {{- $isBrew := and (hasKey $service "brew") $service.brew -}}
+  {{- $brew := includeTemplate "service/brew" $service -}}
   {{- $name := $service.tool -}}
-  {{- if not $isBrew -}}
+  {{- if not $brew -}}
     {{- $name = printf "%s.%s" $service.tool $service.target -}}
   {{- end -}}
   {{- $label := includeTemplate "service/label" (dict "os" $os "service" $service) -}}
@@ -17,11 +17,11 @@
   {{- $file := "" -}}
   {{- if eq $os "darwin" -}}
     {{- $manager = "launchd" -}}
-    {{- if $isBrew -}}{{- $manager = "brew" -}}{{- end -}}
+    {{- if $brew -}}{{- $manager = "brew" -}}{{- end -}}
     {{- $file = printf "$HOME/Library/LaunchAgents/%s.plist" $label -}}
   {{- else if eq $os "linux" -}}
     {{- $manager = "systemd" -}}
-    {{- if and $isBrew (lookPath "brew") -}}{{- $manager = "brew" -}}{{- end -}}
+    {{- if and $brew (lookPath "brew") -}}{{- $manager = "brew" -}}{{- end -}}
     {{- $file = printf "$HOME/.config/systemd/user/%s.service" $label -}}
   {{- end -}}
   {{- $out = append $out (dict

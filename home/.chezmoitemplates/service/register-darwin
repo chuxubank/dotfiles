@@ -1,7 +1,7 @@
-{{- $isBrew := and (hasKey . "brew") .brew -}}
+{{- $brew := includeTemplate "service/brew" . -}}
 {{- $logBase := "" -}}
 {{- $label := includeTemplate "service/label" (dict "os" .chezmoi.os "service" .) -}}
-{{- if $isBrew -}}
+{{- if $brew -}}
   {{- $logBase = .tool -}}
 {{- else -}}
   {{- $logBase = .target -}}
@@ -14,11 +14,14 @@
 {{- $stderr := includeTemplate "service/log-path" (dict "path" .path "parts" (list .tool) "file" $stderrFile) -}}
 {{- if hasKey . "standardOutPath" -}}{{- $stdout = .standardOutPath -}}{{- end -}}
 {{- if hasKey . "standardErrorPath" -}}{{- $stderr = .standardErrorPath -}}{{- end -}}
-{{- $plist := includeTemplate "service/plist-darwin" (merge (dict "label" $label "stdout" $stdout "stderr" $stderr) .) -}}
-{{- if $isBrew }}
+{{- if eq $brew "formula" }}
+brew services restart {{ .tool }}
+{{- else if eq $brew "file" -}}
+{{- $plist := includeTemplate "service/plist-darwin" (merge (dict "label" $label "stdout" $stdout "stderr" $stderr) .) }}
 brew services restart {{ .tool }} --file=/dev/stdin <<'PLIST'
 {{ $plist }}PLIST
 {{- else -}}
+{{- $plist := includeTemplate "service/plist-darwin" (merge (dict "label" $label "stdout" $stdout "stderr" $stderr) .) -}}
 {{- $launchagentsDir := joinPath .chezmoi.homeDir "Library" "LaunchAgents" -}}
 mkdir -p {{ $launchagentsDir | quote }}
 cat > {{ joinPath $launchagentsDir (printf "%s.plist" $label) | quote }} <<'PLIST'

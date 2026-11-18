@@ -395,7 +395,7 @@
 {{- $svcCtx := merge (dict) $base (dict
       "host_env" "personal"
       "services" (list
-        (dict "tool" "isync" "brew" true)
+        (dict "tool" "isync" "brew" "file")
         (dict "tool" "rclone" "owner" "claude-code" "target" "nutstore"))) -}}
 {{- $svcs := includeTemplate "service/services" $svcCtx | fromJson -}}
 {{- if ne (len $svcs) 1 -}}
@@ -406,13 +406,22 @@
 {{- end -}}
 
 {{- /* Homebrew 6 launchd dest/label is sh.brew.<formula>, not homebrew.mxcl.<formula> */ -}}
-{{- $brewDarwin := includeTemplate "service/label" (dict "os" "darwin" "service" (dict "tool" "isync" "brew" true)) -}}
+{{- $brewDarwin := includeTemplate "service/label" (dict "os" "darwin" "service" (dict "tool" "isync" "brew" "file")) -}}
 {{- if ne $brewDarwin "sh.brew.isync" -}}
   {{- fail (printf "service/label: darwin brew expected sh.brew.isync, got %q" $brewDarwin) -}}
 {{- end -}}
-{{- $brewLinux := includeTemplate "service/label" (dict "os" "linux" "service" (dict "tool" "isync" "brew" true)) -}}
+{{- $brewLinux := includeTemplate "service/label" (dict "os" "linux" "service" (dict "tool" "isync" "brew" "file")) -}}
 {{- if ne $brewLinux "homebrew.isync" -}}
   {{- fail (printf "service/label: linux brew expected homebrew.isync, got %q" $brewLinux) -}}
+{{- end -}}
+{{- /* brew: formula registers the formula service and does not pass --file. */ -}}
+{{- $formulaReg := includeTemplate "service/register-darwin" (merge (dict) . (dict "tool" "tokens" "brew" "formula")) -}}
+{{- if or (contains "--file" $formulaReg) (not (contains "brew services restart tokens" $formulaReg)) -}}
+  {{- fail (printf "service/register-darwin: formula service must not replace the plist, got %q" $formulaReg) -}}
+{{- end -}}
+{{- $customReg := includeTemplate "service/register-darwin" (merge (dict) . (dict "tool" "isync" "brew" "file" "runAtLoad" true "startInterval" 300 "programArguments" (list (dict "usrBin" "mbsync") "-a"))) -}}
+{{- if not (contains "--file=/dev/stdin" $customReg) -}}
+  {{- fail "service/register-darwin: a generated brew service must pass --file" -}}
 {{- end -}}
 {{- $customLabel := includeTemplate "service/label" (dict "os" "darwin" "service" (dict "tool" "gitwatch" "target" "org")) -}}
 {{- if ne $customLabel "gitwatch.org" -}}

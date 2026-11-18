@@ -1,0 +1,13 @@
+{{- /* service/brew — Who owns a Homebrew service file.
+       Input: a service spec.
+       Output: "file", "formula", or empty.
+       file: chezmoi generates the plist and brew services installs it.
+       formula: the formula's service is registered unchanged.
+       Any other value fails. Absent or false means this is not a brew service. */ -}}
+{{- if not (hasKey . "brew") -}}
+{{- else if not .brew -}}
+{{- else if and (eq (kindOf .brew) "string") (or (eq .brew "file") (eq .brew "formula")) -}}
+{{- .brew -}}
+{{- else -}}
+{{- fail (printf "service %s: brew must be file or formula" (dig "tool" "?" .)) -}}
+{{- end -}}

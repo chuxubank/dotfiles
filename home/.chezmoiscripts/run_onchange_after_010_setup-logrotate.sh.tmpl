@@ -14,7 +14,9 @@ fi
 $SUDO mkdir -p "$logrotate_dir" \
 {{- $tools := dict -}}
 {{- range (includeTemplate "service/services" . | fromJson) -}}
+  {{- if ne (includeTemplate "service/brew" .) "formula" -}}
   {{- $_ := set $tools .tool true -}}
+  {{- end -}}
 {{- end -}}
 {{- range ($tools | keys | sortAlpha) }}
   {{ joinPath $.path.log . | quote }} \
@@ -30,7 +32,10 @@ $SUDO mkdir -p "$logrotate_dir" \
   {{- if hasKey .logrotate "stderr" -}}{{- $stderrOpts = .logrotate.stderr -}}{{- end -}}
 {{- end -}}
 {{ $filename := .tool -}}
-{{- if not (and (hasKey . "brew") .brew) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end -}}
+{{- if not (includeTemplate "service/brew" .) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end -}}
+{{- if eq (includeTemplate "service/brew" .) "formula" }}
+rm -f "$logrotate_dir/{{ $filename }}"
+{{- else }}
 $SUDO tee "$logrotate_dir/{{ $filename }}" >/dev/null <<'LOGROTATE'
 {{ index $logFiles 0 | quote }}
 {
@@ -41,10 +46,11 @@ $SUDO tee "$logrotate_dir/{{ $filename }}" >/dev/null <<'LOGROTATE'
   {{ includeTemplate "service/logrotate-directives" $stderrOpts }}
 }
 LOGROTATE
+{{- end }}
 {{ end -}}
 {{- range (includeTemplate "service/services" (merge (dict "serviceSelect" "disabled") .) | fromJson) -}}
 {{- $filename := .tool -}}
-{{- if not (and (hasKey . "brew") .brew) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end }}
+{{- if not (includeTemplate "service/brew" .) -}}{{- $filename = printf "%s-%s" .tool .target -}}{{- end }}
 rm -f "$logrotate_dir/{{ $filename }}"
 {{- end -}}
 {{ if eq .chezmoi.os "darwin" }}
