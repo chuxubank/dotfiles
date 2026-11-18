@@ -512,7 +512,7 @@ with tempfile.TemporaryDirectory() as directory:
         refresh_llm, home,
     )
     assert '"https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000"' in script, script
-    assert '"query:key" "Test/Google" "gemini-api-key"' in script, script
+    assert '"google-generative-ai" "Test/Google" "gemini-api-key"' in script, script
     assert '"https://multi.example/v1/models"' in script, script
     subprocess.run(["sh", "-n"], input=script, text=True, check=True)
 
@@ -530,13 +530,28 @@ with tempfile.TemporaryDirectory() as directory:
         "if os.environ.get('CURL_FAIL'):\n"
         "    print('curl: (22) The requested URL returned error: 401', file=sys.stderr)\n"
         "    sys.exit(22)\n"
-        "print('{\"models\": []}')\n"
+        "url = sys.argv[-1]\n"
+        "if '/v1beta/models?' in url:\n"
+        "    print(json.dumps({'models': [\n"
+        "        {'name': 'models/gemini-kept'}, {'name': 'models/gemini-new'},\n"
+        "    ]}))\n"
+        "else:\n"
+        "    print(json.dumps({'data': [{'id': 'vendor/fresh'}]}))\n"
     )
     curl.chmod(0o755)
     log = home / "curl-log"
+    google_cache = home / ".cache/llm/models/google.json"
+    google_cache.parent.mkdir(parents=True)
+    google_cache.write_text(json.dumps({"models": [
+        {"name": "models/gemini-kept"}, {"name": "models/gemini-old"},
+    ]}))
     env = {**os.environ, "PATH": f"{bindir}:{os.environ['PATH']}", "CURL_LOG": str(log), "CURL_FAIL": ""}
     result = subprocess.run(["sh"], input=script, text=True, capture_output=True, env=env)
     assert result.returncode == 0 and not result.stderr, result.stderr
+    assert "refresh provider=google cache=google-models-api added=1 removed=1" in result.stdout, result.stdout
+    assert "+ gemini-new" in result.stdout and "- gemini-old" in result.stdout, result.stdout
+    assert "gemini-kept" not in result.stdout
+    assert "refresh provider=multi cache=iv-cc-models-api models=1" in result.stdout, result.stdout
     calls = [json.loads(line) for line in log.read_text().splitlines()]
     assert len(calls) == 3, calls
     native = next(call for call in calls if "/v1beta/models?" in call[-1])

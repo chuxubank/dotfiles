@@ -38,12 +38,104 @@ fetch_model_response() {
   esac
 }
 
+report_model_diff() {
+  # Compare model ids only. A missing or unreadable previous cache is a
+  # count, not a deletion of every id.
+  python3 - "$1" "$2" "$3" "$4" "$5" <<'PY'
+import json
+import sys
+
+provider, cache_key, list_type, old_path, new_path = sys.argv[1:]
+
+def load(path):
+    try:
+        with open(path, encoding="utf-8") as handle:
+            return json.load(handle), None
+    except FileNotFoundError:
+        return None, "missing"
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None, "unreadable"
+
+def collect(data):
+    if not isinstance(data, dict):
+        return None
+    found = []
+    if list_type == "ollama":
+        rows = data.get("models") or []
+        if not isinstance(rows, list):
+            return None
+        found = [row.get("name", "") for row in rows if isinstance(row, dict)]
+    elif list_type == "google-generative-ai":
+        rows = data.get("models") or []
+        if not isinstance(rows, list):
+            return None
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            name = row.get("name") or ""
+            prefix = "models/"
+            if name.startswith(prefix):
+                name = name[len(prefix):]
+            found.append(name)
+    elif list_type == "opencode":
+        nested = data.get("opencode")
+        models = nested.get("models") if isinstance(nested, dict) else None
+        if not isinstance(models, dict):
+            return None
+        found = list(models)
+    else:
+        rows = data.get("data") or []
+        if not isinstance(rows, list):
+            return None
+        found = [row.get("id", "") for row in rows if isinstance(row, dict)]
+    return {item for item in found if isinstance(item, str) and item}
+
+def emit(message):
+    sys.stdout.write(message + "\n")
+
+new_data, new_error = load(new_path)
+new_ids = None if new_error else collect(new_data)
+if new_ids is None:
+    emit(f"refresh provider={provider} cache={cache_key} unparsed")
+    sys.exit(0)
+
+old_data, old_error = load(old_path)
+if old_error == "missing":
+    emit(f"refresh provider={provider} cache={cache_key} models={len(new_ids)}")
+    sys.exit(0)
+old_ids = None if old_error else collect(old_data)
+if old_ids is None:
+    emit(
+        f"refresh provider={provider} cache={cache_key} "
+        f"models={len(new_ids)} previous=unreadable"
+    )
+    sys.exit(0)
+
+added = sorted(new_ids - old_ids)
+removed = sorted(old_ids - new_ids)
+if not added and not removed:
+    emit(f"refresh provider={provider} cache={cache_key} unchanged={len(new_ids)}")
+    sys.exit(0)
+emit(
+    f"refresh provider={provider} cache={cache_key} "
+    f"added={len(added)} removed={len(removed)}"
+)
+for item in added:
+    emit(f"+ {item}")
+for item in removed:
+    emit(f"- {item}")
+PY
+}
+
 refresh_models() {
-  cache_file=$1
-  url=$2
-  auth_mode=${3-none}
-  pass_path=${4-}
-  pass_field=${5-}
+  provider=$1
+  cache_key=$2
+  cache_file=$3
+  url=$4
+  auth_mode=${5-none}
+  list_type=${6-openai-completions}
+  pass_path=${7-}
+  pass_field=${8-}
 
   case "$auth_mode" in
     none) ;;
@@ -77,6 +169,9 @@ refresh_models() {
     trap - 0 HUP INT TERM
     return 1
   fi
+  if ! report_model_diff "$provider" "$cache_key" "$list_type" "$cache_file" "$tmp_file"; then
+    printf 'warning: could not compare provider=%s cache=%s\n' "$provider" "$cache_key" >&2
+  fi
   if ! mv "$tmp_file" "$cache_file"; then
     rm -f "$tmp_file"
     trap - 0 HUP INT TERM
@@ -108,9 +203,12 @@ refresh_models() {
   {{- if hasKey $provider "auth" -}}{{- $authPath = $provider.auth.path -}}{{- end -}}
 {{- if hasPrefix "http" $endpoint.url }}
 if ! refresh_models \
+  {{ $providerName | quote }} \
+  {{ $cacheKey | quote }} \
   {{ joinPath $.chezmoi.homeDir (index $.path.cache $cacheKey) | quote }} \
   {{ $endpoint.url | quote }} \
-  {{ $endpoint.auth_mode | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}; then
+  {{ $endpoint.auth_mode | quote }} \
+  {{ index $endpointInput "type" | quote }}{{ if $authPath }} "{{ $authPath }}"{{ end }}{{ if hasKey $cache "auth_field" }} "{{ $cache.auth_field }}"{{ end }}; then
   printf 'warning: failed to refresh provider=%s cache=%s url=%s\n' \
     {{ $providerName | quote }} {{ $cacheKey | quote }} {{ $endpoint.url | quote }} >&2
 fi
