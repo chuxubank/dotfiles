@@ -13,6 +13,8 @@ user_pref("extensions.zotero.sync.storage.protocol", "webdav");
 user_pref("extensions.zotero.sync.storage.url", {{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Nutstore/Zotero" "field" "url") .) | quote }});
 user_pref("extensions.zotero.sync.storage.username", {{ includeTemplate "safe/pass" (merge (dict "path" "Personal/Nutstore/Zotero" "field" "username") .) | quote }});
 
+{{ if and (stat (joinPath $repo ".git")) (stat $bibFile) -}}
+{{- /* org-roam is an external, so the bibliography can be absent on a fresh apply. */ -}}
 user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $bibFile | replace "." "%2e"}}", {{- dict
   "created" (output "git" "-C" $repo "log" "--diff-filter=A" "--follow" "--format=%ct" "-1" "--" $file | trim | mul 1000)
   "path" $bibFile
@@ -32,6 +34,7 @@ user_pref("extensions.zotero.translators.better-bibtex.autoExport.{{ urlquery $b
   "biblatexAPA" false
   "biblatexChicago" false
 | toJson | quote -}});
+{{ end -}}
 user_pref("extensions.zotero.translators.better-bibtex.citekeyFormat", "auth.fold.lower + shorttitle(3, 3) + year");
 user_pref("extensions.zotero.translators.better-bibtex.postscript", {{- includeTemplate "zotero/postscript.js" | quote -}});
 

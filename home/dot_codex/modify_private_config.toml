@@ -17,11 +17,13 @@
 {{- end }}
 {{- /* Enumerate git-repo children of every path.workspace tree. Filter on
        .git (dir or worktree file) so upstream checkouts like qmk_firmware
-       don't contribute keyboards/, lib/, etc. Empty trees still trip fd's
-       exit-1; that's pre-existing. */ -}}
+       don't contribute keyboards/, lib/, etc. fd arrives with package
+       install, so a workspace directory can exist while fd is still absent;
+       skip that scan instead of failing the render. Empty trees still trip
+       older fd's exit-1; that's pre-existing. */ -}}
 {{- range $path := sortAlpha (values $.path.workspace) }}
   {{- $root := joinPath $.chezmoi.homeDir $path -}}
-  {{- if stat $root }}
+  {{- if and (stat $root) (lookPath "fd") }}
     {{- $dirs := output "fd" "--hidden" "--no-ignore" "--min-depth" "1" "--max-depth" "1" "--type" "d" "--absolute-path" "--format" "{}" "." $root -}}
     {{- range $dir := splitList "\n" ($dirs | trim) }}
       {{- if and $dir (stat (joinPath $dir ".git")) }}

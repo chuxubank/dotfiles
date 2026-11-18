@@ -4,6 +4,7 @@
 Expected models are the resolved llm.path_models entries, not a copied id.
 """
 
+import atexit
 import json
 import os
 import shutil
@@ -130,6 +131,21 @@ chezmoi_matches = [prefix for prefix in rows if os.path.normpath(prefix) == work
 assert chezmoi_matches, (working_tree, sorted(rows))
 chezmoi_prefix = chezmoi_matches[0]
 personal_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/Personal"))
+# Later template renders stat this tree. Create it only for the cwd checks,
+# and remove it again when this process made the empty directory.
+if not Path(personal_prefix).exists():
+
+    def remove_empty_created_tree() -> None:
+        current = Path(personal_prefix)
+        home = Path.home()
+        while current != home and current.is_dir():
+            try:
+                current.rmdir()
+            except OSError:
+                return
+            current = current.parent
+
+    atexit.register(remove_empty_created_tree)
 oss_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/OpenSource"))
 iv_prefix = next(prefix for prefix in rows if prefix.endswith("/Developer/InfinityValley"))
 assert rows[chezmoi_prefix] == personal
