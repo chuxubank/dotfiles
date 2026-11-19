@@ -1,5 +1,10 @@
 {{- /* chezmoi:modify-template */ -}}
 {{- "" -}}
+{{- /* llm/gptel-backends owns the backend list. This file prints it as the
+       saved value of cat-gptel-backends. The defcustom keeps that value
+       instead of its standard fallbacks. Specs stay data: the module
+       evaluates plist values only after gptel has loaded. */ -}}
+{{- $gptel := includeTemplate "llm/gptel-backends" . | fromJson -}}
 ;;; -*- lexical-binding: t -*-
 (load (cat-template-file "custom.el") nil 'nomessage)
 (custom-set-variables
@@ -65,35 +70,41 @@
 {{- includeTemplate "emacs/logview/submodes.eld" . | nindent 5 }})
    t)
  {{- end }}
+ '(cat-gptel-backends
+   '{{ if $gptel.backends }}({{ range $i, $b := $gptel.backends }}{{ if $i }}
+     {{ end }}({{ $b.symbol }} {{ $b.constructor }} {{ $b.name | quote }}
+      :models nil
+      :host {{ $b.host | quote }}
+      :protocol {{ $b.protocol | quote }}
+      :endpoint {{ $b.endpoint | quote }}{{ if hasKey $b "auth_path" }}
+      :key (cat/gptel-api-key-from-pass
+            {{ index $b "auth_path" | quote }}{{ if hasKey $b "auth_field" }} {{ index $b "auth_field" | quote }}{{ end }}){{ end }}
+      :stream t){{ end }}){{ else }}nil{{ end }}
+   nil nil "Resolved llm aliases; replaces the standard fallbacks")
  '(gptel-model-updater-model-metadata-file
    {{ joinPath .chezmoi.homeDir (index .path.cache "models-dev-api") | quote }})
+{{- $filters := list -}}
+{{- range $b := $gptel.backends -}}
+  {{- if hasKey $b "include" -}}{{- $filters = append $filters $b -}}{{- end -}}
+{{- end -}}
+{{- if $filters }}
+ '(gptel-model-updater-backend-filters
+   '({{ range $i, $b := $filters }}{{ if $i }}
+     {{ end }}({{ $b.name | quote }} :include {{ $b.include | quote }}){{ end }}))
+{{- end }}
  '(gptel-model-updater-backends
-   '((gptel--gemini :cache {{ joinPath .chezmoi.homeDir (index .path.cache "google-models-api") | quote }})
-     {{- if eq .host_env "iv" }}
-     (gptel--iv :providers (all)
-                :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-default-models-api") | quote }})
-     (gptel--openai :providers (all)
-                    :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-codex-models-api") | quote }})
-     (gptel--anthropic :providers (all)
-                        :cache {{ joinPath .chezmoi.homeDir (index .path.cache "iv-cc-models-api") | quote }})
-     {{- end }}
-     {{- if has "llm" .roles }}
-     gptel--llama gptel--mlx
-     (gptel--ollama :cache {{ joinPath .chezmoi.homeDir (index .path.cache "ollama-models-api") | quote }})
-     {{- end }}
-     (gptel--openrouter :cache {{ joinPath .chezmoi.homeDir (index .path.cache "openrouter-models-api") | quote }})))
+   '({{ range $i, $b := $gptel.backends }}{{ if $i }}
+     {{ end }}{{ if or (hasKey $b "cache_file") (hasKey $b "metadata_providers") }}({{ end }}{{ $b.symbol }}{{ if hasKey $b "metadata_providers" }} :providers ({{ join " " $b.metadata_providers }}){{ end }}{{ if hasKey $b "cache_file" }} :cache {{ $b.cache_file | quote }}{{ end }}{{ if or (hasKey $b "cache_file") (hasKey $b "metadata_providers") }}){{ end }}{{ end }}))
  '(gptel-model-updater-external-targets
-   '((gptel-magit-backend gptel-magit-model "GPTel-Magit"
-                          ("IV:deepseek-v4-flash"
-                           "OpenRouter:openrouter/free"))
-     (gptel-forge-prs-backend gptel-forge-prs-model "GPTel-Forge-Prs"
-                              ("IV:deepseek-v4-flash"
-                               "OpenRouter:openrouter/free"))))
+   '((gptel-magit-backend gptel-magit-model "GPTel-Magit"{{ if $gptel.small_models }}
+                          ({{ range $i, $m := $gptel.small_models }}{{ if $i }}
+                           {{ end }}{{ $m | quote }}{{ end }}){{ end }})
+     (gptel-forge-prs-backend gptel-forge-prs-model "GPTel-Forge-Prs"{{ if $gptel.small_models }}
+                              ({{ range $i, $m := $gptel.small_models }}{{ if $i }}
+                               {{ end }}{{ $m | quote }}{{ end }}){{ end }})))
  '(gptel-model-updater-models
-   '("IV:{{ .llm.models.gpt_primary }}"
-     "IV:claude-opus-5"
-     "IV:deepseek-v4-pro"
-     "OpenRouter:auto"))
+   '({{ range $i, $m := $gptel.models }}{{ if $i }}
+     {{ end }}{{ $m | quote }}{{ end }}))
  '(mouse-wheel-progressive-speed nil)
  '(cat-org-cliplink-title-replacements
    '(("_哔哩哔哩_bilibili\\'" "")))
@@ -109,28 +120,3 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-{{- if eq .host_env "iv" }}
-(with-eval-after-load 'gptel
-  (setq gptel--iv
-        (gptel-make-openai "IV"
-          :models '()
-          :host "llm.invalley.co"
-          :protocol "http"
-          :key (cat/gptel-api-key-from-pass
-                "Work/IV/LLM" "default-auth-token")
-          :stream t)
-        gptel--openai
-        (gptel-make-openai "OpenAI"
-          :host "llm.invalley.co"
-          :protocol "http"
-          :key (cat/gptel-api-key-from-pass
-                "Work/IV/LLM" "codex-auth-token")
-          :stream t)
-        gptel--anthropic
-        (gptel-make-anthropic "Anthropic"
-          :host "llm.invalley.co"
-          :protocol "http"
-          :key (cat/gptel-api-key-from-pass
-                "Work/IV/LLM" "cc-auth-token")
-          :stream t)))
-{{- end }}

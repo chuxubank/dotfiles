@@ -82,6 +82,14 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   settings. Each entry carries its own protocol, endpoint, credential and
   upstream id, so multiple gateways do not compete over global environment
   variables.
+- **GPTel** registers one backend per resolved alias. `llm/gptel.yaml`
+  declares the menu names and model candidates; `llm/gptel-backends` turns
+  an alias with a base URL into a `gptel-make-*` backend. Login aliases are
+  skipped. A disabled alias drops its backend and leaves its candidate,
+  which the updater skips. The API key stays in pass. `cat-gptel-backends`
+  is a defcustom whose standard value is the local fallback set. custom.el
+  sets that option's saved value to the resolved specs, and the module
+  builds only those backends.
 - **Goose** gets one native custom-provider definition per alias. A dedicated
   `run_onchange` transaction writes and prunes only the reserved
   `custom_chezmoi_` namespace, leaving native and user definitions alone. The

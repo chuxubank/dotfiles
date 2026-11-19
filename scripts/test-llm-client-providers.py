@@ -37,7 +37,7 @@ base = {
 }
 
 
-def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None):
+def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None, error=None):
     source = (root / path).read_text()
     declared = {"goose": {"when": {"enabled": enabled}}}
     declared.update(tools or {})
@@ -61,6 +61,9 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None):
     )
     template = prefix + '{{- $ := $ctx -}}{{- with $ctx -}}' + source + '{{- end -}}'
     result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    if error:
+        assert result.returncode != 0 and error in result.stderr, result.stderr or result.stdout
+        return result.stderr
     assert result.returncode == 0, result.stderr
     if yaml:
         # Parse as a map, wrapping lists, without requiring PyYAML on CI.
@@ -602,4 +605,89 @@ with tempfile.TemporaryDirectory() as directory:
     assert all(cache.read_text() == "previous cache\n" for cache in caches)
     assert not list((home / ".cache/llm/models").glob(".models.*"))
 
-print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints, model cache refresh")
+    gptel_llm = {
+        "models": {"gpt_primary": "gpt-fixture"},
+        "default_providers": ["magpie", "gateway", "anthropic", "dotted", "ollama", "google", "login"],
+        "providers": {
+            "magpie": {
+                "name": "Magpie",
+                "base_url": "https://magpie.example/ignored",
+                "api_types": ["openai-completions", "anthropic-messages"],
+                "api_key": "secret-sentinel",
+                "auth": {"path": "Test/Magpie", "field": "gateway-key"},
+                "models_cache": "magpie-models-api",
+                "owner": "magpie",
+            },
+            "gateway": {
+                "name": "Gateway",
+                "base_url": "https://gateway.example/api",
+                "api_key": "secret-sentinel",
+                "auth": {"path": "Test/Gateway", "field": "gateway-key"},
+            },
+            "anthropic": {
+                "name": "Anthropic",
+                "base_url": "http://anthropic.example",
+                "api_types": ["anthropic-messages"],
+                "auth": {"path": "Test/Anthropic", "field": "token"},
+            },
+            "dotted": {
+                "name": "Dotted",
+                "base_url": "https://dotted.example",
+                "models": ["vendor.v2", "plain"],
+                "auth": {"path": "Test/Dotted", "field": "k"},
+            },
+            "ollama": {
+                "name": "Ollama",
+                "base_url": "http://localhost:11434",
+                "api_types": ["ollama"],
+            },
+            "google": {
+                "name": "Gemini",
+                "base_url": "https://generativelanguage.googleapis.com",
+                "api_types": ["google-generative-ai"],
+                "auth": {"path": "Test/Google", "field": "gemini-api-key"},
+            },
+            "login": {"name": "LoginOnly"},
+        },
+        "tools": {"gptel": {
+            "supported_provider_types": [
+                "openai-completions", "anthropic-messages",
+                "google-generative-ai", "ollama",
+            ],
+            "model": ["magpie/grok/kept", "gateway/vendor/model"],
+            "small_model": ["gateway/small.id"],
+        }},
+    }
+    custom = "home/dot_config/cat-emacs/modify_custom.el"
+    magpie_on = {"magpie": {"when": {"enabled": True}}}
+    on = render(custom, gptel_llm, home, tools=magpie_on)
+    assert '(gptel--magpie gptel-make-openai "Magpie"' in on, on
+    assert ':host "magpie.example"' in on and ':protocol "https"' in on, on
+    assert ':endpoint "/v1/chat/completions"' in on and "/ignored" not in on, on
+    assert 'cat/gptel-api-key-from-pass' in on and '"Test/Magpie" "gateway-key"' in on, on
+    assert "cat-gptel-backends" in on and "cat-gptel-managed-backends" not in on, on
+    assert "with-eval-after-load 'gptel" not in on, on
+    assert 'gptel--magpie :cache ' in on and on.count("magpie.json") == 1, on
+    assert ':host "gateway.example"' in on and ':endpoint "/api/v1/chat/completions"' in on, on
+    assert '(gptel--anthropic gptel-make-anthropic "Anthropic"' in on, on
+    assert ':host "anthropic.example"' in on and ':protocol "http"' in on, on
+    assert ':endpoint "/v1/messages"' in on, on
+    assert '(gptel--google gptel-make-gemini "Gemini"' in on and ':endpoint "/v1beta/models"' in on, on
+    assert '("Dotted" :include "^\\\\(vendor\\\\.v2\\\\|plain\\\\)$")' in on, on
+    ollama = on[on.index('(gptel--ollama gptel-make-ollama "Ollama"'):on.index(":stream t)", on.index('(gptel--ollama gptel-make-ollama "Ollama"'))]
+    assert ':host "localhost:11434"' in ollama and ':endpoint "/api/chat"' in ollama, ollama
+    assert ":key" not in ollama, ollama
+    assert "gptel--login" not in on and "LoginOnly" not in on, on
+    assert "secret-sentinel" not in on, on
+    assert "Magpie:grok/kept" in on and "Gateway:small.id" in on, on
+    order = ["gptel--anthropic", "gptel--dotted", "gptel--gateway", "gptel--google", "gptel--magpie", "gptel--ollama"]
+    positions = [on.index(symbol) for symbol in order]
+    assert positions == sorted(positions), positions
+    off = render(custom, gptel_llm, home, tools={"magpie": {"when": {"enabled": False}}})
+    assert "gptel--magpie" not in off and "secret-sentinel" not in off, off
+    assert "Magpie:grok/kept" in off and "gptel--gateway" in off, off
+    bad = copy.deepcopy(gptel_llm)
+    bad["providers"]["gateway"]["headers"] = {"X-Test": "1"}
+    render(custom, bad, home, tools=magpie_on, error="request headers")
+
+print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints, GPTel declared backends, model cache refresh")

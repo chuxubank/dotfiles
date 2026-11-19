@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../../../schemas/llm-policy.schema.json
+llm:
+  tools:
+    gptel:
+      # Protocols gptel-make-* can construct. openai-responses is absent:
+      # gptel-make-openai selects Responses only for api.openai.com.
+      supported_provider_types:
+        - openai-completions
+        - anthropic-messages
+        - google-generative-ai
+        - ollama
+      # Menu names. The IV set and Magpie are inherited; a ref here only
+      # renames them. The others are not defaults.
+      providers:
+        iv:
+          name: IV
+        iv-codex:
+          name: OpenAI
+        iv-cc:
+          name: Anthropic
+        iv-anthropic:
+          name: IV-Anthropic
+        google:
+          provider: google
+          name: Gemini
+        ollama:
+          provider: ollama
+          name: Ollama
+        llama:
+          provider: llama
+          name: llama.cpp
+        mlx:
+          provider: mlx
+          name: MLX
+        openrouter:
+          provider: openrouter
+      # Tried in order. An alias that did not resolve stays in the list;
+      # the updater skips a backend it did not register.
+      model:
+        - iv/${gpt_primary}
+        - iv/claude-opus-5
+        - iv/deepseek-v4-pro
+        - magpie/grok/${grok_primary}-build-fast
+        - openrouter/auto
+      # magit and forge. The OpenRouter id itself contains a slash.
+      small_model:
+        - iv/deepseek-v4-flash
+        - openrouter/openrouter/free
