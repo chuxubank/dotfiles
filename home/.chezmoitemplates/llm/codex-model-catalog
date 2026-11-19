@@ -262,6 +262,9 @@
     {{- end -}}
     {{- if has "image" $declaredModalities -}}{{- $inputModalities = append $inputModalities "image" -}}{{- end -}}
 
+    {{- /* Codex omits MCP schemas until the model calls Responses tool_search.
+          These providers use that wire and the call works here, so defer them.
+          Bundled OpenAI entries keep their own flag. */ -}}
     {{- $entry := dict
       "slug" $id
       "display_name" $name
@@ -289,7 +292,7 @@
       "web_search_tool_type" "text"
       "input_modalities" $inputModalities
       "supports_image_detail_original" false
-      "supports_search_tool" false
+      "supports_search_tool" true
       "use_responses_lite" false
       "include_skills_usage_instructions" false
       "include_plugin_usage_instructions" true
