@@ -115,6 +115,15 @@ plugins:
           ownership of tool execution rows.
         source: npm:@pi-kaush/pi-content-layout@0.1.9
 
+      - name: pi-timing
+        description: >-
+          Per-step, per-turn, and per-run timing in the transcript, plus a
+          live clock on the Working line. /timing:runs and /timing:stats
+          read persisted entries. Bash keeps Pi's own timing line; step
+          clocks on read, edit, write, grep, find, and ls sit beside
+          pi-tool-call-markers.
+        source: npm:@powerfool/pi-timing
+
       - name: pi-undo-redo
         description: >-
           Undo/redo conversation checkpoints and the workspace files those
