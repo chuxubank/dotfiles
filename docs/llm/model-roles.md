@@ -73,6 +73,10 @@ unknown id, or a Copilot alias that did not resolve, fails the launch. The
 real binary's absolute path skips the wrapper. So does a checkout outside
 the prefixes, including `path.data.worktree`.
 
+OMP keeps `update.auto` off. A self-update replaces the `omp` it finds on
+`PATH`, and that file is this wrapper, so the update installs the standalone
+binary over it.
+
 Pi selects its primary model, session-title model, subagent model, and
 web-search summary model from separate lists in `pi.yaml`. OMP exposes
 named roles to its call sites. Plugin enablement is separate from provider

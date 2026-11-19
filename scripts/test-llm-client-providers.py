@@ -183,7 +183,9 @@ with tempfile.TemporaryDirectory() as tmp:
     pi = json.loads(render(pi_path, compaction_llm, home, stdin=json.dumps(prior_compaction)))
     assert old_grok not in pi["compaction"]["modelOverrides"]
     omp_path = "home/dot_omp/private_agent/modify_config.yml"
-    omp = json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(prior_compaction)))
+    prior_omp = {**prior_compaction, "update": {"auto": True, "channel": "canary"}}
+    omp = json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(prior_omp)))
+    assert omp["update"] == {"auto": False, "channel": "canary"}
     assert omp["compaction"]["modelThresholds"] == {"magpie/grok-fixture*": "80%"}
     assert omp["compaction"]["modelOverrides"]["other/model"] == {"reserveTokens": 12345}
     assert omp["runtimeOnly"] is True

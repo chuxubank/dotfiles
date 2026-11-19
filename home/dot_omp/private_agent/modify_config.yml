@@ -72,8 +72,11 @@
     {{- end -}}
   {{- end -}}
 {{- end -}}
+{{- /* update.auto installs through the PATH launcher and would replace the
+       ~/bin/omp wrapper. docs/llm/model-roles.md */ -}}
 {{- $managed := dict
   "extendedContext" true
+  "update" (dict "auto" false)
   "advisor" (dict
     "enabled" true
   )
