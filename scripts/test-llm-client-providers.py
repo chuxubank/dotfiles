@@ -189,6 +189,33 @@ with tempfile.TemporaryDirectory() as tmp:
     assert omp["runtimeOnly"] is True
     assert json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(omp))) == omp
 
+    # Codex stores Pi's trigger: the window minus the reserve. A percent
+    # reserve is the rest of the window. An absolute reserve that consumes
+    # the window compacts at the first token. Unmatched and sub-128k
+    # entries keep Codex's own default.
+    model_cache.write_text(json.dumps({"data": [
+        {"id": "grok/grok-fixture@500k", "context_length": 500000, "tool_call": True},
+        {"id": "grok-fixture", "context_length": 256000, "tool_call": True},
+        {"id": "gpt-fixture", "context_length": 1000000, "tool_call": True},
+        {"id": "gpt-fixture-small", "context_length": 200000, "tool_call": True},
+        {"id": "vendor/bare", "tool_call": False},
+    ]}))
+    codex_llm = copy.deepcopy(compaction_llm)
+    codex_llm["path_models"] = []
+    codex_llm["tools"] = {"codex": {"model": "magpie/grok/grok-fixture@500k"}}
+    catalog = json.loads(render(
+        "home/.chezmoitemplates/llm/codex-model-catalog", codex_llm, home,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    by_slug = {m["slug"]: m for m in catalog["models"]}
+    assert by_slug["grok/grok-fixture@500k"]["auto_compact_token_limit"] == 400000
+    assert by_slug["grok-fixture"]["auto_compact_token_limit"] == 204800
+    assert by_slug["gpt-fixture"]["auto_compact_token_limit"] == 575758
+    assert by_slug["gpt-fixture-small"]["auto_compact_token_limit"] == 1
+    assert "auto_compact_token_limit" not in by_slug["vendor/bare"]
+    assert by_slug["vendor/bare"]["context_window"] == 32768
+    model_cache.write_text(json.dumps({"data": rows}))
+
     # Name-only consumers retain their existing contract.
     template = '{{ includeTemplate "llm/fetch-models" (dict "type" "openai-completions" "base_url" "https://offline.invalid" "auth_key" "" "cache_file" ' + json.dumps(str(model_cache)) + ') }}'
     names = subprocess.run(command, input=template, text=True, capture_output=True)

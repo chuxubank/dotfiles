@@ -13,10 +13,10 @@ llm:
   # Compaction starts once context use passes this percent of the window.
   # match is tested against provider/id. The only form is **/name*: **
   # crosses slashes, and * is the rest of the final segment. ${name}
-  # expands from llm.models. Pi and OMP render a percent into their own
-  # settings. reserve_tokens is an absolute Pi reserve for an id with no
-  # catalog window to derive one; OMP only stores a percent, so it skips
-  # that rule.
+  # expands from llm.models. Pi stores the free reserve (the rest of the
+  # window). OMP stores the percent and skips reserve_tokens. Codex stores
+  # the token count where compaction starts: the window minus Pi's reserve,
+  # clamped to 90% of that window. Windows under 128k are not chat windows.
   compaction:
     thresholds:
       - match: "**/${grok_primary}*"

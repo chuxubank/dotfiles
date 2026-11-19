@@ -308,6 +308,49 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* Same rules as Pi. Pi stores the free reserve: a percent keeps
+       (100 - percent)% of the window, and reserve_tokens is already that
+       reserve. Codex stores the token count where compaction starts, which
+       is the window minus that reserve. Windows under 128k are the catalog
+       fallback or a non-chat card, so Pi ignores them and this does too.
+       Codex will not compact later than 90% of the raw window, so a higher
+       trigger is clamped to that. A reserve that consumes the window
+       compacts at the first token. */ -}}
+{{- $rules := includeTemplate "llm/compaction-thresholds" . | fromJson -}}
+{{- range $entry := $models -}}
+  {{- $ctx := int (default 0 (index $entry "context_window")) -}}
+  {{- if ge $ctx 128000 -}}
+    {{- $id := index $entry "model" -}}
+    {{- if not (and (eq (kindOf $id) "string") $id) -}}{{- $id = index $entry "slug" -}}{{- end -}}
+    {{- $key := printf "%s/%s" (index $entry "provider") $id -}}
+    {{- $best := 0 -}}
+    {{- $percent := 0 -}}
+    {{- $reserve := 0 -}}
+    {{- range $rule := $rules -}}
+      {{- if and (regexMatch $rule.regex $key) (gt (len $rule.match) $best) -}}
+        {{- $best = len $rule.match -}}
+        {{- $percent = 0 -}}
+        {{- $reserve = 0 -}}
+        {{- if hasKey $rule "reserve_tokens" -}}
+          {{- $reserve = int $rule.reserve_tokens -}}
+        {{- else -}}
+          {{- $percent = int $rule.percent -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if gt $best 0 -}}
+      {{- if gt $percent 0 -}}
+        {{- $reserve = div (mul $ctx (sub 100 $percent)) 100 -}}
+      {{- end -}}
+      {{- $limit := sub $ctx $reserve -}}
+      {{- $cap := div (mul $ctx 9) 10 -}}
+      {{- if gt $limit $cap -}}{{- $limit = $cap -}}{{- end -}}
+      {{- if lt $limit 1 -}}{{- $limit = 1 -}}{{- end -}}
+      {{- $_ := set $entry "auto_compact_token_limit" $limit -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $seen := dict -}}
 {{- range $entry := $models -}}
   {{- $slug := index $entry "slug" -}}
