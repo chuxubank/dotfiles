@@ -199,9 +199,12 @@ with tempfile.TemporaryDirectory() as tmp:
     # the window compacts at the first token. Unmatched and sub-128k
     # entries keep Codex's own default.
     model_cache.write_text(json.dumps({"data": [
-        {"id": "grok/grok-fixture@500k", "context_length": 500000, "tool_call": True},
-        {"id": "grok-fixture", "context_length": 256000, "tool_call": True},
-        {"id": "gpt-fixture", "context_length": 1000000, "tool_call": True},
+        {"id": "grok/grok-fixture@500k", "context_length": 500000, "tool_call": True,
+         "reasoning": True, "reasoning_levels": ["low", "medium", "high", "xhigh"]},
+        {"id": "grok-fixture", "context_length": 256000, "tool_call": True,
+         "reasoning": True, "supported_reasoning_levels": [
+             {"effort": "high"}, {"effort": "xhigh"}, {"effort": "nope"}]},
+        {"id": "gpt-fixture", "context_length": 1000000, "tool_call": True, "reasoning": True},
         {"id": "gpt-fixture-small", "context_length": 200000, "tool_call": True},
         {"id": "vendor/bare", "tool_call": False},
     ]}))
@@ -213,6 +216,13 @@ with tempfile.TemporaryDirectory() as tmp:
         tools={"magpie": {"when": {"enabled": True}}},
     ))
     by_slug = {m["slug"]: m for m in catalog["models"]}
+    def efforts(slug):
+        return [level["effort"] for level in by_slug[slug]["supported_reasoning_levels"]]
+    assert efforts("grok/grok-fixture@500k") == ["low", "medium", "high", "xhigh"]
+    assert by_slug["grok/grok-fixture@500k"]["default_reasoning_level"] == "low"
+    assert efforts("grok-fixture") == ["high", "xhigh"]
+    assert efforts("gpt-fixture") == ["low", "medium", "high"]
+    assert by_slug["vendor/bare"]["supported_reasoning_levels"] == []
     assert by_slug["grok/grok-fixture@500k"]["auto_compact_token_limit"] == 400000
     assert by_slug["grok-fixture"]["auto_compact_token_limit"] == 204800
     assert by_slug["gpt-fixture"]["auto_compact_token_limit"] == 575758

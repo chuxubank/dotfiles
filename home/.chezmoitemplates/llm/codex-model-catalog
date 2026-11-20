@@ -224,6 +224,23 @@
         {{- range $effort := $supportedEfforts -}}{{- $rawEfforts = append $rawEfforts $effort -}}{{- end -}}
       {{- end -}}
     {{- end -}}
+    {{- /* The gateway cache lists efforts on the model. fetch-models copies
+           that into reasoning_options for Pi and OMP; this catalog reads the
+           cache itself, so it has to accept the same fields. Unknown names
+           are dropped below. A reasoning model that lists nothing still gets
+           low/medium/high. */ -}}
+    {{- if $reasoningEnabled -}}
+      {{- range $effort := default (list) (index $model "reasoning_levels") -}}
+        {{- $rawEfforts = append $rawEfforts $effort -}}
+      {{- end -}}
+      {{- range $level := default (list) (index $model "supported_reasoning_levels") -}}
+        {{- if eq (kindOf $level) "map" -}}
+          {{- $rawEfforts = append $rawEfforts (index $level "effort") -}}
+        {{- else -}}
+          {{- $rawEfforts = append $rawEfforts $level -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
 
     {{- $levels := list -}}
     {{- $seenLevels := dict -}}
