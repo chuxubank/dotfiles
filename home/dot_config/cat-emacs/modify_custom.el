@@ -2,8 +2,8 @@
 {{- "" -}}
 {{- /* llm/gptel-backends owns the backend list. This file prints it as the
        saved value of cat-gptel-backends. The defcustom keeps that value
-       instead of its standard fallbacks. Specs stay data: the module
-       evaluates plist values only after gptel has loaded. */ -}}
+       instead of its standard fallbacks. Values are literal; :auth is the
+       pass entry, not a function call. */ -}}
 {{- $gptel := includeTemplate "llm/gptel-backends" . | fromJson -}}
 ;;; -*- lexical-binding: t -*-
 (load (cat-template-file "custom.el") nil 'nomessage)
@@ -77,8 +77,7 @@
       :host {{ $b.host | quote }}
       :protocol {{ $b.protocol | quote }}
       :endpoint {{ $b.endpoint | quote }}{{ if hasKey $b "auth_path" }}
-      :key (cat/gptel-api-key-from-pass
-            {{ index $b "auth_path" | quote }}{{ if hasKey $b "auth_field" }} {{ index $b "auth_field" | quote }}{{ end }}){{ end }}
+      :auth ({{ index $b "auth_path" | quote }}{{ if hasKey $b "auth_field" }} {{ index $b "auth_field" | quote }}{{ end }}){{ end }}
       :stream t){{ end }}){{ else }}nil{{ end }}
    nil nil "Resolved llm aliases; replaces the standard fallbacks")
  '(gptel-model-updater-model-metadata-file

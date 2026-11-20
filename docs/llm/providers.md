@@ -89,7 +89,8 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   which the updater skips. The API key stays in pass. `cat-gptel-backends`
   is a defcustom whose standard value is the local fallback set. custom.el
   sets that option's saved value to the resolved specs, and the module
-  builds only those backends.
+  builds only those backends. Specs are literal data; `:auth` is the pass
+  path and optional field, which the module turns into the backend key.
 - **Goose** gets one native custom-provider definition per alias. A dedicated
   `run_onchange` transaction writes and prunes only the reserved
   `custom_chezmoi_` namespace, leaving native and user definitions alone. The

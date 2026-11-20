@@ -664,7 +664,8 @@ with tempfile.TemporaryDirectory() as directory:
     assert '(gptel--magpie gptel-make-openai "Magpie"' in on, on
     assert ':host "magpie.example"' in on and ':protocol "https"' in on, on
     assert ':endpoint "/v1/chat/completions"' in on and "/ignored" not in on, on
-    assert 'cat/gptel-api-key-from-pass' in on and '"Test/Magpie" "gateway-key"' in on, on
+    assert ':auth ("Test/Magpie" "gateway-key")' in on, on
+    assert "cat/gptel-api-key-from-pass" not in on, on
     assert "cat-gptel-backends" in on and "cat-gptel-managed-backends" not in on, on
     assert "with-eval-after-load 'gptel" not in on, on
     assert 'gptel--magpie :cache ' in on and on.count("magpie.json") == 1, on
