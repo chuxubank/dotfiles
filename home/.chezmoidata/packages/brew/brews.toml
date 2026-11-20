@@ -142,7 +142,6 @@ brews = [
   "yq",
   "zbar",
   "zellij",
-  "zig",
   "zsh",
   { name = "zsh-autocomplete", owner = "zsh-autocomplete" },
   "zsh-autosuggestions",
@@ -157,5 +156,7 @@ brews = [
   { name = "podman", when.enabled.host_env = ["aa"] },
   { name = "podman-compose", when.enabled.host_env = ["aa"] },
   { name = "podman-tui", when.enabled.host_env = ["aa"] },
+  # Off: nothing here builds Zig, and the formula is what pulls llvm@22.
+  { name = "zig", when.enabled = false },
   { name = "sleepwatcher", restart_service = true },
 ]
