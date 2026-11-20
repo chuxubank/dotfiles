@@ -5,6 +5,14 @@ echo "{{ template "time/week" . }} 󰯁 Setup skills"
 export BUN_INSTALL="$HOME/{{ .path.tool.bun }}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+{{- if eq .chezmoi.os "windows" }}
+# Bun links this CLI as skills.exe. That shim exits with no output under MSYS,
+# so call the package through bun, which this apply already installed.
+skills() {
+  bun "$BUN_INSTALL/install/global/node_modules/skills/bin/cli.mjs" "$@"
+}
+{{- end }}
+
 {{ includeTemplate "script/reconcile" }}
 
 typeset -aU managed declared
