@@ -76,6 +76,23 @@
   {{- $_ := set $marketplaces $marketplace.name $entry -}}
 {{- end }}
 
+{{- /* A one-row footer clips the right side. Keep the glanceable items
+       on the left: who, then context, then place. Long names and items that
+       are usually empty stay at the end so they do not shove the rest. */ -}}
+{{- $statusLine := list
+  "model-with-reasoning"
+  "provider"
+  "context-used"
+  "current-dir"
+  "git-branch"
+  "pull-request-number"
+  "branch-changes"
+  "used-tokens"
+  "total-input-tokens"
+  "total-output-tokens"
+  "thread-name"
+  "estimated-thread-cost"
+-}}
 {{- $managed := dict
   "model" $model
   "model_reasoning_effort" $cfg.reasoning_effort
@@ -88,7 +105,11 @@
     "shell_snapshot" true
     "unified_exec" true
   )
-  "tui" (dict "model_availability_nux" (dict "gpt-5.5" 4))
+  "tui" (dict
+    "model_availability_nux" (dict "gpt-5.5" 4)
+    "status_line_use_colors" true
+    "status_line" $statusLine
+  )
 -}}
 {{- /* `mcp_servers` is merged, not replaced, so the Codex app can keep
        injecting its own servers (computer-use, node_repl). Merging never
