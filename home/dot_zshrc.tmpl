@@ -146,6 +146,12 @@ fi
 zstyle ':omz:plugins:alias-finder' autoload yes
 
 {{- includeTemplate "shell/zshrc-hooks" (merge (dict "at" "after-compinit") .) }}
+
+# Login shells define sdk from .zprofile. Non-login interactive shells never read that file.
+if (( ! $+functions[sdk] )); then
+  source_if "$SDKMAN_DIR/bin/sdkman-init.sh"
+fi
+
 {{- includeTemplate "shell/zshrc-hooks" (merge (dict "at" "completion-ui") .) }}
 
 source_if $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh

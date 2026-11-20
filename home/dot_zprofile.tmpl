@@ -63,6 +63,7 @@ dotfiles_dynamic_path+=(
 )
 {{- end }}
 
+# Defines the sdk function for login shells. Non-login interactive shells load it from .zshrc.
 source_if "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 # Keep user-managed static paths ahead of resolved package-manager paths,
