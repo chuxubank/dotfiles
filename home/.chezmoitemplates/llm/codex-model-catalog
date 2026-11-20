@@ -30,9 +30,25 @@
   "max" "Maximum reasoning depth for the hardest problems"
   "ultra" "Maximum reasoning with automatic task delegation"
 -}}
+{{- /* Weakest first. A tie between two listed levels goes to the stronger. */ -}}
+{{- $effortRank := dict
+  "none" 0
+  "minimal" 1
+  "low" 2
+  "medium" 3
+  "high" 4
+  "xhigh" 5
+  "max" 6
+  "ultra" 7
+-}}
+{{- $effortAlias := dict "light" "low" "extra_high" "xhigh" -}}
 
 {{- $models := list -}}
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "codex") .) | fromJson -}}
+{{- $sessionEffort := "" -}}
+{{- if hasKey $cfg "reasoning_effort" -}}
+  {{- $sessionEffort = trim (toString $cfg.reasoning_effort) -}}
+{{- end -}}
 {{- $wanted := dict -}}
 {{- $defaultProvider := default "openai" $cfg.model_provider -}}
 {{- if $defaultProvider -}}{{- $_ := set $wanted $defaultProvider true -}}{{- end -}}
@@ -318,8 +334,49 @@
     {{- if $description -}}
       {{- $_ := set $entry "description" $description -}}
     {{- end -}}
+    {{- /* Codex saves this when /model switches to the model, and keeps the
+           session effort only when the model lists it. The configured
+           reasoning_effort is that default when listed. Otherwise the nearest
+           listed level by strength, a tie going up, so xhigh on a model of
+           high and max is max. Nothing configured, or a name this catalog
+           does not rank, keeps medium, then high, then the first listed
+           level. The weakest level made a switch drop to low. */ -}}
     {{- if gt (len $levels) 0 -}}
-      {{- $_ := set $entry "default_reasoning_level" (index $levels 0).effort -}}
+      {{- $defaultLevel := (index $levels 0).effort -}}
+      {{- if hasKey $seenLevels "medium" -}}
+        {{- $defaultLevel = "medium" -}}
+      {{- else if hasKey $seenLevels "high" -}}
+        {{- $defaultLevel = "high" -}}
+      {{- end -}}
+      {{- $want := $sessionEffort -}}
+      {{- if hasKey $effortAlias $want -}}{{- $want = index $effortAlias $want -}}{{- end -}}
+      {{- if and $want (hasKey $effortRank $want) -}}
+        {{- if hasKey $seenLevels $sessionEffort -}}
+          {{- $defaultLevel = $sessionEffort -}}
+        {{- else if hasKey $seenLevels $want -}}
+          {{- $defaultLevel = $want -}}
+        {{- else -}}
+          {{- $at := index $effortRank $want -}}
+          {{- $best := "" -}}
+          {{- $dist := 99 -}}
+          {{- $bestAt := -1 -}}
+          {{- range $level := $levels -}}
+            {{- $name := $level.effort -}}
+            {{- if and (ne $name "none") (hasKey $effortRank $name) -}}
+              {{- $i := index $effortRank $name -}}
+              {{- $d := sub $i $at -}}
+              {{- if lt $d 0 -}}{{- $d = sub $at $i -}}{{- end -}}
+              {{- if or (lt $d $dist) (and (eq $d $dist) (gt $i $bestAt)) -}}
+                {{- $best = $name -}}
+                {{- $dist = $d -}}
+                {{- $bestAt = $i -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+          {{- if $best -}}{{- $defaultLevel = $best -}}{{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- $_ := set $entry "default_reasoning_level" $defaultLevel -}}
     {{- end -}}
     {{- $models = append $models $entry -}}
   {{- end -}}

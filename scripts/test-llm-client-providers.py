@@ -210,7 +210,10 @@ with tempfile.TemporaryDirectory() as tmp:
     ]}))
     codex_llm = copy.deepcopy(compaction_llm)
     codex_llm["path_models"] = []
-    codex_llm["tools"] = {"codex": {"model": "magpie/grok/grok-fixture@500k"}}
+    codex_llm["tools"] = {"codex": {
+        "model": "magpie/grok/grok-fixture@500k",
+        "reasoning_effort": "high",
+    }}
     catalog = json.loads(render(
         "home/.chezmoitemplates/llm/codex-model-catalog", codex_llm, home,
         tools={"magpie": {"when": {"enabled": True}}},
@@ -219,9 +222,48 @@ with tempfile.TemporaryDirectory() as tmp:
     def efforts(slug):
         return [level["effort"] for level in by_slug[slug]["supported_reasoning_levels"]]
     assert efforts("grok/grok-fixture@500k") == ["low", "medium", "high", "xhigh"]
-    assert by_slug["grok/grok-fixture@500k"]["default_reasoning_level"] == "low"
+    assert by_slug["grok/grok-fixture@500k"]["default_reasoning_level"] == "high"
     assert efforts("grok-fixture") == ["high", "xhigh"]
+    assert by_slug["grok-fixture"]["default_reasoning_level"] == "high"
     assert efforts("gpt-fixture") == ["low", "medium", "high"]
+    assert by_slug["gpt-fixture"]["default_reasoning_level"] == "high"
+    # xhigh on high+max goes up to max. A model that stops at high stays there.
+    # Nothing configured keeps medium, not the first listed level.
+    nearest_llm = copy.deepcopy(codex_llm)
+    nearest_llm["tools"]["codex"]["reasoning_effort"] = "xhigh"
+    nearest = json.loads(render(
+        "home/.chezmoitemplates/llm/codex-model-catalog", nearest_llm, home,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    nearest_by_slug = {m["slug"]: m for m in nearest["models"]}
+    assert nearest_by_slug["grok/grok-fixture@500k"]["default_reasoning_level"] == "xhigh"
+    assert nearest_by_slug["gpt-fixture"]["default_reasoning_level"] == "high"
+    tie_rows = json.loads(model_cache.read_text())
+    tie_rows["data"].append({
+        "id": "vendor/tie", "tool_call": True, "reasoning": True,
+        "reasoning_levels": ["high", "max"],
+    })
+    tie_rows["data"].append({
+        "id": "vendor/only-xhigh", "tool_call": True, "reasoning": True,
+        "reasoning_levels": ["xhigh"],
+    })
+    model_cache.write_text(json.dumps(tie_rows))
+    tied = json.loads(render(
+        "home/.chezmoitemplates/llm/codex-model-catalog", nearest_llm, home,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    tied_by_slug = {m["slug"]: m for m in tied["models"]}
+    assert tied_by_slug["vendor/tie"]["default_reasoning_level"] == "max"
+    assert tied_by_slug["vendor/only-xhigh"]["default_reasoning_level"] == "xhigh"
+    unset = copy.deepcopy(nearest_llm)
+    del unset["tools"]["codex"]["reasoning_effort"]
+    unset_catalog = json.loads(render(
+        "home/.chezmoitemplates/llm/codex-model-catalog", unset, home,
+        tools={"magpie": {"when": {"enabled": True}}},
+    ))
+    unset_by_slug = {m["slug"]: m for m in unset_catalog["models"]}
+    assert unset_by_slug["grok/grok-fixture@500k"]["default_reasoning_level"] == "medium"
+    assert unset_by_slug["vendor/only-xhigh"]["default_reasoning_level"] == "xhigh"
     assert by_slug["vendor/bare"]["supported_reasoning_levels"] == []
     assert by_slug["grok/grok-fixture@500k"]["auto_compact_token_limit"] == 400000
     assert by_slug["grok-fixture"]["auto_compact_token_limit"] == 204800
