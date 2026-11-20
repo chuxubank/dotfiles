@@ -168,7 +168,7 @@ for host in ("iv", "personal", "ci"):
       {{- $_ := set $iv $alias (pick (index $cfg.providers $alias) "type" "auth_field") -}}
     {{- end -}}
   {{- end -}}
-  {{- $_ := set $result $tool (dict "providers" $iv "patterns" (default (list) (index $cfg "enabled_models"))) -}}
+  {{- $_ := set $result $tool (dict "providers" $iv "patterns" (default (list) (index $cfg "enabled_models")) "model_provider" (default "" (index $cfg "model_provider"))) -}}
 {{- end -}}
 {{- $result | toJson -}}
 '''.replace("HOST", json.dumps(host))
@@ -176,6 +176,8 @@ for host in ("iv", "personal", "ci"):
     assert result.returncode == 0, result.stderr
     for tool, cfg in json.loads(result.stdout).items():
         aliases = set(cfg["providers"])
+        if tool == "pen" and host != "ci":
+            assert cfg["model_provider"] == ("iv-codex" if host == "iv" else "magpie"), (host, cfg)
         if host != "iv":
             assert not aliases, (host, tool, cfg)
             assert not any(p.startswith(("iv/", "iv-codex/", "iv-cc/", "iv-anthropic/")) for p in cfg["patterns"])
@@ -189,6 +191,11 @@ for host in ("iv", "personal", "ci"):
         for alias, provider in cfg["providers"].items():
             field = {"iv": "default-auth-token", "iv-anthropic": "default-auth-token", "iv-codex": "codex-auth-token", "iv-cc": "cc-auth-token"}[alias]
             assert provider["auth_field"] == field, (tool, alias, provider)
+        if tool == "pen":
+            assert cfg["providers"]["iv"]["type"] == "openai-completions"
+            assert cfg["providers"]["iv-codex"]["type"] == "openai-completions"
+            assert cfg["providers"]["iv-cc"]["type"] == "anthropic-messages"
+            assert cfg["providers"]["iv-anthropic"]["type"] == "anthropic-messages"
         if tool in ("pi", "omp"):
             assert all(alias + "/**" in cfg["patterns"] for alias in expected), (tool, cfg)
 

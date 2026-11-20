@@ -148,6 +148,43 @@ with tempfile.TemporaryDirectory() as tmp:
         assert model["contextWindow"] == 300000 and model["maxTokens"] == 32000, model
         assert model["reasoning"] is False and "thinkingLevelMap" not in model and "thinking" not in model
 
+    # Pen is its own agent and uses Pi's per-model projection: discovered
+    # protocol, base URL when it differs, and thinkingLevelMap.
+    pen_llm = copy.deepcopy(discovered)
+    pen_llm["tools"]["pen"] = {
+        "supported_provider_types": [
+            "openai-completions", "openai-responses", "anthropic-messages",
+        ],
+    }
+    pen = json.loads(render("home/dot_pencil/models.json.tmpl", pen_llm, home))
+    pi_models = json.loads(render("home/dot_pi/private_agent/models.json.tmpl", discovered, home))
+    assert set(pen["providers"]) == {"magpie"}
+    pen_magpie = pen["providers"]["magpie"]
+    pi_magpie = pi_models["providers"]["magpie"]
+    assert pen_magpie["api"] == pi_magpie["api"] == "openai-completions"
+    assert pen_magpie["baseUrl"] == pi_magpie["baseUrl"]
+    assert pen_magpie["apiKey"] == pi_magpie["apiKey"]
+    pen_models = {m["id"]: m for m in pen_magpie["models"]}
+    pi_by_id = {m["id"]: m for m in pi_magpie["models"]}
+    assert set(pen_models) == set(pi_by_id)
+    for model_id, model in pen_models.items():
+        pi_model = pi_by_id[model_id]
+        assert model["api"] == pi_model["api"], (model_id, model["api"])
+        assert model.get("baseUrl") == pi_model.get("baseUrl"), model_id
+        assert "thinking" not in model
+    wide = pen_models["auto/model@wide"]
+    assert wide["api"] == "openai-responses" and "baseUrl" not in wide
+    assert wide["thinkingLevelMap"]["xhigh"] == "xhigh", wide
+    assert wide["thinkingLevelMap"]["medium"] is None, wide
+    levels = pen_models["vendor/supported-levels"]
+    assert levels["api"] == "anthropic-messages"
+    assert levels["baseUrl"] == "https://offline.invalid"
+    assert pen_models["vendor/bare"]["api"] == "openai-completions"
+    assert render(
+        "home/dot_pencil/models.json.tmpl", discovered, home,
+        tools={"pen": {"when": {"enabled": False}}},
+    ) == ""
+
     # Compaction follows the fixture rules and model aliases, not a pinned id.
     # Pi drops the percent table and matching reserves. OMP replaces the
     # threshold table with one selector per alias.

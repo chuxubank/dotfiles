@@ -113,6 +113,17 @@ repo owns client rendering; Magpie serves requests behind the configured endpoin
   (`pass-field` with the alias's auth path). `COPILOT_MODEL` and `--model`
   are the upstream id. The key is not written into the script. Directory
   rules use the same qualified reference as the other clients.
+- **Pen** is its own agent in `llm/pen.yaml`. `~/.pencil/models.json` is
+  that tool's provider map, read by the pi runtime bundled in the desktop
+  app. The custom-provider form accepts `openai-completions`,
+  `openai-responses`, and `anthropic-messages`. Each model keeps the
+  discovered protocol, with its own base URL when that protocol is not the
+  provider's. The file uses pi's model fields (`thinkingLevelMap`,
+  `cost.tiers`) because that runtime rejects the OMP thinking field.
+  `apiKey` stays a `pass-field` command. Saving a custom provider rewrites
+  the file; the next apply restores the generated map. The app has no
+  managed default-model field, so the candidate list is resolved by
+  `llm/tool-config` and is not written into this file.
 - **Grok Build** enumerates each compatible provider into local
   `model.<alias/upstream-id>` rows. `model_providers.<alias>` owns the endpoint
   and backend; named `auth_provider.<alias>` helpers call `pass-field` without

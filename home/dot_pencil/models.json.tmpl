@@ -1,0 +1,10 @@
+{{- if includeTemplate "tool/enabled" (merge (dict "tool" "pen") .) | fromJson -}}
+{{- /* Pen.app loads this through its bundled pi ModelRuntime
+       (~/.pencil/models.json). The map is llm.tools.pen, not pi's file.
+       Each model keeps its discovered api. apiKey stays a pass-field
+       !command. Pen's schema rejects keys other than providers, and saving
+       a custom provider rewrites this file — the next apply puts the
+       generated map back. */ -}}
+{{- $providers := includeTemplate "llm/custom-providers" (merge (dict "tool" "pen") .) | fromJson -}}
+{{ dict "providers" $providers | toPrettyJson }}
+{{- end -}}

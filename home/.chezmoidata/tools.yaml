@@ -508,10 +508,12 @@ tools:
 
   # Desktop cask (homebrew/cask, macOS 13+, auto_updates). The CLI and its
   # ~/.pencil session live under pen-cli so non-macOS hosts keep the login.
-  # Pen.app reinstalls the integrations listed in its config on every launch
-  # and deletes a pencil key from any client it knows when that client is
-  # absent from the list. The list is Claude, Codex, and OpenCode, the same
-  # clients mcp.yaml renders, so the replacement entry still reaches the app.
+  # ~/.pencil/models.json is the exception: the desktop agent reads the
+  # llm.tools.pen provider map, so this tool owns it. Pen.app reinstalls
+  # the integrations listed in its config on every launch and deletes a
+  # pencil key from any client it knows when that client is absent from
+  # the list. The list is Claude, Codex, and OpenCode, the same clients
+  # mcp.yaml renders, so the replacement entry still reaches the app.
   pen:
     when:
       enabled:
@@ -521,6 +523,7 @@ tools:
       disabled:
         host_env: [ci]
     remove:
+      - ".pencil/models.json"
       - "Library/Application Support/Pen/config.json"
     purge:
       - "Library/Application Support/Pen/**"
