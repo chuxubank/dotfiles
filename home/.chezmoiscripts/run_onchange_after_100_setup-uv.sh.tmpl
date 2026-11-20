@@ -19,6 +19,17 @@ if ! command -v uv >/dev/null; then
 {{- end }}
 fi
 
+{{- if and (eq .chezmoi.os "windows") (eq .host_env "ci") }}
+# MSYS2 Python is mingw, so PyPI win_amd64 wheels do not match and uv builds
+# sdists. google-re2's sdist (pulled in by kimi-cli) needs bazel, which this
+# job does not have, so install a managed CPython that still has the wheel.
+export UV_MANAGED_PYTHON=1
+if ! uv python install 3.14; then
+  print -u2 -- "Could not install a managed Python for uv tools"
+  exit 1
+fi
+{{- end }}
+
 {{ includeTemplate "script/reconcile" }}
 
 {{- $tools := includeTemplate "package/items" (dict "ctx" . "path" (list "python" "tools")) | fromJson }}
