@@ -1,7 +1,5 @@
 local wezterm = require("wezterm")
 
--- Helper function to get the system's appearance (Dark or Light).
--- It defaults to "Dark" if the GUI is not available.
 function get_appearance()
   if wezterm.gui then
     return wezterm.gui.get_appearance()
@@ -9,12 +7,10 @@ function get_appearance()
   return "Dark"
 end
 
--- Define lists of color schemes for dark and light modes.
--- Make sure both lists have the same number of schemes.
+-- Both lists must stay the same length; the window index is shared.
 local dark_schemes = { "Gruvbox Dark (Gogh)", "Everforest Dark (Gogh)" }
 local light_schemes = { "Gruvbox (Gogh)", "EverforestLight (Gogh)" }
 
--- Function to select a scheme from the correct list based on appearance and index.
 function scheme_for_appearance(appearance, index)
   if appearance:find("Dark") then
     return dark_schemes[index]

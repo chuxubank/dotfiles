@@ -11,7 +11,6 @@ set -eu
 {{ $emacsDir := joinPath .chezmoi.homeDir .path.personal.emacs -}}
 {{ $orgDir := joinPath $emacsDir "elpa" "org-mode" -}}
 
-# Get current Emacs and Org-mode short commit hashes
 EMACS_VER="{{ output "git" "-C" $emacsDir "rev-parse" "--short" "HEAD" | trim }}"
 {{ if stat (joinPath $orgDir ".git") -}}
 ORG_VER="{{ output "git" "-C" $orgDir "rev-parse" "--short" "HEAD" | trim }}"
@@ -19,13 +18,11 @@ ORG_VER="{{ output "git" "-C" $orgDir "rev-parse" "--short" "HEAD" | trim }}"
 ORG_VER=""
 {{ end -}}
 
-# Determine cache directory following XDG spec
 CACHE_HOME="${XDG_CACHE_HOME:-{{ joinPath .chezmoi.homeDir ".cache" }}}"
 CACHE_FILE="$CACHE_HOME/org-mode-last-hash"
 
 mkdir -p "$CACHE_HOME"
 
-# Check Org-mode version change and rebuild autoloads if needed
 if [ -f "$CACHE_FILE" ]; then
     LAST_ORG_VER="$(cat "$CACHE_FILE")"
 else

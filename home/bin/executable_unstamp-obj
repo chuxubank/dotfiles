@@ -1,32 +1,21 @@
 #!/bin/bash
 
-# Get input parameters
 filename="$1"
 object_id="$2"
 
-# Check if both parameters are provided
 if [[ -z "$filename" || -z "$object_id" ]]; then
     echo "Error: Both filename and object ID must be provided as parameters."
     exit 1
 fi
 
-# Get the current working directory
 current_dir=$(pwd)
-
-# Construct the full file path
 file=$(realpath "$current_dir/$filename")
 
-# Check if the file exists
 if [[ ! -f "$file" ]]; then
     echo "Error: File '$file' does not exist."
     exit 1
 fi
 
-# Run mutool with the unstamp.js script
 mutool run "$HOME/bin/mutool/script/unstamp.js" -i "$file" -o "$file" -r "$object_id"
-
-# Clean the file
 mutool clean -ggggcsz "$file" "$file"
-
-# Validate the PDF file
 pdfcpu validate -m strict "$file"

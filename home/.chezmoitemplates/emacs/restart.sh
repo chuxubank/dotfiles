@@ -26,7 +26,6 @@ done
 pkill -KILL -f 'emacs --(bg-|fg-)?daemon' >/dev/null 2>&1 || true
 unset _i
 
-# Start Emacs depending on OS
 {{ if eq .chezmoi.os "android" -}}
 termux-x11 :1 -xstartup "\emacs" &
 {{ else -}}

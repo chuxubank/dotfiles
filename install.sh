@@ -1,7 +1,4 @@
 #!/bin/sh
-
-# -e: exit on error
-# -u: exit on unset variables
 set -eu
 
 script_path=$0

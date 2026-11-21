@@ -1,15 +1,6 @@
 {{- $cfg := includeTemplate "llm/tool-config" (merge (dict "tool" "aider") .) | fromJson -}}
-#############
-# Main model:
-
-## Specify the model to use for the main chat
 model: {{ $cfg.model }}
 
-
-########################
-# API Keys and settings:
-
-## Set an API key for a provider (eg: --api-key provider=<key> sets PROVIDER_API_KEY=<key>)
 api-key:
 {{- range $provName, $ep := $cfg.providers }}
   {{- if $ep.auth_key }}
@@ -17,29 +8,7 @@ api-key:
   {{- end }}
 {{- end }}
 
-
-################
-# History Files:
-
-## Restore the previous chat history messages (default: False)
 restore-chat-history: true
-
-## Log the conversation with the LLM to this file (for example, .aider.llm.history)
-# llm-history-file: .aider.llm.history
-
-
-##################
-# Output settings:
-
-## Set the markdown code theme (default: default, other options include monokai, solarized-dark, solarized-light, or a Pygments builtin style, see https://pygments.org/styles for available themes)
 code-theme: {{ ternary "gruvbox-dark" "gruvbox-light" .isDarkMode }}
-
-
-############
-# Upgrading:
-
-## Check for new aider versions on launch
 check-update: false
-
-## Show release notes on first run of new version (default: None, ask user)
 show-release-notes: false

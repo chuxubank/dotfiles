@@ -3,9 +3,6 @@
 
 echo "󰯁 Setup macOS for build version: {{ output "sw_vers" "--buildVersion" }}"
 
-# make sure spotlight index on to let mas work
-# sudo mdutil -Eai on
-
 # Queries follow the default-route service. Wi-Fi alone leaves every other
 # service on DHCP resolvers.
 if ! services_text=$(networksetup -listallnetworkservices); then

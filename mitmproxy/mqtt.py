@@ -6,7 +6,6 @@ import struct
 
 
 class MQTTControlPacket:
-    # Packet types
     (
         CONNECT,
         CONNACK,
@@ -57,13 +56,11 @@ class MQTTControlPacket:
 
     def __init__(self, packet):
         self._packet = packet
-        # Fixed header
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718020
         self.packet_type = self._parse_packet_type()
         self.packet_type_human = self.Names[self.packet_type]
         self.dup, self.qos, self.retain = self._parse_flags()
         self.remaining_length = self._parse_remaining_length()
-        # Variable header & Payload
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718024
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718026
         if self.packet_type == self.CONNECT:
@@ -263,15 +260,6 @@ def tcp_message(flow: tcp.TCPFlow):
     log_message = mqtt_packet.pprint()
     ctx.log.info(log_message)
 
-    # Check if the packet is a SUBSCRIBE message
     if mqtt_packet.packet_type == mqtt_packet.SUBSCRIBE:
         topic = mqtt_packet.payload[0].topic
         print(f"Subscribed to topic '{topic}'.")
-
-    # This way we can save topics
-    # if mqtt_packet.packet_type == mqtt_packet.PUBLISH:
-    #     with open("topics.txt", "a") as f:
-    #         f.write(f"{mqtt_packet.topic_name}\n")
-    # elif mqtt_packet.packet_type == mqtt_packet.SUBSCRIBE:
-    #     with open("topics.txt", "a") as f:
-    #         f.write(f"{mqtt_packet.topic_filters}\n")

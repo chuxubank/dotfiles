@@ -15,7 +15,6 @@ source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
 {{- if $brewBin }}
 
-# Set PATH, MANPATH, etc., for Homebrew.
 eval "$({{ $brewBin }} shellenv)"
 export HOMEBREW_NO_UPGRADE_AUTO_UPDATES_CASKS=1
 {{- if has .host_env (list "personal" "iv") }}
@@ -27,7 +26,6 @@ export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"
 
 export LIBRARY_PATH=$LIBRARY_PATH:{{ joinPath .path.usr "lib" }}
 
-# ssh
 # Homebrew links formulae under $HOMEBREW_PREFIX/opt. Do not call
 # `brew --prefix` here; this file runs for every login shell.
 export SSH_ASKPASS="$HOMEBREW_PREFIX/opt/ssh-askpass/bin/ssh-askpass"

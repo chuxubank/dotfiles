@@ -6,14 +6,12 @@ from mitmproxy.utils import strutils
 
 
 class MQTTConfig:
-    # MQTT subscribe topics to payload mappings
     TOPIC_PAYLOAD_MAP = {
         "home/sensors/temperature": {"temperature": 22.5, "unit": "C"},
         "home/sensors/humidity": {"humidity": 45, "unit": "%"},
         "home/devices/lamp": {"status": "on", "brightness": 75},
     }
 
-    # Delay for responses
     DELAY_SECONDS = 1
 
 
@@ -22,11 +20,9 @@ class MQTTResponseHandler:
         self.topic_payload_map = MQTTConfig.TOPIC_PAYLOAD_MAP
 
     def handle_publish(self, topic: str) -> bytes:
-        """Return a payload based on the topic."""
         ctx.log.info(f"Handling PUBLISH for topic: {topic}")
         time.sleep(MQTTConfig.DELAY_SECONDS)
 
-        # Generate response payload based on topic
         payload = self.topic_payload_map.get(topic, {"error": "Topic not supported"})
         ctx.log.debug(f"Response payload for topic '{topic}': {payload}")
 
@@ -37,40 +33,32 @@ class MQTTResponseHandler:
         self.simulate_server_messages(topic)
 
     def simulate_server_messages(self, topic):
-        # Simulate sending messages to the client for the subscribed topic
-        for i in range(5):  # Send 5 simulated messages
+        for i in range(5):
             message = f"Simulated message {i + 1} for topic '{topic}'"
             self.send_message_to_client(topic, message)
 
     def send_message_to_client(self, topic, message):
-        # Logic to send the message to the client
-        # This would involve creating a TCPFlow or similar to send the message
-        flow = tcp.TCPFlow()  # Create a TCPFlow instance
-        flow.request.content = message.encode('utf-8')  # Set the message content
-        flow.request.path = topic  # Set the topic as the path
-        flow.response = flow.request  # Simulate response
-        ctx.master.add_flow(flow)  # Add flow to the mitmproxy
+        flow = tcp.TCPFlow()
+        flow.request.content = message.encode('utf-8')
+        flow.request.path = topic
+        flow.response = flow.request
+        ctx.master.add_flow(flow)
 
     def publish_message(client, topic, message):
-        # Publish a message to the specified MQTT topic
         client.publish(topic, message)
         ctx.log.debug(f"Published message to topic '{topic}': {message}")
 
 
-# Global MQTT response handler
 mqtt_handler = MQTTResponseHandler()
 
 
 def tcp_message(flow: tcp.TCPFlow):
-    """Handle MQTT TCP messages and log all topics and payloads."""
     try:
         message = flow.messages[-1]
 
-        # Parse MQTT packet
         mqtt_packet = MQTTControlPacket(message.content)
         ctx.log.info(f"Processing MQTT message: {mqtt_packet.pprint()}")
 
-        # Log topics and payloads based on packet type
         if mqtt_packet.packet_type == MQTTControlPacket.SUBSCRIBE:
             for topic, details in mqtt_packet.topic_filters.items():
                 qos = details.get("qos", 0)
@@ -86,18 +74,15 @@ def tcp_message(flow: tcp.TCPFlow):
             for topic in mqtt_packet.topic_filters.keys():
                 ctx.log.info(f"UNSUBSCRIBE topic: {topic}")
 
-        # Log the payload if present
         if hasattr(mqtt_packet, "payload"):
             payload = mqtt_packet.payload
-            if isinstance(payload, bytes):  # Raw bytes payload
-                # Convert bytes to a string (UTF-8 or fallback to replace errors)
+            if isinstance(payload, bytes):
                 payload_str = payload.decode("utf-8", errors="replace")
                 ctx.log.info(f"Payload (bytes): {payload_str}")
-            elif isinstance(payload, dict):  # Structured payload
-                # Convert dict to JSON string for logging
+            elif isinstance(payload, dict):
                 payload_str = json.dumps(payload, indent=2)
                 ctx.log.info(f"Payload (dict): {payload_str}")
-            else:  # Catch-all for other types (e.g., int, float, etc.)
+            else:
                 ctx.log.info(f"Payload (other): {payload}")
 
     except Exception as e:
@@ -105,7 +90,6 @@ def tcp_message(flow: tcp.TCPFlow):
 
 
 class MQTTControlPacket:
-    # Packet types
     (
         CONNECT,
         CONNACK,
@@ -156,13 +140,11 @@ class MQTTControlPacket:
 
     def __init__(self, packet):
         self._packet = packet
-        # Fixed header
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718020
         self.packet_type = self._parse_packet_type()
         self.packet_type_human = self.Names[self.packet_type]
         self.dup, self.qos, self.retain = self._parse_flags()
         self.remaining_length = self._parse_remaining_length()
-        # Variable header & Payload
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718024
         # http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html#_Toc398718026
         if self.packet_type == self.CONNECT:
@@ -355,8 +337,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
         self.packet_identifier = self._packet[offset : offset + 2]
 
     def serialize(self):
-        """Reconstruct the MQTT packet from its components."""
-        # Serialize the fixed header
         flags = 0
         if self.packet_type == self.PUBLISH:
             flags = (self.dup << 3) | (self.qos << 1) | self.retain
@@ -364,7 +344,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
             [(self.packet_type << 4) | flags]
         ) + self._encode_remaining_length(self.remaining_length)
 
-        # Serialize the variable header and payload
         if self.packet_type == self.PUBLISH:
             variable_header = struct.pack("!H", len(self.topic_name)) + self.topic_name
             if self.qos in [0x01, 0x02]:
@@ -376,7 +355,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
         return self._packet
 
     def _encode_remaining_length(self, length):
-        """Encode the remaining length field as per MQTT spec."""
         encoded = bytearray()
         while True:
             byte = length % 128
@@ -390,7 +368,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
 
     @staticmethod
     def create_publish_packet(topic: str, payload: bytes, qos: int = 0) -> bytes:
-        """Create a PUBLISH packet for MQTT."""
         fixed_header = (MQTTControlPacket.PUBLISH << 4) | (qos << 1)
         topic_length = len(topic)
         topic_bytes = struct.pack("!H", topic_length) + topic.encode("utf-8")
@@ -403,7 +380,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
         remaining_length = len(topic_bytes) + len(packet_identifier) + len(payload)
         remaining_length_bytes = b""
 
-        # Encode remaining length
         while remaining_length > 0:
             byte = remaining_length % 128
             remaining_length //= 128
@@ -411,7 +387,6 @@ Password: {strutils.bytes_to_escaped_str(self.payload.get('Password', b'None'))}
                 byte |= 128
             remaining_length_bytes += struct.pack("B", byte)
 
-        # Combine all parts
         packet = (
             struct.pack("B", fixed_header)
             + remaining_length_bytes
