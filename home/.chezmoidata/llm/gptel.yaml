@@ -45,4 +45,5 @@ llm:
       # magit and forge. The OpenRouter id itself contains a slash.
       small_model:
         - iv/deepseek-v4-flash
+        - magpie/cursor/composer-2.5
         - openrouter/openrouter/free
