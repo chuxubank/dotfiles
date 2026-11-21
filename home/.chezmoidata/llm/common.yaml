@@ -132,7 +132,8 @@ llm:
 
     # OMP's built-in Cursor subscription provider. It has no endpoint or API
     # key here: omp owns its OAuth flow and bundled model catalog. Pi reaches
-    # it through pi-cursor-sdk. Both tools keep the alias on every host.
+    # it through pi-cursor-sdk, and that alias follows the plugin. OMP keeps
+    # the alias on every host.
     cursor:
       name: Cursor
       # Picker globs, appended as `<alias>/<glob>` to the enabled_models of

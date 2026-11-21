@@ -79,6 +79,40 @@ assert render(data)["providers"]["shared"]["headers"]["winner"] == "second"
 data["tools"]["fixture"]["providers"] = {"shared": {"provider": "other"}}
 assert render(data)["providers"]["shared"]["base_url"] == "https://other.example"
 
+# A ref plugin follows plugins/resolve for this tool. Off, the alias is
+# absent, so its picker globs and model candidates drop. An unknown name fails.
+def render_plugins(llm, providers, error=None):
+    template = (
+        context_overlay({"llm": llm, "plugins": {"fixture": {"providers": providers}}}, clear=("llm",))
+        + '{{- includeTemplate "llm/tool-config" (mergeOverwrite $ctx (dict "tool" "fixture")) -}}'
+    )
+    result = capture(root, ["execute-template"], stdin=template)
+    if error:
+        assert result.returncode != 0 and error in result.stderr, result.stderr
+        return None
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout)
+
+
+plugin = {"name": "pi-cursor-sdk", "source": "npm:pi-cursor-sdk"}
+plugin_data = copy.deepcopy(fixture)
+plugin_data["default_providers"] = ["other"]
+plugin_data["tools"]["fixture"] = {
+    "providers": {"cursor": {"provider": "gateway", "plugin": "pi-cursor-sdk"}},
+    "enabled_models": ["cursor/kept", "other/*"],
+    "model": ["cursor/model", "other/model"],
+}
+off = render_plugins(plugin_data, [{**plugin, "when": {"enabled": False}}])
+assert "cursor" not in off["providers"]
+assert off["enabled_models"] == ["other/*"]
+assert off["model"] == "other/model"
+on = render_plugins(plugin_data, [{**plugin, "when": {"enabled": True}}])
+assert "cursor" in on["providers"]
+assert on["enabled_models"] == ["cursor/kept", "other/*", "cursor/*"]
+assert on["model"] == "cursor/model"
+plugin_data["tools"]["fixture"]["providers"]["cursor"]["plugin"] = "not-a-plugin"
+render_plugins(plugin_data, [{**plugin, "when": {"enabled": True}}], error='unknown plugin "not-a-plugin"')
+
 # Exclusions win over defaults, sets and explicit tool refs. They also remove
 # picker patterns and cause model/role candidate lists to take the fallback.
 data["tools"]["fixture"].update({

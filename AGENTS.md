@@ -175,7 +175,9 @@ there replaced Cursor's windows with the vendor API's. Pi's `pi-cursor-sdk`
 prices everything at $0, so `llm.catalogs.cursor`
 (`home/.chezmoidata/llm/cursor.yaml`) carries the Cursor rates Pi projects
 onto its ids; Fast rates come only from `fast`. Cursor picker globs live on
-`llm.providers.cursor.enabled_models`. The rationale is in
+`llm.providers.cursor.enabled_models`. Pi registers that alias only while
+the plugin is enabled, so a disabled plugin writes neither the projected
+ids nor those globs. The rationale is in
 `docs/adr/0009-omp-models-dev-overlays.md`.
 
 ## Cursor Cloud specific instructions

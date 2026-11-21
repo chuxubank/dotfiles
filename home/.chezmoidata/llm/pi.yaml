@@ -59,8 +59,11 @@ llm:
         opencode:
           provider: opencode
           models: false
-        # Keep the extension's catalog and auth; overlay prices separately.
+        # The extension owns the catalog and auth. Prices are overlaid
+        # separately. The alias follows that plugin: off, neither its ids
+        # nor its picker globs are written.
         cursor:
           provider: cursor
           models: false
           catalog: cursor
+          plugin: pi-cursor-sdk

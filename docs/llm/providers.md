@@ -25,7 +25,9 @@ Use `exclude_providers` for that.
 
 The merged references then pass through:
 
-- Provider host conditions and the `owner` tool switch.
+- Provider host conditions, the `owner` tool switch, and a reference
+  `plugin`. The alias is absent unless that plugin is enabled. An unknown
+  plugin name fails rendering.
 - The client's `supported_provider_types`. A provider has no `type`: the
   primary protocol is its first `api_types` entry, otherwise
   `openai-completions`. Later entries supply a compatible protocol when the

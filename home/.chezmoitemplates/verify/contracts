@@ -550,14 +550,34 @@
 {{- end -}}
 
 {{- /* OMP prices Cursor from its bundled catalog: no overlay is emitted.
-      Pi's projection uses llm.catalogs.cursor. Stem list prices come from
-      models.dev and are absent on CI, so only cards in llm/cursor.yaml are
-      checked. The cursor provider is off on iv; check both off-iv. */ -}}
+      Pi's projection uses llm.catalogs.cursor, and only while pi-cursor-sdk
+      is enabled. Stem list prices come from models.dev and are absent on
+      CI, so only cards in llm/cursor.yaml are checked. The cursor provider
+      is off on iv; check both off-iv. */ -}}
 {{- $ompProviders := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "omp" "host_env" "personal")) | fromJson -}}
 {{- if hasKey $ompProviders "cursor" -}}
   {{- fail "cursor: omp overlay emitted" -}}
 {{- end -}}
-{{- $piCursor := index (includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson) "cursor" "modelOverrides" -}}
+{{- $piOff := includeTemplate "llm/custom-providers" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson -}}
+{{- if hasKey $piOff "cursor" -}}
+  {{- fail "cursor: pi models written while pi-cursor-sdk is off" -}}
+{{- end -}}
+{{- $piCfgOff := includeTemplate "llm/tool-config" (mergeOverwrite (deepCopy .) (dict "tool" "pi" "host_env" "personal")) | fromJson -}}
+{{- if or (hasKey $piCfgOff.providers "cursor") (hasPrefix "cursor/" $piCfgOff.model) -}}
+  {{- fail "cursor: pi alias while pi-cursor-sdk is off" -}}
+{{- end -}}
+{{- range $pat := $piCfgOff.enabled_models -}}
+  {{- if hasPrefix "cursor/" $pat -}}
+    {{- fail (printf "cursor: pi picker glob %s while pi-cursor-sdk is off" $pat) -}}
+  {{- end -}}
+{{- end -}}
+{{- $piOn := mergeOverwrite (deepCopy .) (dict
+      "host_env" "personal"
+      "plugins" (dict "pi" (dict "providers" (list (dict
+        "name" "pi-cursor-sdk"
+        "source" "npm:pi-cursor-sdk"
+        "when" (dict "enabled" true)))))) -}}
+{{- $piCursor := index (includeTemplate "llm/custom-providers" (merge (dict "tool" "pi") $piOn) | fromJson) "cursor" "modelOverrides" -}}
 {{- if or (hasKey $piCursor "grok-4.7-high-fast") (ne (float64 (index $piCursor "grok-4.7@500k:fast").cost.input) 4.0) (ne (float64 (index $piCursor "composer-2.5").cost.input) 3.0) (ne (float64 (index $piCursor "composer-2.5:slow").cost.input) 0.5) (ne (float64 (index $piCursor "claude-opus-5-5@1m:fast").cost.input) 8.0) (ne (float64 (index $piCursor "claude-opus-5-5@1m").cost.input) 4.0) (ne (float64 (index $piCursor "claude-opus-5@1m:fast").cost.input) 10.0) -}}
   {{- fail "cursor rates: pi projection" -}}
 {{- end -}}

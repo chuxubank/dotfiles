@@ -48,6 +48,8 @@
                                                     data_set and
                                                     data_set_providers are
                                                     defaults for the ref
+                      plugin: pi-cursor-sdk       — alias exists only while
+                                                    that plugin is enabled
        Shared defaults: llm.default_providers uses the same short/map forms.
        Merge order: default providers < default provider sets < tool
        provider_sets (in order) < tool providers.
@@ -172,6 +174,24 @@
          table drop its base URL. */ -}}
   {{- if and $enabled (hasKey $prov "owner") -}}
     {{- $enabled = includeTemplate "tool/enabled" (merge (dict "tool" (index $prov "owner") "require" true) $ctx) | fromJson -}}
+  {{- end -}}
+  {{- /* A ref's plugin follows that plugin's when. An unknown name fails.
+         Off, the alias is absent, so its catalog and picker globs are not
+         written. */ -}}
+  {{- if and $enabled (hasKey $ref "plugin") -}}
+    {{- $pluginName := index $ref "plugin" -}}
+    {{- $pluginOn := false -}}
+    {{- $pluginSeen := false -}}
+    {{- range $p := includeTemplate "plugins/resolve" (merge (dict "tool" $tool) $ctx) | fromJson -}}
+      {{- if eq $p.name $pluginName -}}
+        {{- $pluginSeen = true -}}
+        {{- if $p.enabled -}}{{- $pluginOn = true -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not $pluginSeen -}}
+      {{- fail (printf "llm %s: unknown plugin %q for alias %q" $tool $pluginName $alias) -}}
+    {{- end -}}
+    {{- $enabled = $pluginOn -}}
   {{- end -}}
   {{- if and $enabled $compatible -}}
 
