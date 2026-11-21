@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
 
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path, PurePath
 
+from _testlib import capture
+
 root = Path(sys.argv[1])
-command = ["chezmoi"]
-state = os.environ.get("CHEZMOI_VERIFY_STATE")
-cache = os.environ.get("CHEZMOI_VERIFY_CACHE")
-if state:
-    command.extend(["--persistent-state", state])
-if cache:
-    command.extend(["--cache", cache])
-command.extend(["data", "--source", str(root)])
-data = json.loads(subprocess.check_output(command))
+result = capture(root, ["data"])
+if result.returncode != 0:
+    raise SystemExit(result.stderr or f"chezmoi data failed ({result.returncode})")
+data = json.loads(result.stdout)
 
 
 def fail(scope, message):

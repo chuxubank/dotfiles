@@ -3,17 +3,12 @@
 
 import copy
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path
 
+from _testlib import capture, context_overlay
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, key in (("--persistent-state", "CHEZMOI_VERIFY_STATE"), ("--cache", "CHEZMOI_VERIFY_CACHE")):
-    if os.environ.get(key):
-        command.extend([flag, os.environ[key]])
-command.extend(["execute-template", "--source", str(root)])
 fixture = {
     "models": {},
     "providers": {
@@ -27,13 +22,12 @@ fixture = {
 
 
 def render(llm, tool="fixture", error=None):
-    payload = json.dumps(json.dumps(llm))
     template = (
-        '{{- $ctx := deepCopy . -}}{{- $_ := set $ctx "llm" (' + payload + ' | fromJson) -}}'
-        '{{- includeTemplate "llm/tool-config" (mergeOverwrite $ctx (dict "tool" '
+        context_overlay({"llm": llm}, clear=("llm",))
+        + '{{- includeTemplate "llm/tool-config" (mergeOverwrite $ctx (dict "tool" '
         + json.dumps(tool) + ")) -}}"
     )
-    result = subprocess.run(command, input=template, text=True, capture_output=True)
+    result = capture(root, ["execute-template"], stdin=template)
     if error:
         assert result.returncode != 0 and error in result.stderr, result.stderr
         return None
@@ -172,7 +166,7 @@ for host in ("iv", "personal", "ci"):
 {{- end -}}
 {{- $result | toJson -}}
 '''.replace("HOST", json.dumps(host))
-    result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    result = capture(root, ["execute-template"], stdin=template, env={"CI": "true"})
     assert result.returncode == 0, result.stderr
     for tool, cfg in json.loads(result.stdout).items():
         aliases = set(cfg["providers"])

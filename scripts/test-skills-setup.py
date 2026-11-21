@@ -9,15 +9,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import capture
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, variable in (
-    ("--persistent-state", "CHEZMOI_VERIFY_STATE"),
-    ("--cache", "CHEZMOI_VERIFY_CACHE"),
-):
-    if os.environ.get(variable):
-        command.extend([flag, os.environ[variable]])
-command.extend(["execute-template", "--source", str(root)])
 
 providers = [
     {"name": "direct", "source": "fixture/direct"},
@@ -39,9 +33,10 @@ prefix = (
 
 
 def render(source):
-    return subprocess.run(
-        command, input=prefix + source, text=True, capture_output=True, check=True
-    ).stdout
+    result = capture(root, ["execute-template"], stdin=prefix + source)
+    if result.returncode != 0:
+        raise AssertionError(result.stderr)
+    return result.stdout
 
 
 setup_template = (
@@ -56,15 +51,11 @@ def render_windows():
     powershell = stub_dir / "powershell.exe"
     powershell.write_text("#!/bin/sh\nprintf '%s\n' '2026 W47'\n")
     powershell.chmod(0o755)
-    env = os.environ.copy()
-    env["PATH"] = str(stub_dir) + os.pathsep + env.get("PATH", "")
-    result = subprocess.run(
-        command,
-        input='{{- $_ := set .chezmoi "os" "windows" -}}' + setup_template,
-        text=True,
-        capture_output=True,
-        env=env,
-        check=False,
+    result = capture(
+        root,
+        ["execute-template"],
+        stdin='{{- $_ := set .chezmoi "os" "windows" -}}' + setup_template,
+        env={"PATH": str(stub_dir) + os.pathsep + os.environ.get("PATH", "")},
     )
     shutil.rmtree(stub_dir)
     if result.returncode != 0:

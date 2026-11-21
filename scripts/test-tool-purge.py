@@ -8,7 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from _testlib import render
+from _testlib import context_overlay, render
 
 root = Path(sys.argv[1]).resolve()
 source = (root / "home/.chezmoiscripts/run_before_010_purge-disabled-tool-commands.sh.tmpl").read_text()
@@ -25,19 +25,22 @@ fixture = {
 }
 
 
-def preamble(data):
-    # Clear tools on a copy first: mergeOverwrite keeps sibling tools otherwise.
-    payload = json.dumps(json.dumps(data))
-    return (
-        '{{- $base := deepCopy . -}}'
-        '{{- $_ := set $base "tools" (dict) -}}'
-        '{{- $ctx := mergeOverwrite (deepCopy $base) (' + payload + " | fromJson) -}}"
-    )
-
-
 def render_purge(prefix):
     # The declarations build a merged context; run the script template as that dot.
     return render(root, "{{- with $ctx -}}\n" + source + "{{- end -}}", prefix=prefix)
+
+
+def write_trash(path):
+    path.write_text(
+        f"#!{sys.executable}\n"
+        "import sys\nfrom pathlib import Path\n"
+        "assert sys.argv[1] == '--'\n"
+        "p = Path(sys.argv[2])\n"
+        "dest = Path.home() / 'Trash'\n"
+        "dest.mkdir(exist_ok=True)\n"
+        "p.rename(dest / p.name)\n"
+    )
+    path.chmod(0o755)
 
 
 variants = [("fixture", fixture)]
@@ -55,15 +58,13 @@ paths_only = json.loads(json.dumps(fixture))
 del paths_only["tools"]["fixture"]["purge"][0]["command"]
 paths_only["tools"]["fixture"]["purge"][0]["paths"] = ["Applications/MyGo.app"]
 variants.append(("paths-only", paths_only))
-rendered = {key: render_purge(preamble(data)) for key, data in variants}
+rendered = {key: render_purge(context_overlay(data, clear=("tools",))) for key, data in variants}
 rendered["hermes"] = render_purge(
     '{{- $hermesObj := .tools.hermes | toJson | fromJson -}}'
     '{{- $_ := set $hermesObj "when" (dict "enabled" false) -}}'
     '{{- $hermesData := dict "tools" (dict "hermes" $hermesObj) '
     '"policies" (dict "purge_disabled_tools" true) "chezmoi" (dict "os" "linux") -}}'
-    '{{- $base := deepCopy . -}}'
-    '{{- $_ := set $base "tools" (dict) -}}'
-    '{{- $ctx := mergeOverwrite (deepCopy $base) $hermesData -}}'
+    + context_overlay(expr="$hermesData", clear=("tools",))
 )
 script_text = rendered["fixture"]
 assert rendered["off-policies"].strip() == ""
@@ -181,16 +182,7 @@ with tempfile.TemporaryDirectory() as tmp:
     unrelated.parent.mkdir(parents=True)
     unrelated.write_text("keep unrelated launcher")
     trash = bins / "trash"
-    trash.write_text(
-        f"#!{sys.executable}\n"
-        "import sys\nfrom pathlib import Path\n"
-        "assert sys.argv[1] == '--'\n"
-        "p = Path(sys.argv[2])\n"
-        "dest = Path.home() / 'Trash'\n"
-        "dest.mkdir(exist_ok=True)\n"
-        "p.rename(dest / p.name)\n"
-    )
-    trash.chmod(0o755)
+    write_trash(trash)
     script = home / "hermes-purge.sh"
     script.write_text(rendered["hermes"])
     subprocess.run(["/bin/sh", "-n", str(script)], check=True)
@@ -210,16 +202,7 @@ with tempfile.TemporaryDirectory() as tmp:
     bins = home / "bin"
     bins.mkdir()
     trash = bins / "trash"
-    trash.write_text(
-        f"#!{sys.executable}\n"
-        "import sys\nfrom pathlib import Path\n"
-        "assert sys.argv[1] == '--'\n"
-        "p = Path(sys.argv[2])\n"
-        "dest = Path.home() / 'Trash'\n"
-        "dest.mkdir(exist_ok=True)\n"
-        "p.rename(dest / p.name)\n"
-    )
-    trash.chmod(0o755)
+    write_trash(trash)
     script = home / "paths-only.sh"
     script.write_text(paths_text)
     subprocess.run(["/bin/sh", "-n", str(script)], check=True)

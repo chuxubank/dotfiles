@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Offline native rendering and Goose provider-file synchronization checks."""
+"""Offline native rendering and Goose provider-file synchronization checks.
+
+Each client is its own function. The checks share one home per group because
+later projections read the model cache the earlier check left behind.
+"""
 
 import copy
 import json
@@ -9,12 +13,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import capture, context_overlay
+
 root = Path(sys.argv[1]).resolve()
-command = ["chezmoi"]
-for flag, key in (("--persistent-state", "CHEZMOI_VERIFY_STATE"), ("--cache", "CHEZMOI_VERIFY_CACHE")):
-    if os.environ.get(key):
-        command.extend([flag, os.environ[key]])
-command.extend(["execute-template", "--source", str(root)])
 base = {
     "models": {},
     "default_providers": ["gateway", "second"],
@@ -36,7 +37,6 @@ base = {
     },
 }
 
-
 def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None, error=None):
     source = (root / path).read_text()
     declared = {"goose": {"when": {"enabled": enabled}}}
@@ -54,13 +54,13 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None, er
         "tools": declared,
     }
     # Replace LLM/MCP data outright so no live catalogs or auth are consulted.
-    prefix = (
-        '{{- $ctx := deepCopy . -}}{{- $_ := set $ctx "llm" (dict) -}}'
-        '{{- $_ := set $ctx "mcp" (dict) -}}{{- $_ := set $ctx "tools" (dict) -}}'
-        '{{- $ctx = mergeOverwrite $ctx (' + json.dumps(json.dumps(data)) + ' | fromJson) -}}'
+    template = (
+        context_overlay(data, clear=("llm", "mcp", "tools"))
+        + "{{- $ := $ctx -}}{{- with $ctx -}}"
+        + source
+        + "{{- end -}}"
     )
-    template = prefix + '{{- $ := $ctx -}}{{- with $ctx -}}' + source + '{{- end -}}'
-    result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    result = capture(root, ["execute-template"], stdin=template, env={"CI": "true"})
     if error:
         assert result.returncode != 0 and error in result.stderr, result.stderr or result.stdout
         return result.stderr
@@ -68,22 +68,19 @@ def render(path, llm, home, yaml=False, enabled=True, stdin=None, tools=None, er
     if yaml:
         # Parse as a map, wrapping lists, without requiring PyYAML on CI.
         document = "value:\n" + "\n".join("  " + line for line in result.stdout.splitlines())
-        template = "{{ (" + json.dumps(document) + " | fromYaml).value | toJson }}"
-        result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+        converted = "{{ (" + json.dumps(document) + " | fromYaml).value | toJson }}"
+        result = capture(root, ["execute-template"], stdin=converted, env={"CI": "true"})
         assert result.returncode == 0, result.stderr
     return result.stdout
 
-
 def parse_toml(text):
     template = "{{ (" + json.dumps(text) + " | fromToml) | toJson }}"
-    result = subprocess.run(command, input=template, text=True, capture_output=True, env={**os.environ, "CI": "true"})
+    result = capture(root, ["execute-template"], stdin=template, env={"CI": "true"})
     assert result.returncode == 0, result.stderr
     return json.loads(result.stdout)
 
-
-with tempfile.TemporaryDirectory() as tmp:
-    home = Path(tmp)
-    # Rich discovery must survive the native Pi/OMP render, not just id/name.
+def prepare_discovery(home):
+    # Shared offline models cache. Codex mutates it and restores these rows.
     model_cache = home / ".cache/llm/models/magpie.json"
     model_cache.parent.mkdir(parents=True)
     rows = [{
@@ -108,6 +105,9 @@ with tempfile.TemporaryDirectory() as tmp:
         }},
         "tools": {"pi": {}, "omp": {}},
     }
+    return model_cache, rows, discovered
+
+def check_pi_omp(home, discovered):
     for tool, path, yaml in (
         ("pi", "home/dot_pi/private_agent/models.json.tmpl", False),
         ("omp", "home/dot_omp/private_agent/models.yml.tmpl", True),
@@ -148,6 +148,7 @@ with tempfile.TemporaryDirectory() as tmp:
         assert model["contextWindow"] == 300000 and model["maxTokens"] == 32000, model
         assert model["reasoning"] is False and "thinkingLevelMap" not in model and "thinking" not in model
 
+def check_pen(home, discovered):
     # Pen is its own agent and uses Pi's per-model projection: discovered
     # protocol, base URL when it differs, and thinkingLevelMap.
     pen_llm = copy.deepcopy(discovered)
@@ -185,6 +186,7 @@ with tempfile.TemporaryDirectory() as tmp:
         tools={"pen": {"when": {"enabled": False}}},
     ) == ""
 
+def check_compaction(home, discovered):
     # Compaction follows the fixture rules and model aliases, not a pinned id.
     # Pi drops the percent table and matching reserves. OMP replaces the
     # threshold table with one selector per alias.
@@ -230,7 +232,9 @@ with tempfile.TemporaryDirectory() as tmp:
     assert omp["compaction"]["modelOverrides"]["other/model"] == {"reserveTokens": 12345}
     assert omp["runtimeOnly"] is True
     assert json.loads(render(omp_path, compaction_llm, home, yaml=True, stdin=json.dumps(omp))) == omp
+    return compaction_llm
 
+def check_codex(home, compaction_llm, model_cache, rows):
     # Codex stores Pi's trigger: the window minus the reserve. A percent
     # reserve is the rest of the window. An absolute reserve that consumes
     # the window compacts at the first token. Unmatched and sub-128k
@@ -310,13 +314,14 @@ with tempfile.TemporaryDirectory() as tmp:
     assert by_slug["vendor/bare"]["context_window"] == 32768
     model_cache.write_text(json.dumps({"data": rows}))
 
+def check_name_index(home, model_cache, rows):
     # Name-only consumers retain their existing contract.
     template = '{{ includeTemplate "llm/fetch-models" (dict "type" "openai-completions" "base_url" "https://offline.invalid" "auth_key" "" "cache_file" ' + json.dumps(str(model_cache)) + ') }}'
-    names = subprocess.run(command, input=template, text=True, capture_output=True)
+    names = capture(root, ["execute-template"], stdin=template)
     assert names.returncode == 0, names.stderr
     assert json.loads(names.stdout) == {row["id"]: row.get("display_name", row["id"]) for row in rows}
 
-    llm = copy.deepcopy(base)
+def check_aider(home, llm):
     # Model-scoped routing means two inherited OpenAI endpoints never overwrite
     # a single global base/key. Provider prefixes in the upstream id survive.
     settings_path = "home/private_dot_aider.model.settings.yml.tmpl"
@@ -325,6 +330,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert settings["gateway/vendor/model"]["api_base"] == "https://gateway.example/v1"
     assert settings["second/another/model"]["api_base"] == "https://second.example/v1"
 
+def check_goose(home, llm):
     # Goose retains the explicitly selected native provider, not the last
     # alphabetic provider in its inherited map.
     goose_config = "home/.chezmoitemplates/agent/goose.yaml"
@@ -364,6 +370,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert list(directory.iterdir()) == [user]
     assert user.read_text() == '{"user": true}'
 
+def check_claude(home, llm):
     # CC has no registry. Inheritance must not hijack a native/login model;
     # explicitly qualified models select exactly one compatible endpoint.
     cc_path = "home/dot_claude/modify_settings.json"
@@ -383,6 +390,7 @@ with tempfile.TemporaryDirectory() as tmp:
     cfg = json.loads(render(cc_path, llm, home, stdin=json.dumps(cfg)))
     assert "ANTHROPIC_BASE_URL" not in cfg["env"]
 
+def check_grok(home):
     # Grok's local catalog keeps every alias selectable, independent of
     # the default. Helpers stay named and never replace native session auth.
     grok_llm = {
@@ -575,6 +583,7 @@ command = "old"
     assert "magpie" not in disabled["auth_provider"]
     assert both["model"]["grok-4.7-build-fast"]["context_window"] == 500000
 
+def check_craft(home):
     # Craft takes the protocol path from the provider type. The alias name
     # does not decide whether /v1 is appended.
     craft_llm = {
@@ -604,9 +613,8 @@ command = "old"
     winner = next(item for item in craft["llmConnections"] if item["slug"] == "gateway")
     assert winner["defaultModel"] == "vendor/model", winner
 
-# Cache refresh consumes raw providers, before tool-config negotiates an alias type.
-with tempfile.TemporaryDirectory() as directory:
-    home = Path(directory)
+def check_model_cache(home):
+    # Cache refresh consumes raw providers, before tool-config negotiates an alias type.
     refresh_llm = {
         "providers": {
             "google": {
@@ -694,6 +702,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert all(cache.read_text() == "previous cache\n" for cache in caches)
     assert not list((home / ".cache/llm/models").glob(".models.*"))
 
+def check_gptel(home):
     gptel_llm = {
         "models": {"gpt_primary": "gpt-fixture"},
         "default_providers": ["magpie", "gateway", "anthropic", "dotted", "ollama", "google", "login"],
@@ -780,4 +789,25 @@ with tempfile.TemporaryDirectory() as directory:
     bad["providers"]["gateway"]["headers"] = {"X-Test": "1"}
     render(custom, bad, home, tools=magpie_on, error="request headers")
 
+def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        home = Path(tmp)
+        model_cache, rows, discovered = prepare_discovery(home)
+        check_pi_omp(home, discovered)
+        check_pen(home, discovered)
+        compaction_llm = check_compaction(home, discovered)
+        check_codex(home, compaction_llm, model_cache, rows)
+        check_name_index(home, model_cache, rows)
+        llm = copy.deepcopy(base)
+        check_aider(home, llm)
+        check_goose(home, llm)
+        check_claude(home, llm)
+        check_grok(home)
+        check_craft(home)
+    with tempfile.TemporaryDirectory() as tmp:
+        home = Path(tmp)
+        check_model_cache(home)
+        check_gptel(home)
+
+main()
 print("ok native providers: Aider routing, Goose sync/retry/cleanup, CC deterministic selection, Grok provider pool, Craft endpoints, GPTel declared backends, model cache refresh")

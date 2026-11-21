@@ -13,18 +13,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+from _testlib import capture
+
 root = Path(sys.argv[1]).resolve()
 zsh = shutil.which("zsh")
 assert zsh, "zsh is required"
-command = ["chezmoi"]
-for flag, key in (("--persistent-state", "CHEZMOI_VERIFY_STATE"), ("--cache", "CHEZMOI_VERIFY_CACHE")):
-    if os.environ.get(key):
-        command.extend([flag, os.environ[key]])
-command.extend(["execute-template", "--source", str(root)])
 
 
 def run(template, error=None):
-    result = subprocess.run(command, input=template, text=True, capture_output=True)
+    result = capture(root, ["execute-template"], stdin=template)
     if error:
         assert result.returncode != 0 and error in result.stderr, result.stderr
         return ""
