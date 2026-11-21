@@ -21,11 +21,13 @@ llm:
         - claude-sonnet-5*
         # This id is pinned because the other IV aliases cannot serve it.
         - iv-anthropic/claude-fable-5
-        - qwen3.8*
-        - gemini-3.8*
-        - deepseek-v4.1*
-        - glm-5.3*
-        - kimi/kimi-k3*
+        # Only the default-token alias serves these. Pin iv/ so the glob is
+        # omitted where that alias is off; unprefixed, Pi warns on startup.
+        - iv/qwen3.8*
+        - iv/gemini-3.8*
+        - iv/deepseek-v4.1*
+        - iv/glm-5.3*
+        - iv/kimi/kimi-k3*
         # cursor/* globs come from llm.providers.cursor.
       session_title_model:
         - iv/deepseek-v4-flash
