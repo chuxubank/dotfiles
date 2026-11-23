@@ -8,6 +8,17 @@ usage() {
 
 [ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
 
+# Dock-launched apps keep the system PATH, which does not include Homebrew.
+# pass execs gpg from that same prefix.
+if ! command -v pass >/dev/null 2>&1; then
+  for prefix in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+    if [ -x "$prefix/bin/pass" ]; then
+      PATH="$prefix/bin:$PATH"
+      break
+    fi
+  done
+fi
+
 pass_name=$1
 field=${2-}
 
