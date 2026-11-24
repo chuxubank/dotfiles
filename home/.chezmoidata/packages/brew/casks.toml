@@ -90,7 +90,7 @@ casks = [
   { name = "thaw", when.enabled = false },
   { name = "termio-sh/tap/termio", owner = "termio" },
   "uuremote",
-  "wezterm",
+  "wezterm@nightly",
   "wireshark-app",
   "zed",
   "zotero",
