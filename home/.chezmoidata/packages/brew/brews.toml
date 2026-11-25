@@ -122,7 +122,8 @@ brews = [
   "stylua",
   "swagger-codegen",
   "switchaudio-osx",
-  "tailscale",
+  # sing-box joins the tailnet on hosts that install it.
+  { name = "tailscale", when.enabled = false },
   "telnet",
   "tesseract",
   "tesseract-lang",

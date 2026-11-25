@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+# sing-box owns the tailnet. This name is its local API client.
+exec sing-box api --url http://127.0.0.1:9090 tailscale "$@"
