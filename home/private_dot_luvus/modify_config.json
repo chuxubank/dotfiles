@@ -6,8 +6,12 @@
        A modify-template so that state survives apply and only the choices
        this repo owns are pinned.
 
-       Luvus has no theme auto_switch (unlike Herdr). Pin `terminal` so
-       chrome follows the host terminal palette instead of a packed theme.
+       `theme_follow` switches packed themes with the host appearance, the
+       Luvus form of Herdr's auto_switch. `theme` stays `terminal`: that is
+       the manual theme, and the fallback when follow is off or the packed
+       theme is missing, so chrome uses the host palette instead of a packed
+       default.
+       `layout.file_open` is the FILES tab editor, aligned with EDITOR.
        check_updates is off because the fork release in
        home/bin/.chezmoiexternal.toml.tmpl owns the binary.
 
@@ -25,6 +29,11 @@
   "input" (dig "stdin" "" .chezmoi)
   "managed" (dict
     "theme" "terminal"
+    "theme_follow" (dict
+      "auto_switch" true
+      "dark" "gruvbox"
+      "light" "gruvbox-light"
+    )
     "prefix" "ctrl+;"
     "check_updates" false
     "worktree" (dict
@@ -45,6 +54,8 @@
       "agent_title" true
       "diff_provider" "difftastic"
       "files_show_hidden" true
+      "file_open" "emacsclient -a=\"\""
+      "workspace_paths" false
     )
     "notifications" (dict
       "sound_on_blocked" true
