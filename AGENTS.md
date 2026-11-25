@@ -66,6 +66,15 @@ with any newly used trust keys. Whole-tap trust requires an explicit reason.
 Verify the rendered Brewfile includes both the package and its tap trust, then
 run `make verify`; validation must not install packages or modify live trust.
 
+## Tool-owned casks
+
+A cask with `owner` follows that `tools.yaml` switch. The entry is the package
+name and its owner. Host, disk, and OS limits belong on the tool. A cask with
+no owner keeps its own `when`.
+
+Verify the rendered Brewfile includes the cask only while that tool is enabled,
+then run `make verify`; validation must not install packages.
+
 ## macOS app externals
 
 Install a macOS app that Homebrew does not ship by adding an entry to

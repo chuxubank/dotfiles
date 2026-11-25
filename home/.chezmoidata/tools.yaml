@@ -51,13 +51,10 @@ tools:
     purge:
       - ".agent-browser/**"
 
-  # Off. Turning this on restores the cask and mcp.json. Settings,
-  # provider secrets, and chat state stay in Application Support; brew zap
-  # covers those plus Preferences, ByHost, and SFL under shared parents.
-  # Plugin packages are installed by the app and are not vendored. Bundled
-  # skills are app-owned copies. mcp.json is rendered from mcp.providers;
-  # the computer-use entry matches the one Alma's registrar writes, so
-  # launch does not rewrite the file.
+  # Settings and chat state stay in Application Support. brew zap covers
+  # those plus Preferences, ByHost, and SFL under shared parents. mcp.json
+  # matches the entry Alma's registrar writes, so launch does not rewrite
+  # the file.
   alma:
     when: *disabled
     remove:
@@ -84,9 +81,7 @@ tools:
   android-project:
     when: *non_ci
 
-  # Android device agent. The example checkout, MCP entry, and launchers
-  # follow this switch. Off until a model provider is chosen. Turning it
-  # on should keep it to macOS and exclude CI.
+  # The example checkout, MCP entry, and launchers follow this switch.
   artemis:
     when: *disabled
     remove:
@@ -94,9 +89,7 @@ tools:
     purge:
       - ".local/share/artemis/**"
 
-  # Multi-shell completion provider. Configuration is ready, but fzf-tab is
-  # the preferred completion UI; enable this separately when its specs are
-  # wanted in addition to native Zsh completions.
+  # Extra completion specs beside fzf-tab, not a replacement for it.
   carapace:
     when: *disabled
     zshrc:
@@ -132,17 +125,17 @@ tools:
       - ".claude.json.backup"
       - ".claude/**"
 
-  # Desktop and mobile client for Claude Code, Codex, and Pi. Homebrew has
-  # no cask, so the notarized global DMG is unpacked by the Applications
-  # external. Electron state is under Library/Application Support/Cindy, a
-  # shared parent, so brew-style zap is not declared here.
+  # No Homebrew cask; the Applications external unpacks the notarized DMG.
+  # The bundle is one path in shared ~/Applications. Electron state under
+  # Library/Application Support/Cindy is a shared parent, so it is not purged.
   cindy:
-    when:
-      enabled:
-        host_env: [personal, iv]
-        os: [darwin]
-        disk_available_gb:
-          min: 50
+    when: *disabled
+    purge:
+      - when:
+          enabled:
+            os: [darwin]
+        paths:
+          - "Applications/Cindy.app"
 
   # CLI via bun; agent wiring is MCP + env. No managed dest files.
   codegraph: {}
@@ -225,8 +218,7 @@ tools:
     purge:
       - ".copilot/**"
 
-  # The Homebrew formula exists only to serve this MCP. Off while gh covers
-  # the same GitHub work.
+  # The Homebrew formula exists only to serve this MCP.
   github-mcp-server:
     when: *disabled
 
@@ -277,9 +269,9 @@ tools:
     purge:
       - ".config/immersive-translate/**"
 
-  # Fig-style PTY autocomplete. Disabled because its Node readline proxy blocks
-  # Kitty keyboard protocol query/set/push/pop sequences, breaking enhanced
-  # keyboard input in terminal multiplexers such as Luvus and Herdr.
+  # Fig-style PTY autocomplete. Its Node readline proxy blocks Kitty keyboard
+  # protocol query/set/push/pop sequences, breaking enhanced keyboard input
+  # in terminal multiplexers such as Luvus and Herdr.
   inshellisense:
     when: *disabled
     zshrc:
@@ -393,9 +385,9 @@ tools:
   magpie:
     when: *non_ci
 
-  # Off. No Homebrew cask; the Applications external unpacks the GitHub
-  # tarball on darwin, outside CI. The bundle is one path in shared
-  # ~/Applications, so this names that path and no uninstaller.
+  # No Homebrew cask; the Applications external unpacks the GitHub tarball.
+  # The bundle is one path in shared ~/Applications, so purge names that
+  # path and no uninstaller.
   mygo-cloudmusic:
     when: *disabled
     purge:
@@ -477,8 +469,7 @@ tools:
       - "Library/Application Support/orca/**"
       - "orca/**"
 
-  # The uv tool exists only to serve this MCP. Off while other converters
-  # cover the same documents.
+  # The uv tool exists only to serve this MCP.
   markitdown:
     when: *disabled
 
@@ -487,9 +478,8 @@ tools:
   mobile-device:
     when: *disabled
 
-  # Accessibility-snapshot browser MCP. Off while agent-browser and
-  # Chrome DevTools MCP cover the same work. Turning this on restores the
-  # MCP entry and the weekly Chromium install in the bun upgrade script.
+  # Accessibility-snapshot browser MCP. The bun upgrade script installs
+  # Chromium while this switch is on.
   playwright:
     when: *disabled
 
@@ -702,13 +692,9 @@ tools:
     purge:
       - "Library/Application Support/Talkify/**"
 
-  # Desktop control surface for the agents already installed here. The cask
-  # ships the app and the t3 binary; server state lives under ~/.t3. The
-  # cask zap covers Electron userData under shared Library trees.
+  # The cask ships the app and the t3 binary. Server state lives under ~/.t3.
+  # The cask zap covers Electron userData under shared Library trees.
   t3-code:
-    when:
-      enabled:
-        host_env: [personal, iv]
-        os: [darwin]
+    when: *disabled
     purge:
       - ".t3/**"
