@@ -1,0 +1,128 @@
+{{- /* llm/floor-models — Minimum release for an agent picker family.
+       Body mode: dict stem, min, optional seps (default ["."]).
+         Output: one brace glob, no provider prefix.
+       List mode: dict patterns []string, floors []{stem, min, seps?}.
+         Output: JSON list. Pi matches these with minimatch, OMP with Bun.Glob.
+
+       min is a major (`6`) or major.minor with one digit (`4.7`). Major is 1–9.
+       A bare major includes that major's codename form (`gpt-6-sol` is 6.0).
+       The brace matches that release and anything newer: the rest of this
+       minor range, a two-digit minor, and a later major. It does not match
+       an older minor or the previous major.
+
+       `*`, `**`, `alias/*` and `alias/**` mean every floor, not the whole
+       catalog. They become one brace so an alias that only serves some
+       families still matches, and the families it lacks do not warn.
+       The generated pattern keeps `**` so a slashed id (`grok/grok-4.7`)
+       still matches. Any other pattern that names a floor stem selects that
+       family; digits on the pattern are not a second floor. A pattern that
+       names no floor stays as written.
+*/ -}}
+{{- if index . "stem" -}}
+  {{- $min := .min | toString -}}
+  {{- if not (regexMatch "^[1-9](\\.[0-9])?$" $min) -}}
+    {{- fail (printf "model floor %q min %q must be a major 1-9 or major.minor with one digit" .stem $min) -}}
+  {{- end -}}
+  {{- $seps := default (list ".") .seps -}}
+  {{- $majorText := $min -}}
+  {{- $minorText := "" -}}
+  {{- if contains "." $min -}}
+    {{- $parts := splitList "." $min -}}
+    {{- $majorText = index $parts 0 -}}
+    {{- $minorText = index $parts 1 -}}
+  {{- end -}}
+  {{- $major := atoi $majorText -}}
+  {{- $minor := 0 -}}
+  {{- if $minorText -}}{{- $minor = atoi $minorText -}}{{- end -}}
+  {{- $alts := list -}}
+  {{- if eq $minor 0 -}}
+    {{- $class := "[!0-9" -}}
+    {{- $dash := false -}}
+    {{- range $sep := $seps -}}
+      {{- if eq $sep "-" -}}
+        {{- $dash = true -}}
+      {{- else if eq $sep "." -}}
+        {{- $class = printf "%s." $class -}}
+      {{- else -}}
+        {{- fail (printf "model floor %q sep %q must be \".\" or \"-\"" $.stem $sep) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $dash -}}{{- $class = printf "%s-" $class -}}{{- end -}}
+    {{- $alts = append $alts (toString $major) -}}
+    {{- $alts = append $alts (printf "%d%s]*" $major $class) -}}
+    {{- range $sep := $seps -}}
+      {{- $alts = append $alts (printf "%d%s*" $major $sep) -}}
+    {{- end -}}
+  {{- else -}}
+    {{- range $sep := $seps -}}
+      {{- if and (ne $sep ".") (ne $sep "-") -}}
+        {{- fail (printf "model floor %q sep %q must be \".\" or \"-\"" $.stem $sep) -}}
+      {{- end -}}
+      {{- $alts = append $alts (printf "%d%s[%d-9]*" $major $sep $minor) -}}
+    {{- end -}}
+    {{- range $sep := $seps -}}
+      {{- $alts = append $alts (printf "%d%s[1-9][0-9]*" $major $sep) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if lt $major 9 -}}
+    {{- $alts = append $alts (printf "[%d-9]*" (add $major 1)) -}}
+  {{- end -}}
+  {{- $alts = append $alts "[1-9][0-9]*" -}}
+  {{- printf "%s{%s}" .stem (join "," $alts) -}}
+{{- else -}}
+  {{- $out := list -}}
+  {{- $seen := dict -}}
+  {{- range $pattern := .patterns -}}
+    {{- $add := list -}}
+    {{- $catalog := "" -}}
+    {{- $isCatalog := or (eq $pattern "*") (eq $pattern "**") -}}
+    {{- if not $isCatalog -}}
+      {{- $catalog = regexFind `^[^*?\[\]{}]+/(?:\*\*|\*)$` $pattern -}}
+      {{- $isCatalog = eq $catalog $pattern -}}
+    {{- end -}}
+    {{- if $isCatalog -}}
+      {{- $literal := "" -}}
+      {{- if $catalog -}}
+        {{- $literal = regexReplaceAll `(?:\*\*|\*)$` $pattern "" -}}
+      {{- end -}}
+      {{- /* One brace for the whole catalog. A narrow alias still matches
+             the families it serves, so the other families do not warn. */ -}}
+      {{- $bodies := list -}}
+      {{- range $floor := $.floors -}}
+        {{- $bodies = append $bodies (includeTemplate "llm/floor-models" (dict "stem" $floor.stem "min" $floor.min "seps" (index $floor "seps")) | trim) -}}
+      {{- end -}}
+      {{- $add = append $add (printf "%s**/{%s}" $literal (join "," $bodies)) -}}
+    {{- else -}}
+      {{- $bestLen := 0 -}}
+      {{- $best := dict -}}
+      {{- $bestPrefix := "" -}}
+      {{- range $floor := $.floors -}}
+        {{- if and (contains $floor.stem $pattern) (gt (len $floor.stem) $bestLen) -}}
+          {{- $re := printf "(?s)(.*)%s(.*)" $floor.stem -}}
+          {{- $prefix := regexReplaceAll $re $pattern "${1}" -}}
+          {{- $rest := regexReplaceAll $re $pattern "${2}" -}}
+          {{- if regexMatch `^[0-9*?[]` $rest -}}
+            {{- $bestLen = len $floor.stem -}}
+            {{- $best = $floor -}}
+            {{- $bestPrefix = $prefix -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- if gt $bestLen 0 -}}
+        {{- $body := includeTemplate "llm/floor-models" (dict "stem" $best.stem "min" $best.min "seps" (index $best "seps")) | trim -}}
+        {{- $literal := regexFind `^([^*?\[\]{}]*/)*` $bestPrefix -}}
+        {{- $globTail := trimPrefix $literal $bestPrefix -}}
+        {{- $add = append $add (printf "%s**/%s%s" $literal $globTail $body) -}}
+      {{- else -}}
+        {{- $add = append $add $pattern -}}
+      {{- end -}}
+    {{- end -}}
+    {{- range $rendered := $add -}}
+      {{- if not (hasKey $seen $rendered) -}}
+        {{- $_ := set $seen $rendered true -}}
+        {{- $out = append $out $rendered -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $out | toJson -}}
+{{- end -}}

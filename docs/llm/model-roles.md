@@ -124,7 +124,8 @@ and the model-cycle order belong to `modify_config.yml`.
   [ADR 0005](../adr/0005-llm-provider-aliases.md) and
   [ADR 0010](../adr/0010-iv-codex-iv-cc.md).
 - Keep selected models and role targets covered by `enabled_models`.
-  Use scoped family patterns rather than whole catalogs where appropriate.
+  Name the family and provider there. The minimum release is
+  `llm.model_floors`; see [Provider resolution](providers.md).
 - Treat effort, context and Fast variants as provider-specific. Do not copy
   another client's SKU spelling or catalog window without checking its adapter.
   Catalog ownership is described in

@@ -51,6 +51,27 @@ for defaults in (["gateway"], {"gateway": {"provider": "gateway"}}):
     assert set(result["providers"]) == {"gateway"}
     assert result["enabled_models"] == ["first", "gateway/*"]
 
+# Floors are opt-in. A family glob loses its own digits; * / ** become those
+# families only; a pattern that names no floor is unchanged. Disabled aliases
+# still contribute nothing, so this fixture's gateway/* does expand.
+gpt = "gpt-{6.[2-9]*,6.[1-9][0-9]*,[7-9]*,[1-9][0-9]*}"
+opus = "claude-opus-{5,5[!0-9.-]*,5.*,5-*,[6-9]*,[1-9][0-9]*}"
+data = copy.deepcopy(fixture)
+data["model_floors"] = [
+    {"stem": "gpt-", "min": "6.2"},
+    {"stem": "claude-opus-", "min": "5", "seps": [".", "-"]},
+]
+data["default_providers"] = ["gateway"]
+data["tools"]["fixture"]["enabled_models"] = ["gpt-*", "composer-2.5*", "gateway/claude-opus-*"]
+assert render(data)["enabled_models"] == [
+    "**/" + gpt,
+    "composer-2.5*",
+    "gateway/**/" + opus,
+    "gateway/**/{%s,%s}" % (gpt, opus),
+]
+data["model_floors"] = [{"stem": "gpt-", "min": "6.21"}]
+render(data, error="model floor")
+
 # Defaults < ordered sets < tool, preserving nested fields and explicit false.
 data = copy.deepcopy(fixture)
 data["default_providers"] = {
@@ -225,6 +246,8 @@ for host in ("iv", "personal", "ci"):
             assert cfg["providers"]["iv-cc"]["type"] == "anthropic-messages"
             assert cfg["providers"]["iv-anthropic"]["type"] == "anthropic-messages"
         if tool in ("pi", "omp"):
-            assert all(alias + "/**" in cfg["patterns"] for alias in expected), (tool, cfg)
+            gpt = "gpt-{6,6[!0-9.]*,6.*,[7-9]*,[1-9][0-9]*}"
+            assert any(gpt in p for p in cfg["patterns"]), (tool, cfg["patterns"])
+            assert not any(p in {"*", "**", alias + "/*", alias + "/**"} for alias in (*expected, "magpie") for p in cfg["patterns"]), (tool, cfg["patterns"])
 
 print("ok LLM providers: defaults, precedence, exclusions, protocol negotiation, IV client/host matrix and picker policy")

@@ -42,7 +42,13 @@ The merged references then pass through:
 Shared provider sets apply to every configured client; adding a client must not
 require copying the IV alias table. Host conditions and protocol compatibility
 still gate each alias. Clients with a picker allowlist inherit the provider's
-patterns, so registering a provider cannot leave its catalog unselectable.
+patterns. `*`, `**`, `alias/*` and `alias/**` do not admit the whole catalog.
+`llm.model_floors` in `common.yaml` is the minimum release of each family, and
+those globs become that release and anything newer. A tool pattern names the
+family and, when it has a provider prefix, which alias. Digits written on the
+pattern are not a second floor. A pattern that names no family, such as
+`default`, stays as written. Registering a provider still adds its families;
+it does not add older releases the floor excludes.
 
 Unknown provider or set references fail rendering. Disabled, incompatible or
 excluded aliases do not contribute picker patterns; explicit patterns naming

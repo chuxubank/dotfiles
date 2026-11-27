@@ -130,10 +130,10 @@ An alias the tool does not ship has no bundled card to inherit.
 Because our entries merge into the bundled catalog instead of replacing it, one
 model id can exist on several providers and a bare id resolves against the
 union, reaching a different provider with no error. Pin the provider on any id
-more than one alias can serve. Pi's `enabled_models` generation globs stay
-unprefixed (`gpt-6*`, `claude-opus-5*`) so every copy stays in the picker.
-OMP pins the provider on those same globs. Role and default model refs stay
-qualified. Omit OpenRouter on pi, omp,
+more than one alias can serve. Pi's picker families stay unprefixed so every
+copy stays in the picker. OMP pins the provider. The minimum release for each
+family is `llm.model_floors`, not the digits on the tool glob. Role and default
+model refs stay qualified. Omit OpenRouter on pi, omp,
 hermes, and opencode: `models: false` still injects the API key and enables
 the bundled catalog, so a bare id can resolve there instead of IV or the
 subscription fallback. Tools that actually route through it (goose, gptel)

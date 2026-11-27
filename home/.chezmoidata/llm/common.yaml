@@ -10,6 +10,38 @@ llm:
     sonnet_primary: claude-sonnet-5-5
     haiku_primary: claude-haiku-5-5
 
+  # Minimum release for each family in an agent picker. Tool and provider
+  # globs only choose the family and provider; digits on those globs are not
+  # a second floor. A bare major includes its codename form. The rule is in
+  # docs/llm/providers.md.
+  model_floors:
+    - stem: gpt-
+      min: "6"
+    - stem: claude-opus-
+      min: "5"
+      seps: [".", "-"]
+    - stem: claude-sonnet-
+      min: "5"
+      seps: [".", "-"]
+    - stem: claude-fable-
+      min: "5"
+    - stem: grok-
+      min: "4.7"
+    - stem: qwen
+      min: "3.8"
+    - stem: gemini-
+      min: "3.8"
+    - stem: deepseek-v
+      min: "4.1"
+    - stem: glm-
+      min: "5.3"
+    - stem: kimi-k
+      min: "3"
+    - stem: composer-
+      min: "2.5"
+    - stem: muse-spark-
+      min: "1.3"
+
   # Compaction starts once context use passes this percent of the window.
   # match is tested against provider/id. The only form is **/name*: **
   # crosses slashes, and * is the rest of the final segment. ${name}
@@ -87,7 +119,8 @@ llm:
   providers:
     iv:
       name: IV
-      # Catalog ids can contain slashes; every served id stays selectable.
+      # Catalog ids can contain slashes. `**` admits every model_floors
+      # family at or above its minimum, not the unfiltered catalog.
       enabled_models: ["**"]
       data_set: models-dev
       base_url: "http://llm.invalley.co"
@@ -136,16 +169,16 @@ llm:
     # the alias on every host.
     cursor:
       name: Cursor
-      # Picker globs, appended as `<alias>/<glob>` to the enabled_models of
-      # every tool with a cursor alias. Cursor does not serve GPT-6.
+      # Family selectors, appended as `<alias>/<glob>`. Versions come from
+      # model_floors. Cursor does not serve GPT. `default` is not a family.
       enabled_models:
-        - claude-opus-5*
-        - claude-sonnet-5*
-        - claude-fable-5*
-        - composer-2.5*
-        - "*${grok_primary}*"
-        - "*muse-spark-1.3*"
-        - "*gemini-3.8-flash*"
+        - claude-opus-*
+        - claude-sonnet-*
+        - claude-fable-*
+        - composer-*
+        - "*grok-*"
+        - "*muse-spark-*"
+        - "*gemini-*"
         - default
 
     google:
@@ -249,8 +282,8 @@ llm:
     # The model list is GET /v1/models, cached like the other OpenAI
     # catalogs. A missing cache is fetched at render; the daily refresh
     # rewrites it. Codex does not read that list. Model ids are
-    # vendor/model, so the pool glob is **. Tools with a pool append it
-    # as magpie/**. A single * does not cross the slash in Pi or OMP.
+    # vendor/model. `**` expands through model_floors, and the generated
+    # pattern keeps a `**` so the vendor segment still matches.
     magpie:
       name: Magpie
       api_types: [openai-completions, openai-responses, anthropic-messages, google-generative-ai]

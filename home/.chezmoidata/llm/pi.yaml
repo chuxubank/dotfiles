@@ -14,20 +14,21 @@ llm:
         - openai-codex/${gpt_primary}
         - cursor/claude-opus-5@1m
       reasoning_effort: high
+      # Family selectors. The minimum release is llm.model_floors.
+      # Unprefixed families keep every provider copy in the picker.
+      # Fable and the open-weight families are pinned: another alias
+      # cannot serve them, or an unprefixed glob warns when that alias is off.
       enabled_models:
-        - ${grok_primary}*
-        - gpt-6*
-        - claude-opus-5*
-        - claude-sonnet-5*
-        # This id is pinned because the other IV aliases cannot serve it.
-        - iv-anthropic/claude-fable-5
-        # Only the default-token alias serves these. Pin iv/ so the glob is
-        # omitted where that alias is off; unprefixed, Pi warns on startup.
-        - iv/qwen3.8*
-        - iv/gemini-3.8*
-        - iv/deepseek-v4.1*
-        - iv/glm-5.3*
-        - iv/kimi/kimi-k3*
+        - grok-*
+        - gpt-*
+        - claude-opus-*
+        - claude-sonnet-*
+        - iv-anthropic/claude-fable-*
+        - iv/qwen*
+        - iv/gemini-*
+        - iv/deepseek-v*
+        - iv/glm-*
+        - iv/kimi/kimi-k*
         # cursor/* globs come from llm.providers.cursor.
       session_title_model:
         - iv/deepseek-v4-flash

@@ -59,6 +59,7 @@
        openai-completions. Later entries substitute when a client rejects
        that primary. An alias type pins the protocol and is not renegotiated.
        A provider's `enabled_models` globs are appended as <alias>/<glob>.
+       llm/floor-models then raises family globs to llm.model_floors.
           Sets:   provider_sets: [iv]             — aliases from llm.provider_sets;
                                                     a same-named `providers`
                                                     entry is deep-merged on top
@@ -412,6 +413,9 @@
     {{- if $keep -}}
       {{- $enabledModels = append $enabledModels $resolved -}}
     {{- end -}}
+  {{- end -}}
+  {{- if index .llm "model_floors" -}}
+    {{- $enabledModels = includeTemplate "llm/floor-models" (dict "patterns" $enabledModels "floors" (index .llm "model_floors")) | fromJson -}}
   {{- end -}}
   {{- $_ := set $result "enabled_models" $enabledModels -}}
 {{- end }}

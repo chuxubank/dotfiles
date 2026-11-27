@@ -9,6 +9,7 @@
         "default_providers": { "$ref": "#/$defs/providerRefs" },
         "default_provider_sets": { "$ref": "#/$defs/providerSets" },
         "compaction": { "$ref": "#/$defs/compaction" },
+        "model_floors": { "$ref": "#/$defs/modelFloors" },
         "providers": {
           "type": "object",
           "additionalProperties": {
@@ -32,6 +33,25 @@
     }
   },
   "$defs": {
+    "modelFloors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stem", "min"],
+        "properties": {
+          "stem": { "type": "string", "minLength": 1 },
+          "min": { "type": "string", "pattern": "^[1-9](\\.[0-9])?$" },
+          "seps": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": [".", "-"] }
+          }
+        }
+      }
+    },
     "compaction": {
       "type": "object",
       "additionalProperties": false,

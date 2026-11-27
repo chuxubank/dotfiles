@@ -41,18 +41,19 @@ llm:
           - magpie/grok/${grok_primary}-build-fast
           - cursor/claude-opus-5-1m:high
         # Unset roles use native fallbacks; see docs/llm/model-roles.md.
-      # Provider-pinned family globs; every role target must remain selectable.
+      # Provider-pinned family selectors. Floors live in llm.model_floors.
+      # Every role target must remain inside the generated pattern.
       enabled_models:
-        - iv-cc/claude-opus-5*
-        - iv-cc/claude-sonnet-5*
-        - iv-anthropic/claude-fable-5
+        - iv-cc/claude-opus-*
+        - iv-cc/claude-sonnet-*
+        - iv-anthropic/claude-fable-*
         # Open-weight models require the default-token group; keep vendor ids.
-        - iv/deepseek-v4.1*
-        - iv/glm-5.3*
-        - iv/kimi/kimi-k3*
-        - iv-codex/gpt-6*
-        - xai-oauth/${grok_primary}*
-        - openai-codex/gpt-6*
+        - iv/deepseek-v*
+        - iv/glm-*
+        - iv/kimi/kimi-k*
+        - iv-codex/gpt-*
+        - xai-oauth/grok-*
+        - openai-codex/gpt-*
         # cursor/* globs come from llm.providers.cursor.
       providers:
         # The default token's Anthropic front is stricter than the cc-auth
