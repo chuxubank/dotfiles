@@ -140,6 +140,7 @@ casks = [
   { name = "tornikegomareli/talkify/talkify", owner = "talkify" },
   { name = "tranvuongquocdat/sidescreen/sidescreen", when.enabled.disk_available_gb.min = 50 },
   { name = "warp", owner = "warp" },
+  { name = "whatcable", when.enabled = { arch = "arm64", os = { type = "darwin", version = ">=14" } } },
   { name = "wechat", when.enabled = { host_env = ["personal"], disk_gb.min = 256 } },
   { name = "wechatwork", when.enabled.host_env = ["aa"] },
   { name = "windows-app", when.enabled.host_env = ["personal"] },

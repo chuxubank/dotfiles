@@ -51,6 +51,8 @@ _Avoid_: implied by host_env alone
 The shared condition object (`enabled` / `disabled`) evaluated by `when/evaluate`.
 _Avoid_: if, gate, match (except `when/match`)
 
+`arch` matches `.chezmoi.arch` exactly (`arm64`, not `aarch64`). Missing architecture data fails closed.
+
 Capacity conditions:
 
 - `mem_gb`: physical memory, captured in chezmoi data during `init`.

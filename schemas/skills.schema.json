@@ -50,7 +50,7 @@
           "properties": { "tool": { "$ref": "tools.schema.json#/$defs/match" } },
           "additionalProperties": false,
           "patternProperties": {
-            "^(host_env|device_type|roles)$": { "$ref": "tools.schema.json#/$defs/match" },
+            "^(host_env|device_type|roles|arch)$": { "$ref": "tools.schema.json#/$defs/match" },
             "^os$": { "$ref": "tools.schema.json#/$defs/os" },
             "^(mem_gb|disk_gb|disk_available_gb)$": { "$ref": "tools.schema.json#/$defs/range" }
           }
