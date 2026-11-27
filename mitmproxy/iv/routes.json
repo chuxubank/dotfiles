@@ -1,5 +1,9 @@
 [
   {
+    "pattern": "^/iv/secret/list-comment(?:\\?|$)",
+    "handler": "comment_pages"
+  },
+  {
     "pattern": "^/iv/secret/list-chat\\?(?=[^#]*\\btab=1(?:&|$))[^#]*$",
     "file": "ugc/list-chat-1.json"
   },
@@ -133,7 +137,7 @@
   },
   {
     "pattern": "^/iv/secret/list-card(?:\\?[^#]*)?$",
-    "file": "ugc/list-card.json"
+    "handler": "passthrough"
   },
   {
     "pattern": "^/iv/secret/list-choose-card(?:\\?[^#]*)?$",
@@ -198,6 +202,18 @@
     "pattern": "^/iv/secret/mock-image\\.png$",
     "handler": "binary",
     "file": "mock-image.png"
+  },
+  {
+    "pattern": "^/iv/secret/list-event(?:\\?|$)",
+    "handler": "passthrough"
+  },
+  {
+    "pattern": "^/iv/secret/get-event(?:\\?|$)",
+    "handler": "passthrough"
+  },
+  {
+    "pattern": "^/iv/secret/list-subcomment(?:\\?|$)",
+    "handler": "subcomment_pages"
   },
   {
     "pattern": "^/(?:iv/secret(?:/[^?#]*)?|ws/query-secret)(?:\\?[^#]*)?$",

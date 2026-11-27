@@ -18,6 +18,33 @@ def _data_file(name):
     return path
 
 
+def handle_subcomment_pages(interceptor, flow, rule):
+    # 子评论首页没有游标；带 marker 或已展示回复 ID 的请求视为下一页。
+    body = json.loads(flow.request.get_text() or "{}")
+    marker = str(body.get("marker") or "")
+    shown = body.get("shown_comment_ids") or []
+    name = "secret-subcomment-page-2-error.json" if marker or shown else "secret-subcomment-page-1.json"
+    content = _data_file(name).read_text(encoding="utf-8")
+    json.loads(content)
+    interceptor.respond(flow, rule.status_code, content)
+
+
+def handle_comment_pages(interceptor, flow, rule):
+    # 首页没有游标；带 marker 或已展示评论 ID 的请求视为下一页。
+    body = json.loads(flow.request.get_text() or "{}")
+    marker = str(body.get("marker") or "")
+    shown = body.get("shown_comment_ids") or []
+    name = "secret-comment-page-2-error.json" if marker or shown else "secret-comment-page-1.json"
+    content = _data_file(name).read_text(encoding="utf-8")
+    json.loads(content)
+    interceptor.respond(flow, rule.status_code, content)
+
+
+def handle_passthrough(interceptor, flow, rule):
+    # 不写响应，让该请求继续访问真实服务，避免落到未配置兜底。
+    return
+
+
 def handle_binary(interceptor, flow, rule):
     # 标准handler只读取JSON；本入口原样返回路由指定的本地图片。
     path = rule.file_path
