@@ -15,18 +15,18 @@ Run `make verify` after modifying keyboard configuration or its documentation.
 
 ## Documentation and comments
 
-All documentation and comments describe workflows, rules, responsibilities,
-constraints, and non-obvious reasons. Keep mutable configuration values in
-their owning data or config files; point readers there instead of copying
-model assignments, prices, versions, parameter values, or deployment details.
-Use placeholders when an example is needed to explain syntax.
+Documentation describes workflows, rules, responsibilities, constraints, and
+non-obvious reasons. Keep mutable configuration values in their owning data
+or config files; point readers there instead of copying model assignments,
+prices, versions, parameter values, or deployment details. Use placeholders
+when an example is needed to explain syntax.
 
 Keep each explanation in one authoritative place and link to it elsewhere.
-Comments explain why or warn about a local constraint, rather than narrating
-adjacent code or repeating configuration. When editing a document or comment,
-remove redundant explanations and stale snapshots instead of appending another
-layer. Update documentation when the process or rule changes, not merely when
-a configured value changes.
+Leave a comment out unless it says something the next lines do not: a local
+constraint, an ordering rule, or why a call exists. When editing a document
+or comment, remove redundant explanations and stale snapshots instead of
+appending another layer. Update documentation when the process or rule
+changes, not merely when a configured value changes.
 
 ## README
 
